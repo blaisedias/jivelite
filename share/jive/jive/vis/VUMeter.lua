@@ -55,9 +55,9 @@ function _layout(self)
 	self.player = appletManager:callService("getCurrentPlayer")
 
 	-- When used in NP screen _layout gets called with strange values
-	if (w <= 0 or w > 480) and (h <= 0 or h > 272) then
-		return
-	end
+--	if (w <= 0 or w > 480) and (h <= 0 or h > 272) then
+--		return
+--	end
 
 	if self.style == "vumeter" then
 		self.w = w - l - r

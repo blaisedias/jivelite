@@ -3549,8 +3549,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position = LAYOUT_NONE,
 			x = 0,
 			y = 2 * TITLE_HEIGHT + 4,
-			w = 800,
-			h = 446 - (2 * TITLE_HEIGHT + 4 + 45),
+			w = screenWidth,
+			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -3558,15 +3558,15 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				position = LAYOUT_NONE,
 				x = 0,
 				y = 2 * TITLE_HEIGHT + 4,
-				w = 800,
-				h = 446 - (2 * TITLE_HEIGHT + 4 + 45),
+				w = screenWidth,
+				h = screenHeight - 34  - (2 * TITLE_HEIGHT + 4 + 45),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
 				bg = { 0x00, 0x00, 0x00, 0x00 },
 
 				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0x74, 0x56, 0xa1, 0xff },
+				capColor = { 0x7c, 0x56, 0xa1, 0xff },
 
 				isMono = 0,				-- 0 / 1
 
@@ -3590,6 +3590,16 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
+	local vuImageW = screenWidth
+	local vuImageH = screenHeight
+	-- BlaiseD hack using larger images results in crashes :-(
+	-- needs further investigation
+	-- only checked with resolutions supported by JogglerSkin
+	if screenWidth > 1280 then
+		vuImageW = 1280
+		vuImageH = 800
+	end
+
 	-- Visualizer: Analog VU Meter
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
@@ -3597,20 +3607,21 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position = LAYOUT_NONE,
 			x = 0,
 			y = TITLE_HEIGHT + 63,
-			w = 800,
-			h = 413 - (TITLE_HEIGHT + 38 + 38),
+			w = screenWidth,
+			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
 			vumeter_analog = {
-				position = LAYOUT_NONE,
+				position = LAYOUT_CENTER,
 				x = 0,
 				y = TITLE_HEIGHT + 63,
-				w = 800,
-				h = 413 - (TITLE_HEIGHT + 38 + 38),
+				w = vuImageW,
+				h = vuImageH - 67 - (TITLE_HEIGHT + 38 + 38),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"),
+				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq.png"):resize((vuImageW/2)*25, vuImageH - 27)
+,
 			}
 		},
 	})
