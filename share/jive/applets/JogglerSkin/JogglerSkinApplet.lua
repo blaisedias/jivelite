@@ -3566,7 +3566,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				bg = { 0x00, 0x00, 0x00, 0x00 },
 
 				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0x7c, 0x56, 0xa1, 0xff },
+				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
 
 				isMono = 0,				-- 0 / 1
 
@@ -3574,10 +3574,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				capSpace = { 4, 4 },			-- >= 0
 				channelFlipped = { 0, 1 },		-- 0 / 1
 				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 1, 1 },			-- > 1
+				barWidth = { 6, 6 },			-- > 1
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
+				spectrumImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum.png"):resize(w, h),
 			}
 		},
 	})
