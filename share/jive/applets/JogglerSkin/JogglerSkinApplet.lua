@@ -3574,11 +3574,20 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				capSpace = { 4, 4 },			-- >= 0
 				channelFlipped = { 0, 1 },		-- 0 / 1
 				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 6, 6 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				spectrumImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum.png"):resize(w, h),
+                useGradient = 1,
+                gradientColours = {
+	                0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
+	                0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
+	                0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
+	                0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
+	                0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
+	                0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
+	                0xff0303ff,
+                },
 			}
 		},
 	})
