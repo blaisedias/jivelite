@@ -14,15 +14,6 @@ local log           = require("jive.utils.log").logger("jivelite.vis")
 
 local FRAME_RATE    = jive.ui.FRAME_RATE
 
-local gradientColors = {
-    0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
-    0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
-    0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
-    0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
-    0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
-    0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
-}
-
 module(...)
 oo.class(_M, Icon)
 
@@ -49,8 +40,8 @@ function _skin(self)
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
 
-    -- FIXME handle absence of image in skin style definition
-    self.spectrumImg = self:styleImage("spectrumImg")
+    self.useGradient = self:styleValue("useGradient", 0)
+    self.gradientColours = self:styleValue("gradientColours", {self.barColor})
 end
 
 
@@ -142,8 +133,8 @@ function _layout(self)
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 
 	self.y = y + h - b
-    -- gradient table y step
-    self.deltaY = math.floor((self.y + #gradientColors - 1)/ #gradientColors)
+	-- gradient table y step
+	self.deltaY = math.floor(h / (#self.gradientColours - 1))
 	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY )
 
 	self.cap = { {}, {} }
@@ -154,12 +145,6 @@ function _layout(self)
 	for i = 1, numBars[2] do
 		self.cap[2][i] = 0
 	end
-
-    -- FIXME: read from skin style definition
-    -- 2 => render using image
-    -- 1 => render using gradient table (gradientColors)
-    -- 0 => render using orignal method
-    self.renderType = 2
 
 end
 
@@ -205,35 +190,33 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		-- bar
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
-                local yBottom = y
-                local yTop = y - bch[i] + 1
-                local xLeft = x + (k * barSize)
-                local xRight = xLeft + (barWidth - 1)
+				if self.useGradient > 0 then
+					local yEndValue = y - bch[i] + 1
+					local xLeft = x + (k * barSize)
+					local xRight = xLeft + (barWidth - 1)
 
-                if self.renderType == 2 then
-                    self.spectrumImg:blitClip(xLeft, yTop, barWidth - 1, yBottom - yTop, surface, xLeft, yTop)
-                elseif self.renderType ==1 then
-                    local yEndValue = yTop
-                    for iColor = 1, #gradientColors do
-                        yTop = yBottom - self.deltaY
-                        if yTop < yEndValue then
-                            yTop = yEndValue
-                        end
-        				surface:filledRectangle(xLeft, yBottom, xRight, yTop, gradientColors[iColor])
-                        yBottom = yBottom - self.deltaY
-                        if yBottom <= yEndValue then
-                            break
-                        end
-                    end
+					local yBottom = y
+					local yTop = 0
+
+					for iColor = 1, #self.gradientColours do
+						yTop = yBottom - self.deltaY
+						if yTop < yEndValue then
+							yTop = yEndValue
+						end
+						surface:filledRectangle(xLeft, yTop, xRight, yBottom, self.gradientColours[iColor])
+						yBottom = yBottom - self.deltaY
+						if yBottom <= yEndValue then
+							break
+						end
+					end
                 else
-      				surface:filledRectangle(xLeft, yBottom, xRight, yTop, self.barColor)
---				surface:filledRectangle(
---					x + (k * barSize),
---					y,
---					x + (barWidth - 1) + (k * barSize),
---					y - bch[i] + 1,
---					self.barColor
---				)
+    				surface:filledRectangle(
+					x + (k * barSize),
+					y,
+					x + (barWidth - 1) + (k * barSize),
+					y - bch[i] + 1,
+					self.barColor
+				)
                 end
 			end
 		end
@@ -248,12 +231,12 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		end
 
 		-- cap
-        local adjustedCapColour = self.capColor
-        local adjustedCapSpace = capSpace
-        if cch[i] < 1 then
-            adjustedCapColour = 0x404040ff
-            adjustedCapSpace = 1
-        end
+		local adjustedCapColour = self.capColor
+		local adjustedCapSpace = capSpace
+		if cch[i] < 1 then
+			adjustedCapColour = 0x404040ff
+			adjustedCapSpace = 0
+		end
 		if capHeight > 0 then
 			for k = 0, barsInBin - 1 do
 				surface:filledRectangle(
@@ -261,8 +244,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					y - cch[i] - adjustedCapSpace,
 					x + (barWidth - 1) + (k * barSize),
 					y - cch[i] - capHeight - adjustedCapSpace,
-                    adjustedCapColour
-				)
+					adjustedCapColour)
 			end
 		end
 
