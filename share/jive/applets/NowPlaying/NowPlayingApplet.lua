@@ -1569,6 +1569,20 @@ function _createUI(self)
 		)
 	end
 
+	-- Visualizer: Mini Spectrum Visualizer - only load if needed
+	if self.windowStyle == "nowplaying_minispectrum_text" then
+		self.visuGroup = Button(
+			Group('npvisu', {
+				visu = SpectrumMeter("spectrum"),
+			}),
+			function()
+				Framework:pushAction("go_now_playing")
+				return EVENT_CONSUME
+			end
+		)
+	end
+
+
 	-- Visualizer: Analog VU Meter - only load if needed
 	if self.windowStyle == "nowplaying_vuanalog_text" then
 		self.visuGroup = Button(
@@ -1738,7 +1752,7 @@ function _createUI(self)
 	window:addWidget(self.artistalbumTitle)
 	window:addWidget(self.artworkGroup)
 	-- Visualizer: Only load if needed
-	if (self.windowStyle == "nowplaying_spectrum_text") or (self.windowStyle == "nowplaying_vuanalog_text") then
+	if (self.windowStyle == "nowplaying_spectrum_text") or (self.windowStyle == "nowplaying_vuanalog_text") or (self.windowStyle == "nowplaying_minispectrum_text")  then
 		window:addWidget(self.visuGroup)
 	end
 

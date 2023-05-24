@@ -149,6 +149,12 @@ function param(self)
 				localPlayerOnly = 1,
 				text = self:string("ANALOG_VU_METER"),
 			},
+			{
+				style = 'nowplaying_minispectrum_text',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("MINI_SPECTRUM_ANALYZER"),
+			},
 		},
 	}
 end
@@ -2856,7 +2862,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + 65,
+			y          = TITLE_HEIGHT + 10,
 			h          = NP_TRACK_FONT_SIZE,
 			nptrack =  {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -2873,7 +2879,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + 32 + 32 + 70,
+			y          = TITLE_HEIGHT + 32 + 32 + 15,
 			h          = 32,
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
@@ -2890,7 +2896,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + 32 + 32 + 32 + 70 + 10,
+			y          = TITLE_HEIGHT + 32 + 32 + 32 + 15 + 10,
 			h          = 32,
 			npalbum = {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -3020,7 +3026,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - 160,
+			y = screenHeight - 120,
 			padding = { 0, 11, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3071,7 +3077,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40,
+			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40 + 160,
 			elapsed = {
 				w = WH_FILL,
 				align = "left",
@@ -3600,6 +3606,86 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
+
+   	-- Visualizer: Container with titlebar, progressbar and controls.
+	--  The space between title and controls is used for the visualizer.
+	s.nowplaying_visualizer_mini = _uses(s.nowplaying, {
+		bgImg = blackBackground,
+
+		npartistgroup = { hidden = 0 },
+		npalbumgroup = { hidden = 0 },
+		npartwork = { hidden = 0 },
+	})
+	s.nowplaying_visualizer_mini.npprogress.npprogressB_disabled = s.nowplaying_visualizer_mini.npprogress.npprogressB
+
+    local msH =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
+    local msY =  230
+    local msW =  (screenWidth/2)
+    local msX =  screenWidth - msW - 65
+    if screenWidth == 1280 and screenHeight == 800 then
+--    if ((screenWidth * 10)/screenHeight) < 17 then
+        msW = (screenWidth * 9) / 20
+        msX = screenWidth - msW - 50
+    end
+	-- Visualizer: mini Spectrum Visualizer
+	s.nowplaying_minispectrum_text = _uses(s.nowplaying_visualizer_mini, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = msX,
+			y = msY,
+			w = msW,
+			h = msH,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			spectrum = {
+				position = LAYOUT_CENTER,
+				x = msX,
+				y = msY,
+				w = msW,
+				h = msH,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				bg = { 0x00, 0x00, 0x00, 0x00 },
+
+				barColor = { 0x14, 0xbc, 0xbc, 0xff },
+				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+				isMono = 0,				-- 0 / 1
+
+				capHeight = { 4, 4 },			-- >= 0
+				capSpace = { 4, 4 },			-- >= 0
+				channelFlipped = { 0, 1 },		-- 0 / 1
+				barsInBin = { 2, 2 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
+				clipSubbands = { 1, 1 },		-- 0 / 1
+                useGradient = 1,
+                gradientColours = {
+	                0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
+	                0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
+	                0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
+	                0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
+	                0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
+	                0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
+	                0xff0303ff,
+                },
+			}
+		},
+	})
+	s.nowplaying_minispectrum_text.pressed = s.nowplaying_minispectrum_text
+
+	s.nowplaying_minispectrum_text.title.pressed = _uses(s.nowplaying_minispectrum_text.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+    
 	local vuImageW = screenWidth
 	local vuImageH = screenHeight
 	-- BlaiseD hack using larger images results in crashes :-(
