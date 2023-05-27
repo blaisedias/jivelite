@@ -294,3 +294,18 @@ ANALOG_VU_METER
 	RU	Аналоговый волюметр
 	SV	Analog VU-mätare
 
+MINI_SPECTRUM_ANALYZER
+	CS	Obal alba, text a Spektrální analyzátor
+	DA	Albumcover, tekst og Spektrumanalyse
+	DE	Plattenhülle, Text und Oszillographszill
+	EN	Artwork, Text and Spectrum Analyzer
+	ES	Carátula de álbum, texto y Analizador de espectro
+	FI	Kansikuva, tekstii ja Asteikon analysointi
+	FR	Pochette, texte et Analyseur de spectre
+	IT	Copertine, testo e Analizzatore di spettro
+	NL	Hoesafbeelding, tekst en Spectrumanalyser
+	NO	Albumomslag, tekst og Spektralanalyse
+	PL	Pliki graficzne, tekst i Analizator widma
+	RU	Обложка и текст Анализатор спектра
+	SV	Albumomslag, text och Spektrumanalys
+
