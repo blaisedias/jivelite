@@ -3716,7 +3716,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				h = vuImageH - 67 - (TITLE_HEIGHT + 38 + 38),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq.png"):resize((vuImageW/2)*25, vuImageH - 27)
+				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((vuImageW/2)*25, vuImageH - 27)
 ,
 			}
 		},
