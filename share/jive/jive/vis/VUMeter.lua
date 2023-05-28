@@ -51,10 +51,14 @@ end
 function _layout(self)
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
+	local imgW, imgH = self.bgImg:getSize()
+	self.src_y = 0
 
 	self.player = appletManager:callService("getCurrentPlayer")
 
 	-- When used in NP screen _layout gets called with strange values
+--	BlaiseD disabling this check allows us to render VU Meters for newer
+--	screen resolutions correctly
 --	if (w <= 0 or w > 480) and (h <= 0 or h > 272) then
 --		return
 --	end
@@ -77,7 +81,20 @@ function _layout(self)
 		self.y = y
 		self.w = w / 2
 		self.h = h
+		-- center vertically
+		if imgH < h then
+			self.y = math.floor(self.y + ((h - imgH)/2))
+		elseif imgH > h then
+--			 self.src_y = math.floor((imgH - h)/2)
+--			 the vast majority of VUMeter images have a ton of space above them,
+--			 so render the bottom part
+			self.src_y = math.floor(imgH - h)
+		end
 	end
+	log:debug("-----------------------------------------------------------------------")
+	log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+	log:debug("** w:", self.w, " h:", self.h)
+	log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 end
 
 
@@ -147,9 +164,9 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 --		local x,y,w,h = self:getBounds()
 
 		if ch == 1 then
-			self.bgImg:blitClip(self.cap[ch] * w, y, w, h, surface, x, y)
+			self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
 		else
-			self.bgImg:blitClip(self.cap[ch] * w, y, w, h, surface, x, y)
+			self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
 		end
 	end
 end
