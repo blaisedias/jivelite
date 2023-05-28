@@ -73,6 +73,16 @@ local WH_FILL                = jive.ui.WH_FILL
 local jiveMain               = jiveMain
 local appletManager          = appletManager
 
+local gradientColours = {
+	0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
+	0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
+	0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
+	0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
+	0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
+	0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
+	0xff0303ff,
+}
+
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
@@ -154,6 +164,12 @@ function param(self)
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("MINI_SPECTRUM_ANALYZER"),
+			},
+			{
+				style = 'nowplaying_minivumeter_text',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("MINI_VU_METER"),
 			},
 		},
 	}
@@ -3585,15 +3601,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
                 useGradient = 1,
-                gradientColours = {
-	                0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
-	                0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
-	                0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
-	                0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
-	                0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
-	                0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
-	                0xff0303ff,
-                },
+                gradientColours = gradientColours,
 			}
 		},
 	})
@@ -3618,33 +3626,36 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 	s.nowplaying_visualizer_mini.npprogress.npprogressB_disabled = s.nowplaying_visualizer_mini.npprogress.npprogressB
 
-    local msH =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
-    local msY =  230
-    local msW =  (screenWidth/2)
-    local msX =  screenWidth - msW - 65
+    local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
+    local mini_visu_Y =  230
+    local mini_visu_W =  screenWidth/2
+    local mini_visu_X =  screenWidth - mini_visu_W - 65
     if screenWidth == 1280 and screenHeight == 800 then
 --    if ((screenWidth * 10)/screenHeight) < 17 then
-        msW = (screenWidth * 9) / 20
-        msX = screenWidth - msW - 50
-    end
+        mini_visu_W = (screenWidth * 9) / 20
+		mini_visu_X = screenWidth - mini_visu_W - 50
+	end
+	-- for vu meters widths must be divisible by 2
+	mini_visu_W = math.floor(mini_visu_W/2) * 2
+
 	-- Visualizer: mini Spectrum Visualizer
 	s.nowplaying_minispectrum_text = _uses(s.nowplaying_visualizer_mini, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
-			x = msX,
-			y = msY,
-			w = msW,
-			h = msH,
+			x = mini_visu_X,
+			y = mini_visu_Y,
+			w = mini_visu_W,
+			h = mini_visu_H,
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
 			spectrum = {
 				position = LAYOUT_CENTER,
-				x = msX,
-				y = msY,
-				w = msW,
-				h = msH,
+				x = mini_visu_X,
+				y = mini_visu_Y,
+				w = mini_visu_W,
+				h = mini_visu_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -3663,16 +3674,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-                useGradient = 1,
-                gradientColours = {
-	                0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
-	                0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
-	                0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
-	                0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
-	                0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
-	                0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
-	                0xff0303ff,
-                },
+				useGradient = 1,
+				gradientColours = gradientColours,
 			}
 		},
 	})
@@ -3685,8 +3688,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
-    
-	local vuImageW = screenWidth
+
+	local bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png")
+	local imgW, imgH = bgImg:getSize()
+	bgImg:release()
+	local vuImageW = (screenWidth/2)*2
 	local vuImageH = screenHeight
 	-- BlaiseD hack using larger images results in crashes :-(
 	-- needs further investigation
@@ -3695,6 +3701,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		vuImageW = 1280
 		vuImageH = 800
 	end
+    -- preserve aspect ratio when resizing the image
+	local vuImageScaledH = (imgH * ((vuImageW/2)/(imgW/25)))
 
 	-- Visualizer: Analog VU Meter
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
@@ -3716,8 +3724,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				h = vuImageH - 67 - (TITLE_HEIGHT + 38 + 38),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((vuImageW/2)*25, vuImageH - 27)
-,
+				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((vuImageW/2)*25, vuImageScaledH),
 			}
 		},
 	})
@@ -3729,6 +3736,46 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			padding = { screenWidth, 0, 0, 0 }
 		},
 	})
+
+	local mini_vu_W =  (mini_visu_W/2)*2
+	bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png")
+	imgW, imgH = bgImg:getSize()
+	bgImg:release()
+    -- preserve aspect ratio when resizing the image
+	vuImageScaledH = (imgH * ((mini_vu_W/2)/(imgW/25)))
+	-- Visualizer: mini Spectrum Visualizer
+	s.nowplaying_minivumeter_text = _uses(s.nowplaying_visualizer_mini, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = mini_visu_X,
+			y = mini_visu_Y,
+			w = mini_vu_W,
+			h = mini_visu_H,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			vumeter_analog = {
+				position = LAYOUT_CENTER,
+				x = mini_visu_X,
+				y = mini_visu_Y,
+				w = mini_visu_W,
+				h = mini_visu_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((mini_vu_W/2)*25, vuImageScaledH),
+			}
+		},
+	})
+	s.nowplaying_minivumeter_text.pressed = s.nowplaying_minivumeter_text
+
+	s.nowplaying_minivumeter_text.title.pressed = _uses(s.nowplaying_minivumeter_text.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
 
 	s.brightness_group = {
 		order = {  'down', 'div1', 'slider', 'div2', 'up' },
