@@ -309,3 +309,17 @@ MINI_SPECTRUM_ANALYZER
 	RU	Обложка и текст Анализатор спектра
 	SV	Albumomslag, text och Spektrumanalys
 
+MINI_ANALOG_VU_METER
+	CS	Obal alba, text a nalogový měřič hlasitosti
+	DA	Albumcover, tekst og Analogt VU-meter
+	DE	Plattenhülle, Text und Analoger VU-Meter
+	EN	Artwork, Text and Analog VU Meter
+	ES	Carátula de álbum, texto y Medidor VU analógico
+	FI	Kansikuva, tekstii ja Analoginen VU-mittari
+	FR	Pochette, texte et VUmètre analogique
+	IT	Copertine, testo e Indicatore VU analogico
+	NL	Hoesafbeelding, tekst en Analoge VU-meter
+	NO	Albumomslag, tekst og Analog VU-måler
+	PL	Pliki graficzne, tekst i Analogowy wskaźnik wysterowania
+	RU	Обложка и текст Анализатор спектра
+	SV	Albumomslag, text och Analog VU-mätare
