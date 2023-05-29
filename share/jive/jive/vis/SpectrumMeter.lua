@@ -44,11 +44,11 @@ function _skin(self)
 	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
 	self.useBgImg = self:styleValue("useBgImg", 0)
 	if self.useBgImg > 0 then
-		self.bgImg = self:styleImage("bgImg")
+		self.srcBgImg = self:styleImage("bgImg")
 	end
 	self.useFgImg = self:styleValue("useFgImg", 0)
 	if self.useFgImg > 0 then
-		self.fgImg = self:styleImage("fgImg")
+		self.srcFgImg = self:styleImage("fgImg")
 	end
 end
 
@@ -155,6 +155,44 @@ function _layout(self)
 		self.cap[2][i] = 0
 	end
 
+	if self.useBgImg > 0 then
+		self.bgImg = _scaleSpectrumImage(self.srcBgImg, w, h)
+		self.srcBgImg:release()
+	end
+
+	if self.useFgImg > 0 then
+		self.fgImg = _scaleSpectrumImage(self.srcFgImg, w, h)
+		self.srcFgImg:release()
+	end
+
+end
+
+
+-- scale an image to fit a width-height
+function _scaleSpectrumImage(img, w, h)
+	local srcW, srcH = img:getSize()
+	-- for spectrum height is determines the scaling factor
+	local scaledW = math.floor(srcW * (h/srcH))
+    log:debug("_scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
+	-- after scaling:
+	if scaledW == w then
+		return img:resize(scaledW,h)
+	elseif scaledW < w then
+	-- if width < than window width the expand - distorts proportion
+	-- this is desired behaviour for vertically thin source images
+	-- which typically would be colour gradients
+        log:debug("_scaleSpectrumImage simple resize")
+		return img:resize(w, h)
+	else
+	-- if width > then window width then clip the source image,
+	-- this preserves proportion
+        log:debug("_scaleSpectrumImage resize and clip")
+		local tmp = img:resize(scaledW, h)
+		local clipped = img:resize(w,h)
+		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, clipped, 0, 0)
+		tmp:release()
+		return clipped
+	end
 end
 
 

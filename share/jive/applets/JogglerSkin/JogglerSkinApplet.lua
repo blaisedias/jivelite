@@ -3600,9 +3600,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 1, 1 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				useGradient = 1,
+				useGradient = 0,
 				gradientColours = gradientColours,
-				useBgImg = 1,
+				useBgImg = 0,
 				bgImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum-gs.png"),
 				useFgImg = 1,
 				fgImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum.png"),
