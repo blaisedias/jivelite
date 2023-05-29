@@ -40,8 +40,16 @@ function _skin(self)
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
 
-    self.useGradient = self:styleValue("useGradient", 0)
-    self.gradientColours = self:styleValue("gradientColours", {self.barColor})
+	self.useGradient = self:styleValue("useGradient", 0)
+	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
+	self.useBgImg = self:styleValue("useBgImg", 0)
+	if self.useBgImg > 0 then
+		self.bgImg = self:styleImage("bgImg")
+	end
+	self.useFgImg = self:styleValue("useFgImg", 0)
+	if self.useFgImg > 0 then
+		self.fgImg = self:styleImage("fgImg")
+	end
 end
 
 
@@ -136,6 +144,7 @@ function _layout(self)
 	-- gradient table y step
 	self.deltaY = math.floor(h / (#self.gradientColours - 1))
 	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY )
+	log:debug("** w: " .. w .. " h: " .. h)
 
 	self.cap = { {}, {} }
 	for i = 1, numBars[1] do
@@ -158,6 +167,12 @@ function draw(self, surface)
 		local x, y, w, h = self:getBounds()
 		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
 		self.backgroundDrawn = true
+	end
+	if self.useBgImg > 0 then
+		local x, y, w, h = self:getBounds()
+--		self.bgImg:blit(surface, x, y, w, h, 0, 0)
+--		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
+		self.bgImg:blitAlpha(surface, x, y, 128)
 	end
 
 	local bins = { {}, {} }
@@ -190,7 +205,14 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		-- bar
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
-				if self.useGradient > 0 then
+				if self.useFgImg > 0 then
+					local yBottom = y
+					local yTop = y - bch[i] + 1
+					local xLeft = x + (k * barSize)
+					local xRight = xLeft + (barWidth - 1)
+					local xx, yy, ww, hh = self:getBounds()
+					self.fgImg:blitClip(xLeft, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
+				elseif self.useGradient > 0 then
 					local yEndValue = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
 					local xRight = xLeft + (barWidth - 1)
@@ -209,15 +231,15 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 							break
 						end
 					end
-                else
-    				surface:filledRectangle(
+				else
+					surface:filledRectangle(
 					x + (k * barSize),
 					y,
 					x + (barWidth - 1) + (k * barSize),
 					y - bch[i] + 1,
 					self.barColor
 				)
-                end
+				end
 			end
 		end
 		
