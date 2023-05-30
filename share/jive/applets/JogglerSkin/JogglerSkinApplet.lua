@@ -169,7 +169,7 @@ function param(self)
 				style = 'nowplaying_minivumeter_text',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
-				text = self:string("MINI_VU_METER"),
+				text = self:string("MINI_ANALOG_VU_METER"),
 			},
 		},
 	}
