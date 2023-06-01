@@ -19,6 +19,7 @@ local appletManager = appletManager
 module(...)
 oo.class(_M, Icon)
 
+-- local imageCache = {}
 
 function __init(self, style)
 	local obj = oo.rawnew(self, Icon(style))
@@ -43,7 +44,8 @@ function _skin(self)
 		self.tickOff = self:styleImage("tickOff")
 
 	elseif self.style == "vumeter_analog" then
-		self.bgImg = self:styleImage("bgImg")
+--		self.srcBgImg = self:styleImage("bgImgPath")
+		self.imgPath = self:styleImage("bgImgPath")
 	end
 end
 
@@ -51,7 +53,6 @@ end
 function _layout(self)
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
-	local imgW, imgH = self.bgImg:getSize()
 	self.src_y = 0
 
 	self.player = appletManager:callService("getCurrentPlayer")
@@ -62,6 +63,11 @@ function _layout(self)
 --	if (w <= 0 or w > 480) and (h <= 0 or h > 272) then
 --		return
 --	end
+
+	-- When used in NP screen _layout gets called with strange values
+	if (w <= 0) and (h <= 0) then
+		return
+	end
 
 	if self.style == "vumeter" then
 		self.w = w - l - r
@@ -76,11 +82,20 @@ function _layout(self)
 		self.y = y + t + (self.bars * th)
 
 	elseif self.style == "vumeter_analog" then
-		self.x1 = x
-		self.x2 = x + (w / 2)
+    	log:debug("-----------------------------------------------------------------------")
+        local xoffs = 0
+        if w > 1280 then
+    	    log:debug("** cutting", w)
+            xoffs = (w - 1280)/2
+            w = 1280
+        end
+		self.x1 = x + xoffs
+		self.x2 = x + math.floor(w / 2) + xoffs
 		self.y = y
-		self.w = w / 2
+		self.w = math.floor(w / 2)
 		self.h = h
+        self.bgImg = _scaleAnalogVuMeter(self.imgPath, self.w * 2, h, 25)
+	    local imgW, imgH = self.bgImg:getSize()
 		-- center vertically
 		if imgH < h then
 			self.y = math.floor(self.y + ((h - imgH)/2))
@@ -90,11 +105,52 @@ function _layout(self)
 --			 so render the bottom part
 			self.src_y = math.floor(imgH - h)
 		end
+    	log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+    	log:debug("** w:", self.w, " h:", self.h)
+    	log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 	end
-	log:debug("-----------------------------------------------------------------------")
-	log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-	log:debug("** w:", self.w, " h:", self.h)
-	log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
+end
+
+
+-- scale an image to fit a width
+function _scaleAnalogVuMeter(imgPath, w, h, seq)
+    log:debug("_scaleAnalogVuMeter loaded:", imgPath)
+    local key = w .. "-" .. h .. "-" .. imgPath
+    log:debug("key:", key )
+--    if imageCache[key] then
+--        log:debug("got cache" .. key)
+--        local cImage =  imageCache(key)
+--        return cImage
+--    else
+--        log:debug("not in cache" .. key)
+--    end
+    img = Surface:loadImage(imgPath)
+	local srcW, srcH = img:getSize()
+    local wSeq = math.floor((w/2))*seq
+	-- for VUMeter width determines the scaling factor
+	local scaledH = math.floor(srcH * (wSeq/srcW))
+    log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
+	local scaledImg = img:resize(wSeq,scaledH)
+    img:release()
+--    log:debug("caching" .. key)
+--    imageCache[key] = scaledImg
+    return scaledImg
+--	-- after scaling:
+--	if scaledH > h then
+--	-- if height > then window height then clip the source image,
+--	-- this preserves proportion
+--        log:debug("_scaleAnalogVuMeter resize and clip")
+--		local tmp = img:resize(wSeq, scaledH)
+--		local clipped = img:resize(wSeq,h)
+--        -- FIXME: should really clip top and bottom - however:
+--        -- stock images are kind of bottom justfied so clip the top of the image
+--		tmp:blitClip(0, math.floor(scaledH-h), wSeq, h, clipped, 0, 0)
+--		tmp:release()
+--		return clipped
+--	else
+--        -- smaller images are centered vertically at render time
+--		return img:resize(wSeq,scaledH)
+--	end
 end
 
 
