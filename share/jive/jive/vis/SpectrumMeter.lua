@@ -40,16 +40,11 @@ function _skin(self)
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
 
-	self.useGradient = self:styleValue("useGradient", 0)
 	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
+	self.useGradient = #self.gradientColours - 1
 	self.useBgImg = self:styleValue("useBgImg", 0)
-	if self.useBgImg > 0 then
-		self.srcBgImg = self:styleImage("bgImg")
-	end
-	self.useFgImg = self:styleValue("useFgImg", 0)
-	if self.useFgImg > 0 then
-		self.srcFgImg = self:styleImage("fgImg")
-	end
+    self.bgImgPath = self:styleValue("bgImgPath", nil)
+	self.fgImgPath = self:styleValue("fgImgPath", nil)
 end
 
 
@@ -155,44 +150,49 @@ function _layout(self)
 		self.cap[2][i] = 0
 	end
 
-	if self.useBgImg > 0 then
-		self.bgImg = _scaleSpectrumImage(self.srcBgImg, w, h)
-		self.srcBgImg:release()
+    self.bgImg = nil
+	if self.bgImgPath ~= nil then
+		self.bgImg = _scaleSpectrumImage(self.bgImgPath, w, h)
 	end
 
-	if self.useFgImg > 0 then
-		self.fgImg = _scaleSpectrumImage(self.srcFgImg, w, h)
-		self.srcFgImg:release()
+    self.fgImg = nil
+	if self.fgImgPath ~= nil then
+		self.fgImg = _scaleSpectrumImage(self.fgImgPath, w, h)
 	end
 
 end
 
 
--- scale an image to fit a width-height
-function _scaleSpectrumImage(img, w, h)
+-- scale an image to fit a height
+function _scaleSpectrumImage(imgPath, w, h)
+    log:debug("_scaleSpectrumImage imagePath:", imgPath)
+    img = Surface:loadImage(imgPath)
+    local scaledImg
 	local srcW, srcH = img:getSize()
 	-- for spectrum height is determines the scaling factor
 	local scaledW = math.floor(srcW * (h/srcH))
     log:debug("_scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
+    if scaledW == w then
+        return img
 	-- after scaling:
-	if scaledW == w then
-		return img:resize(scaledW,h)
 	elseif scaledW < w then
 	-- if width < than window width the expand - distorts proportion
 	-- this is desired behaviour for vertically thin source images
 	-- which typically would be colour gradients
         log:debug("_scaleSpectrumImage simple resize")
-		return img:resize(w, h)
+		scaledImg = img:resize(w, h)
 	else
 	-- if width > then window width then clip the source image,
 	-- this preserves proportion
         log:debug("_scaleSpectrumImage resize and clip")
 		local tmp = img:resize(scaledW, h)
-		local clipped = img:resize(w,h)
-		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, clipped, 0, 0)
+        -- FIXME: find cheaper way to create an image of wxh
+		scaledImg = img:resize(w,h)
+		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
 		tmp:release()
-		return clipped
 	end
+    img:release()
+    return scaledImg
 end
 
 
@@ -206,7 +206,7 @@ function draw(self, surface)
 		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
 		self.backgroundDrawn = true
 	end
-	if self.useBgImg > 0 then
+	if self.bgImg ~= nil then
 		local x, y, w, h = self:getBounds()
 --		self.bgImg:blit(surface, x, y, w, h, 0, 0)
 --		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
@@ -243,7 +243,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		-- bar
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
-				if self.useFgImg > 0 then
+				if self.fgImg ~= nil then
 					local yBottom = y
 					local yTop = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
