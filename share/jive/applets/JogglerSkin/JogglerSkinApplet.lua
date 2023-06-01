@@ -154,16 +154,16 @@ function param(self)
 				text = self:string("SPECTRUM_ANALYZER"),
 			},
 			{
-				style = 'nowplaying_vuanalog_text',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("ANALOG_VU_METER"),
-			},
-			{
 				style = 'nowplaying_minispectrum_text',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("MINI_SPECTRUM_ANALYZER"),
+			},
+			{
+				style = 'nowplaying_vuanalog_text',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("ANALOG_VU_METER"),
 			},
 			{
 				style = 'nowplaying_minivumeter_text',
@@ -3600,12 +3600,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 1, 1 },			-- >= 0
 				binSpace = { 1, 1 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				useGradient = 0,
-				gradientColours = gradientColours,
-				useBgImg = 1,
-				bgImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum-gs.png"),
-				useFgImg = 1,
-				fgImg = _loadImage(self, "UNOFFICIAL/Spectrum/spectrum.png"),
+				-- gradientColours = gradientColours,
+				bgImgPath = imgpath ..  "UNOFFICIAL/Spectrum/background.png",
+				fgImgPath = imgpath ..  "UNOFFICIAL/Spectrum/gradient.png",
 			}
 		},
 	})
@@ -3634,11 +3631,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
     local mini_visu_Y =  230
     local mini_visu_W =  screenWidth/2
     local mini_visu_X =  screenWidth - mini_visu_W - 65
-    if screenWidth == 1280 and screenHeight == 800 then
---    if ((screenWidth * 10)/screenHeight) < 17 then
-        mini_visu_W = (screenWidth * 9) / 20
-		mini_visu_X = screenWidth - mini_visu_W - 50
-	end
 	-- for vu meters widths must be divisible by 2
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
@@ -3693,21 +3685,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 
-	local bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png")
-	local imgW, imgH = bgImg:getSize()
-	bgImg:release()
-	local vuImageW = (screenWidth/2)*2
-	local vuImageH = screenHeight
-	-- BlaiseD hack using larger images results in crashes :-(
-	-- needs further investigation
-	-- only checked with resolutions supported by JogglerSkin
-	if screenWidth > 1280 then
-		vuImageW = 1280
-		vuImageH = 800
-	end
-    -- preserve aspect ratio when resizing the image
-	local vuImageScaledH = (imgH * ((vuImageW/2)/(imgW/25)))
-
 	-- Visualizer: Analog VU Meter
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
@@ -3724,11 +3701,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				position = LAYOUT_CENTER,
 				x = 0,
 				y = TITLE_HEIGHT + 63,
-				w = vuImageW,
-				h = vuImageH - 67 - (TITLE_HEIGHT + 38 + 38),
+				w = screenWidth,
+				h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((vuImageW/2)*25, vuImageScaledH),
+                bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 			}
 		},
 	})
@@ -3741,12 +3718,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
-	local mini_vu_W =  (mini_visu_W/2)*2
-	bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png")
-	imgW, imgH = bgImg:getSize()
-	bgImg:release()
-    -- preserve aspect ratio when resizing the image
-	vuImageScaledH = (imgH * ((mini_vu_W/2)/(imgW/25)))
 	-- Visualizer: mini Spectrum Visualizer
 	s.nowplaying_minivumeter_text = _uses(s.nowplaying_visualizer_mini, {
 		npvisu = {
@@ -3754,7 +3725,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position = LAYOUT_NONE,
 			x = mini_visu_X,
 			y = mini_visu_Y,
-			w = mini_vu_W,
+			w = mini_visu_W,
 			h = mini_visu_H,
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
@@ -3767,7 +3738,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				h = mini_visu_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png"):resize((mini_vu_W/2)*25, vuImageScaledH),
+                bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 			}
 		},
 	})
