@@ -3596,9 +3596,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				capSpace = { 4, 4 },			-- >= 0
 				channelFlipped = { 0, 1 },		-- 0 / 1
 				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 4, 4 },			-- > 1
-				barSpace = { 1, 1 },			-- >= 0
-				binSpace = { 1, 1 },			-- >= 0
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
 				-- gradientColours = gradientColours,
 				bgImgPath = imgpath ..  "UNOFFICIAL/Spectrum/background.png",
