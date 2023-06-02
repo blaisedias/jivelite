@@ -8,6 +8,7 @@ local Timer         = require("jive.ui.Timer")
 local Widget        = require("jive.ui.Widget")
 
 local vis           = require("jive.vis")
+local visImage      = require("jive.visImage")
 
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
@@ -114,43 +115,40 @@ end
 
 -- scale an image to fit a width
 function _scaleAnalogVuMeter(imgPath, w, h, seq)
+    local key = w .. "x" .. h .. "-" .. imgPath
+    log:debug("_scaleAnalogVuMeter key:", key )
+    local scaledImg =  visImage:cacheGet(key)
+    if scaledImg then
+        log:debug("got cached " .. key)
+        return scaledImg
+    end
+    local img = Surface:loadImage(imgPath)
     log:debug("_scaleAnalogVuMeter loaded:", imgPath)
-    local key = w .. "-" .. h .. "-" .. imgPath
-    log:debug("key:", key )
---    if imageCache[key] then
---        log:debug("got cache" .. key)
---        local cImage =  imageCache(key)
---        return cImage
---    else
---        log:debug("not in cache" .. key)
---    end
-    img = Surface:loadImage(imgPath)
 	local srcW, srcH = img:getSize()
     local wSeq = math.floor((w/2))*seq
 	-- for VUMeter width determines the scaling factor
 	local scaledH = math.floor(srcH * (wSeq/srcW))
     log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
-	local scaledImg = img:resize(wSeq,scaledH)
+--    img:release()
+--    visImage:cachePut(key, scaledImg)
+--    return scaledImg
+	-- after scaling:
+	if scaledH > h then
+	-- if height > then window height then clip the source image,
+	-- this preserves proportion
+        log:debug("_scaleAnalogVuMeter resize and clip")
+		local tmp = img:resize(wSeq, scaledH)
+		scaledImg = img:resize(wSeq,h)
+        -- FIXME: should really clip top and bottom - however:
+        -- stock images are kind of bottom justfied so clip the top of the image
+		tmp:blitClip(0, math.floor(scaledH-h), wSeq, h, scaledImg, 0, 0)
+		tmp:release()
+    else
+	    scaledImg = img:resize(wSeq,scaledH)
+    end
     img:release()
---    log:debug("caching" .. key)
---    imageCache[key] = scaledImg
+    visImage:cachePut(key, scaledImg)
     return scaledImg
---	-- after scaling:
---	if scaledH > h then
---	-- if height > then window height then clip the source image,
---	-- this preserves proportion
---        log:debug("_scaleAnalogVuMeter resize and clip")
---		local tmp = img:resize(wSeq, scaledH)
---		local clipped = img:resize(wSeq,h)
---        -- FIXME: should really clip top and bottom - however:
---        -- stock images are kind of bottom justfied so clip the top of the image
---		tmp:blitClip(0, math.floor(scaledH-h), wSeq, h, clipped, 0, 0)
---		tmp:release()
---		return clipped
---	else
---        -- smaller images are centered vertically at render time
---		return img:resize(wSeq,scaledH)
---	end
 end
 
 
