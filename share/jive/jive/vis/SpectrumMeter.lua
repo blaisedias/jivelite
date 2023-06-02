@@ -8,6 +8,7 @@ local Timer         = require("jive.ui.Timer")
 local Widget        = require("jive.ui.Widget")
 
 local vis           = require("jive.vis")
+local visImage      = require("jive.visImage")
 
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
@@ -42,7 +43,6 @@ function _skin(self)
 
 	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
 	self.useGradient = #self.gradientColours - 1
-	self.useBgImg = self:styleValue("useBgImg", 0)
     self.bgImgPath = self:styleValue("bgImgPath", nil)
 	self.fgImgPath = self:styleValue("fgImgPath", nil)
 end
@@ -118,6 +118,7 @@ function _layout(self)
 		self.clipSubbands[2]
 	)
 
+	log:debug("-----------------------------------------------------")
 	log:debug("** 1: " .. numBars[1] .. " 2: " .. numBars[2])
 
 	local barHeight = {}
@@ -152,47 +153,14 @@ function _layout(self)
 
     self.bgImg = nil
 	if self.bgImgPath ~= nil then
-		self.bgImg = _scaleSpectrumImage(self.bgImgPath, w, h)
+		self.bgImg = visImage:scaleSpectrumImage(self.bgImgPath, w, h)
 	end
 
     self.fgImg = nil
 	if self.fgImgPath ~= nil then
-		self.fgImg = _scaleSpectrumImage(self.fgImgPath, w, h)
+		self.fgImg = visImage:scaleSpectrumImage(self.fgImgPath, w, h)
 	end
 
-end
-
-
--- scale an image to fit a height
-function _scaleSpectrumImage(imgPath, w, h)
-    log:debug("_scaleSpectrumImage imagePath:", imgPath)
-    img = Surface:loadImage(imgPath)
-    local scaledImg
-	local srcW, srcH = img:getSize()
-	-- for spectrum height is determines the scaling factor
-	local scaledW = math.floor(srcW * (h/srcH))
-    log:debug("_scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
-    if scaledW == w then
-        return img
-	-- after scaling:
-	elseif scaledW < w then
-	-- if width < than window width the expand - distorts proportion
-	-- this is desired behaviour for vertically thin source images
-	-- which typically would be colour gradients
-        log:debug("_scaleSpectrumImage simple resize")
-		scaledImg = img:resize(w, h)
-	else
-	-- if width > then window width then clip the source image,
-	-- this preserves proportion
-        log:debug("_scaleSpectrumImage resize and clip")
-		local tmp = img:resize(scaledW, h)
-        -- FIXME: find cheaper way to create an image of wxh
-		scaledImg = img:resize(w,h)
-		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
-		tmp:release()
-	end
-    img:release()
-    return scaledImg
 end
 
 
