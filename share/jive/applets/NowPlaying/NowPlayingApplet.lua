@@ -30,6 +30,7 @@ local Tile             = require("jive.ui.Tile")
 local Timer            = require("jive.ui.Timer")
 local Player           = require("jive.slim.Player")
 
+local visImage         = require("jive.visImage")
 local VUMeter          = require("jive.vis.VUMeter")
 local SpectrumMeter    = require("jive.vis.SpectrumMeter")
 
@@ -569,6 +570,10 @@ function notify_playerTrackChange(self, player, nowPlaying)
 		-- for local music, nowPlaying = track_id
 		self.nowPlaying = nowPlaying
 	end
+
+    -- cycle to the next set of visualiser images
+	visImage:vuBump()
+	visImage:spBump()
 
 	self:replaceNPWindow()
 end
@@ -1862,7 +1867,6 @@ end
 
 
 function showNowPlaying(self, transition, direct)
-
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
 
@@ -1976,7 +1980,6 @@ function showNowPlaying(self, transition, direct)
 	-- Initialize with current data from Player
 	self.window:show(transitionOn)
 	self:_updateAll()
-
 end
 
 
