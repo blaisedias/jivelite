@@ -1,17 +1,19 @@
--- C implementation
-
 local math          = require("math")
 local Surface       = require("jive.ui.Surface")
 local vis           = require("jive.vis")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 
+local ipairs,pairs  = ipairs,pairs
 
 module(...)
 
 local imageCache = {}
 
 function scaleSpectrumImage(obj, imgPath, w, h)
+    if imgPath == nil then
+        return nil
+    end
     local key = w .. "x" .. h .. "-" .. imgPath
     log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h, " key:", key)
     if imageCache[key] then
@@ -63,6 +65,9 @@ function _scaleSpectrumImage(imgPath, w, h)
 end
 
 function scaleAnalogVuMeter(obj, imgPath, w, h)
+    if imgPath == nil then
+        return nil
+    end
     local key = w .. "x" .. h .. "-" .. imgPath
     log:debug("scaleAnalogVuMeter imagePath:", imgPath, " w:", w, " h:", h, " key:", key)
     if imageCache[key] then
@@ -115,4 +120,78 @@ function cacheGet(obj, key)
     return nil
 end
 
+function cacheClear(obj)
+    log:debug("cacheClear ")
+    for k,v in pairs(imageCache) do
+        log:debug("cacheClear ", k)
+        v:release()
+        imageCache[k] = nil
+    end
+end
+
+-------------------------------------------------------- 
+--- spectrum images
+-------------------------------------------------------- 
+local spImageIndex = 1
+
+local spectrumImages = {
+    { "applets/JogglerSkin/images/UNOFFICIAL/Spectrum/gradient.png",
+        "applets/JogglerSkin/images/bNOFFICIAL/Spectrum/background.png",
+    },
+    { "applets/JogglerSkin/images/UNOFFICIAL/Spectrum/gradient-1.png",
+        nil,
+    },
+    { "applets/JogglerSkin/images/UNOFFICIAL/Spectrum/gradient-2.png",
+        nil,
+    },
+    { "applets/JogglerSkin/images/UNOFFICIAL/Spectrum/gradient-c.png",
+        nil,
+    },
+}
+
+
+function getFgSpectrumImage()
+    log:debug("--fg ", spImageIndex, ", ", spectrumImages[spImageIndex][0])
+    return spectrumImages[spImageIndex][1]
+end
+
+function getBgSpectrumImage() 
+    log:debug("--bg ", spImageIndex, ", ", spectrumImages[spImageIndex][1])
+    return spectrumImages[spImageIndex][2]
+end
+
+function spBump()
+    log:debug("spBump was ", spImageIndex, " of ", #spectrumImages)
+    spImageIndex = (spImageIndex % #spectrumImages) + 1
+    log:debug("spBump is ", spImageIndex, " of ", #spectrumImages)
+end
+
+function setSpectrumImages(pathList)
+    sectrumImages = pathList
+    spImageIndex = 1
+end
+
+-------------------------------------------------------- 
+--- VU meter images
+-------------------------------------------------------- 
+local vuImages = {
+    "applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+    "applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_b.png",
+}
+local vuImageIndex = 1
+
+function vuBump()
+    log:debug("vuBump was ", vuImageIndex, " of ", #vuImages)
+    vuImageIndex = (vuImageIndex % #vuImages) + 1
+    log:debug("vuBump is ", vuImageIndex, " of ", #vuImages)
+end
+
+function getVuImage()
+    log:debug("--vu ", vuImageIndex, ", ", vuImages[vuImageIndex])
+    return vuImages[vuImageIndex]
+end
+
+function setVuImages(pathList) 
+    vuImages = pathList
+end
 

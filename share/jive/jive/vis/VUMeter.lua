@@ -95,7 +95,7 @@ function _layout(self)
 		self.y = y
 		self.w = math.floor(w / 2)
 		self.h = h
-        self.bgImg = _scaleAnalogVuMeter(self.imgPath, self.w * 2, h, 25)
+	    self.bgImg = _scaleAnalogVuMeter(visImage.getVuImage(), self.w * 2, h, 25)
 	    local imgW, imgH = self.bgImg:getSize()
 		-- center vertically
 		if imgH < h then
@@ -106,9 +106,9 @@ function _layout(self)
 --			 so render the bottom part
 			self.src_y = math.floor(imgH - h)
 		end
-    	log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-    	log:debug("** w:", self.w, " h:", self.h)
-    	log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
+		log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+		log:debug("** w:", self.w, " h:", self.h)
+		log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 	end
 end
 
