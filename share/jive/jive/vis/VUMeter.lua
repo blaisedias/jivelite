@@ -20,7 +20,6 @@ local appletManager = appletManager
 module(...)
 oo.class(_M, Icon)
 
--- local imageCache = {}
 
 function __init(self, style)
 	local obj = oo.rawnew(self, Icon(style))
@@ -45,7 +44,12 @@ function _skin(self)
 		self.tickOff = self:styleImage("tickOff")
 
 	elseif self.style == "vumeter_analog" then
---		self.srcBgImg = self:styleImage("bgImgPath")
+		self.bgImg = self:styleImage("bgImg")
+		if self.bgImg then
+			self.legacy = true
+		else
+			self.legacy = false
+		end
 		self.imgPath = self:styleImage("bgImgPath")
 	end
 end
@@ -83,32 +87,40 @@ function _layout(self)
 		self.y = y + t + (self.bars * th)
 
 	elseif self.style == "vumeter_analog" then
-    	log:debug("-----------------------------------------------------------------------")
-        local xoffs = 0
-        if w > 1280 then
-    	    log:debug("** cutting", w)
-            xoffs = (w - 1280)/2
-            w = 1280
-        end
-		self.x1 = x + xoffs
-		self.x2 = x + math.floor(w / 2) + xoffs
-		self.y = y
-		self.w = math.floor(w / 2)
-		self.h = h
-	    self.bgImg = _scaleAnalogVuMeter(visImage.getVuImage(), self.w * 2, h, 25)
-	    local imgW, imgH = self.bgImg:getSize()
-		-- center vertically
-		if imgH < h then
-			self.y = math.floor(self.y + ((h - imgH)/2))
-		elseif imgH > h then
+		if self.legacy then
+			self.x1 = x
+			self.x2 = x + (w / 2)
+			self.y = y
+			self.w = w / 2
+			self.h = h
+		else
+			log:debug("-----------------------------------------------------------------------")
+			local xoffs = 0
+			if w > 1280 then
+				log:debug("** cutting", w)
+				xoffs = (w - 1280)/2
+				w = 1280
+			end
+			self.x1 = x + xoffs
+			self.x2 = x + math.floor(w / 2) + xoffs
+			self.y = y
+			self.w = math.floor(w / 2)
+			self.h = h
+			self.bgImg = _scaleAnalogVuMeter(visImage.getVuImage(), self.w * 2, h, 25)
+			local imgW, imgH = self.bgImg:getSize()
+			-- center vertically
+			if imgH < h then
+				self.y = math.floor(self.y + ((h - imgH)/2))
+			elseif imgH > h then
 --			 self.src_y = math.floor((imgH - h)/2)
 --			 the vast majority of VUMeter images have a ton of space above them,
 --			 so render the bottom part
 			self.src_y = math.floor(imgH - h)
+			end
+			log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+			log:debug("** w:", self.w, " h:", self.h)
+			log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 		end
-		log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-		log:debug("** w:", self.w, " h:", self.h)
-		log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 	end
 end
 
