@@ -1,16 +1,19 @@
 local math          = require("math")
+local string        = require("string")
 local Surface       = require("jive.ui.Surface")
 local vis           = require("jive.vis")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 
 local ipairs,pairs  = ipairs,pairs
+local table = require("table")
+
 
 module(...)
 
 local imageCache = {}
 
-function scaleSpectrumImage(obj, imgPath, w, h)
+function scaleSpectrumImage(tbl, imgPath, w, h)
     if imgPath == nil then
         return nil
     end
@@ -64,7 +67,7 @@ function _scaleSpectrumImage(imgPath, w, h)
     return scaledImg
 end
 
-function scaleAnalogVuMeter(obj, imgPath, w, h)
+function scaleAnalogVuMeter(tbl, imgPath, w, h)
     if imgPath == nil then
         return nil
     end
@@ -109,18 +112,18 @@ function _scaleAnalogVuMeter(imgPath, w, h, seq)
 end
 
 
-function cachePut(obj, key, img)
+function cachePut(tbl, key, img)
     imageCache[key] = img
 end
 
-function cacheGet(obj, key)
+function cacheGet(tbl, key)
     if imageCache[key] then
         return imageCache[key]
     end
     return nil
 end
 
-function cacheClear(obj)
+function cacheClear(tbl)
     log:debug("cacheClear ")
     for k,v in pairs(imageCache) do
         log:debug("cacheClear ", k)
@@ -133,6 +136,21 @@ end
 --- spectrum images
 -------------------------------------------------------- 
 local spImageIndex = 1
+local spImagePaths = {}
+
+function addSpectrumImagePath(tbl, path)
+    log:debug("addSpectrumImagePath",  path)
+    table.insert(spImagePaths, path)
+end
+
+function preloadSpectrumImages(tbl, w, h)
+    log:debug("preloadSpectrumImages: w:", w , " h:", h)
+    for k, imgPath in pairs(spImagePaths) do
+        key = w .. "x" .. h .. "-" .. imgPath
+        imageCache[key] = _scaleSpectrumImage(imgPath, w, h)
+        log:debug("preloadSpectrumImages k:", k, " v:", imgPath, " key:", key)
+    end
+end
 
 local spectrumImages = {
     { "applets/JogglerSkin/images/UNOFFICIAL/Spectrum/gradient.png",
@@ -175,14 +193,18 @@ end
 --- VU meter images
 -------------------------------------------------------- 
 local vuImages = {
-    "applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-    "applets/JogglerSkin/images/UNOFFICIAL/VUMeter/vu_analog_25seq_b.png",
 }
 local vuImageIndex = 1
+local vuBumpValue = 1
+
+function addVuImagePath(tbl, path)
+    log:debug("addVuImagePath",  path)
+    table.insert(vuImages, path)
+end
 
 function vuBump()
     log:debug("vuBump was ", vuImageIndex, " of ", #vuImages)
-    vuImageIndex = (vuImageIndex % #vuImages) + 1
+    vuImageIndex = (vuImageIndex % #vuImages) + vuBumpValue
     log:debug("vuBump is ", vuImageIndex, " of ", #vuImages)
 end
 
@@ -195,3 +217,11 @@ function setVuImages(pathList)
     vuImages = pathList
 end
 
+function preloadVU(tbl, w, h)
+    log:debug("preloadVU: w:", w , " h:", h)
+    for k, imgPath in pairs(vuImages) do
+        key = w .. "x" .. h .. "-" .. imgPath
+        imageCache[key] = _scaleAnalogVuMeter(imgPath, w, h, 25)
+        log:debug("prealoadVU k:", k, " v:", imgPath, " key:", key)
+    end
+end
