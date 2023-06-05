@@ -54,6 +54,8 @@ local autotable              = require("jive.utils.autotable")
 
 local log                    = require("jive.utils.log").logger("applet.JogglerSkin")
 
+local visImage               = require("jive.visImage")
+
 local EVENT_ACTION           = jive.ui.EVENT_ACTION
 local EVENT_CONSUME          = jive.ui.EVENT_CONSUME
 local EVENT_WINDOW_POP       = jive.ui.EVENT_WINDOW_POP
@@ -296,6 +298,15 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
+
+	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
+		visImage:addSpectrumImagePath(img)
+	end
+
+	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AVUMeters") do 
+		visImage:addVuImagePath(img)
+	end
+
 
 	--init lastInputType so selected item style is not shown on skin load
 	Framework.mostRecentInputType = "mouse"
@@ -731,6 +742,28 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local THREE_ITEM_HEIGHT = 72
 	local FIVE_ITEM_HEIGHT = 45
 	local TITLE_BUTTON_WIDTH = 76
+
+	local VU_H = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38)
+	local SP_H = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45)
+	local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
+	local mini_visu_Y =  230
+	local mini_visu_W =  screenWidth/2
+	local mini_visu_X =  screenWidth - mini_visu_W - 65
+
+	if screenWidth == 1280 and screenHeight == 800 then
+--	if ((screenWidth * 10)/screenHeight) < 17 then
+		mini_visu_W = (screenWidth * 9) / 20
+		mini_visu_X = screenWidth - mini_visu_W - 50
+	end
+
+-- preload imageCache here, on rpi's scaling images takes a noticeable
+-- amount of time .... :-( 
+-- front load so that whilst playing the experience is smooth
+	visImage:cacheClear()
+	visImage:preloadVU(screenWidth, VU_H)
+	visImage:preloadVU(mini_visu_W, mini_visu_H)
+	visImage:preloadSpectrumImages(screenWidth, SP_H)
+	visImage:preloadSpectrumImages(mini_visu_W, mini_visu_H)
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
@@ -3572,7 +3605,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			x = 0,
 			y = 2 * TITLE_HEIGHT + 4,
 			w = screenWidth,
-			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
+--			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
+			h = SP_H,
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -3581,7 +3615,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				x = 0,
 				y = 2 * TITLE_HEIGHT + 4,
 				w = screenWidth,
-				h = screenHeight - 34  - (2 * TITLE_HEIGHT + 4 + 45),
+--				h = screenHeight - 34  - (2 * TITLE_HEIGHT + 4 + 45),
+				h = SP_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -3630,10 +3665,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 	s.nowplaying_visualizer_mini.npprogress.npprogressB_disabled = s.nowplaying_visualizer_mini.npprogress.npprogressB
 
-    local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
-    local mini_visu_Y =  230
-    local mini_visu_W =  screenWidth/2
-    local mini_visu_X =  screenWidth - mini_visu_W - 65
 	-- for vu meters widths must be divisible by 2
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
@@ -3673,7 +3704,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				useGradient = 1,
 				gradientColours = gradientColours,
 			}
 		},
@@ -3696,7 +3726,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			x = 0,
 			y = TITLE_HEIGHT + 63,
 			w = screenWidth,
-			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+--			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+			h = VU_H,
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -3705,10 +3736,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				x = 0,
 				y = TITLE_HEIGHT + 63,
 				w = screenWidth,
-				h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+--				h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+				h = VU_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-                bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 			}
 		},
 	})
@@ -3741,7 +3773,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				h = mini_visu_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-                bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 			}
 		},
 	})
