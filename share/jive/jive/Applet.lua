@@ -131,6 +131,60 @@ function readdir(self, path)
 end
 
 
+
+
+local function dirIter2(self, appletName, path)
+	local rpath = "applets/" .. appletName .. "/" .. path
+	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
+		dir = dir .. rpath
+
+		local mode = lfs.attributes(dir, "mode")
+		
+		if mode == "directory" then
+			for entry in lfs.dir(dir) do
+				if entry ~= "." and entry ~= ".." and entry ~= ".svn" then
+					coroutine.yield(rpath .. '/' .. entry)
+				end
+			end
+		end
+	end
+end
+
+function readdir2(self, appletName, path)
+	local co = coroutine.create(function() dirIter2(self, appletName, path) end)
+	return function()
+		local code, res = coroutine.resume(co)
+		return res
+	end
+end
+
+
+--[[
+
+An iterator over the applets files in path.
+
+--]]
+function readdir(self, path)
+	local co = coroutine.create(function() dirIter(self, path) end)
+	return function()
+		local code, res = coroutine.resume(co)
+		return res
+	end
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 --[[
 
 =head2 jive.Applet:setSettings(settings)
