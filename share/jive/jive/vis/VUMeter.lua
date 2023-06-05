@@ -50,7 +50,6 @@ function _skin(self)
 		else
 			self.legacy = false
 		end
-		self.imgPath = self:styleImage("bgImgPath")
 	end
 end
 
