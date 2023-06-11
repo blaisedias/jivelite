@@ -244,6 +244,61 @@ function getNPStyles(self)
 end
 
 
+function npVUSettingsShow(self)
+	local window = Window("text_list", self:string('SELECT_VUMETER') )
+--	local window = Window("text_list", "VU Meter" )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu")
+
+	self:syncSettings()
+
+	local npscreenVumeters = visImage:getVUImageList()
+	-- syncSettings was invoked so npscreenVumeters reflects the resolved state
+
+	for i, v in ipairs(npscreenVumeters) do
+		local selected = true
+		if v.enabled == false then
+			selected = false
+		end
+		
+		menu:addItem( {
+			text = v.name,
+			style = 'item_choice',
+			check = Checkbox("checkbox", 
+				function(object, isSelected)
+					local settings = self:getSettings()
+					local playerId = self.player:getId()
+
+					if isSelected then
+						-- turn it on
+						settings.vumeters[v.name] = true 
+						visImage:selectVuImage(v.name, true)
+					else
+						-- turn it off conditionally:
+						-- there needs to be at least one VUMeter
+						if visImage:selectVuImage(v.name, false) > 0 then
+							settings.vumeters[v.name] = false 
+						else
+							visImage:selectVuImage(v.name, true)
+							object:setSelected(true)
+						end
+					end
+					self:storeSettings()
+				end,
+			selected),
+		} )
+	end
+
+	--XXX: not sure whether the text is necessary or even helpful here
+	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
+
+	window:addWidget(menu)
+	window:show()
+end
+
+
+
 function npviewsSettingsShow(self)
 	local window = Window("text_list", self:string('NOW_PLAYING_VIEWS') )
 	local group = RadioGroup()
@@ -1869,6 +1924,12 @@ end
 function showNowPlaying(self, transition, direct)
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
+	self:syncSettings()
+	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
+		if not visImage:isCurrentVUMeterEnabled() then
+			self.window = nil
+		end
+	end
 
 	if not self.selectedStyle then
 		local settings = self:getSettings()
@@ -2037,3 +2098,52 @@ function free(self)
 	return true
 end
 
+-- sync settings both ways
+-- from existing settings to visImage
+--      this syncs settings for images found on both 
+-- then write visImage to settings
+--      this gets rid of settings for images no longer present
+-- that way 
+function syncSettings(self)
+	if visImage:getSyncStatus() then
+		-- we have synced and do not need to all this again
+		return
+	end
+	local settings = self:getSettings()
+	if not settings.vumeters then
+		settings.vumeters = {}
+	end
+
+	local npscreenVumeters = visImage:getVUImageList()
+	-- first reflect any valid settings down to visImage
+	log:debug("syncSettings >>")
+	for k, v in pairs(settings.vumeters) do
+		log:debug("syncSettings >>", k, " -> ", v)
+		visImage:selectVuImage(k,v)
+	end
+	log:debug("syncSettings <<")
+	-- refresh list from visImage
+	npscreenVumeters = visImage:getVUImageList()
+	-- ensure that at least one VUMeter is selected
+	local enabled_count = 0
+	for i, v in ipairs(npscreenVumeters) do
+		if npscreenVumeters[i].enabled then
+			enabled_count = enabled_count + 1
+		end
+	end
+	if enabled_count == 0 then
+		npscreenVumeters[1].enabled = true
+		visImage:selectVuImage(npscreenVumeters[1].name,v)
+	end
+	-- save the refreshed list of settings
+	settings.vumeters = {}
+	for i, v in ipairs(npscreenVumeters) do
+		settings.vumeters[v.name] = npscreenVumeters[i].enabled
+	end
+	self:storeSettings()
+	visImage:vuBump()
+	visImage:spBump()
+	-- record that we have synced and do not need to all
+	-- this again
+	visImage:setSyncStatus()
+end
