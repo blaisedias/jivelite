@@ -44,6 +44,16 @@ function registerApplet(self)
 			end
 		)
 	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletNowPlayingVUSettings', 
+			'screenSettingsNowPlaying', 
+			'SELECT_VUMETER', 
+			function(applet, ...) 
+				applet:npVUSettingsShow(...) 
+			end
+		)
+	)
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
 

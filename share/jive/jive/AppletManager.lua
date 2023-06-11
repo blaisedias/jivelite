@@ -88,12 +88,14 @@ function _initUserpathdir()
 	_userpathdir = System.getUserDir()
 	_usersettingsdir = _userpathdir .. "/settings"
 	_userappletsdir = _userpathdir .. "/applets"
+	_usercachedir = _userpathdir .. "/cache"
 	
 	log:info("User Path: ", _userpathdir)
 	
 	_mkdirRecursive(_userpathdir)
 	_mkdirRecursive(_usersettingsdir)
 	_mkdirRecursive(_userappletsdir)
+	_mkdirRecursive(_usercachedir)
 end
 
 function _mkdirRecursive(dir)
