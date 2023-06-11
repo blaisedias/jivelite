@@ -153,12 +153,14 @@ function _layout(self)
 
 	self.bgImg = nil
 	if self.bgImgPath ~= nil then
-		self.bgImg = visImage:scaleSpectrumImage(visImage:getBgSpectrumImage(), w, h)
+		--self.bgImg = visImage:scaleSpectrumImage(visImage:getBgSpectrumImage(), w, h)
+		self.bgImg = visImage:getBgSpectrumImage(w, h)
 	end
 
 	self.fgImg = nil
 	if self.fgImgPath ~= nil then
-		self.fgImg = visImage:scaleSpectrumImage(visImage:getFgSpectrumImage(), w, h)
+		-- self.fgImg = visImage:scaleSpectrumImage(visImage:getFgSpectrumImage(), w, h)
+		self.fgImg = visImage:getFgSpectrumImage(w, h)
 	end
 end
 

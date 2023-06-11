@@ -106,16 +106,16 @@ function _layout(self)
 			self.w = math.floor(w / 2)
 			self.h = h
 			self.bgImg = visImage.getVuImage(w,h)
-			if self.bfImg ~= nil then
+			if self.bgImg ~= nil then
 				local imgW, imgH = self.bgImg:getSize()
 				-- center vertically
 				if imgH < h then
 					self.y = math.floor(self.y + ((h - imgH)/2))
 				elseif imgH > h then
---			 self.src_y = math.floor((imgH - h)/2)
+--				 self.src_y = math.floor((imgH - h)/2)
 --			 the vast majority of VUMeter images have a ton of space above them,
 --			 so render the bottom part
-				self.src_y = math.floor(imgH - h)
+					self.src_y = math.floor(imgH - h)
 				end
 				log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
 				log:debug("** w:", self.w, " h:", self.h)
