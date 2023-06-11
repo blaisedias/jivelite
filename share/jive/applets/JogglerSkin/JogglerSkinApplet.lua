@@ -299,15 +299,6 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
 
-	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
-		visImage:addSpectrumImagePath(img)
-	end
-
-	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AVUMeters") do 
-		visImage:addVuImagePath(img)
-	end
-
-
 	--init lastInputType so selected item style is not shown on skin load
 	Framework.mostRecentInputType = "mouse"
 
@@ -760,10 +751,15 @@ function skin(self, s, reload, useDefaultSize, w, h)
 -- amount of time .... :-( 
 -- front load so that whilst playing the experience is smooth
 	visImage:cacheClear()
-	visImage:preloadVU(screenWidth, VU_H)
-	visImage:preloadVU(mini_visu_W, mini_visu_H)
-	visImage:preloadSpectrumImages(screenWidth, SP_H)
-	visImage:preloadSpectrumImages(mini_visu_W, mini_visu_H)
+	visImage:readCacheDir()
+	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
+		visImage:addSpectrumImage(img, screenWidth, SP_H)
+	end
+
+	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
+		visImage:addVuImage(img, screenWidth, VU_H)
+		visImage:addVuImage(img, mini_visu_W, mini_visu_H)
+	end
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),

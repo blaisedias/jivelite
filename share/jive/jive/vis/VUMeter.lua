@@ -105,61 +105,24 @@ function _layout(self)
 			self.y = y
 			self.w = math.floor(w / 2)
 			self.h = h
-			self.bgImg = _scaleAnalogVuMeter(visImage.getVuImage(), self.w * 2, h, 25)
-			local imgW, imgH = self.bgImg:getSize()
-			-- center vertically
-			if imgH < h then
-				self.y = math.floor(self.y + ((h - imgH)/2))
-			elseif imgH > h then
+			self.bgImg = visImage.getVuImage(w,h)
+			if self.bfImg ~= nil then
+				local imgW, imgH = self.bgImg:getSize()
+				-- center vertically
+				if imgH < h then
+					self.y = math.floor(self.y + ((h - imgH)/2))
+				elseif imgH > h then
 --			 self.src_y = math.floor((imgH - h)/2)
 --			 the vast majority of VUMeter images have a ton of space above them,
 --			 so render the bottom part
-			self.src_y = math.floor(imgH - h)
+				self.src_y = math.floor(imgH - h)
+				end
+				log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+				log:debug("** w:", self.w, " h:", self.h)
+				log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 			end
-			log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-			log:debug("** w:", self.w, " h:", self.h)
-			log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 		end
 	end
-end
-
-
--- scale an image to fit a width
-function _scaleAnalogVuMeter(imgPath, w, h, seq)
-    local key = w .. "x" .. h .. "-" .. imgPath
-    log:debug("_scaleAnalogVuMeter key:", key )
-    local scaledImg =  visImage:cacheGet(key)
-    if scaledImg then
-        log:debug("got cached " .. key)
-        return scaledImg
-    end
-    local img = Surface:loadImage(imgPath)
-    log:debug("_scaleAnalogVuMeter loaded:", imgPath)
-	local srcW, srcH = img:getSize()
-    local wSeq = math.floor((w/2))*seq
-	-- for VUMeter width determines the scaling factor
-	local scaledH = math.floor(srcH * (wSeq/srcW))
-    log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
---    img:release()
---    visImage:cachePut(key, scaledImg)
---    return scaledImg
-	-- after scaling:
-	if scaledH > h then
-	-- if height > then window height then clip the source image,
-	-- this preserves proportion
-        log:debug("_scaleAnalogVuMeter resize and clip")
-		local tmp = img:resize(wSeq, scaledH)
-		scaledImg = img:resize(wSeq,h)
-        -- FIXME: should really clip top and bottom - however:
-        -- stock images are kind of bottom justfied so clip the top of the image
-		tmp:blitClip(0, math.floor(scaledH-h), wSeq, h, scaledImg, 0, 0)
-		tmp:release()
-    else
-	    scaledImg = img:resize(wSeq,scaledH)
-    end
-    img:release()
-    visImage:cachePut(key, scaledImg)
-    return scaledImg
 end
 
 
@@ -228,10 +191,12 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 
 --		local x,y,w,h = self:getBounds()
 
-		if ch == 1 then
-			self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
-		else
-			self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
+		if self.bgImg ~= nil then
+			if ch == 1 then
+				self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
+			else
+				self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
+			end
 		end
 	end
 end
