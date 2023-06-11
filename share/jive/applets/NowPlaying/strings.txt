@@ -212,6 +212,10 @@ NOW_PLAYING_VIEWS
 	RU	Вид экрана при воспроизведении
 	SV	Nu spelas-vyer
 
+SELECT_VUMETER
+	EN	Select VU Meter 
+	ES	VU Meter vistas
+
 NOW_PLAYING_VIEWS_HELP
 	CS	Na obrazovce Právě hraje je k dispozici několik různých konfigurací, neboli "zobrazení", mezi kterými můžete přepínat. Zde si můžete zvolit požadovaná zobrazení přehrávače.
 	DA	Vinduet Nu spiller kan vises på forskellige måder som du kan skifte mellem. Her kan du vælge hvordan vinduet skal se ud.
@@ -226,4 +230,5 @@ NOW_PLAYING_VIEWS_HELP
 	PL	Ekran Teraz odtwarzane oferuje kilka różnych konfiguracji okien lub „widoki”, między którymi można się przełączać. Można wybrać widok odpowiedni do używanego odtwarzacza.
 	RU	Существует несколько видов экрана воспроизведения, между которыми можно переключаться. Здесь можно выбрать несколько видов для этого плеера.
 	SV	Skärmbilden Nu spelas har några olika fönsterkonfigurationer eller vyer som du kan växla mellan. Här väljer du vilken vy du vill ha i den här spelaren.
+
 
