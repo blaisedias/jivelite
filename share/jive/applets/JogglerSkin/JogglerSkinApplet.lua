@@ -752,13 +752,19 @@ function skin(self, s, reload, useDefaultSize, w, h)
 -- front load so that whilst playing the experience is smooth
 	visImage:cacheClear()
 	visImage:readCacheDir()
-	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
-		visImage:addSpectrumImage(img, screenWidth, SP_H)
+	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
+        local parts = string.split("%.", imgPath)
+        if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'gif' or parts[2] == 'bmp' then
+    		visImage:addSpectrumImage(imgPath, screenWidth, SP_H)
+        end
 	end
 
-	for img in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
-		visImage:addVuImage(img, screenWidth, VU_H)
-		visImage:addVuImage(img, mini_visu_W, mini_visu_H)
+	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
+        local parts = string.split("%.", imgPath)
+        if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'gif' or parts[2] == 'bmp' then
+    		visImage:addVuImage(imgPath, screenWidth, VU_H)
+	    	visImage:addVuImage(imgPath, mini_visu_W, mini_visu_H)
+        end
 	end
 
 	local smallSpinny = {
