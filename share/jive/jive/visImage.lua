@@ -214,12 +214,12 @@ function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
 	local imgName = getImageName(path)
 	local key = w .. "x" .. h .. "-" .. imgName
-	dcpath = diskImageCache[key]
+	local dcpath = diskImageCache[key]
 	if dcpath == nil then
-		local cached_path = cachedPath(key)
-		img = _scaleSpectrumImage(path, w, h)
+		local img = _scaleSpectrumImage(path, w, h)
+		dcpath = cachedPath(key)
 		-- imageCache[key] = img
-		img:saveBMP(cached_path)
+		img:saveBMP(dcpath)
         img:release()
 	else
 		log:debug("addSpectrumImage found cached ", dcpath)
@@ -317,12 +317,12 @@ function addVuImage(tbl, path, w, h)
 	log:debug("addVuImage ",  path)
 	local imgName = getImageName(path)
 	local key = w .. "x" .. h .. "-" .. imgName
-	dcpath = diskImageCache[key]
+	local dcpath = diskImageCache[key]
 	if dcpath == nil then
-		local cached_path = cachedPath(key)
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
+		dcpath = cachedPath(key)
 		--imageCache[key] = img
-		img:saveBMP(cached_path)
+		img:saveBMP(dcpath)
         img:release()
 	else
 		log:debug("addVuImage found cached ", dcpath)
