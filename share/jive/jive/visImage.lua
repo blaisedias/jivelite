@@ -74,30 +74,41 @@ function _scaleSpectrumImage(imgPath, w, h)
 	-- for spectrum height is determines the scaling factor
 	local scaledW = math.floor(srcW * (h/srcH))
 	log:debug("scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
-	if scaledW == w and h == srcH then
+	if srcW == w and h == srcH then
 		log:debug("scaleSpectrumImage done", img)
 		return img
-	elseif srcW > w and srcH > h then
-		log:debug("scaleSpectrumImage clip x-center y-bottom")
-		scaledImg = img:resize(w, h)
-		img:blitClip(math.floor((srcW-w)/2), srcH -h , w, h, scaledImg, 0, 0)
-	-- after scaling:
-	elseif scaledW < w then
-	-- if width < than window width the expand - distorts proportion
-	-- this is desired behaviour for vertically thin source images
-	-- which typically would be colour gradients
+	-- scale: whilst trying to maintain proportions
+	-- if scaled width is > required clip the horizontal edges
+	elseif scaledW == w then
 		log:debug("scaleSpectrumImage simple resize")
 		scaledImg = img:resize(w, h)
-	else
-	-- if width > then window width then clip the source image,
-	-- this preserves proportion
-		log:debug("scaleSpectrumImage resize and clip")
+	elseif scaledW > w then
 		local tmp = img:resize(scaledW, h)
-		-- FIXME: find cheaper way to create an image of wxh
-		scaledImg = img:resize(w,h)
-		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
+		scaledImg = img:resize(w, h)
+		log:debug("scaleSpectrumImage resize + hclip")
+		-- upto 1 pixel smaller for odd numbered width differences
+		tmp:blitClip(math.floor((scaledW-w)/2), 0, w, h, scaledImg, 0, 0)
 		tmp:release()
+	else
+	-- if scaled width < than window width the expand - distorts proportion
+	-- this is desired behaviour for vertically thin source images
+	-- which typically would be colour gradients
+		log:debug("scaleSpectrumImage resize expand H")
+		scaledImg = img:resize(w, h)
 	end
+--	elseif srcW > w and srcH > h then
+--		log:debug("scaleSpectrumImage clip x-center y-bottom")
+--		scaledImg = img:resize(w, h)
+--		img:blitClip(math.floor((srcW-w)/2), srcH -h , w, h, scaledImg, 0, 0)
+--	else
+--	-- if width > then window width then clip the source image,
+--	-- this preserves proportion
+--		log:debug("scaleSpectrumImage resize and clip")
+--		local tmp = img:resize(scaledW, h)
+--		-- FIXME: find cheaper way to create an image of wxh
+--		scaledImg = img:resize(w,h)
+--		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
+--		tmp:release()
 	img:release()
 	log:debug("scaleSpectrumImage done")
 	return scaledImg
@@ -208,66 +219,74 @@ end
 --- spectrum images
 -------------------------------------------------------- 
 local spImageIndex = 1
---local spImagePaths = {}
+local spectrumImages = {}
 
 function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
 	local imgName = getImageName(path)
 	local key = w .. "x" .. h .. "-" .. imgName
 	local dcpath = diskImageCache[key]
+	local bg_key = w .. "x" .. h .. "-" .. "BG-" .. imgName
+	local bg_dcpath = cachedPath(bg_key)
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
+		local fgimg = Surface:newRGB(w, h)
+		fgimg:filledRectangle(0,0,w,h,0)
+		img:blitAlpha(fgimg, 0, 0, 0)
 		dcpath = cachedPath(key)
 		-- imageCache[key] = img
-		img:saveBMP(dcpath)
-        img:release()
+		fgimg:saveBMP(dcpath)
+		fgimg:release()
+		if imgName:find("fg-",1,true) == 1 then
+			local bgimg = Surface:newRGB(w, h)
+			bgimg:filledRectangle(0,0,w,h,0)
+			img:blitAlpha(bgimg, 0, 0, 0)
+			bgimg:saveBMP(bg_dcpath)
+			bgimg:release()
+			imageCache[bg_key] = bg_dcpath
+		end
+		img:release()
 	else
 		log:debug("addSpectrumImage found cached ", dcpath)
 		-- imageCache[key] = Surface:loadImage(dcpath)
 	end
-    imageCache[key] = dcpath
+	imageCache[key] = dcpath
+	if imgName:find("fg-",1,true) == 1 then
+		imageCache[bg_key] = bg_dcpath
+		table.insert(spectrumImages, {imgName, "BG-" .. imgName})
+	else
+		table.insert(spectrumImages, {imgName, "BG-" .. imgName})
+	end
 	log:debug("addSpectrumImage key: ", key)
 --	table.insert(spImagePaths, path)
 end
-
-local spectrumImages = {
-	{ "fg-8499490", "bg-8499490", },
-	{ "fg-8499492", "bg-8499492", },
-	{ "fg-8499494", "bg-8499494", },
-	{ "fg-8499496", "bg-8499496", },
-	{ "fg-spectrum-1", "bg-spectrum-1", },
-	{ "fg-spectrum-2", "bg-spectrum-2", },
-	{ "fg-spectrum-3", "bg-spectrum-3", },
-	{ "fg-spectrum-4", "bg-spectrum-4", },
-	{ "fg-spectrum-5", "bg-spectrum-5", },
-	{ "fg-spectrum-6", "bg-spectrum-6", },
-	{ "fg-spectrum-7", "bg-spectrum-7", },
---	{ "gradient", "background", },
---	{ "gradient-1", nil, },
---	{ "gradient-2", nil,},
---	{ "gradient-c", nil, },
-}
 
 
 local currentFgImage = nil
 local currentFgImageKey = nil
 function getFgSpectrumImage(tbl, w,h)
+	log:debug("--fg ", w, " ", h)
+	if spectrumImages[spImageIndex][1] == nil then
+		return nil
+	end
+
 	local key = w .. "x" .. h .. "-" ..  spectrumImages[spImageIndex][1]
 	log:debug("--fg ", spImageIndex, ", ", spectrumImages[spImageIndex][1], " ", key)
-    if currentFgImageKey == key then
-        return currentFgImage
-    end
-    if currentFgImage ~= nil then
-        log:debug("getFgImage: release currentFgImage ", currentFgImageKey)
-        currentFgImage:release()
-        currentFgImage = nil
-        currentFgImageKey = nil
-    end
-    if imageCache[key] ~= nil then 
-        log:debug("getFgImage: load ", key, " ", imageCache[key])
-        currentFgImage = Surface:loadImage(imageCache[key])
-        currentFgImageKey = key
-    end
+
+	if currentFgImageKey == key then
+		return currentFgImage
+	end
+	if currentFgImage ~= nil then
+		log:debug("getFgImage: release currentFgImage ", currentFgImageKey)
+		currentFgImage:release()
+		currentFgImage = nil
+		currentFgImageKey = nil
+	end
+	if imageCache[key] ~= nil then 
+		log:debug("getFgImage: load ", key, " ", imageCache[key])
+		currentFgImage = Surface:loadImage(imageCache[key])
+		currentFgImageKey = key
+	end
 	return currentFgImage
 end
 
@@ -275,22 +294,26 @@ local currentBgImage = nil
 local currentBgImageKey = nil
 function getBgSpectrumImage(tbl, w,h) 
 	log:debug("--bg ", w, " ", h)
+	if spectrumImages[spImageIndex][2] == nil then
+		return nil
+	end
+
 	local key = w .. "x" .. h .. "-" ..  spectrumImages[spImageIndex][2]
 	log:debug("--bg ", spImageIndex, ", ", spectrumImages[spImageIndex][2], " ", key)
-    if currentBgImageKey == key then
-        return currentBgImage
-    end
-    if currentBgImage ~= nil then
-        log:debug("getBgImage: release currentBgImage ", currentBgImageKey)
-        currentBgImage:release()
-        currentBgImage = nil
-        currentBgImageKey = nil
-    end
-    if imageCache[key] ~= nil then 
-        log:debug("getBgImage: load ", key, " ", imageCache[key])
-        currentBgImage = Surface:loadImage(imageCache[key])
-        currentBgImageKey = key
-    end
+	if currentBgImageKey == key then
+		return currentBgImage
+	end
+	if currentBgImage ~= nil then
+		log:debug("getBgImage: release currentBgImage ", currentBgImageKey)
+		currentBgImage:release()
+		currentBgImage = nil
+		currentBgImageKey = nil
+	end
+	if imageCache[key] ~= nil then 
+		log:debug("getBgImage: load ", key, " ", imageCache[key])
+		currentBgImage = Surface:loadImage(imageCache[key])
+		currentBgImageKey = key
+	end
 	return currentBgImage
 end
 
@@ -323,12 +346,12 @@ function addVuImage(tbl, path, w, h)
 		dcpath = cachedPath(key)
 		--imageCache[key] = img
 		img:saveBMP(dcpath)
-        img:release()
+		img:release()
 	else
 		log:debug("addVuImage found cached ", dcpath)
 		--imageCache[key] = Surface:loadImage(dcpath)
 	end
-    imageCache[key] = dcpath
+	imageCache[key] = dcpath
 
 	for k,v in pairs(vuImages) do
 		if v.name == imgName then
@@ -356,20 +379,20 @@ function getVuImage(w,h)
 		vuBump()
 	end
 	local key = w .. "x" .. h .. "-" .. vuImages[vuImageIndex].name
-    if currentVuImageKey == key then
-        return currentVuImage
-    end
-    if currentVuImage ~= nil then
-        log:debug("getVuImage: release currentVuImage ", currentVuImageKey)
-        currentVuImage:release()
-        currentVuImage = nil
-        currentVuImageKey = nil
-    end
-    if imageCache[key] ~= nil then 
-        log:debug("getVuImage: load ", key, " ", imageCache[key])
-        currentVuImage = Surface:loadImage(imageCache[key])
-        currentVuImageKey = key
-    end
+	if currentVuImageKey == key then
+		return currentVuImage
+	end
+	if currentVuImage ~= nil then
+		log:debug("getVuImage: release currentVuImage ", currentVuImageKey)
+		currentVuImage:release()
+		currentVuImage = nil
+		currentVuImageKey = nil
+	end
+	if imageCache[key] ~= nil then 
+		log:debug("getVuImage: load ", key, " ", imageCache[key])
+		currentVuImage = Surface:loadImage(imageCache[key])
+		currentVuImageKey = key
+	end
 	return currentVuImage
 end
 

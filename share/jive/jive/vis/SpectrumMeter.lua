@@ -179,7 +179,7 @@ function draw(self, surface)
 		local x, y, w, h = self:getBounds()
 --		self.bgImg:blit(surface, x, y, w, h, 0, 0)
 --		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
-		self.bgImg:blitAlpha(surface, x, y, 128)
+		self.bgImg:blitAlpha(surface, x, y, 80)
 	end
 
 	local bins = { {}, {} }
