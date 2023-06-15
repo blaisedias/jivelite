@@ -2103,10 +2103,9 @@ end
 
 -- sync settings both ways
 -- from existing settings to visImage
---      this syncs settings for images found on both 
+--	  this syncs settings for images found on both 
 -- then write visImage to settings
---      this gets rid of settings for images no longer present
--- that way 
+--	  this gets rid of settings for images no longer present
 function syncSettings(self)
 	if visImage:getSyncStatus() then
 		-- we have synced and do not need to all this again
@@ -2144,8 +2143,6 @@ function syncSettings(self)
 		settings.vumeters[v.name] = npscreenVumeters[i].enabled
 	end
 	self:storeSettings()
---	visImage:vuBump()
---	visImage:spBump()
 	visImage:sync()
 	-- record that we have synced and do not need to all
 	-- this again
