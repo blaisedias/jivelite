@@ -2141,8 +2141,9 @@ function syncSettings(self)
 		settings.vumeters[v.name] = npscreenVumeters[i].enabled
 	end
 	self:storeSettings()
-	visImage:vuBump()
-	visImage:spBump()
+--	visImage:vuBump()
+--	visImage:spBump()
+	visImage:sync()
 	-- record that we have synced and do not need to all
 	-- this again
 	visImage:setSyncStatus()
