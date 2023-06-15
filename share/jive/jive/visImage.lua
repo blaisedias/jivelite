@@ -211,7 +211,7 @@ function readCacheDir()
 	for img in readdir(userdirpath, "visucache") do
 		local parts = string.split("%.", img)
 		diskImageCache[parts[1]] = cachedir .. "/" .. img
-		log:debug("#### ", parts[1], " ", diskImageCache[parts[1]])
+		log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
 	end
 end
 
@@ -220,21 +220,22 @@ end
 -------------------------------------------------------- 
 local spImageIndex = 1
 local spectrumImages = {}
+local spectrumImagesMap = {}
 
 function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
 	local imgName = getImageName(path)
-	local key = w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[key]
-	local bg_key = w .. "x" .. h .. "-" .. "BG-" .. imgName
-	local bg_dcpath = cachedPath(bg_key)
+	local icKey = w .. "x" .. h .. "-" .. imgName
+	local dcpath = diskImageCache[icKey]
+	local bgIcKey = w .. "x" .. h .. "-" .. "BG-" .. imgName
+	local bg_dcpath = cachedPath(bgIcKey)
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
 		local fgimg = Surface:newRGB(w, h)
 		fgimg:filledRectangle(0,0,w,h,0)
 		img:blitAlpha(fgimg, 0, 0, 0)
-		dcpath = cachedPath(key)
-		-- imageCache[key] = img
+		dcpath = cachedPath(icKey)
+		-- imageCache[icKey] = img
 		fgimg:saveBMP(dcpath)
 		fgimg:release()
 		if imgName:find("fg-",1,true) == 1 then
@@ -243,37 +244,39 @@ function addSpectrumImage(tbl, path, w, h)
 			img:blitAlpha(bgimg, 0, 0, 0)
 			bgimg:saveBMP(bg_dcpath)
 			bgimg:release()
-			imageCache[bg_key] = bg_dcpath
+			imageCache[bgIcKey] = bg_dcpath
 		end
 		img:release()
 	else
 		log:debug("addSpectrumImage found cached ", dcpath)
-		-- imageCache[key] = Surface:loadImage(dcpath)
+		-- imageCache[icKey] = Surface:loadImage(dcpath)
 	end
-	imageCache[key] = dcpath
+	imageCache[icKey] = dcpath
 	if imgName:find("fg-",1,true) == 1 then
-		imageCache[bg_key] = bg_dcpath
-		table.insert(spectrumImages, {imgName, "BG-" .. imgName})
+		imageCache[bgIcKey] = bg_dcpath
+		table.insert(spectrumImages, {name=imgName, enabled=true})
+		spectrumImagesMap[imgName] = {imgName, "BG-" .. imgName} 
 	else
-		table.insert(spectrumImages, {imgName, "BG-" .. imgName})
+		table.insert(spectrumImages, {name=imgName, enabled=true})
+		spectrumImagesMap[imgName] = {imgName, nil} 
 	end
-	log:debug("addSpectrumImage key: ", key)
---	table.insert(spImagePaths, path)
+	log:debug("addSpectrumImage image cache Key: ", icKey)
 end
 
 
 local currentFgImage = nil
 local currentFgImageKey = nil
 function getFgSpectrumImage(tbl, w,h)
-	log:debug("--fg ", w, " ", h)
-	if spectrumImages[spImageIndex][1] == nil then
+	log:debug("getFgImage: ", w, " ", h)
+	local spkey = spectrumImages[spImageIndex].name
+	if spectrumImagesMap[spkey][1] == nil then
 		return nil
 	end
 
-	local key = w .. "x" .. h .. "-" ..  spectrumImages[spImageIndex][1]
-	log:debug("--fg ", spImageIndex, ", ", spectrumImages[spImageIndex][1], " ", key)
+	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey][1]
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey][1], " ", icKey)
 
-	if currentFgImageKey == key then
+	if currentFgImageKey == icKey then
 		return currentFgImage
 	end
 	if currentFgImage ~= nil then
@@ -282,10 +285,10 @@ function getFgSpectrumImage(tbl, w,h)
 		currentFgImage = nil
 		currentFgImageKey = nil
 	end
-	if imageCache[key] ~= nil then 
-		log:debug("getFgImage: load ", key, " ", imageCache[key])
-		currentFgImage = Surface:loadImage(imageCache[key])
-		currentFgImageKey = key
+	if imageCache[icKey] ~= nil then 
+		log:debug("getFgImage: load ", icKey, " ", imageCache[icKey])
+		currentFgImage = Surface:loadImage(imageCache[icKey])
+		currentFgImageKey = icKey
 	end
 	return currentFgImage
 end
@@ -293,14 +296,15 @@ end
 local currentBgImage = nil
 local currentBgImageKey = nil
 function getBgSpectrumImage(tbl, w,h) 
-	log:debug("--bg ", w, " ", h)
-	if spectrumImages[spImageIndex][2] == nil then
+	log:debug("getBgImage: ", w, " ", h)
+	local spkey = spectrumImages[spImageIndex].name
+	if spectrumImagesMap[spkey][2] == nil then
 		return nil
 	end
 
-	local key = w .. "x" .. h .. "-" ..  spectrumImages[spImageIndex][2]
-	log:debug("--bg ", spImageIndex, ", ", spectrumImages[spImageIndex][2], " ", key)
-	if currentBgImageKey == key then
+	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey][2]
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey][2], " ", icKey)
+	if currentBgImageKey == icKey then
 		return currentBgImage
 	end
 	if currentBgImage ~= nil then
@@ -309,10 +313,10 @@ function getBgSpectrumImage(tbl, w,h)
 		currentBgImage = nil
 		currentBgImageKey = nil
 	end
-	if imageCache[key] ~= nil then 
-		log:debug("getBgImage: load ", key, " ", imageCache[key])
-		currentBgImage = Surface:loadImage(imageCache[key])
-		currentBgImageKey = key
+	if imageCache[icKey] ~= nil then 
+		log:debug("getBgImage: load ", icKey, " ", imageCache[icKey])
+		currentBgImage = Surface:loadImage(imageCache[icKey])
+		currentBgImageKey = icKey
 	end
 	return currentBgImage
 end
@@ -339,19 +343,19 @@ local vuBumpValue = 1
 function addVuImage(tbl, path, w, h)
 	log:debug("addVuImage ",  path)
 	local imgName = getImageName(path)
-	local key = w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[key]
+	local icKey = w .. "x" .. h .. "-" .. imgName
+	local dcpath = diskImageCache[icKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(key)
-		--imageCache[key] = img
+		dcpath = cachedPath(icKey)
+		--imageCache[icKey] = img
 		img:saveBMP(dcpath)
 		img:release()
 	else
 		log:debug("addVuImage found cached ", dcpath)
-		--imageCache[key] = Surface:loadImage(dcpath)
+		--imageCache[icKey] = Surface:loadImage(dcpath)
 	end
-	imageCache[key] = dcpath
+	imageCache[icKey] = dcpath
 
 	for k,v in pairs(vuImages) do
 		if v.name == imgName then
@@ -378,8 +382,8 @@ function getVuImage(w,h)
 	if vuImages[vuImageIndex].enabled == false then
 		vuBump()
 	end
-	local key = w .. "x" .. h .. "-" .. vuImages[vuImageIndex].name
-	if currentVuImageKey == key then
+	local icKey = w .. "x" .. h .. "-" .. vuImages[vuImageIndex].name
+	if currentVuImageKey == icKey then
 		return currentVuImage
 	end
 	if currentVuImage ~= nil then
@@ -388,10 +392,10 @@ function getVuImage(w,h)
 		currentVuImage = nil
 		currentVuImageKey = nil
 	end
-	if imageCache[key] ~= nil then 
-		log:debug("getVuImage: load ", key, " ", imageCache[key])
-		currentVuImage = Surface:loadImage(imageCache[key])
-		currentVuImageKey = key
+	if imageCache[icKey] ~= nil then 
+		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
+		currentVuImage = Surface:loadImage(imageCache[icKey])
+		currentVuImageKey = icKey
 	end
 	return currentVuImage
 end
@@ -438,8 +442,8 @@ end
 
 function sync()
 	if not vuImages[vuImageIndex].enabled then
-        vuBump()
-    end
+		vuBump()
+	end
 end
 
 function isCurrentVUMeterEnabled()
