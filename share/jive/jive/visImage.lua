@@ -444,6 +444,9 @@ function sync()
 	if not vuImages[vuImageIndex].enabled then
 		vuBump()
 	end
+	if not spectrumImages[vuImageIndex].enabled then
+		spBump()
+	end
 end
 
 function isCurrentVUMeterEnabled()
