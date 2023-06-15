@@ -417,12 +417,29 @@ end
 
 local settingsSynced = false
 
+-- syncStatus is used to prevent unnecessary work
+-- not a satisfactory solution - good enough for now.
+-- Problem statement : The very first time NowPlaying
+-- shows we need to sync settings, and thereafter when
+-- settings are changed.
+-- however in NowPlaying there is no convenient way to do
+-- so without repeating the work frequently.
 function getSyncStatus()
 	return settingsSynced
 end
 
 function setSyncStatus()
 	settingsSynced = true
+end
+
+function clearSyncStatus()
+	settingsSynced = false
+end
+
+function sync()
+	if not vuImages[vuImageIndex].enabled then
+        vuBump()
+    end
 end
 
 function isCurrentVUMeterEnabled()
