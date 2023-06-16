@@ -1,18 +1,18 @@
+-- lua package imports
 local math          = require("math")
+local table         = require("table")
+local lfs           = require("lfs")
+
+local ipairs, pairs, pcall  = ipairs, pairs, pcall
+local coroutine, package    = coroutine, package
+
+-- jive package imports
 local string        = require("jive.utils.string")
 local Surface       = require("jive.ui.Surface")
 local vis           = require("jive.vis")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 local System        = require("jive.System")
-
-local ipairs, pairs, pcall  = ipairs, pairs, pcall
-local lfs              = require("lfs")
-local table = require("table")
-
-local coroutine, package = coroutine, package
-local lfs              = require("lfs")
-
 
 module(...)
 
@@ -219,7 +219,7 @@ end
 --- spectrum images
 -------------------------------------------------------- 
 local spImageIndex = 1
-local spectrumImages = {}
+local spectrumList = {}
 local spectrumImagesMap = {}
 
 function addSpectrumImage(tbl, path, w, h)
@@ -254,10 +254,10 @@ function addSpectrumImage(tbl, path, w, h)
 	imageCache[icKey] = dcpath
 	if imgName:find("fg-",1,true) == 1 then
 		imageCache[bgIcKey] = bg_dcpath
-		table.insert(spectrumImages, {name=imgName, enabled=true})
+		table.insert(spectrumList, {name=imgName, enabled=true})
 		spectrumImagesMap[imgName] = {imgName, "BG-" .. imgName} 
 	else
-		table.insert(spectrumImages, {name=imgName, enabled=true})
+		table.insert(spectrumList, {name=imgName, enabled=true})
 		spectrumImagesMap[imgName] = {imgName, nil} 
 	end
 	log:debug("addSpectrumImage image cache Key: ", icKey)
@@ -268,7 +268,10 @@ local currentFgImage = nil
 local currentFgImageKey = nil
 function getFgSpectrumImage(tbl, w,h)
 	log:debug("getFgImage: ", w, " ", h)
-	local spkey = spectrumImages[spImageIndex].name
+	if not spectrumList[spImageIndex].enabled then
+		spBump()
+	end
+	local spkey = spectrumList[spImageIndex].name
 	if spectrumImagesMap[spkey][1] == nil then
 		return nil
 	end
@@ -297,7 +300,10 @@ local currentBgImage = nil
 local currentBgImageKey = nil
 function getBgSpectrumImage(tbl, w,h) 
 	log:debug("getBgImage: ", w, " ", h)
-	local spkey = spectrumImages[spImageIndex].name
+	if not spectrumList[spImageIndex].enabled then
+		spBump()
+	end
+	local spkey = spectrumList[spImageIndex].name
 	if spectrumImagesMap[spkey][2] == nil then
 		return nil
 	end
@@ -322,16 +328,42 @@ function getBgSpectrumImage(tbl, w,h)
 end
 
 function spBump()
-	log:debug("spBump was ", spImageIndex, " of ", #spectrumImages)
-	spImageIndex = (spImageIndex % #spectrumImages) + 1
-	log:debug("spBump is ", spImageIndex, " of ", #spectrumImages)
+	for i = 1, #spectrumList do
+		spImageIndex = (spImageIndex % #spectrumList) + 1
+		if spectrumList[spImageIndex].enabled == true then
+			log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
+			return
+		end
+	end
 end
 
-function setSpectrumImages(pathList)
-	sectrumImages = pathList
-	spImageIndex = 1
+--function setSpectrumImages(pathList)
+--	sectrumImages = pathList
+--	spImageIndex = 1
+--end
+
+function selectSpectrum(tbl, name, selected)
+	n_enabled = 0
+	log:debug("selectSpectrum", " ", name, " ", selected)
+	for k, v in pairs(spectrumList) do
+		if v.name == name then
+			v.enabled = selected
+		end
+		if v.enabled then
+			n_enabled = n_enabled + 1
+		end
+	end
+	log:debug("selectSpectrum", " enabled count: ", n_enabled)
+	return n_enabled
 end
 
+function isCurrentSpectrumEnabled()
+	return spectrumList[spImageIndex].enabled
+end
+
+function getSpectrumList()
+	return spectrumList
+end
 -------------------------------------------------------- 
 --- VU meter images
 -------------------------------------------------------- 
@@ -419,6 +451,7 @@ function selectVuImage(tbl, name, selected)
 	return n_enabled
 end
 
+-- Settings 
 local settingsSynced = false
 
 -- syncStatus is used to prevent unnecessary work
@@ -444,7 +477,8 @@ function sync()
 	if not vuImages[vuImageIndex].enabled then
 		vuBump()
 	end
-	if not spectrumImages[vuImageIndex].enabled then
+	if not spectrumList[spImageIndex].enabled then
+		log:debug("sync sp ", spImageIndex, ", ", spectrumList[spImageIndex].name, ", " , spectrumList[spImageIndex].enabled)
 		spBump()
 	end
 end
