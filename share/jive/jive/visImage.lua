@@ -16,6 +16,10 @@ local System        = require("jive.System")
 
 module(...)
 
+-------------------------------------------------------- 
+--- disk image cache 
+-------------------------------------------------------- 
+
 local imageCache = {}
 local userdirpath = System.getUserDir()
 local cachedir = userdirpath .. "/visucache"
@@ -32,37 +36,55 @@ function cachedPath(name)
 	return file
 end
 
---function saveCachedImage(name, img)
---	if lfs.attributes(cachedir, "mode") == nil then
---		log:debug("Making directory: ", cachedir)
---		local created, err = lfs.mkdir(cachedir)
---		if not created then
---			error(string:format("error creating dir '%s' (%s)", cachedir, err))
---		end
---	end
---	local file = cachedir .. "/" .. name .. ".bmp"
---	log:debug("saveBMP: ", file)
---	-- FIXME use pcall here
---	img:saveBMP(file)
---	log:debug("saved BMP: ", file)
---	return file
---end
+function cacheClear(tbl)
+	log:debug("cacheClear ")
+	for k,v in pairs(imageCache) do
+		log:debug("cacheClear ", k)
+--		v:release()
+		imageCache[k] = nil
+	end
+end
 
---function scaleSpectrumImage(tbl, imgPath, w, h)
---	if imgPath == nil then
---		return nil
---	end
---	local key = w .. "x" .. h .. "-" .. imgPath
---	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h, " key:", key)
---	if imageCache[key] then
---		log:debug("scaleSpectrumImage found cached image")
---	else
---		local scaledImg = _scaleSpectrumImage(imgPath, w, h)
---		imageCache[key] = scaledImg
---	end
---	return imageCache[key]
---end
+local function dirIter(parent, rpath)
+	local fq_path = parent .. "/" .. rpath
+	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
+		dir = dir .. rpath
+		if dir == fq_path then
+			local mode = lfs.attributes(dir, "mode")
+		
+			if mode == "directory" then
+				for entry in lfs.dir(dir) do
+					if entry ~= "." and entry ~= ".." and entry ~= ".svn" then
+						coroutine.yield(entry)
+					end
+				end
+			end
+		end
+	end
+end
 
+local function readdir(parent, rpath)
+	local co = coroutine.create(function() dirIter(parent, rpath) end)
+	return function()
+		local code, res = coroutine.resume(co)
+		return res
+	end
+end
+
+local diskImageCache = {}
+
+function readCacheDir()
+	for img in readdir(userdirpath, "visucache") do
+		local parts = string.split("%.", img)
+		diskImageCache[parts[1]] = cachedir .. "/" .. img
+		log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
+	end
+end
+
+
+-------------------------------------------------------- 
+--- image scaling 
+-------------------------------------------------------- 
 -- scale an image to fit a height - maintaining aspect ration
 function _scaleSpectrumImage(imgPath, w, h)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
@@ -114,23 +136,16 @@ function _scaleSpectrumImage(imgPath, w, h)
 	return scaledImg
 end
 
---function scaleAnalogVuMeter(tbl, imgPath, w, h)
---	if imgPath == nil then
---		return nil
---	end
---	local key = w .. "x" .. h .. "-" .. imgPath
---	log:debug("scaleAnalogVuMeter imagePath:", imgPath, " w:", w, " h:", h, " key:", key)
---	if imageCache[key] then
---		log:debug("scaleAnalogVuMeter found cached image")
---	else
---		imageCache[key] = _scaleAnalogVuMeter(imgPath, w, h)
---	end
---	return imageCache[key]
---end
-
 -- scale an image to fit a width - maintaining aspect ratio 
-function _scaleAnalogVuMeter(imgPath, w, h, seq)
+function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
+	local w = w_in
 	log:debug("_scaleAnalogVuMeter imgPath:", imgPath )
+	-- FIXME hack for screenwidth > 1280 
+	-- resizing too large segfaults so VUMeter resize is capped at 1280
+	if w > 1280 then
+		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
+		w = 1280
+	end
 	local img = Surface:loadImage(imgPath)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
@@ -159,68 +174,16 @@ function _scaleAnalogVuMeter(imgPath, w, h, seq)
 end
 
 
---function cachePut(tbl, key, img)
---	imageCache[key] = img
---end
---
---function cacheGet(tbl, key)
---	if imageCache[key] then
---		return imageCache[key]
---	end
---	return nil
---end
-
-function cacheClear(tbl)
-	log:debug("cacheClear ")
-	for k,v in pairs(imageCache) do
-		log:debug("cacheClear ", k)
---		v:release()
-		imageCache[k] = nil
-	end
-end
-
-local function dirIter(parent, rpath)
-	local fq_path = parent .. "/" .. rpath
-	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
-		dir = dir .. rpath
-		if dir == fq_path then
-			local mode = lfs.attributes(dir, "mode")
-		
-			if mode == "directory" then
-				for entry in lfs.dir(dir) do
-					if entry ~= "." and entry ~= ".." and entry ~= ".svn" then
-						coroutine.yield(entry)
-					end
-				end
-			end
-		end
-	end
-end
-
-local function readdir(parent, rpath)
-	local co = coroutine.create(function() dirIter(parent, rpath) end)
-	return function()
-		local code, res = coroutine.resume(co)
-		return res
-	end
-end
-
-local diskImageCache = {}
-
-function readCacheDir()
-	for img in readdir(userdirpath, "visucache") do
-		local parts = string.split("%.", img)
-		diskImageCache[parts[1]] = cachedir .. "/" .. img
-		log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
-	end
-end
-
 -------------------------------------------------------- 
---- spectrum images
+--- Spectrum 
 -------------------------------------------------------- 
-local spImageIndex = 1
 local spectrumList = {}
+local spImageIndex = 1
 local spectrumImagesMap = {}
+
+function getSpectrumList()
+	return spectrumList
+end
 
 function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
@@ -263,6 +226,15 @@ function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage image cache Key: ", icKey)
 end
 
+function spBump()
+	for i = 1, #spectrumList do
+		spImageIndex = (spImageIndex % #spectrumList) + 1
+		if spectrumList[spImageIndex].enabled == true then
+			log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
+			return
+		end
+	end
+end
 
 local currentFgImage = nil
 local currentFgImageKey = nil
@@ -327,21 +299,6 @@ function getBgSpectrumImage(tbl, w,h)
 	return currentBgImage
 end
 
-function spBump()
-	for i = 1, #spectrumList do
-		spImageIndex = (spImageIndex % #spectrumList) + 1
-		if spectrumList[spImageIndex].enabled == true then
-			log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
-			return
-		end
-	end
-end
-
---function setSpectrumImages(pathList)
---	sectrumImages = pathList
---	spImageIndex = 1
---end
-
 function selectSpectrum(tbl, name, selected)
 	n_enabled = 0
 	log:debug("selectSpectrum", " ", name, " ", selected)
@@ -361,16 +318,15 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-function getSpectrumList()
-	return spectrumList
-end
 -------------------------------------------------------- 
---- VU meter images
+--- VU meter
 -------------------------------------------------------- 
-local vuImages = {
-}
+local vuImages = {}
 local vuImageIndex = 1
-local vuBumpValue = 1
+
+function getVUImageList()
+	return vuImages
+end
 
 function addVuImage(tbl, path, w, h)
 	log:debug("addVuImage ",  path)
@@ -399,7 +355,7 @@ end
 
 function vuBump()
 	for i = 1, #vuImages do
-		vuImageIndex = (vuImageIndex % #vuImages) + vuBumpValue
+		vuImageIndex = (vuImageIndex % #vuImages) + 1
 		if vuImages[vuImageIndex].enabled == true then
 			log:debug("vuBump is ", vuImageIndex, " of ", #vuImages, ", ", vuImages[vuImageIndex].name)
 			return
@@ -428,12 +384,10 @@ function getVuImage(w,h)
 		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
 		currentVuImage = Surface:loadImage(imageCache[icKey])
 		currentVuImageKey = icKey
+	else
+		log:debug("getVuImage: no image for ", icKey)
 	end
 	return currentVuImage
-end
-
-function getVUImageList()
-	return vuImages
 end
 
 function selectVuImage(tbl, name, selected)
@@ -451,7 +405,13 @@ function selectVuImage(tbl, name, selected)
 	return n_enabled
 end
 
--- Settings 
+function isCurrentVUMeterEnabled()
+	return vuImages[vuImageIndex].enabled
+end
+
+-------------------------------------------------------- 
+--- Settings 
+-------------------------------------------------------- 
 local settingsSynced = false
 
 -- syncStatus is used to prevent unnecessary work
@@ -478,12 +438,8 @@ function sync()
 		vuBump()
 	end
 	if not spectrumList[spImageIndex].enabled then
-		log:debug("sync sp ", spImageIndex, ", ", spectrumList[spImageIndex].name, ", " , spectrumList[spImageIndex].enabled)
 		spBump()
 	end
 end
 
-function isCurrentVUMeterEnabled()
-	return vuImages[vuImageIndex].enabled
-end
 
