@@ -94,20 +94,16 @@ function _layout(self)
 			self.h = h
 		else
 			log:debug("-----------------------------------------------------------------------")
-			local xoffs = 0
-			if w > 1280 then
-				log:debug("** cutting", w)
-				xoffs = (w - 1280)/2
-				w = 1280
-			end
-			self.x1 = x + xoffs
-			self.x2 = x + math.floor(w / 2) + xoffs
 			self.y = y
 			self.w = math.floor(w / 2)
 			self.h = h
 			self.bgImg = visImage.getVuImage(w,h)
 			if self.bgImg ~= nil then
 				local imgW, imgH = self.bgImg:getSize()
+				-- FIXME VU Meter images will not always be 25 frames
+				frame_w = imgW/25
+				self.x1 = x + self.w - frame_w
+				self.x2 = self.x1 + self.w
 				-- center vertically
 				if imgH < h then
 					self.y = math.floor(self.y + ((h - imgH)/2))
@@ -118,7 +114,7 @@ function _layout(self)
 					self.src_y = math.floor(imgH - h)
 				end
 				log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-				log:debug("** w:", self.w, " h:", self.h)
+				log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
 				log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 			end
 		end
@@ -193,9 +189,9 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 
 		if self.bgImg ~= nil then
 			if ch == 1 then
-				self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
+				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			else
-				self.bgImg:blitClip(self.cap[ch] * w, self.src_y, w, h, surface, x, y)
+				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
 		end
 	end
