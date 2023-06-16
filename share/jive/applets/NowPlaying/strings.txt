@@ -216,6 +216,10 @@ SELECT_VUMETER
 	EN	Select VU Meter 
 	ES	VU Meter vistas
 
+SELECT_SPECTRUM
+	EN	Select Spectrum 
+	ES	VU Meter vistas
+
 NOW_PLAYING_VIEWS_HELP
 	CS	Na obrazovce Právě hraje je k dispozici několik různých konfigurací, neboli "zobrazení", mezi kterými můžete přepínat. Zde si můžete zvolit požadovaná zobrazení přehrávače.
 	DA	Vinduet Nu spiller kan vises på forskellige måder som du kan skifte mellem. Her kan du vælge hvordan vinduet skal se ud.
