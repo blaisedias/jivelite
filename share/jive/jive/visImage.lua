@@ -185,6 +185,11 @@ function getSpectrumList()
 	return spectrumList
 end
 
+function initSpectrumList()
+	table.insert(spectrumList, {name="default", enabled=false})
+	spectrumImagesMap["default"] = {nil, nil} 
+end
+
 function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
 	local imgName = getImageName(path)
