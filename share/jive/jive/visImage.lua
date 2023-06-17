@@ -217,10 +217,10 @@ function addSpectrumImage(tbl, path, w, h)
 	imageCache[icKey] = dcpath
 	if imgName:find("fg-",1,true) == 1 then
 		imageCache[bgIcKey] = bg_dcpath
-		table.insert(spectrumList, {name=imgName, enabled=true})
+		table.insert(spectrumList, {name=imgName, enabled=false})
 		spectrumImagesMap[imgName] = {imgName, "BG-" .. imgName} 
 	else
-		table.insert(spectrumList, {name=imgName, enabled=true})
+		table.insert(spectrumList, {name=imgName, enabled=false})
 		spectrumImagesMap[imgName] = {imgName, nil} 
 	end
 	log:debug("addSpectrumImage image cache Key: ", icKey)
