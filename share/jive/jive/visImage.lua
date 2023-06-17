@@ -187,7 +187,7 @@ end
 
 function initSpectrumList()
 	table.insert(spectrumList, {name="default", enabled=false})
-	spectrumImagesMap["default"] = {nil, nil} 
+	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 end
 
 function addSpectrumImage(tbl, path, w, h)
@@ -223,10 +223,10 @@ function addSpectrumImage(tbl, path, w, h)
 	if imgName:find("fg-",1,true) == 1 then
 		imageCache[bgIcKey] = bg_dcpath
 		table.insert(spectrumList, {name=imgName, enabled=false})
-		spectrumImagesMap[imgName] = {imgName, "BG-" .. imgName} 
+		spectrumImagesMap[imgName] = {fg=imgName, bg="BG-" .. imgName, src=path} 
 	else
 		table.insert(spectrumList, {name=imgName, enabled=false})
-		spectrumImagesMap[imgName] = {imgName, nil} 
+		spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path} 
 	end
 	log:debug("addSpectrumImage image cache Key: ", icKey)
 end
@@ -249,12 +249,12 @@ function getFgSpectrumImage(tbl, w,h)
 		spBump()
 	end
 	local spkey = spectrumList[spImageIndex].name
-	if spectrumImagesMap[spkey][1] == nil then
+	if spectrumImagesMap[spkey].fg == nil then
 		return nil
 	end
 
-	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey][1]
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey][1], " ", icKey)
+	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", icKey)
 
 	if currentFgImageKey == icKey then
 		return currentFgImage
@@ -281,12 +281,12 @@ function getBgSpectrumImage(tbl, w,h)
 		spBump()
 	end
 	local spkey = spectrumList[spImageIndex].name
-	if spectrumImagesMap[spkey][2] == nil then
+	if spectrumImagesMap[spkey].bg == nil then
 		return nil
 	end
 
-	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey][2]
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey][2], " ", icKey)
+	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", icKey)
 	if currentBgImageKey == icKey then
 		return currentBgImage
 	end
@@ -339,14 +339,20 @@ end
 -------------------------------------------------------- 
 local vuImages = {}
 local vuImageIndex = 1
+local vuImagesMap = {}
+local vuMeterResolutions = {}
+
+function registerVUMeterResolution(tbl, w,h)
+	log:debug("registerVUMeterResolution", w, " x ", h)
+	table.insert(vuMeterResolutions, {w=w, h=h})
+end
 
 function getVUImageList()
 	return vuImages
 end
 
-function addVuImage(tbl, path, w, h)
-	log:debug("addVuImage ",  path)
-	local imgName = getImageName(path)
+function _cacheVUImage(imgName, path, w, h)
+	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
 	local icKey = w .. "x" .. h .. "-" .. imgName
 	local dcpath = diskImageCache[icKey]
 	if dcpath == nil then
@@ -356,17 +362,22 @@ function addVuImage(tbl, path, w, h)
 		img:saveBMP(dcpath)
 		img:release()
 	else
-		log:debug("addVuImage found cached ", dcpath)
+		log:debug("_cacheVuImage found cached ", dcpath)
 		--imageCache[icKey] = Surface:loadImage(dcpath)
 	end
 	imageCache[icKey] = dcpath
+end
 
+function addVuImage(tbl, path)
+	log:debug("addVuImage ",  path)
+	local imgName = getImageName(path)
 	for k,v in pairs(vuImages) do
 		if v.name == imgName then
 			return
 		end
 	end
 	table.insert(vuImages, {name=imgName, enabled=false})
+	vuImagesMap[imgName] = {src=path}
 end
 
 function vuBump()
@@ -386,22 +397,40 @@ function getVuImage(w,h)
 	if vuImages[vuImageIndex].enabled == false then
 		vuBump()
 	end
-	local icKey = w .. "x" .. h .. "-" .. vuImages[vuImageIndex].name
+	local entry = vuImages[vuImageIndex]
+	local icKey = w .. "x" .. h .. "-" .. entry.name
 	if currentVuImageKey == icKey then
+		-- image is the current one
 		return currentVuImage
 	end
 	if currentVuImage ~= nil then
+		-- release the current image
 		log:debug("getVuImage: release currentVuImage ", currentVuImageKey)
 		currentVuImage:release()
 		currentVuImage = nil
 		currentVuImageKey = nil
 	end
 	if imageCache[icKey] ~= nil then 
+		-- image is in the cache load and return
 		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
 		currentVuImage = Surface:loadImage(imageCache[icKey])
 		currentVuImageKey = icKey
 	else
-		log:debug("getVuImage: no image for ", icKey)
+		-- this is required to create cached images when skin change, changes the resolution.
+		if vuImagesMap[entry.name].src ~= nil then
+			log:debug("getVuImage: creating image for ", icKey)
+			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
+			if imageCache[icKey] == nil then
+				-- didn't work zap the src string so we don't do this repeatedly
+				log:debug("getVuImage: failed to create image for ", icKey)
+				vumImagesMap[entry.name].src = nil
+			end
+			log:debug("getVuImage: load (new) ", icKey, " ", imageCache[icKey])
+			currentVuImage = Surface:loadImage(imageCache[icKey])
+			currentVuImageKey = icKey
+		else
+			log:debug("getVuImage: no image for ", icKey)
+		end
 	end
 	return currentVuImage
 end
@@ -411,6 +440,12 @@ function selectVuImage(tbl, name, selected)
 	log:debug("selectVuImage", " ", name, " ", selected)
 	for k, v in pairs(vuImages) do
 		if v.name == name then
+			if not v.enabled and selected then
+				-- create the cached image for skin resolutions 
+				for k, v in pairs(vuMeterResolutions) do
+					_cacheVUImage(name, vuImagesMap[name].src, v.w, v.h)
+				end
+			end
 			v.enabled = selected
 		end
 		if v.enabled then
