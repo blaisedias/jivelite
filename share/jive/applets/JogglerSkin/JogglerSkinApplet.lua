@@ -752,6 +752,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 -- front load so that whilst playing the experience is smooth
 	visImage:cacheClear()
 	visImage:readCacheDir()
+	visImage:initSpectrumList()
 
 	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
 		local parts = string.split("%.", imgPath)
