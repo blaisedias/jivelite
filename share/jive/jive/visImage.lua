@@ -318,6 +318,17 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
+local bgAlpha = 80
+
+function setBackgroundAlpha(tbl, v)
+	log:debug("setBackgroundAlpha ", tbl, "; v=", v)
+	bgAlpha = v
+end
+
+function getBackgroundAlpha()
+	return bgAlpha
+end
+
 -------------------------------------------------------- 
 --- VU meter
 -------------------------------------------------------- 
