@@ -71,13 +71,11 @@ local function readdir(parent, rpath)
 	end
 end
 
-local diskImageCache = {}
-
 function readCacheDir()
 	for img in readdir(userdirpath, "visucache") do
 		local parts = string.split("%.", img)
-		diskImageCache[parts[1]] = cachedir .. "/" .. img
-		log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
+		imageCache[parts[1]] = cachedir .. "/" .. img
+		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
 	end
 end
 
@@ -194,7 +192,7 @@ function addSpectrumImage(tbl, path, w, h)
 	log:debug("addSpectrumImage ",  path)
 	local imgName = getImageName(path)
 	local icKey = w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[icKey]
+	local dcpath = imageCache[icKey]
 	local bgIcKey = w .. "x" .. h .. "-" .. "BG-" .. imgName
 	local bg_dcpath = cachedPath(bgIcKey)
 	if dcpath == nil then
@@ -215,13 +213,12 @@ function addSpectrumImage(tbl, path, w, h)
 			imageCache[bgIcKey] = bg_dcpath
 		end
 		img:release()
+	    imageCache[icKey] = dcpath
 	else
 		log:debug("addSpectrumImage found cached ", dcpath)
 		-- imageCache[icKey] = Surface:loadImage(dcpath)
 	end
-	imageCache[icKey] = dcpath
 	if imgName:find("fg-",1,true) == 1 then
-		imageCache[bgIcKey] = bg_dcpath
 		table.insert(spectrumList, {name=imgName, enabled=false})
 		spectrumImagesMap[imgName] = {fg=imgName, bg="BG-" .. imgName, src=path} 
 	else
@@ -354,18 +351,18 @@ end
 function _cacheVUImage(imgName, path, w, h)
 	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
 	local icKey = w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[icKey]
+	local dcpath = imageCache[icKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
 		dcpath = cachedPath(icKey)
 		--imageCache[icKey] = img
 		img:saveBMP(dcpath)
 		img:release()
+	    imageCache[icKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
 		--imageCache[icKey] = Surface:loadImage(dcpath)
 	end
-	imageCache[icKey] = dcpath
 end
 
 function addVuImage(tbl, path)
