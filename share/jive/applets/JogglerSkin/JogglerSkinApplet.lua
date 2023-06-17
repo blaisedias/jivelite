@@ -738,7 +738,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local SP_H = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45)
 	local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
 	local mini_visu_Y =  230
-	local mini_visu_W =  screenWidth/2
+	local mini_visu_W =  math.floor(screenWidth/4)*2
 	local mini_visu_X =  screenWidth - mini_visu_W - 65
 
 	if screenWidth == 1280 and screenHeight == 800 then
