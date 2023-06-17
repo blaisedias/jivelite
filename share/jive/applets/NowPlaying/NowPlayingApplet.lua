@@ -2237,8 +2237,12 @@ function syncSettings(self)
 	for i, v in ipairs(npSpectrum) do
 		settings.spectrum[v.name] = npSpectrum[i].enabled
 	end
-
-
+	-- synchronise background alpha value
+	if not settings.backgroundAlpha then
+		settings.backgroundAlpha = visImage:getBackgroundAlpha()
+	else
+		visImage:setBackgroundAlpha(settings.backgroundAlpha)
+	end
 
 	self:storeSettings()
 	visImage:sync()
