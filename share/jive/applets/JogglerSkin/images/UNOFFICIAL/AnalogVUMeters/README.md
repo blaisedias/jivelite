@@ -7,6 +7,7 @@ list of files are
 * vu_analog_25seq-Peppy_Meter_White_and_Red.png
 * vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
 * vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
+* vu_analog_25seq_Peppy_Meter_Rainbow.png
 
 ### Other VU meter images
 Other images are from https://github.com/ralph-irving/jivelite of which

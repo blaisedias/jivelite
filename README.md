@@ -54,5 +54,5 @@ artwork files are
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
-
+* share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq_Peppy_Meter_Rainbow.png
 Note: VU Meter images are resized to render on different resolutions
