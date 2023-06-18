@@ -178,6 +178,13 @@ end
 local spectrumList = {}
 local spImageIndex = 1
 local spectrumImagesMap = {}
+local spectrumResolutions = {}
+
+function registerSpectrumResolution(tbl, w,h)
+	log:debug("registerSpectrumResolution", w, " x ", h)
+	table.insert(spectrumResolutions, {w=w, h=h})
+end
+
 
 function getSpectrumList()
 	return spectrumList
@@ -188,12 +195,11 @@ function initSpectrumList()
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 end
 
-function addSpectrumImage(tbl, path, w, h)
-	log:debug("addSpectrumImage ",  path)
-	local imgName = getImageName(path)
+function _cacheSpectrumImage(imgName, path, w, h)
+	log:debug("_cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h)
+	local bgImgName = nil
 	local icKey = w .. "x" .. h .. "-" .. imgName
 	local dcpath = imageCache[icKey]
-	local baseImgName = nil
 	local bgIcKey = nil
 	local bg_dcpath = nil
 
@@ -203,9 +209,10 @@ function addSpectrumImage(tbl, path, w, h)
 	-- all other images are considered as foreground images rendered
 	-- against a black background
 	if imgName:find("fg-",1,true) == 1 then
-	 local l = imgName:len()
-		baseImgName = string.sub(imgName,4,l)
-		bgIcKey = w .. "x" .. h .. "-" .. "bg-" .. baseImgName
+		local l = imgName:len()
+		local baseImgName = string.sub(imgName,4,l)
+		bgImgName = "bg-" .. baseImgName
+		bgIcKey = w .. "x" .. h .. "-" .. bgImgName
 		bg_dcpath = cachedPath(bgIcKey)
 	end
 	if dcpath == nil then
@@ -217,6 +224,15 @@ function addSpectrumImage(tbl, path, w, h)
 		-- imageCache[icKey] = img
 		fgimg:saveBMP(dcpath)
 		fgimg:release()
+		-- the fg and bg images appear identical right down to checksums
+		-- however when rendering if bg and fg are the loaded from same
+		-- the source contrast is lost :-(
+		-- For now duplicate the images.
+		-- It is possible that some lower level caching is 
+		-- means that loading the same image twice does not yield
+	 	-- 2 instances of the same image.
+		-- TODO: figure out if how to use a single image source for both
+		-- foreground and background retaining the contrast
 		if imgName:find("fg-",1,true) == 1 then
 			local bgimg = Surface:newRGB(w, h)
 			bgimg:filledRectangle(0,0,w,h,0)
@@ -224,23 +240,33 @@ function addSpectrumImage(tbl, path, w, h)
 			bgimg:saveBMP(bg_dcpath)
 			bgimg:release()
 			imageCache[bgIcKey] = bg_dcpath
+			log:debug("_cacheSpectrumImage cached ", bgIcKey)
 		end
 		img:release()
 		imageCache[icKey] = dcpath
+		log:debug("_cacheSpectrumImage cached ", icKey)
 	else
-		log:debug("addSpectrumImage found cached ", dcpath)
+		log:debug("_cacheSpectrumImage found cached ", dcpath)
 		-- imageCache[icKey] = Surface:loadImage(dcpath)
 		-- assume that the background image if any is also
 		-- present in the disk image cache.
 	end
+end
+
+function addSpectrumImage(tbl, path, w, h)
+	log:debug("addSpectrumImage ",  path)
+	local imgName = getImageName(path)
+
+--	_cacheSpectrumImage(imgName, path, w, h)
+	local bgImgName = nil
 	if imgName:find("fg-",1,true) == 1 then
-		table.insert(spectrumList, {name=imgName, enabled=false})
-		spectrumImagesMap[imgName] = {fg=imgName, bg="bg-" .. baseImgName, src=path} 
-	else
-		table.insert(spectrumList, {name=imgName, enabled=false})
-		spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path} 
+		local l = imgName:len()
+		local baseImgName = string.sub(imgName,4,l)
+		bgImgName = "bg-" .. baseImgName
 	end
-	log:debug("addSpectrumImage image cache Key: ", icKey)
+
+	table.insert(spectrumList, {name=imgName, enabled=false})
+	spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path} 
 end
 
 function spBump()
@@ -281,6 +307,17 @@ function getFgSpectrumImage(tbl, w,h)
 		log:debug("getFgImage: load ", icKey, " ", imageCache[icKey])
 		currentFgImage = Surface:loadImage(imageCache[icKey])
 		currentFgImageKey = icKey
+	else
+		-- this is required to create cached images when skin change, changes the resolution.
+		if spectrumImagesMap[spkey].src ~= nil then
+			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h)
+			if imageCache[icKey] == nil then 
+				spectrumImagesMap[spkey].src = nil
+				return nil
+			end
+			currentFgImage = Surface:loadImage(imageCache[icKey])
+			currentFgImageKey = icKey
+		end
 	end
 	return currentFgImage
 end
@@ -312,6 +349,17 @@ function getBgSpectrumImage(tbl, w,h)
 		log:debug("getBgImage: load ", icKey, " ", imageCache[icKey])
 		currentBgImage = Surface:loadImage(imageCache[icKey])
 		currentBgImageKey = icKey
+	else
+		-- this is required to create cached images when skin change, changes the resolution.
+		if spectrumImagesMap[spkey].src ~= nil then
+			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h)
+			if imageCache[icKey] == nil then 
+				spectrumImagesMap[spkey].src = nil
+				return nil
+			end
+			currentBgImage = Surface:loadImage(imageCache[icKey])
+			currentBgImageKey = icKey
+		end
 	end
 	return currentBgImage
 end
@@ -321,6 +369,12 @@ function selectSpectrum(tbl, name, selected)
 	log:debug("selectSpectrum", " ", name, " ", selected)
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
+			if not v.enabled and selected then
+				-- create the cached image for skin resolutions 
+				for k, v in pairs(spectrumResolutions) do
+					_cacheSpectrumImage(name, spectrumImagesMap[name].src, v.w, v.h)
+				end
+			end
 			v.enabled = selected
 		end
 		if v.enabled then
