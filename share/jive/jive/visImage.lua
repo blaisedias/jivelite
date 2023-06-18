@@ -193,8 +193,21 @@ function addSpectrumImage(tbl, path, w, h)
 	local imgName = getImageName(path)
 	local icKey = w .. "x" .. h .. "-" .. imgName
 	local dcpath = imageCache[icKey]
-	local bgIcKey = w .. "x" .. h .. "-" .. "BG-" .. imgName
-	local bg_dcpath = cachedPath(bgIcKey)
+	local baseImgName = nil
+	local bgIcKey = nil
+	local bg_dcpath = nil
+
+	-- for images starting with 'fg-' we synthesize the backgorund
+	-- image from the foreground image, and render the foreground
+	-- on top of the background image
+	-- all other images are considered as foreground images rendered
+	-- against a black background
+	if imgName:find("fg-",1,true) == 1 then
+	 local l = imgName:len()
+		baseImgName = string.sub(imgName,4,l)
+		bgIcKey = w .. "x" .. h .. "-" .. "bg-" .. baseImgName
+		bg_dcpath = cachedPath(bgIcKey)
+	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
 		local fgimg = Surface:newRGB(w, h)
@@ -213,14 +226,16 @@ function addSpectrumImage(tbl, path, w, h)
 			imageCache[bgIcKey] = bg_dcpath
 		end
 		img:release()
-	    imageCache[icKey] = dcpath
+		imageCache[icKey] = dcpath
 	else
 		log:debug("addSpectrumImage found cached ", dcpath)
 		-- imageCache[icKey] = Surface:loadImage(dcpath)
+		-- assume that the background image if any is also
+		-- present in the disk image cache.
 	end
 	if imgName:find("fg-",1,true) == 1 then
 		table.insert(spectrumList, {name=imgName, enabled=false})
-		spectrumImagesMap[imgName] = {fg=imgName, bg="BG-" .. imgName, src=path} 
+		spectrumImagesMap[imgName] = {fg=imgName, bg="bg-" .. baseImgName, src=path} 
 	else
 		table.insert(spectrumList, {name=imgName, enabled=false})
 		spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path} 
@@ -358,7 +373,7 @@ function _cacheVUImage(imgName, path, w, h)
 		--imageCache[icKey] = img
 		img:saveBMP(dcpath)
 		img:release()
-	    imageCache[icKey] = dcpath
+		imageCache[icKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
 		--imageCache[icKey] = Surface:loadImage(dcpath)
