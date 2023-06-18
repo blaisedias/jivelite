@@ -755,6 +755,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	visImage:initSpectrumList()
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
+	visImage:registerSpectrumResolution(screenWidth, SP_H)
 
 	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
 		local parts = string.split("%.", imgPath)
