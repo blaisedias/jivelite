@@ -265,7 +265,9 @@ function addSpectrumImage(tbl, path, w, h)
 		bgImgName = "bg-" .. baseImgName
 	end
 
-	table.insert(spectrumList, {name=imgName, enabled=false})
+	if spectrumImagesMap[imgName] == nil then
+		table.insert(spectrumList, {name=imgName, enabled=false})
+	end
 	spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path} 
 end
 
