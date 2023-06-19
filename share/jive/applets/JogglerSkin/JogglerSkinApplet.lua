@@ -3133,7 +3133,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40 + 160,
+--			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40,
+			y = screenHeight - 120,
 			elapsed = {
 				w = WH_FILL,
 				align = "left",
