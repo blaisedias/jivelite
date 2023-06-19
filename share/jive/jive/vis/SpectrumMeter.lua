@@ -99,8 +99,9 @@ function _layout(self)
 	barSize[1] = self.barWidth[1] * self.barsInBin[1] + self.barSpace[1] * (self.barsInBin[1] - 1) + self.binSpace[1]
 	barSize[2] = self.barWidth[2] * self.barsInBin[2] + self.barSpace[2] * (self.barsInBin[2] - 1) + self.binSpace[2]
 
-	self.channelWidth[1] = (w - l - r) / 2
-	self.channelWidth[2] = (w - l - r) / 2
+	sep = 6
+	self.channelWidth[1] = ((w - l - r) / 2) - (sep - self.binSpace[1])
+	self.channelWidth[2] = ((w - l - r) / 2) - (sep - self.binSpace[2])
 
 	local numBars = {}
 
@@ -133,14 +134,15 @@ function _layout(self)
 	self.barHeightMulti[2] = barHeight[2] / 31
 
 	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1]
-	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2]
+	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2] + (sep - self.binSpace[1]) + (sep - self.binSpace[2])
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
+	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
+	log:debug("** cw1: " .. self.channelWidth[1] .. " nB1xbS: " .. numBars[1] * barSize[1])
 
 	self.y = y + h - b
 	-- gradient table y step
 	self.deltaY = math.floor(h / (#self.gradientColours - 1))
-	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY )
-	log:debug("** w: " .. w .. " h: " .. h)
+	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY .. " h:" .. h)
 
 	self.cap = { {}, {} }
 	for i = 1, numBars[1] do
