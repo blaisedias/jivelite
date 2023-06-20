@@ -133,7 +133,7 @@ function _layout(self)
 	self.barHeightMulti[1] = barHeight[1] / 31
 	self.barHeightMulti[2] = barHeight[2] / 31
 
-	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1]
+	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2 
 	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2] + (sep - self.binSpace[1]) + (sep - self.binSpace[2])
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
