@@ -1,7 +1,7 @@
 # credits:
 ## VU Meter images
 ### Peppy VU meter images
-provided with kind permission by https://github.com/project-owner/Peppy
+provided with kind permission by https://github.com/project-owner/PeppyMeter.doc/wiki
 list of files are
 * vu_analog_25seq-Peppy_Meter_Tube.png
 * vu_analog_25seq-Peppy_Meter_White_and_Red.png
