@@ -2,7 +2,7 @@
 ## VU Meter images
 ### Peppy VU meter images
 provided with kind permission by https://github.com/project-owner/PeppyMeter.doc/wiki
-list of files are
+list of files are (compiled by @Eyerex https://forums.slimdevices.com/member/65695-eyerex)
 * vu_analog_25seq-Peppy_Meter_Tube.png
 * vu_analog_25seq-Peppy_Meter_White_and_Red.png
 * vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
