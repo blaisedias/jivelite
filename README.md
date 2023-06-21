@@ -49,7 +49,7 @@ The stock VU meter images have been copied to this location
 ## VU Meter images
 ### Peppy VU meter images
 provided with kind permission by https://github.com/project-owner/PeppyMeter.doc/wiki
-artwork files are
+artwork files are (compiled by @Eyerex https://forums.slimdevices.com/member/65695-eyerex)
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_Tube.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
