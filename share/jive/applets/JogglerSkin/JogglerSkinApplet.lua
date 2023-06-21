@@ -760,17 +760,18 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
 		local parts = string.split("%.", imgPath)
 		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-			visImage:addVuImage(imgPath)
+			visImage:registerVUMeterImage(imgPath)
 		end
 	end
 
 	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
 		local parts = string.split("%.", imgPath)
 		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'gif' or parts[2] == 'bmp' then
-			visImage:addSpectrumImage(imgPath, screenWidth, SP_H)
+			visImage:registerSpectrumImage(imgPath, screenWidth, SP_H)
 		end
 	end
 
+    visImage:registerComplete()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),

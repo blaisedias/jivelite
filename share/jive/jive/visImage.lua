@@ -253,8 +253,8 @@ function _cacheSpectrumImage(imgName, path, w, h)
 	end
 end
 
-function addSpectrumImage(tbl, path, w, h)
-	log:debug("addSpectrumImage ",  path)
+function registerSpectrumImage(tbl, path, w, h)
+	log:debug("registerSpectrumImage ",  path)
 	local imgName = getImageName(path)
 
 --	_cacheSpectrumImage(imgName, path, w, h)
@@ -436,8 +436,8 @@ function _cacheVUImage(imgName, path, w, h)
 	end
 end
 
-function addVuImage(tbl, path)
-	log:debug("addVuImage ",  path)
+function registerVUMeterImage(tbl, path)
+	log:debug("registerVUMeterImage ",  path)
 	local imgName = getImageName(path)
 	for k,v in pairs(vuImages) do
 		if v.name == imgName then
@@ -559,6 +559,14 @@ function sync()
 	if not spectrumList[spImageIndex].enabled then
 		spBump()
 	end
+end
+
+-------------------------------------------------------- 
+--- Misc
+-------------------------------------------------------- 
+function registerComplete()
+    table.sort(vuImages, function (left, right) return left.name < right.name end)
+    table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
 
