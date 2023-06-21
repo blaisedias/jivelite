@@ -12,7 +12,7 @@ VU Meters are now selectable see *Selection* and *Location* below
 
 ## Details
 To provide a timely user experience VU meter images are resized once when
-the image is found once stored as bmp files in a "disk cache" which is at 
+the image is found and stored as bmp files in a "disk cache" which is at 
 `~/.jivelite/userpath/visucache`
 
 Doing it this way avoids repeated resize operations when Jivelite starts up.
@@ -55,4 +55,28 @@ artwork files are (compiled by @Eyerex https://forums.slimdevices.com/member/656
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq_Peppy_Meter_Rainbow.png
+
 Note: VU Meter images are resized to render on different resolutions
+
+# Spectrum Meter Enhancements
+TBD
+
+Spectrum Meters are selectable see *Selection* and *Location* below
+
+## Details
+TBD
+
+## Selection
+It is possible to change the Spectrum Meter Image
+
+A menu item `Select Spectrum` has been added under
+`Settings` -> `Screen` -> `Now Playing`
+
+Multiple items in the menu may be selected Spectrum meter display is cycled on track change.
+The logic enforces that at least one item is selected
+
+## Location
+Spectrum meter images are enumerated from the location
+ `share/jive/applets/JogglerSkin/images/UNOFFICIAL/Spectrum`
+
+
