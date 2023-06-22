@@ -43,8 +43,7 @@ function _skin(self)
 
 	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
 	self.useGradient = #self.gradientColours - 1
-	self.bgImgPath = self:styleValue("bgImgPath", nil)
-	self.fgImgPath = self:styleValue("fgImgPath", nil)
+	self.useVisImage = self:styleValue("useVisImage", false)
 end
 
 
@@ -154,13 +153,13 @@ function _layout(self)
 	end
 
 	self.fgImg = nil
-	if self.fgImgPath ~= nil then
+	if self.useVisImage then
 		-- self.fgImg = visImage:scaleSpectrumImage(visImage:getFgSpectrumImage(), w, h)
 		self.fgImg = visImage:getFgSpectrumImage(w, h)
 	end
 
 	self.bgImg = nil
-	if self.bgImgPath ~= nil then
+	if self.useVisImage then
 		--self.bgImg = visImage:scaleSpectrumImage(visImage:getBgSpectrumImage(), w, h)
 		self.bgImg = visImage:getBgSpectrumImage(w, h)
 		self.bgAlpha = visImage:getBackgroundAlpha()
