@@ -162,7 +162,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		scaledImg = img:resize(wSeq,h)
 		-- FIXME: should really clip top and bottom - however:
 		-- stock images are kind of bottom justfied so clip the top of the image
-		tmp:blitClip(0, math.floor(scaledH-h), wSeq, h, scaledImg, 0, 0)
+		tmp:blitClip(0, math.floor(scaledH-h/2), wSeq, h, scaledImg, 0, 0)
 		tmp:release()
 	else
 		scaledImg = img:resize(wSeq, scaledH)
@@ -374,7 +374,9 @@ function selectSpectrum(tbl, name, selected)
 			if not v.enabled and selected then
 				-- create the cached image for skin resolutions 
 				for k, v in pairs(spectrumResolutions) do
-					_cacheSpectrumImage(name, spectrumImagesMap[name].src, v.w, v.h)
+					if spectrumImagesMap[name].src ~= nil then
+						_cacheSpectrumImage(name, spectrumImagesMap[name].src, v.w, v.h)
+					end
 				end
 			end
 			v.enabled = selected
@@ -565,8 +567,8 @@ end
 --- Misc
 -------------------------------------------------------- 
 function registerComplete()
-    table.sort(vuImages, function (left, right) return left.name < right.name end)
-    table.sort(spectrumList, function (left, right) return left.name < right.name end)
+	table.sort(vuImages, function (left, right) return left.name < right.name end)
+	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
 
