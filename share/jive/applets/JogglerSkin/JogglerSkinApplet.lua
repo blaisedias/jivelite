@@ -3648,8 +3648,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				binSpace = { 1, 1 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
 				-- gradientColours = gradientColours,
-				bgImgPath = imgpath ..  "UNOFFICIAL/Spectrum/bg-spectrum-2.png",
-				fgImgPath = imgpath ..  "UNOFFICIAL/Spectrum/fg-spectrum-2.png",
+				useVisImage = true,
 			}
 		},
 	})

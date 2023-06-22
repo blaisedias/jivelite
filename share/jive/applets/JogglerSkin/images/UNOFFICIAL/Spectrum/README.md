@@ -17,3 +17,13 @@ Accreditations
  * source: https://pixabay.com/illustrations/background-colorful-geometric-1466092/
 * background-1783718_960_720.jpg
  * source: https://pixabay.com/illustrations/background-flower-green-yellow-1783718/
+* fantasy-5316260_1280.jpg
+ * source:https://pixabay.com/illustrations/fantasy-science-fiction-surreal-5316260/
+* tile-1179386_1280.jpg
+ * source: https://pixabay.com/illustrations/tile-background-image-wallpaper-1179386/
+* wallpaper-7896859_1280.webp
+ * source: https://pixabay.com/illustrations/wallpaper-synthwave-80s-city-7896859/
+* fantasy-5023437_1280.jpg
+ * source: https://pixabay.com/illustrations/fantasy-architecture-surreal-mood-5023437/
+* technology-3357605_1280.jpg
+ * https://pixabay.com/illustrations/technology-network-connection-3357605/
