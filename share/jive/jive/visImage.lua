@@ -421,6 +421,46 @@ function getBackgroundAlpha()
 end
 
 -------------------------------------------------------- 
+--- Spectrum bars format
+-------------------------------------------------------- 
+local barsFormats  = {
+    {name="skin"},
+	{name="2-1-3-6", values={barsInBin=2, barWidth=1, barSpace=3, binSpace=6}},
+	{name="2-2-3-4", values={barsInBin=2, barWidth=2, barSpace=3, binSpace=4}},
+	{name="2-3-3-2", values={barsInBin=2, barWidth=3, barSpace=3, binSpace=2}},
+	{name="2-4-1-2", values={barsInBin=2, barWidth=4, barSpace=1, binSpace=2}},
+	{name="1-4-3-6", values={barsInBin=1, barWidth=4, barSpace=3, binSpace=6}},
+	{name="1-6-3-4", values={barsInBin=1, barWidth=6, barSpace=3, binSpace=4}},
+	{name="1-8-3-2", values={barsInBin=1, barWidth=8, barSpace=3, binSpace=2}},
+	{name="1-5-1-5", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=5}},
+	{name="1-5-1-3", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=3}},
+	{name="1-4-1-4", values={barsInBin=1, barWidth=4, barSpace=1, binSpace=4}},
+	{name="1-5-1-2", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=2}},
+	{name="2-2-1-2", values={barsInBin=2, barWidth=2, barSpace=1, binSpace=2}},
+	{name="1-4-1-2", values={barsInBin=1, barWidth=4, barSpace=1, binSpace=2}},
+	{name="1-3-1-3", values={barsInBin=1, barWidth=3, barSpace=1, binSpace=3}},
+	{name="2-1-1-2", values={barsInBin=2, barWidth=1, barSpace=1, binSpace=2}},
+	{name="1-2-1-2", values={barsInBin=1, barWidth=2, barSpace=1, binSpace=2}},
+	{name="1-1-1-1", values={barsInBin=1, barWidth=1, barSpace=1, binSpace=1}},
+}
+
+local barsFormat  = barsFormats[17]
+
+function getBarsFormat()
+	log:debug("getBarFormat", " ", barsFormat.name)
+	return barsFormat
+end
+
+function getBarFormats()
+	return barsFormats
+end
+
+function setBarFormat(tbl, format)
+	log:debug("setBarFormat", " ", format.name)
+	barsFormat = format
+end
+
+-------------------------------------------------------- 
 --- VU meter
 -------------------------------------------------------- 
 local vuImages = {}
