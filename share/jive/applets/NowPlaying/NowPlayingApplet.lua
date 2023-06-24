@@ -133,7 +133,7 @@ function init(self)
 	local settings      = self:getSettings()
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
-
+	self.spbfchanged = false
 end
 
 -- style names are grabbed from the skin
@@ -350,6 +350,43 @@ function npSpectrumSettingsShow(self)
 	window:show()
 end
 
+
+function npSpectrumBarSettingsShow(self)
+	local window = Window("text_list", self:string('SPECTRUM_BARS_FORMAT') )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu")
+
+	self:syncSettings()
+
+	local npscreenSpectrumBars = visImage:getBarFormats()
+	-- syncSettings was invoked so npscreenSpectrumBars reflects the resolved state
+	local current =  visImage:getBarsFormat()
+	self.spbfchanged = false
+	for i, v in ipairs(npscreenSpectrumBars) do
+		local selected = false
+		if v.name == current.name then
+			selected = true
+		end
+		
+		menu:addItem( {
+			text = v.name,
+			style = 'item_choice',
+			check = RadioButton("radio", group,
+				function()
+					visImage:setBarFormat(v)
+					self.spbfchanged = true
+				end,
+			selected),
+		} )
+	end
+
+	--XXX: not sure whether the text is necessary or even helpful here
+	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
+
+	window:addWidget(menu)
+	window:show()
+end
 
 
 function npviewsSettingsShow(self)
@@ -1988,7 +2025,7 @@ function showNowPlaying(self, transition, direct)
 
 	-- if the user deselected the current Spectrum trigger re-display
 	if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
-		if not visImage:isCurrentSpectrumEnabled() then
+		if not visImage:isCurrentSpectrumEnabled() or self.spbfchanged then
 			self.window = nil
 		end
 	end
