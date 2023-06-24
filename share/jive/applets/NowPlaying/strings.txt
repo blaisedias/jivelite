@@ -213,12 +213,13 @@ NOW_PLAYING_VIEWS
 	SV	Nu spelas-vyer
 
 SELECT_VUMETER
-	EN	Select VU Meter 
-	ES	VU Meter vistas
+	EN	VU Meter 
 
 SELECT_SPECTRUM
-	EN	Select Spectrum 
-	ES	VU Meter vistas
+	EN	Spectrum 
+
+SPECTRUM_BARS_FORMAT
+	EN	Spectrum Bars Format
 
 NOW_PLAYING_VIEWS_HELP
 	CS	Na obrazovce Právě hraje je k dispozici několik různých konfigurací, neboli "zobrazení", mezi kterými můžete přepínat. Zde si můžete zvolit požadovaná zobrazení přehrávače.
