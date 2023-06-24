@@ -90,18 +90,20 @@ function _scaleSpectrumImage(imgPath, w, h)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
 	local srcW, srcH = img:getSize()
+	if srcW == w and h == srcH then
+		log:debug("scaleSpectrumImage done", img)
+		return img
+	end
 	log:debug("scaleSpectrumImage: srcW:", srcW, " srcH:", srcH)
 	-- for spectrum height is determines the scaling factor
 	local scaledW = math.floor(srcW * (h/srcH))
 	log:debug("scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
-	if srcW == w and h == srcH then
-		log:debug("scaleSpectrumImage done", img)
-		return img
 	-- scale: whilst trying to maintain proportions
-	-- if scaled width is > required clip the horizontal edges
-	elseif scaledW == w then
+	-- perfect match just resize
+	if scaledW == w then
 		log:debug("scaleSpectrumImage simple resize")
 		scaledImg = img:resize(w, h)
+	-- if scaled width is > required clip the horizontal edges
 	elseif scaledW > w then
 		local tmp = img:resize(scaledW, h)
 		scaledImg = img:resize(w, h)
@@ -109,10 +111,24 @@ function _scaleSpectrumImage(imgPath, w, h)
 		-- upto 1 pixel smaller for odd numbered width differences
 		tmp:blitClip(math.floor((scaledW-w)/2), 0, w, h, scaledImg, 0, 0)
 		tmp:release()
+	elseif srcW > w and srcH > h then
+	-- if src image is larger just clip
+		log:debug("scaleSpectrumImage clip x-center y-bottom")
+		scaledImg = img:resize(w, h)
+		img:blitClip(math.floor((srcW-w)/2), srcH-h , w, h, scaledImg, 0, 0)
+	elseif srcH > h and scaledW > (w/2) then
+	-- if src image is almost larger enough expand to fill horizontally
+	-- and clip vertically
+		log:debug("scaleSpectrumImage expand to w, clip y-center")
+		local scaledH = math.floor(srcH * (w/srcW))
+		local tmp = img:resize(w, scaledH)
+		scaledImg = img:resize(w, h)
+		tmp:blitClip(0, (scaledH-h)/2, w, h, scaledImg, 0, 0)
+		tmp:release()
 	else
-	-- if scaled width < than window width the expand - distorts proportion
-	-- this is desired behaviour for vertically thin source images
-	-- which typically would be colour gradients
+	-- if scaled width is significantly < than width the expand - this distorts proportion
+	-- desired behaviour for vertically thin source images which typically would be colour
+	-- gradients
 		log:debug("scaleSpectrumImage resize expand H")
 		scaledImg = img:resize(w, h)
 	end
