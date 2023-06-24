@@ -64,6 +64,16 @@ function registerApplet(self)
 			end
 		)
 	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletNowPlayingSpectrumBarSettings', 
+			'screenSettingsNowPlaying', 
+			'SPECTRUM_BARS_FORMAT', 
+			function(applet, ...) 
+				applet:npSpectrumBarSettingsShow(...) 
+			end
+		)
+	)
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
 

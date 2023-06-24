@@ -72,11 +72,20 @@ function _layout(self)
 	self.capHeight = self:styleValue("capHeight")
 	self.capSpace = self:styleValue("capSpace")
 	self.channelFlipped = self:styleValue("channelFlipped")
-	self.barsInBin = self:styleValue("barsInBin")
-	self.barWidth = self:styleValue("barWidth")
-	self.barSpace = self:styleValue("barSpace")
-	self.binSpace = self:styleValue("binSpace")
 	self.clipSubbands = self:styleValue("clipSubbands")
+	-- selectable from ui
+	local barsFormat = visImage:getBarsFormat()
+	if barsFormat.name == "skin" then
+		self.barsInBin = self:styleValue("barsInBin")
+		self.barWidth = self:styleValue("barWidth")
+		self.barSpace = self:styleValue("barSpace")
+		self.binSpace = self:styleValue("binSpace")
+	else
+		self.barsInBin = {barsFormat.values.barsInBin, barsFormat.values.barsInBin}
+		self.barWidth = {barsFormat.values.barWidth, barsFormat.values.barWidth}
+		self.barSpace = {barsFormat.values.barSpace, barsFormat.values.barSpace}
+		self.binSpace = {barsFormat.values.binSpace, barsFormat.values.binSpace}
+	end
 	
 	self.backgroundDrawn = false;
 
