@@ -176,9 +176,9 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		log:debug("_scaleAnalogVuMeter resize and clip")
 		local tmp = img:resize(wSeq, scaledH)
 		scaledImg = img:resize(wSeq,h)
-		-- FIXME: should really clip top and bottom - however:
-		-- stock images are kind of bottom justfied so clip the top of the image
-		tmp:blitClip(0, math.floor(scaledH-h/2), wSeq, h, scaledImg, 0, 0)
+		-- Note stock VUMeter images are bottom justfied so this does not
+		-- work for those VUMeter images
+		tmp:blitClip(0, math.floor((scaledH-h)/2), wSeq, h, scaledImg, 0, 0)
 		tmp:release()
 	else
 		scaledImg = img:resize(wSeq, scaledH)
@@ -424,7 +424,7 @@ end
 --- Spectrum bars format
 -------------------------------------------------------- 
 local barsFormats  = {
-    {name="skin"},
+	{name="skin"},
 	{name="2-1-3-6", values={barsInBin=2, barWidth=1, barSpace=3, binSpace=6}},
 	{name="2-2-3-4", values={barsInBin=2, barWidth=2, barSpace=3, binSpace=4}},
 	{name="2-3-3-2", values={barsInBin=2, barWidth=3, barSpace=3, binSpace=2}},
