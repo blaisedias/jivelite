@@ -134,6 +134,7 @@ function init(self)
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
 	self.spbfchanged = false
+	self:syncSettings()
 end
 
 -- style names are grabbed from the skin
@@ -251,8 +252,6 @@ function npVUSettingsShow(self)
 
 	local menu = SimpleMenu("menu")
 
-	self:syncSettings()
-
 	local npscreenVumeters = visImage:getVUImageList()
 	-- syncSettings was invoked so npscreenVumeters reflects the resolved state
 
@@ -284,7 +283,7 @@ function npVUSettingsShow(self)
 							object:setSelected(true)
 						end
 					end
-					self:storeSettings()
+					self:updateSettings()
 				end,
 			selected),
 		} )
@@ -303,8 +302,6 @@ function npSpectrumSettingsShow(self)
 	local group = RadioGroup()
 
 	local menu = SimpleMenu("menu")
-
-	self:syncSettings()
 
 	local npscreenSpectrum = visImage:getSpectrumList()
 	-- syncSettings was invoked so npscreenSpectrum reflects the resolved state
@@ -337,7 +334,7 @@ function npSpectrumSettingsShow(self)
 							object:setSelected(true)
 						end
 					end
-					self:storeSettings()
+					self:updateSettings()
 				end,
 			selected),
 		} )
@@ -357,10 +354,9 @@ function npSpectrumBarSettingsShow(self)
 
 	local menu = SimpleMenu("menu")
 
-	self:syncSettings()
-
 	local npscreenSpectrumBars = visImage:getBarFormats()
 	-- syncSettings was invoked so npscreenSpectrumBars reflects the resolved state
+
 	local current =  visImage:getBarsFormat()
 	self.spbfchanged = false
 	for i, v in ipairs(npscreenSpectrumBars) do
@@ -374,7 +370,8 @@ function npSpectrumBarSettingsShow(self)
 			style = 'item_choice',
 			check = RadioButton("radio", group,
 				function()
-					visImage:setBarFormat(v)
+					visImage:setBarsFormat(v)
+					self:updateSettings()
 					self.spbfchanged = true
 				end,
 			selected),
@@ -1972,7 +1969,7 @@ function _delayNowPlaying(self, direct)
 				self:showNowPlaying(transition, direct)
 			else
 				local browser = appletManager:getAppletInstance("SlimBrowser")
-                                browser:showPlaylist()
+								browser:showPlaylist()
 			end
 		end
 	, true)
@@ -2014,7 +2011,7 @@ end
 function showNowPlaying(self, transition, direct)
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
-	self:syncSettings()
+--	self:updateSettings()
 
 	-- if the user deselected the current VUMeter trigger re-display
 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
@@ -2198,15 +2195,11 @@ function free(self)
 end
 
 -- sync settings both ways
--- from existing settings to visImage
+-- push from existing settings to visImage
 --	  this syncs settings for images found on both 
 -- then write visImage to settings
 --	  this gets rid of settings for images no longer present
 function syncSettings(self)
-	if visImage:getSyncStatus() then
-		-- we have synced and do not need to all this again
-		return
-	end
 	local settings = self:getSettings()
 	if not settings.vumeters then
 		settings.vumeters = {}
@@ -2217,14 +2210,15 @@ function syncSettings(self)
 
 	-- VUMeters
 	local npscreenVumeters = visImage:getVUImageList()
-	-- first reflect any valid settings down to visImage
+	-- first reflect settings down to visImage
+	-- settings for VUMeters that no longer exist are ignored
 	log:debug("syncSettings vumeters >>")
 	for k, v in pairs(settings.vumeters) do
 		log:debug("syncSettings vumeters >>", k, " -> ", v)
 		visImage:selectVuImage(k,v)
 	end
 	log:debug("syncSettings vumeters <<")
-	-- refresh list from visImage
+	-- refresh VUMeter settings from visImage
 	npscreenVumeters = visImage:getVUImageList()
 	-- ensure that at least one VUMeter is selected
 	local enabled_count = 0
@@ -2237,7 +2231,7 @@ function syncSettings(self)
 		npscreenVumeters[1].enabled = true
 		visImage:selectVuImage(npscreenVumeters[1].name,v)
 	end
-	-- save the refreshed list of settings
+	-- refresh and a save VU meter settings
 	settings.vumeters = {}
 	for i, v in ipairs(npscreenVumeters) do
 		settings.vumeters[v.name] = npscreenVumeters[i].enabled
@@ -2247,13 +2241,14 @@ function syncSettings(self)
 	-- Spectrum meters
 	local npscreenSpectrum = visImage:getSpectrumList()
 	-- first reflect any valid settings down to visImage
+	-- settings for spectrum images that no longer exist are ignored
 	log:debug("syncSettings spectrum >>")
 	for k, v in pairs(settings.spectrum) do
 		log:debug("syncSettings spectrum >>", k, " -> ", v)
 		visImage:selectSpectrum(k,v)
 	end
 	log:debug("syncSettings spectrum <<")
-	-- refresh list from visImage
+	-- refresh spectrum images settings from visImage
 	npSpectrum = visImage:getSpectrumList()
 	-- ensure that at least one Spectrum is selected
 	local enabled_count = 0
@@ -2266,11 +2261,12 @@ function syncSettings(self)
 		npSpectrum[1].enabled = true
 		visImage:selectSpectrum(npSpectrum[1].name,v)
 	end
-	-- save the refreshed list of settings
+	-- refresh and save the spectrum image settings
 	settings.spectrum = {}
 	for i, v in ipairs(npSpectrum) do
 		settings.spectrum[v.name] = npSpectrum[i].enabled
 	end
+
 	-- synchronise background alpha value
 	if not settings.backgroundAlpha then
 		settings.backgroundAlpha = visImage:getBackgroundAlpha()
@@ -2278,9 +2274,37 @@ function syncSettings(self)
 		visImage:setBackgroundAlpha(settings.backgroundAlpha)
 	end
 
+	if not settings.spectrumBarsFormat then
+		settings.spectrumBarsFormat = visImage:getBarsFormat()
+	else
+		visImage:setBarsFormat(settings.spectrumBarsFormat)
+	end
+
 	self:storeSettings()
 	visImage:sync()
-	-- record that we have synced and do not need to all
-	-- this again
-	visImage:setSyncStatus()
+end
+
+
+function updateSettings(self)
+	local settings = self:getSettings()
+
+	-- VUMeters
+	npscreenVumeters = visImage:getVUImageList()
+	settings.vumeters = {}
+	for i, v in ipairs(npscreenVumeters) do
+		settings.vumeters[v.name] = npscreenVumeters[i].enabled
+	end
+
+
+	-- Spectrum images
+	settings.spectrum = {}
+	for i, v in ipairs(npSpectrum) do
+		settings.spectrum[v.name] = npSpectrum[i].enabled
+	end
+
+	-- Spectrum bars format
+	settings.spectrumBarsFormat = visImage:getBarsFormat()
+
+	self:storeSettings()
+	visImage:sync()
 end
