@@ -455,8 +455,8 @@ function getBarFormats()
 	return barsFormats
 end
 
-function setBarFormat(tbl, format)
-	log:debug("setBarFormat", " ", format.name)
+function setBarsFormat(tbl, format)
+	log:debug("setBarsFormat", " ", format.name)
 	barsFormat = format
 end
 
@@ -586,28 +586,12 @@ function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
 end
 
+------------------------------------------------------- 
+--- Misc
 -------------------------------------------------------- 
---- Settings 
--------------------------------------------------------- 
-local settingsSynced = false
-
--- syncStatus is used to prevent unnecessary work
--- not a satisfactory solution - good enough for now.
--- Problem statement : The very first time NowPlaying
--- shows we need to sync settings, and thereafter when
--- settings are changed.
--- however in NowPlaying there is no convenient way to do
--- so without repeating the work frequently.
-function getSyncStatus()
-	return settingsSynced
-end
-
-function setSyncStatus()
-	settingsSynced = true
-end
-
-function clearSyncStatus()
-	settingsSynced = false
+function registerComplete()
+	table.sort(vuImages, function (left, right) return left.name < right.name end)
+	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
 function sync()
@@ -618,13 +602,3 @@ function sync()
 		spBump()
 	end
 end
-
--------------------------------------------------------- 
---- Misc
--------------------------------------------------------- 
-function registerComplete()
-	table.sort(vuImages, function (left, right) return left.name < right.name end)
-	table.sort(spectrumList, function (left, right) return left.name < right.name end)
-end
-
-
