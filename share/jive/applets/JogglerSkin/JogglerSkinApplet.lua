@@ -738,14 +738,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local SP_H = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45)
 	local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
 	local mini_visu_Y =  230
-	local mini_visu_W =  math.floor(screenWidth/4)*2
-	local mini_visu_X =  screenWidth - mini_visu_W - 65
-
-	if screenWidth == 1280 and screenHeight == 800 then
---	if ((screenWidth * 10)/screenHeight) < 17 then
-		mini_visu_W = (screenWidth * 9) / 20
-		mini_visu_X = screenWidth - mini_visu_W - 50
-	end
+	-- see _tracklayout
+	local mini_visu_X = screenHeight - 160 + 5
+	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
 -- preload imageCache here, on rpi's scaling images takes a noticeable
 -- amount of time .... :-( 
@@ -771,7 +766,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		end
 	end
 
-    visImage:registerComplete()
+	visImage:registerComplete()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
@@ -3119,7 +3114,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				sh = { 0x37, 0x37, 0x37 },
 			},
 			npprogressB = {
-				w = screenWidth - _tracklayout.x - 2*80 - 25,
+--				w = screenWidth - _tracklayout.x - 2*80 - 25,
+				w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
 				h = 50,
 				padding = { 0, 0, 0, 0 },
 			        position = LAYOUT_SOUTH,
