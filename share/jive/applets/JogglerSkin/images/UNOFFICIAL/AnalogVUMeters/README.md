@@ -19,5 +19,12 @@ list of files:
  * vu_analog_25seq_j.png
  * vu_analog_25seq_w.png
 
-
+### Misc
 Note: VU Meter images are resized to render on different resolutions
+
+All images have been trimmed using imagemagick
+
+`mogrify -define trim:edges=north,south -trim +repage <image>`
+
+This improves the results for resizing for mini VUMeter Now Playing screen renders,
+in partcular for the screen resoultion of 800x480.
