@@ -164,25 +164,20 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
 	local wSeq = math.floor((w/2))*seq
-	-- for VUMeter width determines the scaling factor
+	-- try scaling to fit width
 	local scaledH = math.floor(srcH * (wSeq/srcW))
 	log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	if wSeq == srcW and h == srcH then
 		return img
 	-- after scaling:
 	elseif scaledH > h then
-	-- if height > then window height then clip the source image,
-	-- this preserves proportion
-		log:debug("_scaleAnalogVuMeter resize and clip")
-		local tmp = img:resize(wSeq, scaledH)
-		scaledImg = img:resize(wSeq,h)
-		-- Note stock VUMeter images are bottom justfied so this does not
-		-- work for those VUMeter images
-		tmp:blitClip(0, math.floor((scaledH-h)/2), wSeq, h, scaledImg, 0, 0)
-		tmp:release()
-	else
-		scaledImg = img:resize(wSeq, scaledH)
+	-- doesn't fit height-wise, so ...
+	-- scale to fit height - typically this means more visible empty space horizontally
+		scaledH = h
+		wSeq = math.floor((srcW * (h/srcH))/seq) * seq
+		log:debug("_scaleAnalogVuMeter adjusted for height srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	end
+	scaledImg = img:resize(wSeq, scaledH)
 	img:release()
 	return scaledImg
 end
@@ -214,7 +209,7 @@ end
 function _cacheSpectrumImage(imgName, path, w, h)
 	log:debug("_cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h)
 	local bgImgName = nil
-	local icKey = w .. "x" .. h .. "-" .. imgName
+	local icKey = "for-" .. w .. "x" .. h .. "-" .. imgName
 	local dcpath = imageCache[icKey]
 	local bgIcKey = nil
 	local bg_dcpath = nil
@@ -228,7 +223,7 @@ function _cacheSpectrumImage(imgName, path, w, h)
 		local l = imgName:len()
 		local baseImgName = string.sub(imgName,4,l)
 		bgImgName = "bg-" .. baseImgName
-		bgIcKey = w .. "x" .. h .. "-" .. bgImgName
+		bgIcKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
 		bg_dcpath = cachedPath(bgIcKey)
 	end
 	if dcpath == nil then
@@ -309,7 +304,7 @@ function getFgSpectrumImage(tbl, w,h)
 		return nil
 	end
 
-	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
+	local icKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", icKey)
 
 	if currentFgImageKey == icKey then
@@ -352,7 +347,7 @@ function getBgSpectrumImage(tbl, w,h)
 		return nil
 	end
 
-	local icKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
+	local icKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", icKey)
 	if currentBgImageKey == icKey then
 		return currentBgImage
@@ -479,7 +474,7 @@ end
 
 function _cacheVUImage(imgName, path, w, h)
 	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
-	local icKey = w .. "x" .. h .. "-" .. imgName
+	local icKey = "for-" .. w .. "x" .. h .. "-" .. imgName
 	local dcpath = imageCache[icKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
@@ -524,7 +519,7 @@ function getVuImage(w,h)
 		vuBump()
 	end
 	local entry = vuImages[vuImageIndex]
-	local icKey = w .. "x" .. h .. "-" .. entry.name
+	local icKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 	if currentVuImageKey == icKey then
 		-- image is the current one
 		return currentVuImage
