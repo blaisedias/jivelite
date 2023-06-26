@@ -101,17 +101,17 @@ function _layout(self)
 			if self.bgImg ~= nil then
 				local imgW, imgH = self.bgImg:getSize()
 				-- FIXME VU Meter images will not always be 25 frames
-				frame_w = imgW/25
-				self.x1 = x + self.w - frame_w
-				self.x2 = self.x1 + self.w
-				-- center vertically
+				self.frame_w = imgW/25
+				-- centre the VUMeter image within the designated space
+				-- horizontally
+				self.x1 = x + self.w - self.frame_w
+				self.x2 = self.x1 + self.frame_w
+				-- vertically
 				if imgH < h then
 					self.y = math.floor(self.y + ((h - imgH)/2))
 				elseif imgH > h then
---				 self.src_y = math.floor((imgH - h)/2)
---			 the vast majority of VUMeter images have a ton of space above them,
---			 so render the bottom part
-					self.src_y = math.floor(imgH - h)
+					-- clip the image at the top and bottom
+					self.src_y = math.floor((imgH - h)/2)
 				end
 				log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
 				log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
