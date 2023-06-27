@@ -439,7 +439,7 @@ local barsFormats  = {
 	{name="1-1-1-1", values={barsInBin=1, barWidth=1, barSpace=1, binSpace=1}},
 }
 
-local barsFormat  = barsFormats[17]
+local barsFormat  = barsFormats[1]
 
 function getBarsFormat()
 	log:debug("getBarFormat", " ", barsFormat.name)
