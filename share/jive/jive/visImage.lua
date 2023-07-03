@@ -13,6 +13,7 @@ local vis           = require("jive.vis")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 local System        = require("jive.System")
+local os            = require("os")
 
 module(...)
 
@@ -45,36 +46,37 @@ function cacheClear(tbl)
 	end
 end
 
-local function dirIter(parent, rpath)
-	local fq_path = parent .. "/" .. rpath
+local function dirIter(rpath)
+--	local fq_path = parent .. "/" .. rpath
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
 		dir = dir .. rpath
-		if dir == fq_path then
+--		if dir == fq_path then
 			local mode = lfs.attributes(dir, "mode")
 		
 			if mode == "directory" then
 				for entry in lfs.dir(dir) do
 					if entry ~= "." and entry ~= ".." and entry ~= ".svn" then
-						coroutine.yield(entry)
+						coroutine.yield(entry, dir)
 					end
 				end
 			end
-		end
+--		end
 	end
 end
 
 local function readdir(parent, rpath)
-	local co = coroutine.create(function() dirIter(parent, rpath) end)
+	local co = coroutine.create(function() dirIter(rpath) end)
 	return function()
-		local code, res = coroutine.resume(co)
-		return res
+		local code, res, path = coroutine.resume(co)
+		return res, path
 	end
 end
 
 function readCacheDir()
-	for img in readdir(userdirpath, "visucache") do
+--	for img, path in readdir(userdirpath, "visucache") do
+	for img, path in readdir(nil, "visucache") do
 		local parts = string.split("%.", img)
-		imageCache[parts[1]] = cachedir .. "/" .. img
+		imageCache[parts[1]] = path .. "/" .. img
 		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
 	end
 end
@@ -245,11 +247,12 @@ function _cacheSpectrumImage(imgName, path, w, h)
 		-- TODO: figure out if how to use a single image source for both
 		-- foreground and background retaining the contrast
 		if imgName:find("fg-",1,true) == 1 then
-			local bgimg = Surface:newRGB(w, h)
-			bgimg:filledRectangle(0,0,w,h,0)
-			img:blitAlpha(bgimg, 0, 0, 0)
-			bgimg:saveBMP(bg_dcpath)
-			bgimg:release()
+--			local bgimg = Surface:newRGB(w, h)
+--			bgimg:filledRectangle(0,0,w,h,0)
+--			img:blitAlpha(bgimg, 0, 0, 0)
+--			bgimg:saveBMP(bg_dcpath)
+--			bgimg:release()
+			os.execute("ln -s " .. dcpath .. " " .. bg_dcpath)
 			imageCache[bgIcKey] = bg_dcpath
 			log:debug("_cacheSpectrumImage cached ", bgIcKey)
 		end
