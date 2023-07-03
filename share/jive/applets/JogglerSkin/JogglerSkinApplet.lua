@@ -742,9 +742,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local mini_visu_X = screenHeight - 160 + 5
 	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
--- preload imageCache here, on rpi's scaling images takes a noticeable
--- amount of time .... :-( 
--- front load so that whilst playing the experience is smooth
+-- front load for smoother experince when music is playing
 	visImage:cacheClear()
 	visImage:readCacheDir()
 	visImage:initSpectrumList()
