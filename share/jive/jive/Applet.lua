@@ -131,8 +131,6 @@ function readdir(self, path)
 end
 
 
-
-
 local function dirIter2(self, appletName, path)
 	local rpath = "applets/" .. appletName .. "/" .. path
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
@@ -157,32 +155,6 @@ function readdir2(self, appletName, path)
 		return res
 	end
 end
-
-
---[[
-
-An iterator over the applets files in path.
-
---]]
-function readdir(self, path)
-	local co = coroutine.create(function() dirIter(self, path) end)
-	return function()
-		local code, res = coroutine.resume(co)
-		return res
-	end
-end
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 --[[
