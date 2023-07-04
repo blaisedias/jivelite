@@ -93,6 +93,7 @@ end
 -- scale an image to fit a height - maintaining aspect ration
 function _scaleSpectrumImage(imgPath, w, h)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
+    -- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
@@ -167,6 +168,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
 		w = 1280
 	end
+    -- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
@@ -236,8 +238,7 @@ function _cacheSpectrumImage(imgName, path, w, h)
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
 		local fgimg = Surface:newRGB(w, h)
-		fgimg:filledRectangle(0,0,w,h,0)
-		img:blitAlpha(fgimg, 0, 0, 0)
+		img:blit(fgimg, 0, 0, 0)
 		dcpath = cachedPath(icKey)
 		-- imageCache[icKey] = img
 		fgimg:saveBMP(dcpath)
@@ -254,7 +255,7 @@ function _cacheSpectrumImage(imgName, path, w, h)
 		if imgName:find("fg-",1,true) == 1 then
 --			local bgimg = Surface:newRGB(w, h)
 --			bgimg:filledRectangle(0,0,w,h,0)
---			img:blitAlpha(bgimg, 0, 0, 0)
+--			img:blitAlpha(bgimg, 0, 0, 80)
 --			bgimg:saveBMP(bg_dcpath)
 --			bgimg:release()
 			os.execute("ln -s " .. dcpath .. " " .. bg_dcpath)
@@ -326,6 +327,7 @@ function getFgSpectrumImage(tbl, w,h)
 	end
 	if imageCache[icKey] ~= nil then 
 		log:debug("getFgImage: load ", icKey, " ", imageCache[icKey])
+        -- FIXME: loads a "tile" which is not freed by release call
 		currentFgImage = Surface:loadImage(imageCache[icKey])
 		currentFgImageKey = icKey
 	else
@@ -336,6 +338,7 @@ function getFgSpectrumImage(tbl, w,h)
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
+            -- FIXME: loads a "tile" which is not freed by release call
 			currentFgImage = Surface:loadImage(imageCache[icKey])
 			currentFgImageKey = icKey
 		end
@@ -368,7 +371,13 @@ function getBgSpectrumImage(tbl, w,h)
 	end
 	if imageCache[icKey] ~= nil then 
 		log:debug("getBgImage: load ", icKey, " ", imageCache[icKey])
-		currentBgImage = Surface:loadImage(imageCache[icKey])
+		currentBgImage = Surface:newRGB(w,h)
+		currentBgImage:filledRectangle(0,0,w,h,0)
+        -- FIXME: loads a "tile" which is not freed by release call
+		local img = Surface:loadImage(imageCache[icKey])
+		img:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
+		img:blit(currentBgImage, 0, 0)
+		img:release()
 		currentBgImageKey = icKey
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
@@ -378,6 +387,7 @@ function getBgSpectrumImage(tbl, w,h)
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
+            -- FIXME: loads a "tile" which is not freed by release call
 			currentBgImage = Surface:loadImage(imageCache[icKey])
 			currentBgImageKey = icKey
 		end
@@ -412,7 +422,7 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-local bgAlpha = 80
+local bgAlpha = 40
 
 function setBackgroundAlpha(tbl, v)
 	log:debug("setBackgroundAlpha ", tbl, "; v=", v)
@@ -542,6 +552,7 @@ function getVuImage(w,h)
 	if imageCache[icKey] ~= nil then 
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
+        -- FIXME: loads a "tile" which is not freed by release call
 		currentVuImage = Surface:loadImage(imageCache[icKey])
 		currentVuImageKey = icKey
 	else
@@ -555,6 +566,7 @@ function getVuImage(w,h)
 				vumImagesMap[entry.name].src = nil
 			end
 			log:debug("getVuImage: load (new) ", icKey, " ", imageCache[icKey])
+            -- FIXME: loads a "tile" which is not freed by release call
 			currentVuImage = Surface:loadImage(imageCache[icKey])
 			currentVuImageKey = icKey
 		else
