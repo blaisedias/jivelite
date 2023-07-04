@@ -3,3 +3,4 @@ bin
 *.so
 *.so.*
 visucache/*
+primed-visu-images/*
