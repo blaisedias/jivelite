@@ -74,6 +74,11 @@ end
 
 function readCacheDir()
 --	for img, path in readdir(userdirpath, "visucache") do
+	for img, path in readdir(nil, "primed-visu-images") do
+		local parts = string.split("%.", img)
+		imageCache[parts[1]] = path .. "/" .. img
+		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+	end
 	for img, path in readdir(nil, "visucache") do
 		local parts = string.split("%.", img)
 		imageCache[parts[1]] = path .. "/" .. img
