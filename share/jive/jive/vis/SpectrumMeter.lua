@@ -190,7 +190,8 @@ function draw(self, surface)
 		local x, y, w, h = self:getBounds()
 --		self.bgImg:blit(surface, x, y, w, h, 0, 0)
 --		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
-		self.bgImg:blitAlpha(surface, x, y, self.bgAlpha)
+--		self.bgImg:blitAlpha(surface, x, y, self.bgAlpha)
+		self.bgImg:blit(surface, x, y)
 	end
 
 	local bins = { {}, {} }
@@ -216,6 +217,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 	local bch = bins[ch]
 	local cch = self.cap[ch]
 	local barSize = barWidth + barSpace
+	local xx, yy, ww, hh = self:getBounds()
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -228,7 +230,6 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					local yTop = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
 					local xRight = xLeft + (barWidth - 1)
-					local xx, yy, ww, hh = self:getBounds()
 					self.fgImg:blitClip(xLeft, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
 				elseif self.useGradient > 0 then
 					local yEndValue = y - bch[i] + 1
