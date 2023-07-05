@@ -13,7 +13,7 @@ Features:
 * Spectrum meter can now be rendered using images as
  * gradient colours on black background
  * pre-defined gradient 
- * foreground image over background typically simulating lighting up parts of an image
+ * foreground image over background typically simulating lighting up vertical bars of an image
 * Now Playing Views, 2 new views have been added
  * Artwork, Text and Analog VU Meter (mini vu meter)
  * Artwork, Text and Spectrum Analyzer (mini spectrum meter)
@@ -131,20 +131,28 @@ The presence of the disk image cache has the side-effects:
 * more space required for persistent storage
 * the disk image cache exists in RAM file-system so consumes RAM
 
-The guaranteed way to reduce the impact of the disk image cache is to remove images from
+The simplest way to reduce the impact of the disk image cache is to remove images from
  * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/
  * share/jive/applets/JogglerSkin/images/UNOFFICIAL/Spectrum/
 
-Another strategy to reduce the impact on piCorePlayer and load the images from "disk" (SD-Card)
-would be to generate the cache images for the desired resolution offline. This will require code
-changes.
-
-TODO - report what works for Raspberry PI Zero.
 Disk image cache sizes (at commit commit d1d15b2dac154efa6b114b50875f1ef1532e5d2f)
  *  800 x 480  - 81 MiB
  * 1024 x 600 - 141 MiB
 
-# Thanks
-Thanks to the Adrian Smith for creating Jivelite and sharing it.
+## Resizing images prior to deployment 
+It is possible to remove the need for resizing on the target system compeletely 
+by running Jivelite on a desktop or laptop with the desired sking, selecting all
+images in VUMeter and Spectrum menus and then copying the images from 
+`~/.jivelite/userpath/visucache` to `jivelite/share/jive/primed-visu-images`
+Doing this removes the negative impacts of
+ * longer backup times
+ * larger mydata.tgz files
 
-Thanks to Ralph Irving (https://github.com/ralph-irving) and Michael Herger (https://github.com/mherger) for keeping the wheels spinning.
+# Thanks
+Thanks to those involved in creating Jivelite,
+ * the Logitech team
+ * GWENWDESIGN / Felix Mueller
+ * presslane-us
+ * Adrian Smith,  triode1@btinternet.
+
+Special thanks to Ralph Irving (https://github.com/ralph-irving) and Michael Herger (https://github.com/mherger) for keeping the wheels spinning.
