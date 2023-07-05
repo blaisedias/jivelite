@@ -1,25 +1,13 @@
 --[[
 =head1 NAME
 
-jive.net.SocketTcpServer - A TCP server socket for accepting client connections
+jive.visImage - Image support for visualisation
 
 =head1 DESCRIPTION
 
-Implements a tcp socket to accept client connections.
+Implements support routines to resize VUMeter and Spectrum Visualiser images
 
-(c) Adrian Smith, 2013
-
-=head1 SYNOPSIS
-
- local listener = SocketTcpServer(jnt, "localhost", "9006", "listener sock")
- listener:t_addRead(function()
-						local newsock = listener:t_accept()
-						local pump = function()
-										 -- do something 
-									 end
-						newsock:t_addRead(pump)
-					end
-	)
+(c) Blaise Dias, 2023
 
 =cut
 --]]
