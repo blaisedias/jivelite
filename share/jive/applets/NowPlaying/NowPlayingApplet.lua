@@ -2013,15 +2013,15 @@ function showNowPlaying(self, transition, direct)
 	self.nowPlayingScreenStyles = self:getNPStyles()
 --	self:updateSettings()
 
-	-- if the user deselected the current VUMeter trigger re-display
 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
-		if not visImage:isCurrentVUMeterEnabled() then
+--	-- if the user deselected the current VUMeter trigger re-display
+--		if not visImage:isCurrentVUMeterEnabled() then
 			self.window = nil
-		end
+--		end
 	end
 
-	-- if the user deselected the current Spectrum trigger re-display
 	if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
+	-- if the user deselected the current Spectrum trigger re-display
 		if not visImage:isCurrentSpectrumEnabled() or self.spbfchanged then
 			self.window = nil
 		end
