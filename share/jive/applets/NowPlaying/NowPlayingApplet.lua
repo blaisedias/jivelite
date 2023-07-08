@@ -281,6 +281,9 @@ function npVUSettingsShow(self)
 						-- there needs to be at least one VUMeter
 						if visImage:selectVuImage(v.name, false) > 0 then
 							settings.vumeters[v.name] = false 
+						 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
+								self.window = nil
+							end
 						else
 							visImage:selectVuImage(v.name, true)
 							object:setSelected(true)
@@ -332,6 +335,9 @@ function npSpectrumSettingsShow(self)
 						-- there needs to be at least one Spectrum
 						if visImage:selectSpectrum(v.name, false) > 0 then
 							settings.spectrum[v.name] = false 
+							if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
+								self.window = nil
+							end
 						else
 							visImage:selectSpectrum(v.name, true)
 							object:setSelected(true)
@@ -716,7 +722,7 @@ function notify_playerTrackChange(self, player, nowPlaying)
 		self.nowPlaying = nowPlaying
 	end
 
-    -- cycle to the next set of visualiser images
+	-- cycle to the next set of visualiser images
 	visImage:vuBump()
 	visImage:spBump()
 
@@ -2015,20 +2021,6 @@ function showNowPlaying(self, transition, direct)
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
 --	self:updateSettings()
-
-	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
---	-- if the user deselected the current VUMeter trigger re-display
---		if not visImage:isCurrentVUMeterEnabled() then
-			self.window = nil
---		end
-	end
-
-	if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
---	-- if the user deselected the current Spectrum trigger re-display
---		if not visImage:isCurrentSpectrumEnabled() or self.spbfchanged then
-			self.window = nil
---		end
-	end
 
 	if not self.selectedStyle then
 		local settings = self:getSettings()
