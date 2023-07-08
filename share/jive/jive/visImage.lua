@@ -13,7 +13,6 @@ local vis           = require("jive.vis")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 local System        = require("jive.System")
-local os            = require("os")
 
 module(...)
 
@@ -258,7 +257,10 @@ function _cacheSpectrumImage(imgName, path, w, h)
 --			img:blitAlpha(bgimg, 0, 0, 80)
 --			bgimg:saveBMP(bg_dcpath)
 --			bgimg:release()
-			os.execute("ln -s " .. dcpath .. " " .. bg_dcpath)
+            local cwd = lfs.currentdir()
+            lfs.chdir(cachedir)
+            lfs.link(icKey .. ".bmp", bgIcKey .. ".bmp", true)
+            lfs.chdir(cwd)
 			imageCache[bgIcKey] = bg_dcpath
 			log:debug("_cacheSpectrumImage cached ", bgIcKey)
 		end
