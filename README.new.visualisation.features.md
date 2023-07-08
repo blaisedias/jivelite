@@ -62,7 +62,8 @@ artwork files are (packaged by @Eyerex https://forums.slimdevices.com/member/656
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq_Peppy_Meter_Rainbow.png
 
-Note: VU Meter images are resized to render on different resolutions
+Note: To accomodate resizing the VUMeter images in this location have been trimmed at the top and bottom.
+This works out fine for VUMeters with black surrounds - not so good for other VUMeters.
 
 # Spectrum Meter Enhancements
 Spectrum meters can now be rendered using images. This makes it possible to render spectrum meters as
