@@ -96,6 +96,12 @@ Spectrum meter images are enumerated from the location
 New Spectrum images can be added simply by copying appropriate files to this location.
 
 Images which with names starting with `fg-` are rendered as foreground over a dimmed version as the background.
+At the moment that dimming is not configurable from the menu but can be 
+adjusted by changing the value of `backgroundAlpha` in
+
+`~/.jivelite/userpath/settings/NowPlaying.lua` 
+
+
 
 All other images are rendered as reveals on a black background.
 
