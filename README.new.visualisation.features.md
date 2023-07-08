@@ -8,15 +8,17 @@ New features have been added for visualisation
 
 Features:
 * VU Meters
- * Are now rendered by resizing and centering in the available space.
- * VU Meters are now selectable see *Selection* and *Location* below
+  * Are now rendered by resizing and centering in the available space.
+  * VU Meters are now selectable see *Selection* and *Location* below
 * Spectrum meter can now be rendered using images as
- * gradient colours on black background
- * pre-defined gradient 
- * foreground image over background typically simulating lighting up vertical bars of an image
+  * gradient colours on black background
+  * pre-defined gradient 
+  * foreground image over background typically simulating lighting up vertical bars of an image
 * Now Playing Views, 2 new views have been added
- * Artwork, Text and Analog VU Meter (mini vu meter)
- * Artwork, Text and Spectrum Analyzer (mini spectrum meter)
+  * `Artwork, Text and Analog VU Meter` (mini vu meter)
+  * `Artwork, Text and Spectrum Analyzer` (mini spectrum meter)
+
+For consistency of the layout of the `Artwork and Text` now playing viwew has been altered.
 
 
 # VU Meter enhancements
@@ -29,6 +31,8 @@ Doing it this way avoids repeated resize operations when Jivelite starts up.
 The resize operations take a noticeable amount of time especially on low powered raspberry PIs.
 
 The trade-off is more disk space is used also see section on piCorePlayer
+
+**Note:** resizing VUMeters is capped to the resolution of `1280x800`, scaling for larger resolutions crashes Jivelite.
 
 ## Selection
 It is now possible to change the VU Meter displayed without restarting Jivelite
@@ -43,7 +47,7 @@ The logic enforces that at least one VU Meter image is selected
 VU meter images are enumerated from the location
  `share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters`
 
-This is primarily so that using multiple VU Meter images is possible on piCorePlayer 
+This is primarily to make it possible to use multiple VU Meter images on piCorePlayer 
 
 New VUMeters can be added simply by copying appropriate files to this location.
 
@@ -64,9 +68,10 @@ Note: VU Meter images are resized to render on different resolutions
 Spectrum meters can now be rendered using images. This makes it possible to render spectrum meters as
 * a custom colour gradient
 * simulate lighting up sections of an image in accordance with spectrum values
-* spectrum bar parameters can now be configured - from a selection of formats
-
 Spectrum Meter images are selectable see *Selection* and *Location* below
+
+Spectrum bar format can now be configured - from a selection of formats.
+The list of formats is ordered according to the number of bins the spectrum code generates. Rendering more bins consumes more CPU resource.
 
 ## Details
 Similar to VUMeters, in order to yield a timely user experience Spectrum meter images are resized once when
@@ -94,10 +99,11 @@ Images which with names starting with `fg-` are rendered as foreground over a di
 All other images are rendered as reveals on a black background.
 
 Resizing strategies of spectrum images for display are different from that use for VUMeters.
-Typically expansion is the same on both axes to preserve the aspect ratio 
+
+Typically expansion is the same on both axes to preserve the aspect ratio.
 
 ## Bar formats
-The bars rendered in the spectrum meter now have limited configurablility -
+The bars rendered in the spectrum meter now have limited configurability -
 i.e select one from 18 presets.
 The parameters are
 * number of bars in a bin
@@ -121,38 +127,46 @@ It is possible that increasing the number of columns may overload resource const
 The list of presets is ordered so that the number of columns rendered increases further down the list.
 
 # piCorePlayer
-On piCorePlayer after the first run or after adding new VU meter images a
-backup operation should be performed to benefit from this preprocessing.
-If not, Jivelite startup times will be affected adversely.
+On piCorePlayer the image cache is not persistent, between reboots, unless a backup operation is performed - typically using the command 
+ * `pcp bu`
+
+Using `filetool.sh` should work as well
 
 The presence of the disk image cache has the side-effects:
 * longer backup times
 * larger mydata.tgz files
-* more space required for persistent storage
 * the disk image cache exists in RAM file-system so consumes RAM
 
-The simplest way to reduce the impact of the disk image cache is to remove images from
+One way to reduce the impact of the disk image cache is to remove images that will not be used from
  * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/
  * share/jive/applets/JogglerSkin/images/UNOFFICIAL/Spectrum/
 
-Disk image cache sizes (at commit commit d1d15b2dac154efa6b114b50875f1ef1532e5d2f)
- *  800 x 480  - 81 MiB
- * 1024 x 600 - 141 MiB
+Alternatively see `Resizing images prior to deployment` below.
 
 ## Resizing images prior to deployment 
-It is possible to remove the need for resizing on the target system compeletely 
-by running Jivelite on a desktop or laptop with the desired sking, selecting all
-images in VUMeter and Spectrum menus and then copying the images from 
-`~/.jivelite/userpath/visucache` to `jivelite/share/jive/primed-visu-images`
+It is possible to remove the need for resizing on the target system completely 
+by running Jivelite on a desktop or laptop with the desired skin, selecting all
+images in VUMeter and Spectrum menus and then copying or moving the images from 
+
+`~/.jivelite/userpath/visucache`
+
+ to
+
+ `jivelite/share/jive/primed-visu-images`
+
 Doing this removes the negative impacts of
  * longer backup times
  * larger mydata.tgz files
 
+# Known issues
+* Jivelite gets stuck when trying to render the `Now Playing Views` menu if navigated to from `Home`->`Settings`->`Screen`->`Now Playing` . Unstick by entering now playing and then going back.
+* Occasionally now playing view screen start getting stacked. The trigger for this bug is not known at this point. When this bug triggers clicking on the `back` button `shifts` the view right rather then navigating back up the menu system.
+ 
 # Thanks
 Thanks to those involved in creating Jivelite,
  * the Logitech team
  * GWENWDESIGN / Felix Mueller
- * presslane-us
+ * presslabs-us
  * Adrian Smith,  triode1@btinternet.
 
 Special thanks to Ralph Irving (https://github.com/ralph-irving) and Michael Herger (https://github.com/mherger) for keeping the wheels spinning.
