@@ -2021,10 +2021,10 @@ function showNowPlaying(self, transition, direct)
 	end
 
 	if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
-	-- if the user deselected the current Spectrum trigger re-display
-		if not visImage:isCurrentSpectrumEnabled() or self.spbfchanged then
+--	-- if the user deselected the current Spectrum trigger re-display
+--		if not visImage:isCurrentSpectrumEnabled() or self.spbfchanged then
 			self.window = nil
-		end
+--		end
 	end
 
 	if not self.selectedStyle then
