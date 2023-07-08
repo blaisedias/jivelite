@@ -160,7 +160,7 @@ Doing this removes the negative impacts of
 
 # Known issues
 * Jivelite gets stuck when trying to render the `Now Playing Views` menu if navigated to from `Home`->`Settings`->`Screen`->`Now Playing` . Unstick by entering now playing and then going back.
-* Occasionally now playing view screen start getting stacked. The trigger for this bug is not known at this point. When this bug triggers clicking on the `back` button `shifts` the view right rather then navigating back up the menu system.
+* Occasionally now playing view screen starts getting stacked. The trigger for this bug is not known at this point. When this bug triggers clicking on the `back` button `shifts` the view right rather then navigating back up the menu system. Pressing the `back` button repeatedly will eventually navigate back up the menu system.
  
 # Thanks
 Thanks to those involved in creating Jivelite,
