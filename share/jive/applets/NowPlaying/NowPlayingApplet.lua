@@ -265,7 +265,7 @@ function npVUSettingsShow(self)
 		end
 		
 		menu:addItem( {
-			text = v.name,
+			text = v.displayName,
 			style = 'item_choice',
 			check = Checkbox("checkbox", 
 				function(object, isSelected)
