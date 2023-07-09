@@ -517,7 +517,16 @@ function registerVUMeterImage(tbl, path)
 			return
 		end
 	end
-	table.insert(vuImages, {name=imgName, enabled=false})
+	local displayName = imgName
+	local ixSub = string.find(imgName, "25seq")
+	if ixSub ~= nil then
+		if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
+			displayName = string.sub(imgName, ixSub + 6)
+		else
+            displayName = string.sub(imgName, ixSub + 5)
+        end
+    end
+	table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName})
 	vuImagesMap[imgName] = {src=path}
 end
 
