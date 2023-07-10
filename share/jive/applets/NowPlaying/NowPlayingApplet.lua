@@ -379,6 +379,7 @@ function npSpectrumBarSettingsShow(self)
 					visImage:setBarsFormat(v)
 					self:updateSettings()
 					self.spbfchanged = true
+					self.window = nil
 				end,
 			selected),
 		} )
