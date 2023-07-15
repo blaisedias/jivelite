@@ -71,6 +71,7 @@ local function readdir(parent, rpath)
 	end
 end
 
+
 function readCacheDir()
 --	for img, path in readdir(userdirpath, "visucache") do
 	for img, path in readdir(nil, "primed-visu-images") do
@@ -83,6 +84,12 @@ function readCacheDir()
 		imageCache[parts[1]] = path .. "/" .. img
 		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
 	end
+    for img, path in readdir(nil, "digital-vu") do
+		local parts = string.split("%.", img)
+		imageCache[parts[1]] = path .. "/" .. img
+		log:debug("########### readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+    end
+
 end
 
 
@@ -478,7 +485,8 @@ end
 -------------------------------------------------------- 
 --- VU meter
 -------------------------------------------------------- 
-local vuImages = {}
+local vuImages = {
+}
 local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
@@ -523,11 +531,15 @@ function registerVUMeterImage(tbl, path)
 		if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
 			displayName = string.sub(imgName, ixSub + 6)
 		else
-            displayName = string.sub(imgName, ixSub + 5)
-        end
-    end
-	table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName})
+			displayName = string.sub(imgName, ixSub + 5)
+		end
+	end
+	table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
 	vuImagesMap[imgName] = {src=path}
+end
+
+function initVuMeterList()
+	table.insert(vuImages, {name="technics", enabled=false, displayName="Technics", vutype="digital"})
 end
 
 function vuBump()
@@ -551,7 +563,7 @@ function getVuImage(w,h)
 	local icKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 	if currentVuImageKey == icKey then
 		-- image is the current one
-		return currentVuImage
+		return currentVuImage, entry.vutype
 	end
 	if currentVuImage ~= nil then
 		-- release the current image
@@ -560,10 +572,13 @@ function getVuImage(w,h)
 		currentVuImage = nil
 		currentVuImageKey = nil
 	end
+	if entry.vutype ~= "frame" then
+		return nil, entry.vutype
+	end
 	if imageCache[icKey] ~= nil then 
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
-        -- FIXME: loads a "tile" which is not freed by release call
+		-- FIXME: loads a "tile" which is not freed by release call
 		currentVuImage = Surface:loadImage(imageCache[icKey])
 		currentVuImageKey = icKey
 	else
@@ -577,15 +592,16 @@ function getVuImage(w,h)
 				vumImagesMap[entry.name].src = nil
 			end
 			log:debug("getVuImage: load (new) ", icKey, " ", imageCache[icKey])
-            -- FIXME: loads a "tile" which is not freed by release call
+			-- FIXME: loads a "tile" which is not freed by release call
 			currentVuImage = Surface:loadImage(imageCache[icKey])
 			currentVuImageKey = icKey
 		else
 			log:debug("getVuImage: no image for ", icKey)
 		end
 	end
-	return currentVuImage
+	return currentVuImage, entry.vutype
 end
+
 
 function selectVuImage(tbl, name, selected)
 	n_enabled = 0
@@ -593,9 +609,11 @@ function selectVuImage(tbl, name, selected)
 	for k, v in pairs(vuImages) do
 		if v.name == name then
 			if not v.enabled and selected then
-				-- create the cached image for skin resolutions 
-				for k, v in pairs(vuMeterResolutions) do
-					_cacheVUImage(name, vuImagesMap[name].src, v.w, v.h)
+				if v.vutype == "frame" then
+					-- create the cached image for skin resolutions 
+					for k, v in pairs(vuMeterResolutions) do
+						_cacheVUImage(name, vuImagesMap[name].src, v.w, v.h)
+					end
 				end
 			end
 			v.enabled = selected
@@ -610,6 +628,17 @@ end
 
 function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
+end
+
+function getDigiVU()
+	dv = {}
+	dv.off = Surface:loadImage(imageCache["bar-off"])
+	dv.on = Surface:loadImage(imageCache["bar-on"])
+	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
+	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
+	dv.left = Surface:loadImage(imageCache["left"])
+	dv.right = Surface:loadImage(imageCache["right"])
+	return dv
 end
 
 ------------------------------------------------------- 
