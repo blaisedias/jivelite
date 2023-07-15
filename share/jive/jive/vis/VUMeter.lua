@@ -120,11 +120,9 @@ function _layout(self)
 				end
 			else
 				self.dv = visImage.getDigiVU()
-				local d_w, d_h = self.dv.on:getSize()
-				self.dv.y1 = self.y + math.floor((self.h/2 - d_h)/2)
-				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - d_h)/2)
-				self.dv.w = d_w
-				self.dv.h = d_h
+				self.dv.w, self.dv.h = self.dv.on:getSize()
+				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
+				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.lw, self.dv.lh = self.dv.left:getSize()
 				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
 			end
