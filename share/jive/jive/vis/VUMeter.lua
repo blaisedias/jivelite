@@ -97,25 +97,36 @@ function _layout(self)
 			self.y = y
 			self.w = math.floor(w / 2)
 			self.h = h
-			self.bgImg = visImage.getVuImage(w,h)
-			if self.bgImg ~= nil then
-				local imgW, imgH = self.bgImg:getSize()
-				-- FIXME VU Meter images will not always be 25 frames
-				self.frame_w = imgW/25
-				-- centre the VUMeter image within the designated space
-				-- horizontally
-				self.x1 = x + self.w - self.frame_w
-				self.x2 = self.x1 + self.frame_w
-				-- vertically
-				if imgH < h then
-					self.y = math.floor(self.y + ((h - imgH)/2))
-				elseif imgH > h then
-					-- clip the image at the top and bottom
-					self.src_y = math.floor((imgH - h)/2)
+			self.bgImg, self.vutype = visImage.getVuImage(w,h)
+   			if self.vutype == "frame"  then
+				if self.bgImg ~= nil then
+					local imgW, imgH = self.bgImg:getSize()
+					-- FIXME VU Meter images will not always be 25 frames
+					self.frame_w = imgW/25
+					-- centre the VUMeter image within the designated space
+					-- horizontally
+					self.x1 = x + self.w - self.frame_w
+					self.x2 = self.x1 + self.frame_w
+					-- vertically
+					if imgH < h then
+						self.y = math.floor(self.y + ((h - imgH)/2))
+					elseif imgH > h then
+						-- clip the image at the top and bottom
+						self.src_y = math.floor((imgH - h)/2)
+					end
+					log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
+					log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
+					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
-				log:debug("** x1:", self.x1, " x2:", self.x2, " y:", self.y, " src_y:", self.src_y)
-				log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
-				log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
+			else
+				self.dv = visImage.getDigiVU()
+				local d_w, d_h = self.dv.on:getSize()
+				self.dv.y1 = self.y + math.floor((self.h/2 - d_h)/2)
+				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - d_h)/2)
+				self.dv.w = d_w
+				self.dv.h = d_h
+				self.dv.lw, self.dv.lh = self.dv.left:getSize()
+				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
 			end
 		end
 	end
@@ -137,11 +148,11 @@ end
 
 -- FIXME dynamic based on number of bars
 local RMS_MAP = {
-	0, 2, 5, 7, 10, 21, 33, 45, 57, 82, 108, 133, 159, 200, 
-	242, 284, 326, 387, 448, 509, 570, 652, 735, 817, 900, 
-	1005, 1111, 1217, 1323, 1454, 1585, 1716, 1847, 2005, 
-	2163, 2321, 2480, 2666, 2853, 3040, 3227, 3414, 3601,
-	3788, 3975, 4162, 4349, 4536,
+	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
+	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
+	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
+	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
+	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536,
 }
 
 function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
@@ -153,6 +164,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 		end
 	end
 
+    local vald = math.floor(val)
 	-- FIXME when rms map scaled
 	val = math.floor(val / 2)
 
@@ -187,11 +199,39 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 
 --		local x,y,w,h = self:getBounds()
 
-		if self.bgImg ~= nil then
+		if self.vutype == "frame" then
+			if self.bgImg ~= nil then
+				if ch == 1 then
+					self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				else
+					self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				end
+			end
+		else
+			local dvx = 0
+			local dvy = self.dv.y1
 			if ch == 1 then
-				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				self.dv.left:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			else
-				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				dvy = self.dv.y2
+				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
+			end
+			dvx = self.dv.lw
+			for i = 1, 48 do
+				if i < 36 then
+					if i < vald then
+						self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					else
+						self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					end
+				else
+					if i < vald then
+						self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					else
+						self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					end
+				end
+				dvx = dvx + self.dv.w
 			end
 		end
 	end
