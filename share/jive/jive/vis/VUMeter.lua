@@ -164,7 +164,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 		end
 	end
 
-    local vald = math.floor(val)
+    local dvval = val
 	-- FIXME when rms map scaled
 	val = math.floor(val / 2)
 
@@ -217,15 +217,21 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			end
 			dvx = self.dv.lw
-			for i = 1, 48 do
+			if dvval > 1 then
+				self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+			else
+				self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+			end
+			dvx = dvx + self.dv.w
+			for i = 2, 48 do
 				if i < 36 then
-					if i < vald then
+					if i <= dvval then
 						self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 					else
 						self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 					end
 				else
-					if i < vald then
+					if i <= dvval then
 						self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 					else
 						self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
