@@ -539,7 +539,7 @@ function registerVUMeterImage(tbl, path)
 end
 
 function initVuMeterList()
-	table.insert(vuImages, {name="technics", enabled=false, displayName="Technics", vutype="digital"})
+	table.insert(vuImages, {name="tchncs", enabled=false, displayName="Tchncs", vutype="digital"})
 end
 
 function vuBump()
@@ -631,26 +631,34 @@ function isCurrentVUMeterEnabled()
 end
 
 function getDigiVU(w, h)
-    -- FIXME: cheating: the digital VU meter components are
-    -- created for 1024x392 so scale accordingly
 	dv = {}
-    if w == 1024 and h == 392 then
-    	dv.off = Surface:loadImage(imageCache["bar-off"])
-    	dv.on = Surface:loadImage(imageCache["bar-on"])
-    	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
-    	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
-    	dv.left = Surface:loadImage(imageCache["left"])
-    	dv.right = Surface:loadImage(imageCache["right"])
-    else
-        local bw = math.floor((20*w)/1024)
-        local bh = math.floor((130*h)/392)
-    	dv.off = Surface:loadImage(imageCache["bar-off"]):resize(bw, bh)
-    	dv.on = Surface:loadImage(imageCache["bar-on"]):resize(bw, bh)
-    	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"]):resize(bw, bh)
-    	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"]):resize(bw, bh)
-    	dv.left = Surface:loadImage(imageCache["left"]):resize(bw*2, bh)
-    	dv.right = Surface:loadImage(imageCache["right"]):resize(bw*2, bh)
-    end
+	bw, bh = Surface:loadImage(imageCache["bar-on"]):getSize()
+   	lw, lh = Surface:loadImage(imageCache["left"]):getSize()
+	dw = (bw * 48) + lw
+	dh = lh * 3
+	if w > dw and h > lh * 2 then
+		dv.on = Surface:loadImage(imageCache["bar-on"])
+		dv.off = Surface:loadImage(imageCache["bar-off"])
+		dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
+		dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
+		dv.left = Surface:loadImage(imageCache["left"])
+		dv.right = Surface:loadImage(imageCache["right"])
+		dv.center = Surface:loadImage(imageCache["center"])
+	else
+		bw = math.floor((bw*w)/dw)
+		bh = math.floor((bh*h)/dh)
+		dv.on = Surface:loadImage(imageCache["bar-on"]):resize(bw, bh)
+		dv.off = Surface:loadImage(imageCache["bar-off"]):resize(bw, bh)
+		dv.peakon = Surface:loadImage(imageCache["bar-peak-on"]):resize(bw, bh)
+		dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"]):resize(bw, bh)
+		dv.left = Surface:loadImage(imageCache["left"]):resize(bw*2, bh)
+		dv.right = Surface:loadImage(imageCache["right"]):resize(bw*2, bh)
+    --FIXME scale center and return
+	end
+	dw = (bw * 48) + lw
+	dh = lh * 3
+	dv.xoffset = math.floor(( w - dw ) / 2)
+	log:debug("##### ", dv.xoffset, " ", dv.center)
 	return dv
 end
 
