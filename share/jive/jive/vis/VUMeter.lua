@@ -119,13 +119,14 @@ function _layout(self)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
 			else
-			    self.x1 = x
-			    self.x2 = x
+				self.x1 = x
+				self.x2 = x
 				self.dv = visImage.getDigiVU(w, h)
 				self.dv.w, self.dv.h = self.dv.on:getSize()
 				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.lw, self.dv.lh = self.dv.left:getSize()
+				self.dv.cap = {0, 0}
 				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
 			end
 		end
@@ -164,7 +165,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 		end
 	end
 
-    local dvval = val
+	local dvval = val
 	-- FIXME when rms map scaled
 	val = math.floor(val / 2)
 
@@ -208,6 +209,12 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				end
 			end
 		else
+			if dvval >= self.dv.cap[ch] then
+				self.dv.cap[ch] = dvval
+			elseif self.dv.cap[ch] > 0 then
+				self.dv.cap[ch] = self.dv.cap[ch] - 1
+			end
+
 			local dvx = x
 			local dvy = self.dv.y1
 			if ch == 1 then
@@ -217,25 +224,39 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			end
 			dvx = dvx + self.dv.lw
-			if dvval > 1 then
+			if dvval > 1 or 1 < self.dv.cap[ch] then
 				self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 			else
 				self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 			end
 			dvx = dvx + self.dv.w
-			for i = 2, 48 do
-				if i < 36 then
-					if i <= dvval then
-						self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-					else
-						self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-					end
+			for i = 2, 35 do
+				-- this is instantaneous and accurate
+				-- if i <= dvval then
+				-- 
+				-- this is instantaneous and accurate with trailing cap bar
+				-- if i <= dvval or i == self.dv.cap[ch] then
+				-- 
+				-- this is smoother
+				if i <= dvval or i <= self.dv.cap[ch] then
+					self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				else
-					if i <= dvval then
-						self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-					else
-						self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-					end
+					self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+				end
+				dvx = dvx + self.dv.w
+			end
+			for i = 36, 48 do
+				-- this is instantaneous and accurate  
+				-- if i <= dvval then
+				-- 
+				-- this is instantaneous and accurate with trailing cap bar
+				-- if i <= dvval or i == self.dv.cap[ch] then
+				-- 
+				-- this is smoother
+				if i <= dvval or i <= self.dv.cap[ch] then
+					self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+				else
+					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				end
 				dvx = dvx + self.dv.w
 			end
