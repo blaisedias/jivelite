@@ -119,7 +119,9 @@ function _layout(self)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
 			else
-				self.dv = visImage.getDigiVU()
+			    self.x1 = x
+			    self.x2 = x
+				self.dv = visImage.getDigiVU(w, h)
 				self.dv.w, self.dv.h = self.dv.on:getSize()
 				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
@@ -206,7 +208,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				end
 			end
 		else
-			local dvx = 0
+			local dvx = x
 			local dvy = self.dv.y1
 			if ch == 1 then
 				self.dv.left:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
@@ -214,7 +216,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				dvy = self.dv.y2
 				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			end
-			dvx = self.dv.lw
+			dvx = dvx + self.dv.lw
 			if dvval > 1 then
 				self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 			else

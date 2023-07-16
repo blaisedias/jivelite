@@ -630,14 +630,27 @@ function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
 end
 
-function getDigiVU()
+function getDigiVU(w, h)
+    -- FIXME: cheating: the digital VU meter components are
+    -- created for 1024x392 so scale accordingly
 	dv = {}
-	dv.off = Surface:loadImage(imageCache["bar-off"])
-	dv.on = Surface:loadImage(imageCache["bar-on"])
-	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
-	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
-	dv.left = Surface:loadImage(imageCache["left"])
-	dv.right = Surface:loadImage(imageCache["right"])
+    if w == 1024 and h == 392 then
+    	dv.off = Surface:loadImage(imageCache["bar-off"])
+    	dv.on = Surface:loadImage(imageCache["bar-on"])
+    	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
+    	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
+    	dv.left = Surface:loadImage(imageCache["left"])
+    	dv.right = Surface:loadImage(imageCache["right"])
+    else
+        local bw = math.floor((20*w)/1024)
+        local bh = math.floor((130*h)/392)
+    	dv.off = Surface:loadImage(imageCache["bar-off"]):resize(bw, bh)
+    	dv.on = Surface:loadImage(imageCache["bar-on"]):resize(bw, bh)
+    	dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"]):resize(bw, bh)
+    	dv.peakon = Surface:loadImage(imageCache["bar-peak-on"]):resize(bw, bh)
+    	dv.left = Surface:loadImage(imageCache["left"]):resize(bw*2, bh)
+    	dv.right = Surface:loadImage(imageCache["right"]):resize(bw*2, bh)
+    end
 	return dv
 end
 
