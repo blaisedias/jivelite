@@ -28,6 +28,8 @@ function __init(self, style)
 
 	obj.cap = { 0, 0 }
 
+	obj.ix = { 0, 0 }
+
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
 
 	return obj
@@ -127,6 +129,7 @@ function _layout(self)
 				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.lw, self.dv.lh = self.dv.left:getSize()
 				self.dv.cap = {0, 0}
+				self.dv.cap_counter = {0, 0}
 				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
 			end
 		end
@@ -201,18 +204,24 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 --		local x,y,w,h = self:getBounds()
 
 		if self.vutype == "frame" then
+			-- smoother transitions => the loss of accuracy
+			-- frame change speed is exponential derived from difference
+			-- like real VU meters
+			local delta = math.floor((self.cap[ch] - self.ix[ch])/2)
+			self.ix[ch] = self.ix[ch] + delta
 			if self.bgImg ~= nil then
-				if ch == 1 then
-					self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
-				else
-					self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
-				end
+				self.bgImg:blitClip(self.ix[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
 		else
 			if dvval >= self.dv.cap[ch] then
 				self.dv.cap[ch] = dvval
+				self.dv.cap_counter[ch] = math.floor(FRAME_RATE/2)
 			elseif self.dv.cap[ch] > 0 then
-				self.dv.cap[ch] = self.dv.cap[ch] - 1
+				-- self.dv.cap[ch] = self.dv.cap[ch] - 1
+				self.dv.cap_counter[ch] = self.dv.cap_counter[ch] - 1
+				if self.dv.cap_counter[ch] < 1 then
+					self.dv.cap[ch] = 0
+				end
 			end
 
 			local dvx = x
@@ -235,10 +244,10 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				-- if i <= dvval then
 				-- 
 				-- this is instantaneous and accurate with trailing cap bar
-				-- if i <= dvval or i == self.dv.cap[ch] then
+				if i <= dvval or i == self.dv.cap[ch] then
 				-- 
 				-- this is smoother
-				if i <= dvval or i <= self.dv.cap[ch] then
+				-- if i <= dvval or i <= self.dv.cap[ch] then
 					self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				else
 					self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
@@ -250,10 +259,10 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				-- if i <= dvval then
 				-- 
 				-- this is instantaneous and accurate with trailing cap bar
-				-- if i <= dvval or i == self.dv.cap[ch] then
+				if i <= dvval or i == self.dv.cap[ch] then
 				-- 
 				-- this is smoother
-				if i <= dvval or i <= self.dv.cap[ch] then
+				-- if i <= dvval or i <= self.dv.cap[ch] then
 					self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				else
 					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
