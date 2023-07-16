@@ -121,8 +121,6 @@ function _layout(self)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
 			else
-				self.x1 = x
-				self.x2 = x
 				self.dv = visImage.getDigiVU(w, h)
 				self.dv.w, self.dv.h = self.dv.on:getSize()
 				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
@@ -130,6 +128,13 @@ function _layout(self)
 				self.dv.lw, self.dv.lh = self.dv.left:getSize()
 				self.dv.cap = {0, 0}
 				self.dv.cap_counter = {0, 0}
+				self.x1 = x + self.dv.xoffset
+				self.x2 = x + self.dv.xoffset
+				if self.dv.center ~= nil then
+					self.dv.cw, self.dv.ch = self.dv.center:getSize()
+					self.dv.cy = self.y + math.floor(self.h/2 -  self.dv.ch/2)
+					log:debug("******* C ", self.dv.cy, " ", self.y, " ", self.h, " ", self.dv.ch ) 
+				end
 				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
 			end
 		end
@@ -269,6 +274,11 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				end
 				dvx = dvx + self.dv.w
 			end
+
+			if self.dv.center ~= nil then
+				self.dv.center:blit(surface, x, self.dv.cy, self.dv.cw, self.dv.ch)
+			end
+
 		end
 	end
 end
