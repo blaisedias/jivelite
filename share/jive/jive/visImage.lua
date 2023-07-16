@@ -658,7 +658,6 @@ function getDigiVU(w, h)
 	dw = (bw * 48) + lw
 	dh = lh * 3
 	dv.xoffset = math.floor(( w - dw ) / 2)
-	log:debug("##### ", dv.xoffset, " ", dv.center)
 	return dv
 end
 
