@@ -48,6 +48,7 @@ end
 local function dirIter(rpath)
 --	local fq_path = parent .. "/" .. rpath
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
+		log:info("########### dirIter: ", dir)
 		dir = dir .. rpath
 --		if dir == fq_path then
 			local mode = lfs.attributes(dir, "mode")
@@ -84,12 +85,11 @@ function readCacheDir()
 		imageCache[parts[1]] = path .. "/" .. img
 		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
 	end
-    for img, path in readdir(nil, "digital-vu") do
-		local parts = string.split("%.", img)
-		imageCache[parts[1]] = path .. "/" .. img
-		log:debug("########### readCacheDir: ", parts[1], " ", imageCache[parts[1]])
-    end
-
+--    for img, path in readdir(nil, "digital-vu") do
+--		local parts = string.split("%.", img)
+--		imageCache[parts[1]] = path .. "/" .. img
+--		log:info("########### readCacheDir: ", parts[1], " ", imageCache[parts[1]], " ", parts)
+--    end
 end
 
 
@@ -539,7 +539,24 @@ function registerVUMeterImage(tbl, path)
 end
 
 function initVuMeterList()
-	table.insert(vuImages, {name="tchncs", enabled=false, displayName="Tchncs", vutype="digital"})
+    local dvudir = lfs.currentdir() .. "/share/jive/digital-vu"
+    for entry in lfs.dir(dvudir) do
+        if entry ~= "." and entry ~= ".." then
+            local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
+            if mode == "directory" then
+                path = dvudir .. "/" .. entry
+                for f in lfs.dir(path) do
+                    mode = lfs.attributes(path .. "/" .. f, "mode")
+                    if mode == "file" then
+		                local parts = string.split("%.", f)
+                        log:info("digital-vu ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+		                imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+                    end
+                end
+	            table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="digital"})
+            end
+        end
+    end
 end
 
 function vuBump()
@@ -573,7 +590,7 @@ function getVuImage(w,h)
 		currentVuImageKey = nil
 	end
 	if entry.vutype ~= "frame" then
-		return nil, entry.vutype
+		return getDigiVU(entry.name, w, h), entry.vutype
 	end
 	if imageCache[icKey] ~= nil then 
 		-- image is in the cache load and return
@@ -630,30 +647,37 @@ function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
 end
 
-function getDigiVU(w, h)
+function getDigiVU(name, w, h)
+	local bar_on = name .. ":bar-on"
+	local bar_off = name .. ":bar-off"
+	local bar_peak_on = name .. ":bar-peak-on"
+	local bar_peak_off = name .. ":bar-peak-off"
+	local left = name .. ":left"
+	local right = name .. ":right"
+	local center = name .. ":center"
 	dv = {}
-	bw, bh = Surface:loadImage(imageCache["bar-on"]):getSize()
-   	lw, lh = Surface:loadImage(imageCache["left"]):getSize()
+	bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
+   	lw, lh = Surface:loadImage(imageCache[left]):getSize()
 	dw = (bw * 48) + lw
 	dh = lh * 3
 	if w > dw and h > lh * 2 then
-		dv.on = Surface:loadImage(imageCache["bar-on"])
-		dv.off = Surface:loadImage(imageCache["bar-off"])
-		dv.peakon = Surface:loadImage(imageCache["bar-peak-on"])
-		dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"])
-		dv.left = Surface:loadImage(imageCache["left"])
-		dv.right = Surface:loadImage(imageCache["right"])
-		dv.center = Surface:loadImage(imageCache["center"])
+		dv.on = Surface:loadImage(imageCache[bar_on])
+		dv.off = Surface:loadImage(imageCache[bar_off])
+		dv.peakon = Surface:loadImage(imageCache[bar_peak_on])
+		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off])
+		dv.left = Surface:loadImage(imageCache[left])
+		dv.right = Surface:loadImage(imageCache[right])
+		dv.center = Surface:loadImage(imageCache[center])
 	else
 		bw = math.floor((bw*w)/dw)
 		bh = math.floor((bh*h)/dh)
-		dv.on = Surface:loadImage(imageCache["bar-on"]):resize(bw, bh)
-		dv.off = Surface:loadImage(imageCache["bar-off"]):resize(bw, bh)
-		dv.peakon = Surface:loadImage(imageCache["bar-peak-on"]):resize(bw, bh)
-		dv.peakoff = Surface:loadImage(imageCache["bar-peak-off"]):resize(bw, bh)
-		dv.left = Surface:loadImage(imageCache["left"]):resize(bw*2, bh)
-		dv.right = Surface:loadImage(imageCache["right"]):resize(bw*2, bh)
-    --FIXME scale center and return
+		dv.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
+		dv.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
+		dv.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
+		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off]):resize(bw, bh)
+		dv.left = Surface:loadImage(imageCache[left]):resize(bw*2, bh)
+		dv.right = Surface:loadImage(imageCache[right]):resize(bw*2, bh)
+	--FIXME scale center and return
 	end
 	dw = (bw * 48) + lw
 	dh = lh * 3

@@ -99,8 +99,9 @@ function _layout(self)
 			self.y = y
 			self.w = math.floor(w / 2)
 			self.h = h
-			self.bgImg, self.vutype = visImage.getVuImage(w,h)
+			self.vutbl, self.vutype = visImage.getVuImage(w,h)
    			if self.vutype == "frame"  then
+				self.bgimg = self.vutbl
 				if self.bgImg ~= nil then
 					local imgW, imgH = self.bgImg:getSize()
 					-- FIXME VU Meter images will not always be 25 frames
@@ -121,7 +122,7 @@ function _layout(self)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
 			else
-				self.dv = visImage.getDigiVU(w, h)
+				self.dv = self.vutbl
 				self.dv.w, self.dv.h = self.dv.on:getSize()
 				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
