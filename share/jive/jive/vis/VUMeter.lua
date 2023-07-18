@@ -101,7 +101,7 @@ function _layout(self)
 			self.h = h
 			self.vutbl, self.vutype = visImage.getVuImage(w,h)
    			if self.vutype == "frame"  then
-				self.bgimg = self.vutbl
+				self.bgImg = self.vutbl
 				if self.bgImg ~= nil then
 					local imgW, imgH = self.bgImg:getSize()
 					-- FIXME VU Meter images will not always be 25 frames
@@ -162,7 +162,7 @@ local RMS_MAP = {
 	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
 	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
 	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
-	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536,
+	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 4942
 }
 
 function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
@@ -176,7 +176,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 
 	local dvval = val
 	-- FIXME when rms map scaled
-	val = math.floor(val / 2)
+	val = math.floor((val % 49)/2)
 
 --	val = math.floor(math.log(sampleAcc[ch]) * 1.5)
 --	if val > 24 then
@@ -213,10 +213,11 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 			-- smoother transitions => the loss of accuracy
 			-- frame change speed is exponential derived from difference
 			-- like real VU meters
-			local delta = math.floor((self.cap[ch] - self.ix[ch])/2)
-			self.ix[ch] = self.ix[ch] + delta
+			-- local delta = math.floor((self.cap[ch] - self.ix[ch])/2)
+			-- self.ix[ch] = self.ix[ch] + delta
 			if self.bgImg ~= nil then
-				self.bgImg:blitClip(self.ix[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				-- self.bgImg:blitClip(self.ix[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
+				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
 		else
 			if dvval >= self.dv.cap[ch] then
@@ -245,7 +246,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 			end
 			dvx = dvx + self.dv.w
-			for i = 2, 35 do
+			for i = 2, 36 do
 				-- this is instantaneous and accurate
 				-- if i <= dvval then
 				-- 
@@ -260,7 +261,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				end
 				dvx = dvx + self.dv.w
 			end
-			for i = 36, 48 do
+			for i = 37, 49 do
 				-- this is instantaneous and accurate  
 				-- if i <= dvval then
 				-- 
