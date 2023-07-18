@@ -48,7 +48,6 @@ end
 local function dirIter(rpath)
 --	local fq_path = parent .. "/" .. rpath
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
-		log:info("########### dirIter: ", dir)
 		dir = dir .. rpath
 --		if dir == fq_path then
 			local mode = lfs.attributes(dir, "mode")
@@ -85,11 +84,6 @@ function readCacheDir()
 		imageCache[parts[1]] = path .. "/" .. img
 		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
 	end
---    for img, path in readdir(nil, "digital-vu") do
---		local parts = string.split("%.", img)
---		imageCache[parts[1]] = path .. "/" .. img
---		log:info("########### readCacheDir: ", parts[1], " ", imageCache[parts[1]], " ", parts)
---    end
 end
 
 
@@ -549,7 +543,7 @@ function initVuMeterList()
                     mode = lfs.attributes(path .. "/" .. f, "mode")
                     if mode == "file" then
 		                local parts = string.split("%.", f)
-                        log:info("digital-vu ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+                        log:debug("digital-vu ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
 		                imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
                     end
                 end
