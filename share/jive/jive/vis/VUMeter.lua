@@ -123,20 +123,18 @@ function _layout(self)
 				end
 			else
 				self.dv = self.vutbl
-				self.dv.w, self.dv.h = self.dv.on:getSize()
-				self.dv.y1 = self.y + math.floor((self.h/2 - self.dv.h)/2)
-				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
-				self.dv.lw, self.dv.lh = self.dv.left:getSize()
-				self.dv.cap = {0, 0}
+				self.x1 = x + math.floor((w - self.dv.w)/2)
+				self.x2 = self.x1
+--				log:debug("******* DV x=", self.x1)
+				local y1 = self.y + math.floor((h - self.dv.h)/2)
+--				log:debug("******* DV y1=", y1)
+				self.dv.cy = y1 + self.dv.bh
+				local y2 = self.dv.cy + self.dv.ch
+--				log:debug("******* DV y2=", y2)
+				self.dv.y = {y1, y2}
+				self.dv.cap = {-1, -1}
 				self.dv.peak_hold_counter = {0, 0}
-				self.x1 = x + self.dv.xoffset
-				self.x2 = x + self.dv.xoffset
-				if self.dv.center ~= nil then
-					self.dv.cw, self.dv.ch = self.dv.center:getSize()
-					self.dv.cy = self.y + math.floor(self.h/2 -  self.dv.ch/2)
-					log:debug("******* C ", self.dv.cy, " ", self.y, " ", self.h, " ", self.dv.ch ) 
-				end
-				log:debug("******* dv ", self.dv.y1, " ", self.dv.y2, " ", self.dv.w, " ", self.dv.h, " ", self.dv.lw)
+--				log:debug("******* DV y1=", y1, " cy=", self.dv.cy, " y2=", y2)
 			end
 		end
 	end
@@ -220,41 +218,35 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
 		else
-			if dvval >= self.dv.cap[ch] then
+			if dvval > 1 and dvval >= self.dv.cap[ch] then
 				self.dv.cap[ch] = dvval
 				self.dv.peak_hold_counter[ch] = math.floor(FRAME_RATE/2)
-			elseif self.dv.cap[ch] > 0 then
-				-- self.dv.cap[ch] = self.dv.cap[ch] - 1
+			else
 				self.dv.peak_hold_counter[ch] = self.dv.peak_hold_counter[ch] - 1
 				if self.dv.peak_hold_counter[ch] < 1 then
-					self.dv.cap[ch] = 0
+					self.dv.cap[ch] = -1
 				end
 			end
 
 			local dvx = x
-			local dvy = self.dv.y1
-			if ch == 1 then
-				self.dv.left:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
-			else
-				dvy = self.dv.y2
-				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
-			end
+			local dvy = self.dv.y[ch]
+			self.dv.blead[ch]:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			dvx = dvx + self.dv.lw
 			for i = 1, 36 do
 				if i < dvval or i == self.dv.cap[ch] then
-					self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					self.dv.on:blit(surface, dvx, dvy, self.dv.bw, self.dv.bh)
 				else
-					self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					self.dv.off:blit(surface, dvx, dvy, self.dv.bw, self.dv.bh)
 				end
-				dvx = dvx + self.dv.w
+				dvx = dvx + self.dv.bw
 			end
 			for i = 37, 49 do
 				if i < dvval or i == self.dv.cap[ch] then
-					self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					self.dv.peakon:blit(surface, dvx, dvy, self.dv.bw, self.dv.h)
 				else
-					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
+					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.bw, self.dv.h)
 				end
-				dvx = dvx + self.dv.w
+				dvx = dvx + self.dv.bw
 			end
 
 			if self.dv.center ~= nil then
