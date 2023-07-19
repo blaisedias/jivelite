@@ -656,32 +656,50 @@ function getVFDVUmeter(name, w, h)
 	local right = name .. ":right"
 	local center = name .. ":center"
 	dv = {}
-	bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
-   	lw, lh = Surface:loadImage(imageCache[left]):getSize()
-	dw = (bw * 48) + lw
-	dh = lh * 3
-	if w > dw and h > lh * 2 then
+	local bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
+   	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
+   	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
+	local dw = cw
+	local dh = ch + (bh * 2)
+--	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
+--	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
+	if w >= dw and h >= dh then
 		dv.on = Surface:loadImage(imageCache[bar_on])
 		dv.off = Surface:loadImage(imageCache[bar_off])
 		dv.peakon = Surface:loadImage(imageCache[bar_peak_on])
 		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off])
-		dv.left = Surface:loadImage(imageCache[left])
-		dv.right = Surface:loadImage(imageCache[right])
+		dv.blead = { Surface:loadImage(imageCache[left]), Surface:loadImage(imageCache[right]) }
 		dv.center = Surface:loadImage(imageCache[center])
+		dv.w = dw
+		dv.h = dh
 	else
-		bw = math.floor((bw*w)/dw)
-		bh = math.floor((bh*h)/dh)
+		local sf = math.min(w/dw, h/dh)
+		bw = math.floor(bw * sf)
+		bh = math.floor(bh * sf)
+		lw = math.floor(lw * sf)
+		lh = math.floor(lh * sf)
+		-- doh. Due to rounding differences,  scaling the calibration part like so
+		-- cw = math.floor((cw*w)/dw)
+		-- scales at odds with the smaller bits.
+		cw = math.floor((bw *49) + (lw *2))
+		ch = math.floor((ch * sf))
 		dv.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
 		dv.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
 		dv.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
 		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off]):resize(bw, bh)
-		dv.left = Surface:loadImage(imageCache[left]):resize(bw*2, bh)
-		dv.right = Surface:loadImage(imageCache[right]):resize(bw*2, bh)
-	--FIXME scale center and return
+		dv.blead = { Surface:loadImage(imageCache[left]):resize(lw, lh), Surface:loadImage(imageCache[right]):resize(lw, lh) }
+		dv.center = Surface:loadImage(imageCache[center]):resize(cw, ch)
+		dv.w = cw
+		dv.h = ch + (bh * 2)
 	end
-	dw = (bw * 48) + lw
-	dh = lh * 3
-	dv.xoffset = math.floor(( w - dw ) / 2)
+	dv.bw = bw
+	dv.bh = bh
+	dv.lw = lw
+	dv.lh = lh
+	dv.cw = cw
+	dv.ch = ch
+--	log:debug("####  dv.w:", dv.w, " dv.h:", dv.h)
+--	log:debug("####  dv.bw:", dv.bw, " dv.bh:", dv.bh, " dv.lw:", dv.lw, " dv.lh", dv.lh, " dv.cw:", dv.cw, " dv.ch", dv.ch)
 	return dv
 end
 
