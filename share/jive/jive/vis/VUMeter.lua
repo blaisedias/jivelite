@@ -128,7 +128,7 @@ function _layout(self)
 				self.dv.y2 = self.y + (self.h/2) + math.floor((self.h/2 - self.dv.h)/2)
 				self.dv.lw, self.dv.lh = self.dv.left:getSize()
 				self.dv.cap = {0, 0}
-				self.dv.cap_counter = {0, 0}
+				self.dv.peak_hold_counter = {0, 0}
 				self.x1 = x + self.dv.xoffset
 				self.x2 = x + self.dv.xoffset
 				if self.dv.center ~= nil then
@@ -162,7 +162,7 @@ local RMS_MAP = {
 	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
 	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
 	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
-	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 4942
+	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755,
 }
 
 function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
@@ -222,11 +222,11 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 		else
 			if dvval >= self.dv.cap[ch] then
 				self.dv.cap[ch] = dvval
-				self.dv.cap_counter[ch] = math.floor(FRAME_RATE/2)
+				self.dv.peak_hold_counter[ch] = math.floor(FRAME_RATE/2)
 			elseif self.dv.cap[ch] > 0 then
 				-- self.dv.cap[ch] = self.dv.cap[ch] - 1
-				self.dv.cap_counter[ch] = self.dv.cap_counter[ch] - 1
-				if self.dv.cap_counter[ch] < 1 then
+				self.dv.peak_hold_counter[ch] = self.dv.peak_hold_counter[ch] - 1
+				if self.dv.peak_hold_counter[ch] < 1 then
 					self.dv.cap[ch] = 0
 				end
 			end
@@ -240,21 +240,8 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.dv.right:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
 			end
 			dvx = dvx + self.dv.lw
-			if dvval > 1 or 1 < self.dv.cap[ch] then
-				self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-			else
-				self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
-			end
-			dvx = dvx + self.dv.w
-			for i = 2, 36 do
-				-- this is instantaneous and accurate
-				-- if i <= dvval then
-				-- 
-				-- this is instantaneous and accurate with trailing cap bar
-				if i <= dvval or i == self.dv.cap[ch] then
-				-- 
-				-- this is smoother
-				-- if i <= dvval or i <= self.dv.cap[ch] then
+			for i = 1, 36 do
+				if i < dvval or i == self.dv.cap[ch] then
 					self.dv.on:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				else
 					self.dv.off:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
@@ -262,14 +249,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				dvx = dvx + self.dv.w
 			end
 			for i = 37, 49 do
-				-- this is instantaneous and accurate  
-				-- if i <= dvval then
-				-- 
-				-- this is instantaneous and accurate with trailing cap bar
-				if i <= dvval or i == self.dv.cap[ch] then
-				-- 
-				-- this is smoother
-				-- if i <= dvval or i <= self.dv.cap[ch] then
+				if i < dvval or i == self.dv.cap[ch] then
 					self.dv.peakon:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
 				else
 					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.w, self.dv.h)
