@@ -76,13 +76,17 @@ function readCacheDir()
 --	for img, path in readdir(userdirpath, "visucache") do
 	for img, path in readdir(nil, "primed-visu-images") do
 		local parts = string.split("%.", img)
-		imageCache[parts[1]] = path .. "/" .. img
-		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+			imageCache[parts[1]] = path .. "/" .. img
+			log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+		end
 	end
 	for img, path in readdir(nil, "visucache") do
 		local parts = string.split("%.", img)
-		imageCache[parts[1]] = path .. "/" .. img
-		log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+			imageCache[parts[1]] = path .. "/" .. img
+			log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+		end
 	end
 end
 
@@ -93,7 +97,7 @@ end
 -- scale an image to fit a height - maintaining aspect ration
 function _scaleSpectrumImage(imgPath, w, h)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
-    -- FIXME: loads a "tile" which is not freed by release call
+	-- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
@@ -168,7 +172,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
 		w = 1280
 	end
-    -- FIXME: loads a "tile" which is not freed by release call
+	-- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
@@ -258,10 +262,10 @@ function _cacheSpectrumImage(imgName, path, w, h)
 --			img:blitAlpha(bgimg, 0, 0, 80)
 --			bgimg:saveBMP(bg_dcpath)
 --			bgimg:release()
-            local cwd = lfs.currentdir()
-            lfs.chdir(cachedir)
-            lfs.link(icKey .. ".bmp", bgIcKey .. ".bmp", true)
-            lfs.chdir(cwd)
+			local cwd = lfs.currentdir()
+			lfs.chdir(cachedir)
+			lfs.link(icKey .. ".bmp", bgIcKey .. ".bmp", true)
+			lfs.chdir(cwd)
 			imageCache[bgIcKey] = bg_dcpath
 			log:debug("_cacheSpectrumImage cached ", bgIcKey)
 		end
@@ -330,7 +334,7 @@ function getFgSpectrumImage(tbl, w,h)
 	end
 	if imageCache[icKey] ~= nil then 
 		log:debug("getFgImage: load ", icKey, " ", imageCache[icKey])
-        -- FIXME: loads a "tile" which is not freed by release call
+		-- FIXME: loads a "tile" which is not freed by release call
 		currentFgImage = Surface:loadImage(imageCache[icKey])
 		currentFgImageKey = icKey
 	else
@@ -341,7 +345,7 @@ function getFgSpectrumImage(tbl, w,h)
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
-            -- FIXME: loads a "tile" which is not freed by release call
+			-- FIXME: loads a "tile" which is not freed by release call
 			currentFgImage = Surface:loadImage(imageCache[icKey])
 			currentFgImageKey = icKey
 		end
@@ -376,7 +380,7 @@ function getBgSpectrumImage(tbl, w,h)
 		log:debug("getBgImage: load ", icKey, " ", imageCache[icKey])
 		currentBgImage = Surface:newRGB(w,h)
 		currentBgImage:filledRectangle(0,0,w,h,0)
-        -- FIXME: loads a "tile" which is not freed by release call
+		-- FIXME: loads a "tile" which is not freed by release call
 		local img = Surface:loadImage(imageCache[icKey])
 		img:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
 		img:blit(currentBgImage, 0, 0)
@@ -390,7 +394,7 @@ function getBgSpectrumImage(tbl, w,h)
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
-            -- FIXME: loads a "tile" which is not freed by release call
+			-- FIXME: loads a "tile" which is not freed by release call
 			currentBgImage = Surface:loadImage(imageCache[icKey])
 			currentBgImageKey = icKey
 		end
@@ -533,24 +537,26 @@ function registerVUMeterImage(tbl, path)
 end
 
 function initVuMeterList()
-    local dvudir = lfs.currentdir() .. "/share/jive/vumeters/vfd"
-    for entry in lfs.dir(dvudir) do
-        if entry ~= "." and entry ~= ".." then
-            local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
-            if mode == "directory" then
-                path = dvudir .. "/" .. entry
-                for f in lfs.dir(path) do
-                    mode = lfs.attributes(path .. "/" .. f, "mode")
-                    if mode == "file" then
-		                local parts = string.split("%.", f)
-                        log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-		                imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
-                    end
-                end
-	            table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
-            end
-        end
-    end
+	local dvudir = lfs.currentdir() .. "/share/jive/vumeters/vfd"
+	for entry in lfs.dir(dvudir) do
+		if entry ~= "." and entry ~= ".." then
+			local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
+			if mode == "directory" then
+				path = dvudir .. "/" .. entry
+				for f in lfs.dir(path) do
+					mode = lfs.attributes(path .. "/" .. f, "mode")
+					if mode == "file" then
+						local parts = string.split("%.", f)
+						if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+							log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+							imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+						end
+					end
+				end
+				table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
+			end
+		end
+	end
 end
 
 function vuBump()
