@@ -533,7 +533,7 @@ function registerVUMeterImage(tbl, path)
 end
 
 function initVuMeterList()
-    local dvudir = lfs.currentdir() .. "/share/jive/digital-vu"
+    local dvudir = lfs.currentdir() .. "/share/jive/vumeters/vfd"
     for entry in lfs.dir(dvudir) do
         if entry ~= "." and entry ~= ".." then
             local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
@@ -543,11 +543,11 @@ function initVuMeterList()
                     mode = lfs.attributes(path .. "/" .. f, "mode")
                     if mode == "file" then
 		                local parts = string.split("%.", f)
-                        log:debug("digital-vu ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+                        log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
 		                imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
                     end
                 end
-	            table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="digital"})
+	            table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
             end
         end
     end
@@ -584,7 +584,7 @@ function getVuImage(w,h)
 		currentVuImageKey = nil
 	end
 	if entry.vutype ~= "frame" then
-		return getDigiVU(entry.name, w, h), entry.vutype
+		return getVFDVUmeter(entry.name, w, h), entry.vutype
 	end
 	if imageCache[icKey] ~= nil then 
 		-- image is in the cache load and return
@@ -641,7 +641,7 @@ function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
 end
 
-function getDigiVU(name, w, h)
+function getVFDVUmeter(name, w, h)
 	local bar_on = name .. ":bar-on"
 	local bar_off = name .. ":bar-off"
 	local bar_peak_on = name .. ":bar-peak-on"
