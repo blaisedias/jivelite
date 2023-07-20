@@ -121,20 +121,20 @@ function _layout(self)
 					log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
-			else
-				self.dv = self.vutbl
-				self.x1 = x + math.floor((w - self.dv.w)/2)
+            elseif self.vutype == "vfd" then
+				self.vfd = self.vutbl
+				self.x1 = x + math.floor((w - self.vfd.w)/2)
 				self.x2 = self.x1
---				log:debug("******* DV x=", self.x1)
-				local y1 = self.y + math.floor((h - self.dv.h)/2)
---				log:debug("******* DV y1=", y1)
-				self.dv.cy = y1 + self.dv.bh
-				local y2 = self.dv.cy + self.dv.ch
---				log:debug("******* DV y2=", y2)
-				self.dv.y = {y1, y2}
-				self.dv.cap = {-1, -1}
-				self.dv.peak_hold_counter = {0, 0}
---				log:debug("******* DV y1=", y1, " cy=", self.dv.cy, " y2=", y2)
+--				log:debug("******* vfd x=", self.x1)
+				local y1 = self.y + math.floor((h - self.vfd.h)/2)
+--				log:debug("******* vfd y1=", y1)
+				self.vfd.cy = y1 + self.vfd.bh
+				local y2 = self.vfd.cy + self.vfd.ch
+--				log:debug("******* vfd y2=", y2)
+				self.vfd.y = {y1, y2}
+				self.vfd.cap = {-1, -1}
+				self.vfd.peak_hold_counter = {0, 0}
+--				log:debug("******* vfd y1=", y1, " cy=", self.vfd.cy, " y2=", y2)
 			end
 		end
 	end
@@ -218,39 +218,39 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
 		else
-			if dvval > 1 and dvval >= self.dv.cap[ch] then
-				self.dv.cap[ch] = dvval
-				self.dv.peak_hold_counter[ch] = math.floor(FRAME_RATE/2)
+			if dvval > 1 and dvval >= self.vfd.cap[ch] then
+				self.vfd.cap[ch] = dvval
+				self.vfd.peak_hold_counter[ch] = math.floor(FRAME_RATE/2)
 			else
-				self.dv.peak_hold_counter[ch] = self.dv.peak_hold_counter[ch] - 1
-				if self.dv.peak_hold_counter[ch] < 1 then
-					self.dv.cap[ch] = -1
+				self.vfd.peak_hold_counter[ch] = self.vfd.peak_hold_counter[ch] - 1
+				if self.vfd.peak_hold_counter[ch] < 1 then
+					self.vfd.cap[ch] = -1
 				end
 			end
 
 			local dvx = x
-			local dvy = self.dv.y[ch]
-			self.dv.blead[ch]:blit(surface, dvx, dvy, self.dv.lw, self.dv.lh)
-			dvx = dvx + self.dv.lw
+			local dvy = self.vfd.y[ch]
+			self.vfd.blead[ch]:blit(surface, dvx, dvy, self.vfd.lw, self.vfd.lh)
+			dvx = dvx + self.vfd.lw
 			for i = 1, 36 do
-				if i < dvval or i == self.dv.cap[ch] then
-					self.dv.on:blit(surface, dvx, dvy, self.dv.bw, self.dv.bh)
+				if i < dvval or i == self.vfd.cap[ch] then
+					self.vfd.on:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.bh)
 				else
-					self.dv.off:blit(surface, dvx, dvy, self.dv.bw, self.dv.bh)
+					self.vfd.off:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.bh)
 				end
-				dvx = dvx + self.dv.bw
+				dvx = dvx + self.vfd.bw
 			end
 			for i = 37, 49 do
-				if i < dvval or i == self.dv.cap[ch] then
-					self.dv.peakon:blit(surface, dvx, dvy, self.dv.bw, self.dv.h)
+				if i < dvval or i == self.vfd.cap[ch] then
+					self.vfd.peakon:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.h)
 				else
-					self.dv.peakoff:blit(surface, dvx, dvy, self.dv.bw, self.dv.h)
+					self.vfd.peakoff:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.h)
 				end
-				dvx = dvx + self.dv.bw
+				dvx = dvx + self.vfd.bw
 			end
 
-			if self.dv.center ~= nil then
-				self.dv.center:blit(surface, x, self.dv.cy, self.dv.cw, self.dv.ch)
+			if self.vfd.center ~= nil then
+				self.vfd.center:blit(surface, x, self.vfd.cy, self.vfd.cw, self.vfd.ch)
 			end
 
 		end
