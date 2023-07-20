@@ -655,7 +655,7 @@ function getVFDVUmeter(name, w, h)
 	local left = name .. ":left"
 	local right = name .. ":right"
 	local center = name .. ":center"
-	dv = {}
+	vfd = {}
 	local bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
    	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
    	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
@@ -664,14 +664,14 @@ function getVFDVUmeter(name, w, h)
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w >= dw and h >= dh then
-		dv.on = Surface:loadImage(imageCache[bar_on])
-		dv.off = Surface:loadImage(imageCache[bar_off])
-		dv.peakon = Surface:loadImage(imageCache[bar_peak_on])
-		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off])
-		dv.blead = { Surface:loadImage(imageCache[left]), Surface:loadImage(imageCache[right]) }
-		dv.center = Surface:loadImage(imageCache[center])
-		dv.w = dw
-		dv.h = dh
+		vfd.on = Surface:loadImage(imageCache[bar_on])
+		vfd.off = Surface:loadImage(imageCache[bar_off])
+		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on])
+		vfd.peakoff = Surface:loadImage(imageCache[bar_peak_off])
+		vfd.blead = { Surface:loadImage(imageCache[left]), Surface:loadImage(imageCache[right]) }
+		vfd.center = Surface:loadImage(imageCache[center])
+		vfd.w = dw
+		vfd.h = dh
 	else
 		local sf = math.min(w/dw, h/dh)
 		bw = math.floor(bw * sf)
@@ -683,24 +683,24 @@ function getVFDVUmeter(name, w, h)
 		-- scales at odds with the smaller bits.
 		cw = math.floor((bw *49) + (lw *2))
 		ch = math.floor((ch * sf))
-		dv.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
-		dv.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
-		dv.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
-		dv.peakoff = Surface:loadImage(imageCache[bar_peak_off]):resize(bw, bh)
-		dv.blead = { Surface:loadImage(imageCache[left]):resize(lw, lh), Surface:loadImage(imageCache[right]):resize(lw, lh) }
-		dv.center = Surface:loadImage(imageCache[center]):resize(cw, ch)
-		dv.w = cw
-		dv.h = ch + (bh * 2)
+		vfd.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
+		vfd.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
+		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
+		vfd.peakoff = Surface:loadImage(imageCache[bar_peak_off]):resize(bw, bh)
+		vfd.blead = { Surface:loadImage(imageCache[left]):resize(lw, lh), Surface:loadImage(imageCache[right]):resize(lw, lh) }
+		vfd.center = Surface:loadImage(imageCache[center]):resize(cw, ch)
+		vfd.w = cw
+		vfd.h = ch + (bh * 2)
 	end
-	dv.bw = bw
-	dv.bh = bh
-	dv.lw = lw
-	dv.lh = lh
-	dv.cw = cw
-	dv.ch = ch
---	log:debug("####  dv.w:", dv.w, " dv.h:", dv.h)
---	log:debug("####  dv.bw:", dv.bw, " dv.bh:", dv.bh, " dv.lw:", dv.lw, " dv.lh", dv.lh, " dv.cw:", dv.cw, " dv.ch", dv.ch)
-	return dv
+	vfd.bw = bw
+	vfd.bh = bh
+	vfd.lw = lw
+	vfd.lh = lh
+	vfd.cw = cw
+	vfd.ch = ch
+--	log:debug("####  vfd.w:", vfd.w, " vfd.h:", vfd.h)
+--	log:debug("####  vfd.bw:", vfd.bw, " vfd.bh:", vfd.bh, " vfd.lw:", vfd.lw, " vfd.lh", vfd.lh, " vfd.cw:", vfd.cw, " vfd.ch", vfd.ch)
+	return vfd
 end
 
 ------------------------------------------------------- 
