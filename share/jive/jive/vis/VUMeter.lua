@@ -28,8 +28,6 @@ function __init(self, style)
 
 	obj.cap = { 0, 0 }
 
-	obj.ix = { 0, 0 }
-
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
 
 	return obj
@@ -121,7 +119,7 @@ function _layout(self)
 					log:debug("** w:", self.w, " frame_w:", self.frame_w, " h:", self.h)
 					log:debug("** bgImg-w:", imgW, " bgImg-h:", imgH)
 				end
-            elseif self.vutype == "vfd" then
+			elseif self.vutype == "vfd" then
 				self.vfd = self.vutbl
 				self.x1 = x + math.floor((w - self.vfd.w)/2)
 				self.x2 = self.x1
@@ -172,7 +170,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 		end
 	end
 
-	local dvval = val
+	local vol = val
 	-- FIXME when rms map scaled
 	val = math.floor((val % 49)/2)
 
@@ -207,19 +205,15 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 
 --		local x,y,w,h = self:getBounds()
 
-		if self.vutype == "frame" then
-			-- smoother transitions => the loss of accuracy
-			-- frame change speed is exponential derived from difference
-			-- like real VU meters
-			-- local delta = math.floor((self.cap[ch] - self.ix[ch])/2)
-			-- self.ix[ch] = self.ix[ch] + delta
+		if self.legacy then
+			self.bgImg:blitClip(self.cap[ch] * self.w, y, self.frame_w, h, surface, x, y)
+		elseif self.vutype == "frame" then
 			if self.bgImg ~= nil then
-				-- self.bgImg:blitClip(self.ix[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 				self.bgImg:blitClip(self.cap[ch] * self.frame_w, self.src_y, self.frame_w, h, surface, x, y)
 			end
-		else
-			if dvval > 1 and dvval >= self.vfd.cap[ch] then
-				self.vfd.cap[ch] = dvval
+		elseif self.vutype == "vfd" then
+			if vol > 1 and vol >= self.vfd.cap[ch] then
+				self.vfd.cap[ch] = vol
 				self.vfd.peak_hold_counter[ch] = math.floor(FRAME_RATE/2)
 			else
 				self.vfd.peak_hold_counter[ch] = self.vfd.peak_hold_counter[ch] - 1
@@ -233,7 +227,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 			self.vfd.blead[ch]:blit(surface, dvx, dvy, self.vfd.lw, self.vfd.lh)
 			dvx = dvx + self.vfd.lw
 			for i = 1, 36 do
-				if i < dvval or i == self.vfd.cap[ch] then
+				if i < vol or i == self.vfd.cap[ch] then
 					self.vfd.on:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.bh)
 				else
 					self.vfd.off:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.bh)
@@ -241,7 +235,7 @@ function _drawMeter(self, surface, sampleAcc, ch, x, y, w, h)
 				dvx = dvx + self.vfd.bw
 			end
 			for i = 37, 49 do
-				if i < dvval or i == self.vfd.cap[ch] then
+				if i < vol or i == self.vfd.cap[ch] then
 					self.vfd.peakon:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.h)
 				else
 					self.vfd.peakoff:blit(surface, dvx, dvy, self.vfd.bw, self.vfd.h)
