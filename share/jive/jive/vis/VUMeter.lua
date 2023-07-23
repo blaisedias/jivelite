@@ -222,54 +222,54 @@ function _drawMeter(self, surface, vol, ch, x, y, w, h, ptr)
 	end
 end
 
-function drawVFD(self, surface, vol)
-	local x = self.x
-	local y = self.y
-	if vol >= self.cap then
-		self.cap = vol
-		self.peak_hold_counter = math.floor(FRAME_RATE/2)
+function drawVFD(params, surface, vol)
+	local x = params.x
+	local y = params.y
+	if vol >= params.cap then
+		params.cap = vol
+		params.peak_hold_counter = math.floor(FRAME_RATE/2)
 	else
-		self.peak_hold_counter = self.peak_hold_counter - 1
-		if self.peak_hold_counter < 1 then
-			self.cap = 0
+		params.peak_hold_counter = params.peak_hold_counter - 1
+		if params.peak_hold_counter < 1 then
+			params.cap = 0
 		end
 	end
 	for i = 2, 37 do
-		if i <= vol or i == self.cap then
-			self.vfd.on:blit(surface, x, y, self.vfd.bw, self.vfd.bh)
+		if i <= vol or i == params.cap then
+			params.vfd.on:blit(surface, x, y, params.vfd.bw, params.vfd.bh)
 		else
-			self.vfd.off:blit(surface, x, y, self.vfd.bw, self.vfd.bh)
+			params.vfd.off:blit(surface, x, y, params.vfd.bw, params.vfd.bh)
 		end
-		x = x + self.vfd.bw
+		x = x + params.vfd.bw
 	end
 	for i = 38, 50 do
-		if i <= vol or i == self.cap then
-			self.vfd.peakon:blit(surface, x, y, self.vfd.bw, self.vfd.h)
+		if i <= vol or i == params.cap then
+			params.vfd.peakon:blit(surface, x, y, params.vfd.bw, params.vfd.h)
 		else
-			self.vfd.peakoff:blit(surface, x, y, self.vfd.bw, self.vfd.h)
+			params.vfd.peakoff:blit(surface, x, y, params.vfd.bw, params.vfd.h)
 		end
-		x = x + self.vfd.bw
+		x = x + params.vfd.bw
 	end
 end
 
-function drawVFDStatic(tbl, surface) 
-	tbl.vfd.center:blit(surface, tbl.x, tbl.y, tbl.w, tbl.h)
-	tbl.vfd.blead[1]:blit(surface, tbl.x, tbl.left.y,  tbl.vfd.lw, tbl.vfd.lh)
-	tbl.vfd.blead[2]:blit(surface, tbl.x, tbl.right.y, tbl.vfd.lw, tbl.vfd.lh)
+function drawVFDStatic(params, surface) 
+	params.vfd.center:blit(surface, params.x, params.y, params.w, params.h)
+	params.vfd.blead[1]:blit(surface, params.x, params.left.y,  params.vfd.lw, params.vfd.lh)
+	params.vfd.blead[2]:blit(surface, params.x, params.right.y, params.vfd.lw, params.vfd.lh)
 end
 
 
-function draw25FrameVuMeter(self, surface, vol)
+function draw25FrameVuMeter(params, surface, vol)
 	local val = math.min(math.floor(vol/2), 24)
-	if val >= self.cap then
-		self.cap = val
-	elseif self.cap > 0 then
-		self.cap = self.cap -1
+	if val >= params.cap then
+		params.cap = val
+	elseif params.cap > 0 then
+		params.cap = params.cap -1
 	end
-	self.img:blitClip(self.cap * self.w, self.src_y, self.w, self.h, surface, self.x, self.y)
+	params.img:blitClip(params.cap * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
 end
 
-function nullDraw(self, surface)
+function nullDraw(params, surface)
 end
 
 --[[
