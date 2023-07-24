@@ -45,10 +45,8 @@ function _skin(self)
 
 	elseif self.style == "vumeter_analog" then
 		self.bgImg = self:styleImage("bgImg")
-		if self.bgImg then
-			self.legacy = true
-		else
-			self.legacy = false
+		if self.bgImg == nil then
+			self.style = "vumeter_v2"
 		end
 	end
 end
@@ -86,58 +84,56 @@ function _layout(self)
 		self.y = y + t + (self.bars * th)
 
 	elseif self.style == "vumeter_analog" then
-		if self.legacy then
-			self.x1 = x
-			self.x2 = x + (w / 2)
-			self.y = y
-			self.w = w / 2
-			self.h = h
-		else
-			log:debug("-----------------------------------------------------------------------")
-			self.y = y
-			self.w = math.floor(w / 2)
-			self.h = h
-			self.vutbl, self.vutype = visImage.getVuImage(w,h)
-   			if self.vutype == "frame"  then
-				self.bgImg = self.vutbl
-				if self.bgImg ~= nil then
-					local imgW, imgH = self.bgImg:getSize()
-					-- FIXME VU Meter images will not always be 25 frames
-					local frame_w = imgW/25
-					-- centre the VUMeter image within the designated space
-					-- horizontally
-					local fx= x + math.floor(w / 2) - frame_w
-					-- vertically
-					local fy = y
-					local src_y = 0
-					if imgH < h then
-						fy = math.floor(self.y + ((h - imgH)/2))
-					elseif imgH > h then
-						-- clip the image at the top and bottom
-						src_y = math.floor((imgH - h)/2)
-					end
-					self.left =  { img=self.bgImg, x=fx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-					self.right = { img=self.bgImg, x=self.left.x + frame_w, y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-					log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:", self.left.src_y, " w:", self.left.w, " h:", self.left.h)
-					log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y, " w:", self.right.w, " h:", self.right.h)
-					self.drawMeter = draw25FrameVuMeter
-				else
-					self.left =  { img=bgImg }
-					self.right = { img=bgImg }
-				    self.drawMeter = nullDraw
+		self.x1 = x
+		self.x2 = x + (w / 2)
+		self.y = y
+		self.w = w / 2
+		self.h = h
+	elseif self.style == "vumeter_v2" then
+		log:debug("-----------------------------------------------------------------------")
+		self.y = y
+		self.w = math.floor(w / 2)
+		self.h = h
+		self.vutbl, self.vutype = visImage.getVuImage(w,h)
+   		if self.vutype == "frame"  then
+			self.bgImg = self.vutbl
+			if self.bgImg ~= nil then
+				local imgW, imgH = self.bgImg:getSize()
+				-- FIXME VU Meter images will not always be 25 frames
+				local frame_w = imgW/25
+				-- centre the VUMeter image within the designated space
+				-- horizontally
+				local fx= x + math.floor(w / 2) - frame_w
+				-- vertically
+				local fy = y
+				local src_y = 0
+				if imgH < h then
+					fy = math.floor(self.y + ((h - imgH)/2))
+				elseif imgH > h then
+					-- clip the image at the top and bottom
+					src_y = math.floor((imgH - h)/2)
 				end
-			elseif self.vutype == "vfd" then
-				self.vfd = self.vutbl
-				local vfdx = x + math.floor((w - self.vfd.w)/2)
-				local y1 = self.y + math.floor((h - self.vfd.h)/2)
-				local y2 = y1 + self.vfd.bh + self.vfd.ch
-				self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd}
-				self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd}
-				self.drawMeter = drawVFD
-
-				self.bgParams = {x=vfdx, y=y1 + self.vfd.bh, vfd=self.vfd, left=self.left, right=self.right}
-				self.drawBackground = drawVFDStatic
+				self.left =  { img=self.bgImg, x=fx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				self.right = { img=self.bgImg, x=self.left.x + frame_w, y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:", self.left.src_y, " w:", self.left.w, " h:", self.left.h)
+				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y, " w:", self.right.w, " h:", self.right.h)
+				self.drawMeter = draw25FrameVuMeter
+			else
+				self.left =  { img=bgImg }
+				self.right = { img=bgImg }
+			    self.drawMeter = nullDraw
 			end
+		elseif self.vutype == "vfd" then
+			self.vfd = self.vutbl
+			local vfdx = x + math.floor((w - self.vfd.w)/2)
+			local y1 = self.y + math.floor((h - self.vfd.h)/2)
+			local y2 = y1 + self.vfd.bh + self.vfd.ch
+			self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd}
+			self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd}
+			self.drawMeter = drawVFD
+
+			self.bgParams = {x=vfdx, y=y1 + self.vfd.bh, vfd=self.vfd, left=self.left, right=self.right}
+			self.drawBackground = drawVFDStatic
 		end
 	end
 end
