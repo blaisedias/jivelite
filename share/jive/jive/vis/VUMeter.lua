@@ -72,23 +72,46 @@ function _layout(self)
 	end
 
 	if self.style == "vumeter" then
-		self.w = w - l - r
-		self.h = h - t - b
+		local vu_w = w - l - r
+		local vu_h = h - t - b
 
 		local tw,th = self.tickOn:getMinSize()
 
-		self.x1 = x + l + ((self.w - tw * 2) / 3)
-		self.x2 = x + l + ((self.w - tw * 2) / 3) * 2 + tw
+		self.x1 = x + l + ((vu_w - tw * 2) / 3)
+		self.x2 = x + l + ((vu_w - tw * 2) / 3) * 2 + tw
 
-		self.bars = self.h / th
-		self.y = y + t + (self.bars * th)
-
+		local bars = vu_h / th
+		self.y = y + t + (bars * th)
+		self.left =  { cap=0,
+			x = x + l + ((vu_w - tw * 2) / 3),
+			y = y + t + (bars * th),
+			bars = bars,
+			tw = tw,
+			th = th,
+			tickOn = self.tickOn,
+			tickOff = self.tickOff,
+			tickCap = self.tickCap
+		}
+		self.right =  { cap=0,
+			x = x + l + ((vu_w - tw * 2) / 3) * 2 + tw,
+			y = y + t + (bars * th),
+			bars = bars,
+			tw = tw,
+			th = th,
+			tickOn = self.tickOn,
+			tickOff = self.tickOff,
+			tickCap = self.tickCap
+	 	}
+		self.drawMeter = drawVuMeter
+		self.bgParams = { bgImg = self.bgImg, bounds=self:getBounds() }
+		self.drawBackground = drawVuMeterBackground
 	elseif self.style == "vumeter_analog" then
-		self.x1 = x
-		self.x2 = x + (w / 2)
-		self.y = y
-		self.w = w / 2
-		self.h = h
+		local imgW, imgH = self.bgImg:getSize()
+		local frame_w = imgW/25
+		local fx = x + math.floor(w / 2) - frame_w
+		self.left =  { img=self.bgImg, x=fx ,                   y=y, src_y=0, w=frame_w, h=imgH, cap=0}
+		self.right = { img=self.bgImg, x=self.left.x + frame_w, y=y, src_y=0, w=frame_w, h=imgH, cap=0}
+		self.drawMeter = draw25FrameVuMeter
 	elseif self.style == "vumeter_v2" then
 		log:debug("-----------------------------------------------------------------------")
 		self.y = y
@@ -103,7 +126,7 @@ function _layout(self)
 				local frame_w = imgW/25
 				-- centre the VUMeter image within the designated space
 				-- horizontally
-				local fx= x + math.floor(w / 2) - frame_w
+				local fx = x + math.floor(w / 2) - frame_w
 				-- vertically
 				local fy = y
 				local src_y = 0
@@ -121,7 +144,7 @@ function _layout(self)
 			else
 				self.left =  { img=bgImg }
 				self.right = { img=bgImg }
-			    self.drawMeter = nullDraw
+				self.drawMeter = nullDraw
 			end
 		elseif self.vutype == "vfd" then
 			self.vfd = self.vutbl
@@ -157,10 +180,6 @@ function samplAcc2Vol(sampleAcc)
 end
 
 function draw(self, surface)
-	if self.style == "vumeter" then
-		self.bgImg:blit(surface, self:getBounds())
-	end
-
 	if self.bgParams ~= nil then
 		self.drawBackground(self.bgParams, surface)
 	end
@@ -170,16 +189,17 @@ function draw(self, surface)
 
 	-- local volume = self.player:getVolume()
 
-	if self.drawMeter == nil then
-		_drawMeter(self, surface, vol[1], 1, self.x1, self.y, self.w, self.h)
-		_drawMeter(self, surface, vol[2], 2, self.x2, self.y, self.w, self.h)
-	else
-		self.drawMeter(self.left, surface, vol[1]) 
-		self.drawMeter(self.right, surface, vol[1]) 
+	self.drawMeter(self.left, surface, vol[1]) 
+	self.drawMeter(self.right, surface, vol[1]) 
+end
+
+function drawVuMeterBackground(params, surface)
+	if params.bgImg ~= nil then
+		params.bgImg:blit(surface, params.bounds)
 	end
 end
 
-function _drawMeter(self, surface, vol, ch, x, y, w, h, ptr)
+function drawVuMeter(params, surface, vol)
 	-- FIXME when rms map scaled
 	local val = math.min(math.floor(vol/2), 24)
 
@@ -188,33 +208,24 @@ function _drawMeter(self, surface, vol, ch, x, y, w, h, ptr)
 --		val = 24
 --	end
 
-	if val >= self.cap[ch] then
-		self.cap[ch] = val
-	elseif self.cap[ch] > 0 then
-		self.cap[ch] = self.cap[ch] - 1
+	if val >= params.cap then
+		params.cap = val
+	elseif params.cap > 0 then
+		params.cap = params.cap - 1
 	end
 
-	if self.style == "vumeter" then
+	local y = params.y
 
-		local tw,th = self.tickOn:getMinSize()
-
-		for i = 1, self.bars do
-			if i == math.floor(self.cap[ch] / 2) then
-				self.tickCap:blit(surface, x, y, tw, th)
-			elseif i < val then
-				self.tickOn:blit(surface, x, y, tw, th)
-			else
-				self.tickOff:blit(surface, x, y, tw, th)
-			end
-
-			y = y - th
+	for i = 1, params.bars do
+		if i == math.floor(params.cap / 2) then
+			params.tickCap:blit(surface, params.x, y, params.tw, params.th)
+		elseif i < val then
+			params.tickOn:blit(surface, params.x, y, params.tw, params.th)
+		else
+			params.tickOff:blit(surface, params.x, y, params.tw, params.th)
 		end
 
-	elseif self.style == "vumeter_analog" then
-
---		local x,y,w,h = self:getBounds()
-
-		self.bgImg:blitClip(self.cap[ch] * self.w, y, self.frame_w, h, surface, x, y)
+		y = y - th
 	end
 end
 
