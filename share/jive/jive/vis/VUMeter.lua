@@ -55,7 +55,6 @@ end
 function _layout(self)
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
-	self.src_y = 0
 
 	self.player = appletManager:callService("getCurrentPlayer")
 
@@ -114,9 +113,6 @@ function _layout(self)
 		self.drawMeter = draw25FrameVuMeter
 	elseif self.style == "vumeter_v2" then
 		log:debug("-----------------------------------------------------------------------")
-		self.y = y
-		self.w = math.floor(w / 2)
-		self.h = h
 		self.vutbl, self.vutype = visImage.getVuImage(w,h)
    		if self.vutype == "frame"  then
 			self.bgImg = self.vutbl
@@ -131,7 +127,7 @@ function _layout(self)
 				local fy = y
 				local src_y = 0
 				if imgH < h then
-					fy = math.floor(self.y + ((h - imgH)/2))
+					fy = math.floor(y + ((h - imgH)/2))
 				elseif imgH > h then
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
@@ -149,7 +145,7 @@ function _layout(self)
 		elseif self.vutype == "vfd" then
 			self.vfd = self.vutbl
 			local vfdx = x + math.floor((w - self.vfd.w)/2)
-			local y1 = self.y + math.floor((h - self.vfd.h)/2)
+			local y1 = y + math.floor((h - self.vfd.h)/2)
 			local y2 = y1 + self.vfd.bh + self.vfd.ch
 			self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd}
 			self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd}
