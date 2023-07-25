@@ -537,7 +537,7 @@ function registerVUMeterImage(tbl, path)
 end
 
 function initVuMeterList()
-	local dvudir = lfs.currentdir() .. "/share/jive/vumeters/vfd"
+	local dvudir = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
 	for entry in lfs.dir(dvudir) do
 		if entry ~= "." and entry ~= ".." then
 			local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
