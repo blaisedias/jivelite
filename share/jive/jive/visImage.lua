@@ -217,6 +217,41 @@ end
 function initSpectrumList()
 	table.insert(spectrumList, {name="default", enabled=false})
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
+
+	local search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/backlit"
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+        if mode == "file" then
+			local parts = string.split("%.", entry)
+			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+                local imgName = parts[1]
+                local baseImgName = string.sub(imgName,4,l)
+                bgImgName = "bg-" .. baseImgName
+				if spectrumImagesMap[imgName] == nil then
+					table.insert(spectrumList, {name=imgName, enabled=false})
+				end
+                log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
+				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
+            end
+        end
+	end
+
+	search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/gradient"
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+        if mode == "file" then
+			local parts = string.split("%.", entry)
+			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+                local imgName = parts[1]
+				if spectrumImagesMap[imgName] == nil then
+					table.insert(spectrumList, {name=imgName, enabled=false})
+				end
+                log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
+				spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
+            end
+        end
+	end
+	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
 function _cacheSpectrumImage(imgName, path, w, h)
@@ -278,24 +313,6 @@ function _cacheSpectrumImage(imgName, path, w, h)
 		-- assume that the background image if any is also
 		-- present in the disk image cache.
 	end
-end
-
-function registerSpectrumImage(tbl, path, w, h)
-	log:debug("registerSpectrumImage ",  path)
-	local imgName = getImageName(path)
-
---	_cacheSpectrumImage(imgName, path, w, h)
-	local bgImgName = nil
-	if imgName:find("fg-",1,true) == 1 then
-		local l = imgName:len()
-		local baseImgName = string.sub(imgName,4,l)
-		bgImgName = "bg-" .. baseImgName
-	end
-
-	if spectrumImagesMap[imgName] == nil then
-		table.insert(spectrumList, {name=imgName, enabled=false})
-	end
-	spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path} 
 end
 
 function spBump()
@@ -515,34 +532,13 @@ function _cacheVUImage(imgName, path, w, h)
 	end
 end
 
-function registerVUMeterImage(tbl, path)
-	log:debug("registerVUMeterImage ",  path)
-	local imgName = getImageName(path)
-	for k,v in pairs(vuImages) do
-		if v.name == imgName then
-			return
-		end
-	end
-	local displayName = imgName
-	local ixSub = string.find(imgName, "25seq")
-	if ixSub ~= nil then
-		if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-			displayName = string.sub(imgName, ixSub + 6)
-		else
-			displayName = string.sub(imgName, ixSub + 5)
-		end
-	end
-	table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
-	vuImagesMap[imgName] = {src=path}
-end
-
 function initVuMeterList()
-	local dvudir = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
-	for entry in lfs.dir(dvudir) do
+	local search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
+	for entry in lfs.dir(search_root) do
 		if entry ~= "." and entry ~= ".." then
-			local mode = lfs.attributes(dvudir .. "/" .. entry, "mode")
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "directory" then
-				path = dvudir .. "/" .. entry
+				path = search_root .. "/" .. entry
 				for f in lfs.dir(path) do
 					mode = lfs.attributes(path .. "/" .. f, "mode")
 					if mode == "file" then
@@ -557,6 +553,30 @@ function initVuMeterList()
 			end
 		end
 	end
+    -- Do this the dumb way for now, i.e. repeat the enumeration
+	search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/analogue"
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+        if mode == "file" then
+			local parts = string.split("%.", entry)
+			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+                local imgName = parts[1]
+                local displayName = imgName
+                local ixSub = string.find(imgName, "25seq")
+				if ixSub ~= nil then
+					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
+						displayName = string.sub(imgName, ixSub + 6)
+					else
+						displayName = string.sub(imgName, ixSub + 5)
+					end
+				end
+                log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
+				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
+				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
+            end
+        end
+	end
+	table.sort(vuImages, function (left, right) return left.name < right.name end)
 end
 
 function vuBump()
@@ -706,10 +726,6 @@ end
 ------------------------------------------------------- 
 --- Misc
 -------------------------------------------------------- 
-function registerComplete()
-	table.sort(vuImages, function (left, right) return left.name < right.name end)
-	table.sort(spectrumList, function (left, right) return left.name < right.name end)
-end
 
 function sync()
 	if not vuImages[vuImageIndex].enabled then

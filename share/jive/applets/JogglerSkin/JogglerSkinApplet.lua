@@ -742,30 +742,14 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local mini_visu_X = screenHeight - 160 + 5
 	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
--- front load for smoother experince when music is playing
+-- front load for smoother experience when music is playing
 	visImage:cacheClear()
 	visImage:readCacheDir()
-	visImage:initSpectrumList()
-	visImage:initVuMeterList()
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
-
-	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/AnalogVUMeters") do 
-		local parts = string.split("%.", imgPath)
-		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-			visImage:registerVUMeterImage(imgPath)
-		end
-	end
-
-	for imgPath in self:readdir2("JogglerSkin", "images/UNOFFICIAL/Spectrum") do 
-		local parts = string.split("%.", imgPath)
-		if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'gif' or parts[2] == 'bmp' then
-			visImage:registerSpectrumImage(imgPath, screenWidth, SP_H)
-		end
-	end
-
-	visImage:registerComplete()
+	visImage:initSpectrumList()
+	visImage:initVuMeterList()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),

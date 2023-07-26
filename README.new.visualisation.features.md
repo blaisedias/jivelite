@@ -45,7 +45,7 @@ The logic enforces that at least one VU Meter image is selected
 
 ## Location
 VU meter images are enumerated from the location
- `share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters`
+ `assets/visualisers/vumeters/analogue`
 
 This is primarily to make it possible to use multiple VU Meter images on piCorePlayer 
 
@@ -90,24 +90,25 @@ Multiple items in the menu may be selected Spectrum meter display is cycled on t
 The logic enforces that at least one item is selected
 
 ## Location
-Spectrum meter images are enumerated from the location
- `share/jive/applets/JogglerSkin/images/UNOFFICIAL/Spectrum`
+Spectrum meter images are enumerated from the locations
+ `assets/visualisers/spectrum/backlit`
+ `assets/visualisers/spectrum/gradient`
 
-New Spectrum images can be added simply by copying appropriate files to this location.
+New Spectrum images can be added simply by copying appropriate files to these locations.
 
-Images which with names starting with `fg-` are rendered as foreground over a dimmed version as the background.
+Images in `.../backlit` are rendered as foreground over a dimmed version as the background.
 At the moment that dimming is not configurable from the menu but can be 
 adjusted by changing the value of `backgroundAlpha` in
 
 `~/.jivelite/userpath/settings/NowPlaying.lua` 
 
+The resizing strategy for these images is the same on both axes to preserve the aspect ratio.
+Images will be resized, centered and clipped to fit.
 
+Images in `.../gradient` are rendered considered to be gradients, and are rendered as reveals on a black background.
 
-All other images are rendered as reveals on a black background.
-
-Resizing strategies of spectrum images for display are different from that use for VUMeters.
-
-Typically expansion is the same on both axes to preserve the aspect ratio.
+The resizing strategy for these images is to expand and compress to fit, without preserving the aspect ratio.
+An image consisting of a single vertical line would suffice.
 
 ## Bar formats
 The bars rendered in the spectrum meter now have limited configurability -
