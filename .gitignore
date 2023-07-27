@@ -4,3 +4,4 @@ bin
 *.so.*
 visucache
 primed-visu-images
+precache
