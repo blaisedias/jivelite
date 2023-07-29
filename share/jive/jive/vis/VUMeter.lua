@@ -226,7 +226,8 @@ function drawVuMeter(params, surface, vol)
 end
 
 function drawVFD(params, surface, vol)
-	local x = params.x
+	-- add vfd bar render x offset here 
+	local x = params.x + params.vfd.bar_rxo
 	local y = params.y
 	if vol >= params.cap then
 		params.cap = vol
@@ -243,7 +244,7 @@ function drawVFD(params, surface, vol)
 		else
 			params.vfd.off:blit(surface, x, y, params.vfd.bw, params.vfd.bh)
 		end
-		x = x + params.vfd.bw
+		x = x + params.vfd.barwidth
 	end
 	for i = 38, 50 do
 		if i <= vol or i == params.cap then
@@ -251,7 +252,7 @@ function drawVFD(params, surface, vol)
 		else
 			params.vfd.peakoff:blit(surface, x, y, params.vfd.bw, params.vfd.h)
 		end
-		x = x + params.vfd.bw
+		x = x + params.vfd.barwidth
 	end
 end
 
