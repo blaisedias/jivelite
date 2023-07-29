@@ -658,11 +658,17 @@ function getVFDVUmeter(name, w, h)
 	local right = name .. ":right"
 	local center = name .. ":center"
 	vfd = {}
+	-- bar render x-offset
 	local bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
    	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
    	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
+	local barwidth = math.floor((cw - lw)/49)
+--	log:debug("#### bw:", bw, " barwidth:", barwidth)
+	-- vfd.bar_rxo= barwidth - bw
+	vfd.bar_rxo= 0
+
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w >= dw and h >= dh then
@@ -676,6 +682,7 @@ function getVFDVUmeter(name, w, h)
 		vfd.h = dh
 	else
 		local sf = math.min(w/dw, h/dh)
+		barwidth = math.floor(barwidth * sf)
 		bw = math.floor(bw * sf)
 		bh = math.floor(bh * sf)
 		lw = math.floor(lw * sf)
@@ -683,8 +690,9 @@ function getVFDVUmeter(name, w, h)
 		-- doh. Due to rounding differences,  scaling the calibration part like so
 		-- cw = math.floor((cw*w)/dw)
 		-- scales at odds with the smaller bits.
-		cw = math.floor((bw *49) + (lw *2))
+		cw = math.floor((barwidth *49) + (lw *2))
 		ch = math.floor((ch * sf))
+		-- vfd.bar_rxo= barwidth - bw
 		vfd.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
 		vfd.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
 		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
@@ -694,6 +702,7 @@ function getVFDVUmeter(name, w, h)
 		vfd.w = cw
 		vfd.h = ch + (bh * 2)
 	end
+	vfd.barwidth = barwidth
 	vfd.bw = bw
 	vfd.bh = bh
 	vfd.lw = lw
