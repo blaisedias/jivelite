@@ -1,13 +1,25 @@
 --[[
 =head1 NAME
 
-jive.visImage - Image support for visualisation
+jive.net.SocketTcpServer - A TCP server socket for accepting client connections
 
 =head1 DESCRIPTION
 
-Implements support routines to resize VUMeter and Spectrum Visualiser images
+Implements a tcp socket to accept client connections.
 
-(c) Blaise Dias, 2023
+(c) Adrian Smith, 2013
+
+=head1 SYNOPSIS
+
+ local listener = SocketTcpServer(jnt, "localhost", "9006", "listener sock")
+ listener:t_addRead(function()
+						local newsock = listener:t_accept()
+						local pump = function()
+										 -- do something 
+									 end
+						newsock:t_addRead(pump)
+					end
+	)
 
 =cut
 --]]
