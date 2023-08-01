@@ -743,13 +743,10 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
 -- front load for smoother experience when music is playing
-	visImage:cacheClear()
-	visImage:readCacheDir()
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
-	visImage:initSpectrumList()
-	visImage:initVuMeterList()
+	visImage:initialise()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),

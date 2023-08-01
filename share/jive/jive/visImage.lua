@@ -31,6 +31,25 @@ function getImageName(imgPath)
 	return parts[1]
 end
 
+function pathIter(rpath)
+	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
+		dir = dir .. rpath
+
+		local mode = lfs.attributes(dir, "mode")
+		if mode == "directory" then
+			coroutine.yield(dir)
+		end
+	end
+end
+
+function findPaths(rpath)
+	local co = coroutine.create(function() pathIter(rpath) end)
+	return function()
+		local code, res = coroutine.resume(co)
+		return res
+	end
+end
+
 function cachedPath(name)
 	local file = cachedir .. "/" .. name .. ".bmp"
 	return file
@@ -46,20 +65,9 @@ function cacheClear(tbl)
 end
 
 
-function readCacheDir()
-	local search_root = lfs.currentdir() .. "/assets/precache"
-	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = string.split("%.", entry)
-			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-				imageCache[parts[1]] = search_root .. "/" .. entry
-				log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
-			end
-		end
-	end
+function _readCacheDir(search_root)
+	log:debug("_readCacheDir", " ", search_root)
 
-	search_root = cachedir
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
@@ -72,6 +80,18 @@ function readCacheDir()
 	end
 end
 
+function initialise()
+	cacheClear()
+	local search_root
+	for search_root in findPaths("assets/precache") do
+		_readCacheDir(search_root)
+	end
+	for search_root in findPaths("visucache") do
+		_readCacheDir(search_root)
+	end
+	initVuMeterList()
+	initSpectrumList()
+end
 
 -------------------------------------------------------- 
 --- image scaling 
@@ -200,36 +220,40 @@ function initSpectrumList()
 	table.insert(spectrumList, {name="default", enabled=false})
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 
-	local search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/backlit"
-	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = string.split("%.", entry)
-			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-				local imgName = parts[1]
-				local baseImgName = string.sub(imgName,4,l)
-				bgImgName = "bg-" .. baseImgName
-				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false})
+--	local search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/backlit"
+	local search_root
+	for search_root in findPaths("assets/visualisers/spectrum/backlit") do
+		for entry in lfs.dir(search_root) do
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "file" then
+				local parts = string.split("%.", entry)
+				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+					local imgName = parts[1]
+					local baseImgName = string.sub(imgName,4,l)
+					bgImgName = "bg-" .. baseImgName
+					if spectrumImagesMap[imgName] == nil then
+						table.insert(spectrumList, {name=imgName, enabled=false})
+					end
+					log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
+					spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
 				end
-				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
 			end
 		end
 	end
 
-	search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/gradient"
-	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = string.split("%.", entry)
-			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-				local imgName = parts[1]
-				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false})
+	for search_root in findPaths("assets/visualisers/spectrum/gradient") do
+		for entry in lfs.dir(search_root) do
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "file" then
+				local parts = string.split("%.", entry)
+				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+					local imgName = parts[1]
+					if spectrumImagesMap[imgName] == nil then
+						table.insert(spectrumList, {name=imgName, enabled=false})
+					end
+					log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
+					spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
 				end
-				log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
 			end
 		end
 	end
@@ -515,46 +539,50 @@ function _cacheVUImage(imgName, path, w, h)
 end
 
 function initVuMeterList()
-	local search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
-	for entry in lfs.dir(search_root) do
-		if entry ~= "." and entry ~= ".." then
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "directory" then
-				path = search_root .. "/" .. entry
-				for f in lfs.dir(path) do
-					mode = lfs.attributes(path .. "/" .. f, "mode")
-					if mode == "file" then
-						local parts = string.split("%.", f)
-						if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-							log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-							imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+--	local search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
+	local search_root
+	for search_root in findPaths("assets/visualisers/vumeters/vfd") do
+		for entry in lfs.dir(search_root) do
+			if entry ~= "." and entry ~= ".." then
+				local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+				if mode == "directory" then
+					path = search_root .. "/" .. entry
+					for f in lfs.dir(path) do
+						mode = lfs.attributes(path .. "/" .. f, "mode")
+						if mode == "file" then
+							local parts = string.split("%.", f)
+							if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+								log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+								imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+							end
 						end
 					end
+					table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
 				end
-				table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
 			end
 		end
 	end
 	-- Do this the dumb way for now, i.e. repeat the enumeration
-	search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/analogue"
-	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = string.split("%.", entry)
-			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-				local imgName = parts[1]
-				local displayName = imgName
-				local ixSub = string.find(imgName, "25seq")
-				if ixSub ~= nil then
-					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-						displayName = string.sub(imgName, ixSub + 6)
-					else
-						displayName = string.sub(imgName, ixSub + 5)
+	for search_root in findPaths("/assets/visualisers/vumeters/analogue") do
+		for entry in lfs.dir(search_root) do
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "file" then
+				local parts = string.split("%.", entry)
+				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+					local imgName = parts[1]
+					local displayName = imgName
+					local ixSub = string.find(imgName, "25seq")
+					if ixSub ~= nil then
+						if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
+							displayName = string.sub(imgName, ixSub + 6)
+						else
+							displayName = string.sub(imgName, ixSub + 5)
+						end
 					end
+					log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
+					table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
+					vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
 				end
-				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
-				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
-				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
 			end
 		end
 	end
