@@ -1,3 +1,22 @@
+ --[[
+ =head1 NAME
+ 
+ jive.visImage - visualiser support
+ 
+ =head1 DESCRIPTION
+ 
+ Implements visualiser support 
+  - menu selection support
+  - resize for multiple resoultions
+  - image caching
+  - ....
+ 
+ (c) Blaise Dias, 2023
+
+ =cut
+ --]]
+
+--
 -- lua package imports
 local math          = require("math")
 local table         = require("table")
@@ -15,6 +34,9 @@ local log           = require("jive.utils.log").logger("jivelite.vis")
 local System        = require("jive.System")
 
 module(...)
+
+local vuImages = {}
+local spectrumList = {}
 
 -------------------------------------------------------- 
 --- disk image cache 
@@ -80,6 +102,14 @@ function _readCacheDir(search_root)
 	end
 end
 
+local npvumeters = {}
+local npspectrums = {}
+
+function npSettings(tbl, vusettings, spsettings)
+	npvumeters = vusettings
+	npspectrums = spsettings
+end
+
 function initialise()
 	cacheClear()
 	local search_root
@@ -91,6 +121,26 @@ function initialise()
 	end
 	initVuMeterList()
 	initSpectrumList()
+	for k, v in pairs(npvumeters) do
+		selectVuImage({},k,v)
+	end
+	for k, v in pairs(npspectrums) do
+	 log:debug("#### ", k, " ", v)
+		selectSpectrum({},k,v)
+	end
+	local enabled = false
+	for i, v in ipairs(vuImages) do
+		enabled = enabled or v.enabled
+	end
+	if not enabled then
+		vuImages[1].enabled = true
+	end
+	for i, v in ipairs(spectrumList) do
+		enabled = enabled or v.enabled
+	end
+	if not enabled then
+		spectrumList[1].enabled = true
+	end
 end
 
 -------------------------------------------------------- 
@@ -201,7 +251,6 @@ end
 -------------------------------------------------------- 
 --- Spectrum 
 -------------------------------------------------------- 
-local spectrumList = {}
 local spImageIndex = 1
 local spectrumImagesMap = {}
 local spectrumResolutions = {}
@@ -506,8 +555,6 @@ end
 -------------------------------------------------------- 
 --- VU meter
 -------------------------------------------------------- 
-local vuImages = {
-}
 local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
