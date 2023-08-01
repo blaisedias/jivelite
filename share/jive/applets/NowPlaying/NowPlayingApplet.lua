@@ -134,7 +134,28 @@ function init(self)
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
 	self.spbfchanged = false
-	self:syncSettings()
+
+	local settings = self:getSettings()
+	if not settings.vumeters then
+		settings.vumeters = {}
+	end
+	if not settings.spectrum then
+		settings.spectrum = {}
+	end
+
+	visImage:npSettings(settings.vumeters, settings.spectrum)
+	if not settings.backgroundAlpha then
+		settings.backgroundAlpha = visImage:getBackgroundAlpha()
+	else
+		visImage:setBackgroundAlpha(settings.backgroundAlpha)
+	end
+
+	if not settings.spectrumBarsFormat then
+		settings.spectrumBarsFormat = visImage:getBarsFormat()
+	else
+		visImage:setBarsFormat(settings.spectrumBarsFormat)
+	end
+
 end
 
 -- style names are grabbed from the skin
@@ -256,7 +277,6 @@ function npVUSettingsShow(self)
 	local menu = SimpleMenu("menu")
 
 	local npscreenVumeters = visImage:getVUImageList()
-	-- syncSettings was invoked so npscreenVumeters reflects the resolved state
 
 	for i, v in ipairs(npscreenVumeters) do
 		local selected = true
@@ -310,7 +330,6 @@ function npSpectrumSettingsShow(self)
 	local menu = SimpleMenu("menu")
 
 	local npscreenSpectrum = visImage:getSpectrumList()
-	-- syncSettings was invoked so npscreenSpectrum reflects the resolved state
 
 	for i, v in ipairs(npscreenSpectrum) do
 		local selected = true
@@ -364,7 +383,6 @@ function npSpectrumBarSettingsShow(self)
 	local menu = SimpleMenu("menu")
 
 	local npscreenSpectrumBars = visImage:getBarFormats()
-	-- syncSettings was invoked so npscreenSpectrumBars reflects the resolved state
 
 	local current =  visImage:getBarsFormat()
 	self.spbfchanged = false
@@ -2190,97 +2208,6 @@ function free(self)
 	return true
 end
 
--- sync settings both ways
--- push from existing settings to visImage
---	  this syncs settings for images found on both 
--- then write visImage to settings
---	  this gets rid of settings for images no longer present
-function syncSettings(self)
-	local settings = self:getSettings()
-	if not settings.vumeters then
-		settings.vumeters = {}
-	end
-	if not settings.spectrum then
-		settings.spectrum = {}
-	end
-
-	-- VUMeters
-	local npscreenVumeters = visImage:getVUImageList()
-	-- first reflect settings down to visImage
-	-- settings for VUMeters that no longer exist are ignored
-	log:debug("syncSettings vumeters >>")
-	for k, v in pairs(settings.vumeters) do
-		log:debug("syncSettings vumeters >>", k, " -> ", v)
-		visImage:selectVuImage(k,v)
-	end
-	log:debug("syncSettings vumeters <<")
-	-- refresh VUMeter settings from visImage
-	npscreenVumeters = visImage:getVUImageList()
-	-- ensure that at least one VUMeter is selected
-	local enabled_count = 0
-	for i, v in ipairs(npscreenVumeters) do
-		if npscreenVumeters[i].enabled then
-			enabled_count = enabled_count + 1
-		end
-	end
-	if enabled_count == 0 then
-		npscreenVumeters[1].enabled = true
-		visImage:selectVuImage(npscreenVumeters[1].name,v)
-	end
-	-- refresh and a save VU meter settings
-	settings.vumeters = {}
-	for i, v in ipairs(npscreenVumeters) do
-		settings.vumeters[v.name] = npscreenVumeters[i].enabled
-	end
-
-
-	-- Spectrum meters
-	local npscreenSpectrum = visImage:getSpectrumList()
-	-- first reflect any valid settings down to visImage
-	-- settings for spectrum images that no longer exist are ignored
-	log:debug("syncSettings spectrum >>")
-	for k, v in pairs(settings.spectrum) do
-		log:debug("syncSettings spectrum >>", k, " -> ", v)
-		visImage:selectSpectrum(k,v)
-	end
-	log:debug("syncSettings spectrum <<")
-	-- refresh spectrum images settings from visImage
-	npSpectrum = visImage:getSpectrumList()
-	-- ensure that at least one Spectrum is selected
-	local enabled_count = 0
-	for i, v in ipairs(npSpectrum) do
-		if npSpectrum[i].enabled then
-			enabled_count = enabled_count + 1
-		end
-	end
-	if enabled_count == 0 then
-		npSpectrum[1].enabled = true
-		visImage:selectSpectrum(npSpectrum[1].name,v)
-	end
-	-- refresh and save the spectrum image settings
-	settings.spectrum = {}
-	for i, v in ipairs(npSpectrum) do
-		settings.spectrum[v.name] = npSpectrum[i].enabled
-	end
-
-	-- synchronise background alpha value
-	if not settings.backgroundAlpha then
-		settings.backgroundAlpha = visImage:getBackgroundAlpha()
-	else
-		visImage:setBackgroundAlpha(settings.backgroundAlpha)
-	end
-
-	if not settings.spectrumBarsFormat then
-		settings.spectrumBarsFormat = visImage:getBarsFormat()
-	else
-		visImage:setBarsFormat(settings.spectrumBarsFormat)
-	end
-
-	self:storeSettings()
-	visImage:sync()
-end
-
-
 function updateSettings(self)
 	local settings = self:getSettings()
 
@@ -2293,9 +2220,10 @@ function updateSettings(self)
 
 
 	-- Spectrum images
+	npscreenSpectrum = visImage:getSpectrumList()
 	settings.spectrum = {}
-	for i, v in ipairs(npSpectrum) do
-		settings.spectrum[v.name] = npSpectrum[i].enabled
+	for i, v in ipairs(npscreenSpectrum) do
+		settings.spectrum[v.name] = npscreenSpectrum[i].enabled
 	end
 
 	-- Spectrum bars format
