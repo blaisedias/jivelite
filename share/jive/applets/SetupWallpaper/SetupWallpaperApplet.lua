@@ -22,6 +22,7 @@ SetupWallpaperApplet overrides the following methods:
 
 -- stuff we use
 local ipairs, pairs, type, print, tostring = ipairs, pairs, type, print, tostring
+local math          = require("math")
 
 local oo                     = require("loop.simple")
 local io                     = require("io")
@@ -37,6 +38,7 @@ local RadioGroup             = require("jive.ui.RadioGroup")
 local SimpleMenu             = require("jive.ui.SimpleMenu")
 local Textarea               = require("jive.ui.Textarea")
 local Tile                   = require("jive.ui.Tile")
+local Surface                = require("jive.ui.Surface")
 local Window                 = require("jive.ui.Window")
 local Framework              = require("jive.ui.Framework")
 
@@ -44,6 +46,7 @@ local RequestHttp            = require("jive.net.RequestHttp")
 local SocketHttp             = require("jive.net.SocketHttp")
 
 local debug                  = require("jive.utils.debug")
+local log                    = require("jive.utils.log").logger("applet.SetupWallpaper")
 
 local jnt                    = jnt
 local appletManager          = appletManager
@@ -430,7 +433,18 @@ function showBackground(self, wallpaper, playerId, force)
 		-- get the absolute file path for whatever we have
 		wallpaper = System:findFile(wallpaper)
 		if wallpaper ~= nil then 
-			srf = Tile:loadImage(wallpaper)
+			sw,sh = Framework:getScreenSize()
+			img = Surface:loadImage(wallpaper)
+			w,h = img:getSize()
+			if w > sw or h > sh then
+				local x = math.max(0, math.floor((w - sw)/2))
+				local y = math.max(0, math.floor((h - sh)/2))
+				srf = Surface:newRGBA(sw, sh)
+				img:blitClip(x, y, sw, sh, srf, 0, 0)
+			else
+				srf = img
+			end
+--			srf = Tile:loadImage(wallpaper)
 		end
 	end
 	-- srf = nil represents no background image
