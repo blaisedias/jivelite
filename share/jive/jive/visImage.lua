@@ -54,12 +54,17 @@ function getImageName(imgPath)
 end
 
 function pathIter(rpath)
+	local hist = {}
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
-		dir = dir .. rpath
-
-		local mode = lfs.attributes(dir, "mode")
-		if mode == "directory" then
-			coroutine.yield(dir)
+		if hist[dir] == nil then
+			hist[dir] = true
+			if dir ~= "./" then
+				dir = dir .. rpath
+				local mode = lfs.attributes(dir, "mode")
+				if mode == "directory" then
+					coroutine.yield(dir)
+				end
+			end
 		end
 	end
 end
@@ -113,32 +118,33 @@ end
 function initialise()
 	cacheClear()
 	local search_root
-	for search_root in findPaths("assets/precache") do
+	for search_root in findPaths("../../assets/precache") do
 		_readCacheDir(search_root)
 	end
+
 	for search_root in findPaths("visucache") do
 		_readCacheDir(search_root)
 	end
+
 	initVuMeterList()
 	initSpectrumList()
 	for k, v in pairs(npvumeters) do
 		selectVuImage({},k,v)
 	end
 	for k, v in pairs(npspectrums) do
-	 log:debug("#### ", k, " ", v)
 		selectSpectrum({},k,v)
 	end
 	local enabled = false
 	for i, v in ipairs(vuImages) do
 		enabled = enabled or v.enabled
 	end
-	if not enabled then
+	if not enabled and #vuImages > 0 then
 		vuImages[1].enabled = true
 	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
 	end
-	if not enabled then
+	if not enabled and #spectrumList > 0 then
 		spectrumList[1].enabled = true
 	end
 end
@@ -269,9 +275,8 @@ function initSpectrumList()
 	table.insert(spectrumList, {name="default", enabled=false})
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 
---	local search_root = lfs.currentdir() .. "/assets/visualisers/spectrum/backlit"
 	local search_root
-	for search_root in findPaths("assets/visualisers/spectrum/backlit") do
+	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
@@ -290,7 +295,7 @@ function initSpectrumList()
 		end
 	end
 
-	for search_root in findPaths("assets/visualisers/spectrum/gradient") do
+	for search_root in findPaths("../../assets/visualisers/spectrum/gradient") do
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
@@ -586,9 +591,8 @@ function _cacheVUImage(imgName, path, w, h)
 end
 
 function initVuMeterList()
---	local search_root = lfs.currentdir() .. "/assets/visualisers/vumeters/vfd"
 	local search_root
-	for search_root in findPaths("assets/visualisers/vumeters/vfd") do
+	for search_root in findPaths("../../assets/visualisers/vumeters/vfd") do
 		for entry in lfs.dir(search_root) do
 			if entry ~= "." and entry ~= ".." then
 				local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
@@ -609,8 +613,9 @@ function initVuMeterList()
 			end
 		end
 	end
+
 	-- Do this the dumb way for now, i.e. repeat the enumeration
-	for search_root in findPaths("/assets/visualisers/vumeters/analogue") do
+	for search_root in findPaths("../../assets/visualisers/vumeters/analogue") do
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
