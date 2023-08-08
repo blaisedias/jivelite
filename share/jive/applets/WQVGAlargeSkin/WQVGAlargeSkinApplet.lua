@@ -42,6 +42,8 @@ local autotable              = require("jive.utils.autotable")
 
 local log                    = require("jive.utils.log").logger("applet.WQVGAlargeSkin")
 
+local visImage               = require("jive.visImage")
+
 local EVENT_ACTION           = jive.ui.EVENT_ACTION
 local EVENT_CONSUME          = jive.ui.EVENT_CONSUME
 local EVENT_WINDOW_POP       = jive.ui.EVENT_WINDOW_POP
@@ -480,6 +482,12 @@ function skin(self, s)
 	local THREE_ITEM_HEIGHT = 72
 	local FIVE_ITEM_HEIGHT = 43
 	local TITLE_BUTTON_WIDTH = 76
+
+	-- see line 2542-ish
+	visImage:registerVUMeterResolution(480, 272 - (TITLE_HEIGHT + 34 + 38))
+	-- see line 2508-ish
+	visImage:registerSpectrumResolution(480, 272 - (2 * TITLE_HEIGHT + 4 + 33))
+	visImage:initialise()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_med.png"),
@@ -2526,6 +2534,7 @@ function skin(self, s)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
+                useVisImage = true,
 			}
 		},
 	})
@@ -2551,7 +2560,7 @@ function skin(self, s)
 				h = 272 - (TITLE_HEIGHT + 34 + 38),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
-				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_b.png"),
+--				bgImg = _loadImage(self, "UNOFFICIAL/VUMeter/vu_analog_25seq_b.png"),
 			}
 		},
 	})
