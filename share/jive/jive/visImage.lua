@@ -272,6 +272,8 @@ function getSpectrumList()
 end
 
 function initSpectrumList()
+	spectrumList = {}
+	spectrumImagesMap = {} 
 	table.insert(spectrumList, {name="default", enabled=false})
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 
@@ -591,6 +593,8 @@ function _cacheVUImage(imgName, path, w, h)
 end
 
 function initVuMeterList()
+	vuImages = {}
+	vuImagesMap = {}
 	local search_root
 	for search_root in findPaths("../../assets/visualisers/vumeters/vfd") do
 		for entry in lfs.dir(search_root) do
@@ -751,7 +755,7 @@ function getVFDVUmeter(name, w, h)
 
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
-	if w >= dw and h >= dh then
+	if w > dw and h >= dh then
 		vfd.on = Surface:loadImage(imageCache[bar_on])
 		vfd.off = Surface:loadImage(imageCache[bar_off])
 		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on])
@@ -761,7 +765,7 @@ function getVFDVUmeter(name, w, h)
 		vfd.w = dw
 		vfd.h = dh
 	else
-		local sf = math.min(w/dw, h/dh)
+		local sf = math.min((w-20)/dw, h/dh)
 		barwidth = math.floor(barwidth * sf)
 		bw = math.floor(bw * sf)
 		bh = math.floor(bh * sf)
