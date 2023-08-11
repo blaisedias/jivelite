@@ -141,8 +141,10 @@ function _layout(self)
 	self.barHeightMulti[1] = barHeight[1] / 31
 	self.barHeightMulti[2] = barHeight[2] / 31
 
+	self.xshift = x + l
 	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2 
 	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2] + (sep - self.binSpace[1]) + (sep - self.binSpace[2])
+	log:debug("** x: " .. x .. " l: " .. l)
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
 	log:debug("** cw1: " .. self.channelWidth[1] .. " nB1xbS: " .. numBars[1] * barSize[1])
@@ -218,6 +220,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 	local cch = self.cap[ch]
 	local barSize = barWidth + barSpace
 	local xx, yy, ww, hh = self:getBounds()
+	local xshift = self.xshift
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -230,7 +233,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					local yTop = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
 					local xRight = xLeft + (barWidth - 1)
-					self.fgImg:blitClip(xLeft, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
+					self.fgImg:blitClip(xLeft - xshift, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
 				elseif self.useGradient > 0 then
 					local yEndValue = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
