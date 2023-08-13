@@ -740,7 +740,7 @@ function notify_playerTrackChange(self, player, nowPlaying)
 
 	-- cycle to the next set of visualiser images
 	visImage:vuBump()
-	visImage:spBump()
+	visImage:spBump(nil)
 
 	self:replaceNPWindow()
 end
