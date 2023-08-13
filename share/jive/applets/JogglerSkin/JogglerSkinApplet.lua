@@ -3689,7 +3689,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				gradientColours = gradientColours,
+--				gradientColours = gradientColours,
+				useVisImage = true,
+				spType="gradient",
 			}
 		},
 	})
