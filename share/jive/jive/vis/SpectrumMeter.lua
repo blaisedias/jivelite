@@ -44,6 +44,7 @@ function _skin(self)
 	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
 	self.useGradient = #self.gradientColours - 1
 	self.useVisImage = self:styleValue("useVisImage", false)
+	self.spType = self:styleValue("spType")
 end
 
 
@@ -163,17 +164,8 @@ function _layout(self)
 		self.cap[2][i] = 0
 	end
 
-	self.fgImg = nil
 	if self.useVisImage then
-		-- self.fgImg = visImage:scaleSpectrumImage(visImage:getFgSpectrumImage(), w, h)
-		self.fgImg = visImage:getFgSpectrumImage(w, h)
-	end
-
-	self.bgImg = nil
-	if self.useVisImage then
-		--self.bgImg = visImage:scaleSpectrumImage(visImage:getBgSpectrumImage(), w, h)
-		self.bgImg = visImage:getBgSpectrumImage(w, h)
-		self.bgAlpha = visImage:getBackgroundAlpha()
+		self.fgImg, self.bgImg, self.bgAlpha = visImage:getSpectrum(w, h, self.spType)
 	end
 end
 
