@@ -70,9 +70,15 @@ function _layout(self)
 
 	self.isMono =  self:styleValue("isMono")
 
-	self.capHeight = self:styleValue("capHeight")
-	self.capSpace = self:styleValue("capSpace")
-	self.channelFlipped = self:styleValue("channelFlipped")
+	if self.useVisImage then
+		self.fgImg, self.bgImg, self.bgAlpha = visImage:getSpectrum(w, h, self.spType)
+	end
+
+--	self.capHeight = self:styleValue("capHeight")
+--	self.capSpace = self:styleValue("capSpace")
+	self.capHeight, self.capSpace = visImage:getCapsValues(self:styleValue("capHeight"), self:styleValue("capSpace"))
+--	self.channelFlipped = self:styleValue("channelFlipped")
+	self.channelFlipped = visImage:getChannelFlipValues()
 	self.clipSubbands = self:styleValue("clipSubbands")
 	-- selectable from ui
 	local barsFormat = visImage:getBarsFormat()
@@ -164,9 +170,6 @@ function _layout(self)
 		self.cap[2][i] = 0
 	end
 
-	if self.useVisImage then
-		self.fgImg, self.bgImg, self.bgAlpha = visImage:getSpectrum(w, h, self.spType)
-	end
 end
 
 

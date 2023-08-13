@@ -74,6 +74,26 @@ function registerApplet(self)
 			end
 		)
 	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletNowPlayingSpectrumCapsSettings', 
+			'screenSettingsNowPlaying', 
+			'SPECTRUM_CAPS', 
+			function(applet, ...) 
+				applet:npSpectrumCapsSettingsShow(...) 
+			end
+		)
+	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletNowPlayingSpectrumChannelFlipSettings', 
+			'screenSettingsNowPlaying', 
+			'SPECTRUM_CHANNEL_FLIP', 
+			function(applet, ...) 
+				applet:npSpectrumChannelFlipSettingsShow(...) 
+			end
+		)
+	)
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
 

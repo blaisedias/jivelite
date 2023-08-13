@@ -382,7 +382,7 @@ function spBump(tbl, spType)
 		spImageIndex = (spImageIndex % #spectrumList) + 1
 		if spectrumList[spImageIndex].enabled == true then
 			if spType == nil or spectrumList[spImageIndex].spType == spType then 
-				log:debug("########## spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
+				log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
 				return true
 			end
 		end
@@ -397,7 +397,7 @@ function spFindSpectrumByType(spType)
 			return spectrumList[i].name
 		end
 	end
-    -- type is not available - return type
+	-- type is not available - return type
 	return spectrumList[1].name
 end
 
@@ -489,7 +489,7 @@ end
 
 function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: ", w, " ", h)
-    local spkey = spectrumList[spImageIndex].name
+	local spkey = spectrumList[spImageIndex].name
 	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
 		if not spBump(nil, spType) then
 			spkey = spFindSpectrumByType(spType)
@@ -581,6 +581,60 @@ function setBarsFormat(tbl, format)
 	log:debug("setBarsFormat", " ", format.name)
 	barsFormat = format
 end
+
+-------------------------------------------------------- 
+--- Spectrum caps
+-------------------------------------------------------- 
+local capsOn  = true
+
+function getCapsOn(tbl)
+	log:debug("getCapsOn", " ", capsOn)
+	return capsOn
+end
+
+function setCapsOn(tbl, v)
+	log:debug("setCapsOn", " ", v)
+	capsOn = v
+end
+
+function getCapsValues(tbl, capsHeight, capsSpace)
+	if not capsOn then
+		return {0,0}, {0,0}
+	end
+	return capsHeight, capsSpace
+end
+
+-------------------------------------------------------- 
+--- Spectrum channel flip
+-------------------------------------------------------- 
+local channelFlips  = {
+	{name="N,F", values={0,1}},
+	{name="F,F", values={1,1}},
+	{name="F,N", values={1,0}},
+	{name="N,N", values={0,0}},
+}
+
+local channelFlip  = channelFlips[1]
+
+function getChannelFlipValues()
+	log:debug("getChannelFlipValues", " ", channelFlip.name, " ", channelFlip.values)
+	return channelFlip.values
+end
+
+function getChannelFlip()
+	log:debug("getChannelFlip", " ", channelFlip.name)
+	return channelFlip
+end
+
+function getChannelFlips()
+	return channelFlips
+end
+
+function setChannelFlip(tbl, flip)
+	log:debug("setChannelFlip", " ", flip.name)
+	channelFlip = flip
+end
+
 
 -------------------------------------------------------- 
 --- VU meter
