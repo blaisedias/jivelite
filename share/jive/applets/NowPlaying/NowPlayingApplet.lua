@@ -156,6 +156,17 @@ function init(self)
 		visImage:setBarsFormat(settings.spectrumBarsFormat)
 	end
 
+	if settings.capsOn == nil then
+		settings.capsOn = visImage:getCapsOn()
+	else
+		visImage:setCapsOn(settings.capsOn)
+	end
+
+	if not settings.channelFlip then
+		settings.channelFlip = visImage:getChannelFlip()
+	else
+		visImage:setChannelFlip(settings.channelFlip)
+	end
 end
 
 -- style names are grabbed from the skin
@@ -400,6 +411,79 @@ function npSpectrumBarSettingsShow(self)
 					visImage:setBarsFormat(v)
 					self:updateSettings()
 					self.spbfchanged = true
+					self.window = nil
+				end,
+			selected),
+		} )
+	end
+
+	--XXX: not sure whether the text is necessary or even helpful here
+	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
+
+	window:addWidget(menu)
+	window:show()
+end
+
+function npSpectrumCapsSettingsShow(self)
+	local window = Window("text_list", self:string('SPECTRUM_CAPS') )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu", {
+		{
+			text = self:string("SPECTRUM_CAPS_ON"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setCapsOn(true)
+					self:updateSettings()
+					self.window = nil
+				end,
+				visImage:getCapsOn()
+			)
+		},
+		{
+			text = self:string("SPECTRUM_CAPS_OFF"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setCapsOn(false)
+					self:updateSettings()
+					self.window = nil
+				end,
+				not visImage:getCapsOn()
+			)
+		},
+	})
+
+	window:addWidget(menu)
+	window:show()
+end
+
+
+function npSpectrumChannelFlipSettingsShow(self)
+	local window = Window("text_list", self:string('SPECTRUM_CHANNEL_FLIP') )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu")
+
+	local npscreenChannelFlips = visImage:getChannelFlips()
+
+	local current =  visImage:getChannelFlip()
+	for i, v in ipairs(npscreenChannelFlips) do
+		local selected = false
+		if v.name == current.name then
+			selected = true
+		end
+		
+		menu:addItem( {
+			text = v.name,
+			style = 'item_choice',
+			check = RadioButton("radio", group,
+				function()
+					visImage:setChannelFlip(v)
+					self:updateSettings()
 					self.window = nil
 				end,
 			selected),
@@ -2228,6 +2312,8 @@ function updateSettings(self)
 
 	-- Spectrum bars format
 	settings.spectrumBarsFormat = visImage:getBarsFormat()
+	settings.capsOn = visImage:getCapsOn()
+	settings.channelFlip = visImage:getChannelFlip()
 
 	self:storeSettings()
 	visImage:sync()
