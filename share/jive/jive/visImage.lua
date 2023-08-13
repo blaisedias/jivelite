@@ -274,7 +274,7 @@ end
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {} 
-	table.insert(spectrumList, {name="default", enabled=false})
+	table.insert(spectrumList, {name="default", enabled=false, spType="default"})
 	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
 
 	local search_root
@@ -288,7 +288,7 @@ function initSpectrumList()
 					local baseImgName = string.sub(imgName,4,l)
 					bgImgName = "bg-" .. baseImgName
 					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false})
+						table.insert(spectrumList, {name=imgName, enabled=false, spType="backlit"})
 					end
 					log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
 					spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
@@ -305,7 +305,7 @@ function initSpectrumList()
 				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
 					local imgName = parts[1]
 					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false})
+						table.insert(spectrumList, {name=imgName, enabled=false, spType="gradient"})
 					end
 					log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
 					spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
@@ -377,24 +377,34 @@ function _cacheSpectrumImage(imgName, path, w, h)
 	end
 end
 
-function spBump()
+function spBump(tbl, spType)
 	for i = 1, #spectrumList do
 		spImageIndex = (spImageIndex % #spectrumList) + 1
 		if spectrumList[spImageIndex].enabled == true then
-			log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
-			return
+			if spType == nil or spectrumList[spImageIndex].spType == spType then 
+				log:debug("########## spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
+				return true
+			end
 		end
 	end
+	return false
+end
+
+function spFindSpectrumByType(spType)
+	for i = 1, #spectrumList do
+		if spType == nil or spectrumList[i].spType == spType then 
+			log:debug("spFindSpectrumByType is ", i, " of ", #spectrumList, ", ", spectrumList[i].name)
+			return spectrumList[i].name
+		end
+	end
+    -- type is not available - return type
+	return spectrumList[1].name
 end
 
 local currentFgImage = nil
 local currentFgImageKey = nil
-function getFgSpectrumImage(tbl, w,h)
-	log:debug("getFgImage: ", w, " ", h)
-	if not spectrumList[spImageIndex].enabled then
-		spBump()
-	end
-	local spkey = spectrumList[spImageIndex].name
+function _getFgSpectrumImage(spkey, w,h)
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
 	if spectrumImagesMap[spkey].fg == nil then
 		return nil
 	end
@@ -434,12 +444,8 @@ end
 
 local currentBgImage = nil
 local currentBgImageKey = nil
-function getBgSpectrumImage(tbl, w,h) 
-	log:debug("getBgImage: ", w, " ", h)
-	if not spectrumList[spImageIndex].enabled then
-		spBump()
-	end
-	local spkey = spectrumList[spImageIndex].name
+function _getBgSpectrumImage(spkey, w,h) 
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
 	if spectrumImagesMap[spkey].bg == nil then
 		return nil
 	end
@@ -479,6 +485,23 @@ function getBgSpectrumImage(tbl, w,h)
 		end
 	end
 	return currentBgImage
+end
+
+function getSpectrum(tbl, w, h, spType)
+	log:debug("getSpectrum: ", w, " ", h)
+    local spkey = spectrumList[spImageIndex].name
+	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
+		if not spBump(nil, spType) then
+			spkey = spFindSpectrumByType(spType)
+		else
+			spkey = spectrumList[spImageIndex].name
+		end
+	end
+	log:debug("getSpectrum: spkey: ", spkey)
+	fg = _getFgSpectrumImage(spkey, w, h)
+	bg = _getBgSpectrumImage(spkey, w, h)
+	alpha = getBackgroundAlpha
+	return fg, bg, alpha
 end
 
 function selectSpectrum(tbl, name, selected)
@@ -807,6 +830,6 @@ function sync()
 		vuBump()
 	end
 	if not spectrumList[spImageIndex].enabled then
-		spBump()
+		spBump(nil,nil)
 	end
 end
