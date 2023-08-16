@@ -32,6 +32,8 @@ local autotable              = require("jive.utils.autotable")
 
 local log                    = require("jive.utils.log").logger("applet.HDGridSkin")
 
+local visImage               = require("jive.visImage")
+
 local EVENT_ACTION           = jive.ui.EVENT_ACTION
 local EVENT_CONSUME          = jive.ui.EVENT_CONSUME
 local EVENT_WINDOW_POP       = jive.ui.EVENT_WINDOW_POP
@@ -54,7 +56,6 @@ local math                   = math
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
-
 
 -- Define useful variables for this skin
 local imgpath = "applets/HDGridSkin/images/"
@@ -98,6 +99,12 @@ function param(self)
 				artworkSize = coverSize .. "x" .. coverSize,
 				localPlayerOnly = 1,
 				text = self:string("SPECTRUM_ANALYZER"),
+			},
+			{
+				style = 'nowplaying_vuanalog_text',
+				artworkSize = coverSize .. "x" .. coverSize,
+				localPlayerOnly = 1,
+				text = self:string("ANALOG_VU_METER"),
 			},
 		},
 		disableTimeInput = true,
@@ -663,6 +670,11 @@ function skin(self, s)
 	local THREE_ITEM_HEIGHT = 72
 	local FIVE_ITEM_HEIGHT = 76
 	local TITLE_BUTTON_WIDTH = 76
+
+-- front load for smoother experience when music is playing
+--	visImage:registerVUMeterResolution(coverSize, coverSize)
+--	visImage:registerSpectrumResolution(coverSize, coverSize)
+	visImage:initialise()
 
 	-- alternatives for grid view
 	local ALBUMMENU_FONT_SIZE_G = 26
@@ -2955,7 +2967,7 @@ function skin(self, s)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = coverSize + math.floor(100 * screenWidth/1920),
-			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 5 / 6,
+			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 5.25 / 6,
 			padding = { 0, 10, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3006,7 +3018,7 @@ function skin(self, s)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = coverSize + math.floor(100 * screenWidth/1920),
-			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 5 / 6,
+			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 5.25 / 6,
 			elapsed = {
 				w = math.floor(100 * screenWidth/1920),
 				align = "left",
@@ -3053,7 +3065,7 @@ function skin(self, s)
 	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
 	s.nowplaying_visualizer_common = _uses(s.nowplaying, {
-		npartwork = { hidden = 1 },
+		npartwork = { hidden = 0 },
 	})
 
 	s.nowplaying_visualizer_common.npprogress.npprogressB_disabled = s.nowplaying_visualizer_common.npprogress.npprogressB
@@ -3063,21 +3075,18 @@ function skin(self, s)
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
-			x = math.floor(50 * screenWidth/1920),
-			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 6 / 6 - coverSize,
-			align = "center",
-			w = coverSize,
-			h = coverSize,
+			x =  _tracklayout.x,
+			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
+			h = coverSize * 2 / 6,
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
-			bgImg = _progressBackground,
 
 			spectrum = {
 				position = LAYOUT_NONE,
-				x = 0,
-				y = 0,
-				w = coverSize,
-				h = coverSize,
+				x =  _tracklayout.x,
+				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
+				w = screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),
+				h = coverSize * 2 / 6,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -3096,6 +3105,30 @@ function skin(self, s)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
+				useVisImage = true,
+			}
+		},
+	})
+
+	-- Visualizer: VU Meter
+	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x =  _tracklayout.x,
+			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
+			h = coverSize * 2 / 6,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			vumeter_analog = {
+				position = LAYOUT_NONE,
+				x =  _tracklayout.x,
+				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
+				w = screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),
+				h = coverSize * 2 / 6,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
 			}
 		},
 	})
