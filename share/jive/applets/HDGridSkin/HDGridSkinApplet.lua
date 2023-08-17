@@ -2925,12 +2925,25 @@ function skin(self, s)
 	
 		--transport controls - hidden
 		npcontrols = {
-			order = { 'repeatMode', 'shuffleMode' },
+			order = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode' },
 			position = LAYOUT_NONE,
-			x = coverSize + math.floor(100 * screenWidth/1920) + (screenWidth - _tracklayout.x - math.floor(50 * screenWidth/1920) - 8)/2 - controlWidth,
+--			x = coverSize + math.floor(100 * screenWidth/1920) + (screenWidth - _tracklayout.x - math.floor(50 * screenWidth/1920) - 8)/2 - controlWidth,
+			x = _tracklayout.x + ( (screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920) ) /2) - (controlWidth * (5/2)),
 			y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 5.5 / 6,	
 			h = controlHeight,
 			w = WH_FILL,
+			rew   = _uses(_transportControlButton, {
+				img = _loadImage(self, "Icons/icon_toolbar_rew.png"),
+			}),
+			play  = _uses(_transportControlButton, {
+				img = _loadImage(self, "Icons/icon_toolbar_play.png"),
+			}),
+			pause = _uses(_transportControlButton, {
+				img = _loadImage(self, "Icons/icon_toolbar_pause.png"),
+			}),
+			fwd   = _uses(_transportControlButton, {
+				img = _loadImage(self, "Icons/icon_toolbar_ffwd.png"),
+			}),
 			shuffleMode = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_shuffle_off.png"),
 			}),
@@ -3058,7 +3071,19 @@ function skin(self, s)
 	s.nowplaying.npartwork.pressed = s.nowplaying.npartwork
 
 	s.nowplaying.npcontrols.pressed = {
-		hidden = 1,
+--		hidden = 1,
+		rew     = _uses(s.nowplaying.npcontrols.rew, { bgImg = keyMiddlePressed }),
+		play    = _uses(s.nowplaying.npcontrols.play, { bgImg = keyMiddlePressed }),
+		pause   = _uses(s.nowplaying.npcontrols.pause, { bgImg = keyMiddlePressed }),
+		fwd     = _uses(s.nowplaying.npcontrols.fwd, { bgImg = keyMiddlePressed }),
+		repeatPlaylist  = _uses(s.nowplaying.npcontrols.repeatPlaylist, { bgImg = keyMiddlePressed }),
+		repeatSong      = _uses(s.nowplaying.npcontrols.repeatSong, { bgImg = keyMiddlePressed }),
+		repeatOff       = _uses(s.nowplaying.npcontrols.repeatOff, { bgImg = keyMiddlePressed }),
+		repeatMode      = _uses(s.nowplaying.npcontrols.repeatMode, { bgImg = keyMiddlePressed }),
+		shuffleAlbum    = _uses(s.nowplaying.npcontrols.shuffleAlbum, { bgImg = keyMiddlePressed }),
+		shuffleSong     = _uses(s.nowplaying.npcontrols.shuffleSong, { bgImg = keyMiddlePressed }),
+		shuffleMode      = _uses(s.nowplaying.npcontrols.shuffleMode, { bgImg = keyMiddlePressed }),
+		shuffleOff      = _uses(s.nowplaying.npcontrols.shuffleOff, { bgImg = keyMiddlePressed }),
 	}
 
 	
