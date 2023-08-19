@@ -31,6 +31,7 @@ function registerApplet(self)
 	jiveMain:registerSkin(self:string("HD_SKIN_1080"), "HDSkin", "skin_1080p", "HDSkin-1080")
 	jiveMain:registerSkin(self:string("HD_SKIN_720"),  "HDSkin", "skin_720p", "HDSkin-720")
 	jiveMain:registerSkin(self:string("HD_SKIN_1280_1024"),  "HDSkin", "skin_1280_1024", "HDSkin-1280-1024")
+	jiveMain:registerSkin(self:string("HD_SKIN_WSVGA"),  "HDSkin", "skin_wsvga", "HDSkin-WSVGA")
 	jiveMain:registerSkin(self:string("HD_SKIN_VGA"),  "HDSkin", "skin_vga", "HDSkin-VGA")
 end
 
