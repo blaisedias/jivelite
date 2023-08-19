@@ -239,6 +239,11 @@ function skin_1280_1024(self, s)
 	self:skin(s)
 end
 
+function skin_wsvga(self, s)
+	Framework:setVideoMode(1024, 600, 0, false)
+	self:skin(s)
+end
+
 -- this is the startup screen - not intended to be used beyond this
 function skin_vga(self, s)
 	Framework:setVideoMode(640, 480, 0, false)
