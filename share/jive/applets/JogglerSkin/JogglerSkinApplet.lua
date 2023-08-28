@@ -86,6 +86,8 @@ local gradientColours = {
 }
 
 
+local BLACK_BACKGROUND = false
+
 module(..., Framework.constants)
 oo.class(_M, Applet)
 
@@ -302,6 +304,22 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	--init lastInputType so selected item style is not shown on skin load
 	Framework.mostRecentInputType = "mouse"
 
+	local V_blackBackground = nil
+	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
+	local V_titleBox = nil
+	local V_touchToolbarBackground = nil
+	local V_titlebarButtonBox = nil
+	local V_titlebar_shadow_png_path = nil
+	local V_titlebar_png_path = nil
+	if BLACK_BACKGROUND then
+		V_blackBackground = blackBackground
+		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
+		V_titleBox = titleBox
+		V_touchToolbarBackground = touchToolbarBackground
+		V_titlebarButtonBox = titlebarButtonBox
+		V_titlebar_shadow_png_path = "Titlebar/titlebar_shadow.png"
+		V_titlebar_png_path = "Titlebar/titlebar.png"
+	end
 	-- skin
 	local thisSkin = 'touch'
 	local skinSuffix = "_" .. thisSkin .. ".png"
@@ -592,13 +610,13 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	local titleBox                =
 		_loadTile(self, {
-				 imgpath .. "Titlebar/titlebar.png",
+				 V_titlebar_png_path,
 				 nil,
 				 nil,
 				 nil,
 				 nil,
 				 nil,
-				 imgpath .. "Titlebar/titlebar_shadow.png",
+				 V_titlebar_shadow_png_path,
 				 nil,
 				 nil,
 		})
@@ -2335,7 +2353,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	-- base button
 	local _button = {
-		bgImg = titlebarButtonBox,
+		bgImg = V_titlebarButtonBox,
 		w = TITLE_BUTTON_WIDTH,
 		h = WH_FILL,
 		border = { 8, 0, 8, 0 },
@@ -2876,12 +2894,12 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			zOrder = 1,
 			text = {
 				font = _boldfont(TITLEBAR_FONT_SIZE),
-				bgImg   = titlebarButtonBox,
+				bgImg   = V_titlebarButtonBox,
 			},
 			rbutton  = {
 				font    = _font(14),
 				fg      = TEXT_COLOR,
-				bgImg   = titlebarButtonBox,
+				bgImg   = V_titlebarButtonBox,
 				w       = TITLE_BUTTON_WIDTH,
 				padding = { 8, 0, 8, 0},
 				align   = 'center',
@@ -2970,7 +2988,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			position = LAYOUT_SOUTH,
 			h = controlHeight,
 			w = WH_FILL,
-			bgImg = touchToolbarBackground,
+			bgImg = V_touchToolbarBackground,
 
 			div1 = _uses(_transportControlBorder),
 			div2 = _uses(_transportControlBorder),
@@ -3217,7 +3235,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local npX = screenHeight + 15
 
 	s.nowplaying_large_art = _uses(s.nowplaying, {
-		bgImg = blackBackground,
+		bgImg = V_blackBackground,
 		title = {
 			bgImg = false,
 			text = {
@@ -3379,7 +3397,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	
 	s.nowplaying_art_only = _uses(s.nowplaying, {
 
-		bgImg            = blackBackground,
+		bgImg            = V_blackBackground,
 		title            = { hidden = 1 },
 		nptitle          = { hidden = 1 },
 		npcontrols       = { hidden = 1 },
@@ -3498,7 +3516,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
 	s.nowplaying_visualizer_common = _uses(s.nowplaying, {
-		bgImg = blackBackground,
+		bgImg = V_blackBackground,
 
 		npartistgroup = { hidden = 1 },
 		npalbumgroup = { hidden = 1 },
@@ -3536,9 +3554,10 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			y = TITLE_HEIGHT,
 			w = screenWidth,
 			h = 60,
-			bgImg = titleBox,
+			bgImg = V_titleBox,
 			align = "center",
-			fg = { 0xb3, 0xb3, 0xb3 },
+			fg = V_npartistalbumFg,
+			sh = TEXT_SH_COLOR,
 			padding = { 100, 0, 100, 5 },
 			font = _font(NP_ARTISTALBUM_FONT_SIZE),
 		},
@@ -3642,7 +3661,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
    	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
 	s.nowplaying_visualizer_mini = _uses(s.nowplaying, {
-		bgImg = blackBackground,
+		bgImg = V_blackBackground,
 
 		npartistgroup = { hidden = 0 },
 		npalbumgroup = { hidden = 0 },
