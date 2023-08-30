@@ -274,8 +274,8 @@ end
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {} 
-	table.insert(spectrumList, {name="default", enabled=false, spType="default"})
-	spectrumImagesMap["default"] = {fg=nil, bg=nil, src=nil} 
+	table.insert(spectrumList, {name=" default", enabled=false, spType="default"})
+	spectrumImagesMap[" default"] = {fg=nil, bg=nil, src=nil} 
 
 	local search_root
 	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
