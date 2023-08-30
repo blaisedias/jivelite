@@ -538,13 +538,15 @@ function skin(self, s)
 	})
 
 	local titleBox = _loadTile(self, {
-		imgpath .. "Titlebar/titlebar.png",
+--		imgpath .. "Titlebar/titlebar.png",
+        nil,
 		nil,
 		nil,
 		nil,
 		nil,
 		nil,
-		imgpath .. "Titlebar/titlebar_shadow.png",
+--		imgpath .. "Titlebar/titlebar_shadow.png",
+        nil,		
 		nil,
 		nil,
 	})
@@ -798,7 +800,8 @@ function skin(self, s)
 		position = LAYOUT_NORTH,
 		--bgImg = titleBox,
 		padding = { 0, 5, 0, 5 },
-		order = { "text" }, -- { "lbutton", "text", "rbutton" },
+		-- order = { "text" }, -- { "lbutton", "text", "rbutton" },
+		order = { "lbutton", "text", "rbutton" },
 		lbutton = {
 			border = { 8, 0, 8, 0 },
 			h = WH_FILL,
@@ -2281,7 +2284,7 @@ function skin(self, s)
 
 	-- base button
 	local _button = {
-		bgImg = titlebarButtonBox,
+--		bgImg = titlebarButtonBox,
 		w = TITLE_BUTTON_WIDTH,
 		h = WH_FILL,
 		border = { 8, 0, 8, 0 },
