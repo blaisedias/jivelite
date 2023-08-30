@@ -436,7 +436,18 @@ function showBackground(self, wallpaper, playerId, force)
 			sw,sh = Framework:getScreenSize()
 			img = Surface:loadImage(wallpaper)
 			w,h = img:getSize()
-			if w > sw or h > sh then
+            --  scale the wallpaper to fit the screen
+            sfw = sw/w
+            sfh = sh/h
+            ww = (w*sfw)
+            wh = (h*sfw)
+            hw = (w*sfh)
+            hh = (h*sfh)
+            if ww >= sw and wh >= sh then
+                srf = Surface:loadImage(wallpaper):resize(ww, wh)
+            elseif hw >= sw and hh >= sh then
+                srf = Surface:loadImage(wallpaper):resize(hw, hh)
+            elseif w > sw or h > sh then
 				local x = math.max(0, math.floor((w - sw)/2))
 				local y = math.max(0, math.floor((h - sh)/2))
 				srf = Surface:newRGBA(sw, sh)
