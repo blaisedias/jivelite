@@ -82,17 +82,17 @@ function _layout(self)
 	self.clipSubbands = self:styleValue("clipSubbands")
 	-- selectable from ui
 	local barsFormat = visImage:getBarsFormat()
-	if barsFormat.name == "skin" then
-		self.barsInBin = self:styleValue("barsInBin")
-		self.barWidth = self:styleValue("barWidth")
-		self.barSpace = self:styleValue("barSpace")
-		self.binSpace = self:styleValue("binSpace")
-	else
+--	if barsFormat.name == " default" then
+--		self.barsInBin = self:styleValue("barsInBin")
+--		self.barWidth = self:styleValue("barWidth")
+--		self.barSpace = self:styleValue("barSpace")
+--		self.binSpace = self:styleValue("binSpace")
+--	else
 		self.barsInBin = {barsFormat.values.barsInBin, barsFormat.values.barsInBin}
 		self.barWidth = {barsFormat.values.barWidth, barsFormat.values.barWidth}
 		self.barSpace = {barsFormat.values.barSpace, barsFormat.values.barSpace}
 		self.binSpace = {barsFormat.values.binSpace, barsFormat.values.binSpace}
-	end
+--	end
 	
 	self.backgroundDrawn = false;
 
