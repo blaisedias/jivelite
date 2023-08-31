@@ -35,6 +35,10 @@ local System        = require("jive.System")
 
 module(...)
 
+SPT_DEFAULT = "default"
+SPT_BACKLIT = "backlit"
+SPT_GRADIENT = "gradient"
+
 local vuImages = {}
 local spectrumList = {}
 
@@ -274,7 +278,7 @@ end
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {} 
-	table.insert(spectrumList, {name=" default", enabled=false, spType="default"})
+	table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
 	spectrumImagesMap[" default"] = {fg=nil, bg=nil, src=nil} 
 
 	local search_root
@@ -288,7 +292,7 @@ function initSpectrumList()
 					local baseImgName = string.sub(imgName,4,l)
 					bgImgName = "bg-" .. baseImgName
 					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false, spType="backlit"})
+						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
 					end
 					log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
 					spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
@@ -305,7 +309,7 @@ function initSpectrumList()
 				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
 					local imgName = parts[1]
 					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false, spType="gradient"})
+						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_GRADIENT})
 					end
 					log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
 					spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
@@ -316,20 +320,18 @@ function initSpectrumList()
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
-function _cacheSpectrumImage(imgName, path, w, h)
-	log:debug("_cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h)
+function _cacheSpectrumImage(imgName, path, w, h, spType)
+	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
 	local bgImgName = nil
 	local icKey = "for-" .. w .. "x" .. h .. "-" .. imgName
 	local dcpath = imageCache[icKey]
 	local bgIcKey = nil
 	local bg_dcpath = nil
 
-	-- for images starting with 'fg-' we synthesize the backgorund
+	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
-	-- all other images are considered as foreground images rendered
-	-- against a black background
-	if imgName:find("fg-",1,true) == 1 then
+	if spType == SPT_BACKLIT then
 		local l = imgName:len()
 		local baseImgName = string.sub(imgName,4,l)
 		bgImgName = "bg-" .. baseImgName
@@ -353,7 +355,7 @@ function _cacheSpectrumImage(imgName, path, w, h)
 	 	-- 2 instances of the same image.
 		-- TODO: figure out if how to use a single image source for both
 		-- foreground and background retaining the contrast
-		if imgName:find("fg-",1,true) == 1 then
+		if spType == SPT_BACKLIT then
 --			local bgimg = Surface:newRGB(w, h)
 --			bgimg:filledRectangle(0,0,w,h,0)
 --			img:blitAlpha(bgimg, 0, 0, 80)
@@ -364,13 +366,13 @@ function _cacheSpectrumImage(imgName, path, w, h)
 			lfs.link(icKey .. ".bmp", bgIcKey .. ".bmp", true)
 			lfs.chdir(cwd)
 			imageCache[bgIcKey] = bg_dcpath
-			log:debug("_cacheSpectrumImage cached ", bgIcKey)
+			log:debug("cacheSpectrumImage cached ", bgIcKey)
 		end
 		img:release()
 		imageCache[icKey] = dcpath
-		log:debug("_cacheSpectrumImage cached ", icKey)
+		log:debug("cacheSpectrumImage cached ", icKey)
 	else
-		log:debug("_cacheSpectrumImage found cached ", dcpath)
+		log:debug("cacheSpectrumImage found cached ", dcpath)
 		-- imageCache[icKey] = Surface:loadImage(dcpath)
 		-- assume that the background image if any is also
 		-- present in the disk image cache.
@@ -403,7 +405,7 @@ end
 
 local currentFgImage = nil
 local currentFgImageKey = nil
-function _getFgSpectrumImage(spkey, w,h)
+function _getFgSpectrumImage(spkey, w, h, spType)
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
 	if spectrumImagesMap[spkey].fg == nil then
 		return nil
@@ -429,7 +431,7 @@ function _getFgSpectrumImage(spkey, w,h)
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if spectrumImagesMap[spkey].src ~= nil then
-			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h)
+			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
 			if imageCache[icKey] == nil then 
 				spectrumImagesMap[spkey].src = nil
 				return nil
@@ -444,7 +446,7 @@ end
 
 local currentBgImage = nil
 local currentBgImageKey = nil
-function _getBgSpectrumImage(spkey, w,h) 
+function _getBgSpectrumImage(spkey, w, h, spType) 
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
 	if spectrumImagesMap[spkey].bg == nil then
 		return nil
@@ -474,7 +476,7 @@ function _getBgSpectrumImage(spkey, w,h)
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if spectrumImagesMap[spkey].src ~= nil then
-			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h)
+			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
 			if imageCache[icKey] == nil then 
 				spectrumImagesMap[spkey].src = nil
 				return nil
@@ -511,9 +513,9 @@ function selectSpectrum(tbl, name, selected)
 		if v.name == name then
 			if not v.enabled and selected then
 				-- create the cached image for skin resolutions 
-				for k, v in pairs(spectrumResolutions) do
+				for kr, vr in pairs(spectrumResolutions) do
 					if spectrumImagesMap[name].src ~= nil then
-						_cacheSpectrumImage(name, spectrumImagesMap[name].src, v.w, v.h)
+						_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
 					end
 				end
 			end
@@ -546,7 +548,6 @@ end
 --- Spectrum bars format
 -------------------------------------------------------- 
 local barsFormats  = {
-	{name="skin"},
 	{name="2-1-3-6", values={barsInBin=2, barWidth=1, barSpace=3, binSpace=6}},
 	{name="2-2-3-4", values={barsInBin=2, barWidth=2, barSpace=3, binSpace=4}},
 	{name="2-3-3-2", values={barsInBin=2, barWidth=3, barSpace=3, binSpace=2}},
@@ -557,12 +558,16 @@ local barsFormats  = {
 	{name="1-5-1-5", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=5}},
 	{name="1-5-1-3", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=3}},
 	{name="1-4-1-4", values={barsInBin=1, barWidth=4, barSpace=1, binSpace=4}},
+	{name="1-4-1-3", values={barsInBin=1, barWidth=4, barSpace=1, binSpace=3}},
 	{name="1-5-1-2", values={barsInBin=1, barWidth=5, barSpace=1, binSpace=2}},
 	{name="2-2-1-2", values={barsInBin=2, barWidth=2, barSpace=1, binSpace=2}},
 	{name="1-4-1-2", values={barsInBin=1, barWidth=4, barSpace=1, binSpace=2}},
 	{name="1-3-1-3", values={barsInBin=1, barWidth=3, barSpace=1, binSpace=3}},
+	{name="1-3-1-2", values={barsInBin=1, barWidth=3, barSpace=1, binSpace=2}},
 	{name="2-1-1-2", values={barsInBin=2, barWidth=1, barSpace=1, binSpace=2}},
 	{name="1-2-1-2", values={barsInBin=1, barWidth=2, barSpace=1, binSpace=2}},
+	{name="1-3-1-1", values={barsInBin=1, barWidth=3, barSpace=1, binSpace=1}},
+	{name="1-2-1-1", values={barsInBin=1, barWidth=2, barSpace=1, binSpace=1}},
 	{name="1-1-1-1", values={barsInBin=1, barWidth=1, barSpace=1, binSpace=1}},
 }
 
@@ -608,10 +613,10 @@ end
 --- Spectrum channel flip
 -------------------------------------------------------- 
 local channelFlips  = {
-	{name="N,F", values={0,1}},
-	{name="F,F", values={1,1}},
-	{name="F,N", values={1,0}},
-	{name="N,N", values={0,0}},
+	{name="LF--HF, HF--LF", values={0,1}},
+	{name="HF--LF, HF--LF", values={1,1}},
+	{name="HF--LF, LF--HF", values={1,0}},
+	{name="LF--HF, LF--HF", values={0,0}},
 }
 
 local channelFlip  = channelFlips[1]
@@ -791,8 +796,8 @@ function selectVuImage(tbl, name, selected)
 			if not v.enabled and selected then
 				if v.vutype == "frame" then
 					-- create the cached image for skin resolutions 
-					for k, v in pairs(vuMeterResolutions) do
-						_cacheVUImage(name, vuImagesMap[name].src, v.w, v.h)
+					for kr, vr in pairs(vuMeterResolutions) do
+						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
 					end
 				end
 			end
