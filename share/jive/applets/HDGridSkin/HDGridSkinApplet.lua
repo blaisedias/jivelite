@@ -3099,6 +3099,7 @@ function skin(self, s)
 	s.nowplaying_visualizer_common.npprogress.npprogressB_disabled = s.nowplaying_visualizer_common.npprogress.npprogressB
 
 	-- Visualizer: Spectrum Visualizer
+	visImage:registerSpectrumResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
 	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
@@ -3114,7 +3115,7 @@ function skin(self, s)
 				x =  _tracklayout.x,
 				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
 				w = screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),
-				h = coverSize * 2 / 6,
+				h = math.floor(coverSize * 2 / 6),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -3139,6 +3140,7 @@ function skin(self, s)
 	})
 
 	-- Visualizer: VU Meter
+	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
@@ -3154,7 +3156,7 @@ function skin(self, s)
 				x =  _tracklayout.x,
 				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
 				w = screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),
-				h = coverSize * 2 / 6,
+				h = math.floor(coverSize * 2 / 6),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 			}
