@@ -289,8 +289,7 @@ function initSpectrumList()
 				local parts = string.split("%.", entry)
 				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
 					local imgName = parts[1]
-					local baseImgName = string.sub(imgName,4,l)
-					bgImgName = "bg-" .. baseImgName
+					local bgImgName = "bg-" .. imgName
 					if spectrumImagesMap[imgName] == nil then
 						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
 					end
@@ -332,9 +331,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
 	if spType == SPT_BACKLIT then
-		local l = imgName:len()
-		local baseImgName = string.sub(imgName,4,l)
-		bgImgName = "bg-" .. baseImgName
+		local bgImgName = "bg-" .. imgName
 		bgIcKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
 		bg_dcpath = cachedPath(bgIcKey)
 	end
@@ -500,8 +497,8 @@ function getSpectrum(tbl, w, h, spType)
 		end
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
-	fg = _getFgSpectrumImage(spkey, w, h)
-	bg = _getBgSpectrumImage(spkey, w, h)
+	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	alpha = getBackgroundAlpha
 	return fg, bg, alpha
 end
@@ -826,8 +823,8 @@ function getVFDVUmeter(name, w, h)
 	vfd = {}
 	-- bar render x-offset
 	local bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
-   	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
-   	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
+	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
+	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
 	local barwidth = math.floor((cw - lw)/49)
