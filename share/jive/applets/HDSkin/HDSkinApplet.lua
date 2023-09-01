@@ -546,7 +546,7 @@ function skin(self, s)
 
 	local titleBox = _loadTile(self, {
 --		imgpath .. "Titlebar/titlebar.png",
-        nil,		
+	    nil,		
 		nil,
 		nil,
 		nil,
@@ -683,7 +683,8 @@ function skin(self, s)
 -- front load for smoother experience when music is playing
 --	visImage:registerVUMeterResolution(coverSize, coverSize)
 --	visImage:registerSpectrumResolution(coverSize, coverSize)
-	visImage:initialise()
+--	visImage:initialise()
+	visImage:initialiseCache()
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_med.png"),
@@ -2901,7 +2902,8 @@ function skin(self, s)
 
 	s.nowplaying_visualizer_common.npprogress.npprogressB_disabled = s.nowplaying_visualizer_common.npprogress.npprogressB
 
-    visImage:registerSpectrumResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
+	visImage:registerSpectrumResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
+	visImage:initialiseSpectrumMeters()
 
 	-- Visualizer: Spectrum Visualizer
 	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
@@ -2940,13 +2942,14 @@ function skin(self, s)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-                useVisImage = true,
+	            useVisImage = true,
 			}
 		},
 	})
 
 	-- Visualizer: VU Meter
-    visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),  math.floor(coverSize * 2 / 6))
+	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),  math.floor(coverSize * 2 / 6))
+	visImage:initialiseVUMeters()
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
