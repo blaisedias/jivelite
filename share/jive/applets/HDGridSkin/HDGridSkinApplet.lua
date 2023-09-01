@@ -539,14 +539,14 @@ function skin(self, s)
 
 	local titleBox = _loadTile(self, {
 --		imgpath .. "Titlebar/titlebar.png",
-        nil,
+	    nil,
 		nil,
 		nil,
 		nil,
 		nil,
 		nil,
 --		imgpath .. "Titlebar/titlebar_shadow.png",
-        nil,		
+	    nil,		
 		nil,
 		nil,
 	})
@@ -676,7 +676,8 @@ function skin(self, s)
 -- front load for smoother experience when music is playing
 --	visImage:registerVUMeterResolution(coverSize, coverSize)
 --	visImage:registerSpectrumResolution(coverSize, coverSize)
-	visImage:initialise()
+--	visImage:initialiseCache()
+	visImage:initialiseCache()
 
 	-- alternatives for grid view
 	local ALBUMMENU_FONT_SIZE_G = 26
@@ -3100,6 +3101,7 @@ function skin(self, s)
 
 	-- Visualizer: Spectrum Visualizer
 	visImage:registerSpectrumResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
+	visImage:initialiseSpectrumMeters()
 	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
@@ -3141,6 +3143,7 @@ function skin(self, s)
 
 	-- Visualizer: VU Meter
 	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
+	visImage:initialiseVUMeters()
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
