@@ -119,7 +119,7 @@ function npSettings(tbl, vusettings, spsettings)
 	npspectrums = spsettings
 end
 
-function initialise()
+function initialiseCache()
 	cacheClear()
 	local search_root
 	for search_root in findPaths("../../assets/precache") do
@@ -129,14 +129,12 @@ function initialise()
 	for search_root in findPaths("visucache") do
 		_readCacheDir(search_root)
 	end
+end
 
+function initialiseVUMeters()
 	initVuMeterList()
-	initSpectrumList()
 	for k, v in pairs(npvumeters) do
 		selectVuImage({},k,v)
-	end
-	for k, v in pairs(npspectrums) do
-		selectSpectrum({},k,v)
 	end
 	local enabled = false
 	for i, v in ipairs(vuImages) do
@@ -145,12 +143,26 @@ function initialise()
 	if not enabled and #vuImages > 0 then
 		vuImages[1].enabled = true
 	end
+
+end
+
+function initialiseSpectrumMeters()
+	initSpectrumList()
+	for k, v in pairs(npspectrums) do
+		selectSpectrum({},k,v)
+	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
 	end
 	if not enabled and #spectrumList > 0 then
 		spectrumList[1].enabled = true
 	end
+end
+
+function initialise()
+	initialiseCache()
+	initialiseVUMeters()
+	initialiseSpectrumMeters()
 end
 
 -------------------------------------------------------- 
