@@ -220,6 +220,15 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
 
+		if bch[i] >= cch[i] then
+			cch[i] = bch[i]
+		elseif cch[i] > 0 then
+			cch[i] = cch[i] - barHeightMulti
+			if cch[i] < 0 then
+				cch[i] = 0
+			end
+		end
+
 		-- bar
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
@@ -229,6 +238,12 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					local xLeft = x + (k * barSize)
 					local xRight = xLeft + (barWidth - 1)
 					self.fgImg:blitClip(xLeft - xshift, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
+
+					if capHeight > 0 and cch[i] > 0 then
+						ytop = y - cch[i] - capHeight - capSpace
+						self.fgImg:blitClip(xLeft - xshift, hh - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
+					end
+
 				elseif self.useGradient > 0 then
 					local yEndValue = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
@@ -255,38 +270,18 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					x + (barWidth - 1) + (k * barSize),
 					y - bch[i] + 1,
 					self.barColor
-				)
+					)
+					if capHeight > 0 and cch[i] > 0 then
+						surface:filledRectangle(
+							x + (k * barSize),
+							y - cch[i] - capHeight - capSpace,
+							x + (barWidth - 1) + (k * barSize),
+							y - cch[i] - capSpace,
+							self.capColor)
+					end
 				end
 			end
 		end
-		
-		if bch[i] >= cch[i] then
-			cch[i] = bch[i]
-		elseif cch[i] > 0 then
-			cch[i] = cch[i] - barHeightMulti
-			if cch[i] < 0 then
-				cch[i] = 0
-			end
-		end
-
-		-- cap
-		local adjustedCapColour = self.capColor
-		local adjustedCapSpace = capSpace
-		if cch[i] < 1 then
-			adjustedCapColour = 0x404040ff
-			adjustedCapSpace = 0
-		end
-		if capHeight > 0 then
-			for k = 0, barsInBin - 1 do
-				surface:filledRectangle(
-					x + (k * barSize),
-					y - cch[i] - adjustedCapSpace,
-					x + (barWidth - 1) + (k * barSize),
-					y - cch[i] - capHeight - adjustedCapSpace,
-					adjustedCapColour)
-			end
-		end
-
 		x = x + barWidth * barsInBin + barSpace * (barsInBin - 1) + binSpace
 	end
 end
