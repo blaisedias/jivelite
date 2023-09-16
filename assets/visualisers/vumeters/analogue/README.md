@@ -10,28 +10,24 @@ list of files are (packaged by @Eyerex https://forums.slimdevices.com/member/656
 * vu_analog_25seq_Peppy_Meter_Rainbow.png
 
 ### Other VU meter images
-Other images are from https://github.com/ralph-irving/jivelite of which
-this repository is a fork
-list of files:
-* vu_analog_25seq_b.png
-* vu_analog_25seq_d.png
-* vu_analog_25seq_e.png
-* vu_analog_25seq_j.png
-* vu_analog_25seq_w.png
+Other images are from https://github.com/ralph-irving/tcz-jivelite of which
+see .info files
+* vu_analog_25seq_Blue_Glow.png
+* vu_analog_25seq_Jstraw_Dark_Peak_Rounded.png
+* vu_analog_25seq_Jstraw_Dark_Rounded.png
+* vu_analog_25seq_Jstraw_Vintage.png
+* vu_analog_25seq_Kolossos_Oval.png
+* vu_analog_25seq_Logitech_Black.png
+* vu_analog_25seq_Logitech_White.png
 
 ### Misc
-Note: VU Meter images are resized to render on different resolutions
+Note: VU Meter images are resized to render on different screen resolutions
 
-All images have been trimmed using imagemagick
+Some images have been trimmed using imagemagick
 
 `mogrify -define trim:edges=north,south -trim +repage <image>`
 
-The following image files have been trimmed manually as well
-* vu_analog_25seq_w.png
-* vu_analog_25seq_b.png
-* vu_analog_25seq_j.png
-
 The primary motivation for trimming is to improve the results when resizing VUMeters
-for the Now Playing view `Artwork, Text and Analog VU Meter`in particular for the screen
+for the Now Playing view `Artwork, Text and Analog VU Meter` in particular for the screen
 resolution of 800x480.
 
