@@ -88,7 +88,7 @@ function _initUserpathdir()
 	_userpathdir = System.getUserDir()
 	_usersettingsdir = _userpathdir .. "/settings"
 	_userappletsdir = _userpathdir .. "/applets"
-	_usercachedir = _userpathdir .. "/visucache"
+	_usercachedir = _userpathdir .. "/resized_cache"
 	
 	log:info("User Path: ", _userpathdir)
 	

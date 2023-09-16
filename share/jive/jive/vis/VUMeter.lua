@@ -258,8 +258,8 @@ end
 
 function drawVFDStatic(params, surface) 
 	params.vfd.center:blit(surface, params.x, params.y, params.w, params.h)
-	params.vfd.blead[1]:blit(surface, params.x, params.left.y,  params.vfd.lw, params.vfd.lh)
-	params.vfd.blead[2]:blit(surface, params.x, params.right.y, params.vfd.lw, params.vfd.lh)
+	params.vfd.leftlead:blit(surface, params.x, params.left.y,  params.vfd.lw, params.vfd.lh)
+	params.vfd.rightlead:blit(surface, params.x, params.right.y, params.vfd.lw, params.vfd.lh)
 end
 
 
