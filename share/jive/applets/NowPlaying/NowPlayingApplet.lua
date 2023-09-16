@@ -303,17 +303,17 @@ function npVUSettingsShow(self)
 					if isSelected then
 						-- turn it on
 						settings.vumeters[v.name] = true 
-						visImage:selectVuImage(v.name, true)
+						visImage:selectVuImage(v.name, true, false)
 					else
 						-- turn it off conditionally:
 						-- there needs to be at least one VUMeter
-						if visImage:selectVuImage(v.name, false) > 0 then
+						if visImage:selectVuImage(v.name, false, false) > 0 then
 							settings.vumeters[v.name] = false 
 						 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
 								self.window = nil
 							end
 						else
-							visImage:selectVuImage(v.name, true)
+							visImage:selectVuImage(v.name, true, false)
 							object:setSelected(true)
 						end
 					end
@@ -355,18 +355,18 @@ function npSpectrumSettingsShow(self)
 
 					if isSelected then
 						-- turn it on
-						settings.spectrum[v.name] = true 
-						visImage:selectSpectrum(v.name, true)
+						settings.spectrum[v.name] = true
+						visImage:selectSpectrum(v.name, true, false)
 					else
 						-- turn it off conditionally:
 						-- there needs to be at least one Spectrum
-						if visImage:selectSpectrum(v.name, false) > 0 then
+						if visImage:selectSpectrum(v.name, false, false) > 0 then
 							settings.spectrum[v.name] = false 
 							if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
 								self.window = nil
 							end
 						else
-							visImage:selectSpectrum(v.name, true)
+							visImage:selectSpectrum(v.name, true, false)
 							object:setSelected(true)
 						end
 					end
