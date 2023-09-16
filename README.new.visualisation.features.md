@@ -1,11 +1,6 @@
 # General
 New features have been added for visualisation
 
-**Note these features has only been implemented for Joggler based skins at this point**
-* Joggler skin
-* PiGrid skins
-* Touch skins
-
 Features:
 * VU Meters
   * Are now rendered by resizing and centering in the available space.
@@ -18,21 +13,20 @@ Features:
   * `Artwork, Text and Analog VU Meter` (mini vu meter)
   * `Artwork, Text and Spectrum Analyzer` (mini spectrum meter)
 
-For consistency of the layout of the `Artwork and Text` now playing viwew has been altered.
-
+For consistency of the layout of the `Artwork and Text` now playing view has been altered.
 
 # VU Meter enhancements
 ## Details
 To provide a timely user experience VU meter images are resized once when
-the image is discovered (registered) and stored as bmp files in a "disk cache" which is at 
-`~/.jivelite/userpath/visucache`
+the image is discovered (registered) and stored in a "disk cache" which is at 
+`~/.jivelite/userpath/resized_cache`
 
 Doing it this way avoids repeated resize operations when Jivelite starts up.
 The resize operations take a noticeable amount of time especially on low powered raspberry PIs.
 
 The trade-off is more disk space is used also see section on piCorePlayer
 
-**Note:** resizing VUMeters is capped to the resolution of `1280x800`, scaling for larger resolutions crashes Jivelite.
+**Note:** resizing VU Meters is capped to the resolution of `1280x800`, scaling for larger resolutions crashes Jivelite.
 
 ## Selection
 It is now possible to change the VU Meter displayed without restarting Jivelite
@@ -62,8 +56,8 @@ artwork files are (packaged by @Eyerex https://forums.slimdevices.com/member/656
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
 * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/vu_analog_25seq_Peppy_Meter_Rainbow.png
 
-Note: To accomodate resizing the VUMeter images in this location have been trimmed at the top and bottom.
-This works out fine for VUMeters with black surrounds - not so good for other VUMeters.
+Note: To accommodate resizing the VU Meter images in this location have been trimmed at the top and bottom.
+This works out fine for VU Meters with black surrounds - not so good for other VU Meters.
 
 # Spectrum Meter Enhancements
 Spectrum meters can now be rendered using images. This makes it possible to render spectrum meters as
@@ -75,9 +69,9 @@ Spectrum bar format can now be configured - from a selection of formats.
 The list of formats is ordered according to the number of bins the spectrum code generates. Rendering more bins consumes more CPU resource.
 
 ## Details
-Similar to VUMeters, in order to yield a timely user experience Spectrum meter images are resized once when
+Similar to VU Meters, in order to yield a timely user experience Spectrum meter images are resized once when
 the image is discovered (registered) and stored as bmp files in a "disk cache" which is at 
-`~/.jivelite/userpath/visucache`
+`~/.jivelite/userpath/resized_cache`
 
 
 ## Selection
@@ -145,30 +139,31 @@ The presence of the disk image cache has the side-effects:
 * larger mydata.tgz files
 * the disk image cache exists in RAM file-system so consumes RAM
 
-One way to reduce the impact of the disk image cache is to remove images that will not be used from
- * share/jive/applets/JogglerSkin/images/UNOFFICIAL/AnalogVUMeters/
- * share/jive/applets/JogglerSkin/images/UNOFFICIAL/Spectrum/
+One way to reduce the impact of the disk image cache is to remove images that will not be used from subdirectories under
+  * assets/visualisers
+  * assets/resized (if any)
 
 Alternatively see `Resizing images prior to deployment` below.
 
 ## Resizing images prior to deployment 
 It is possible to remove the need for resizing on the target system completely 
 by running Jivelite on a desktop or laptop with the desired skin, selecting all
-images in VUMeter and Spectrum menus and then copying or moving the images from 
+images in VU Meter and Spectrum menus and then copying or moving the images from 
 
-`~/.jivelite/userpath/visucache`
+`~/.jivelite/userpath/resized_cache`
 
  to
 
- `jivelite/share/jive/primed-visu-images`
+ `jivelite/assets/resized`
 
 Doing this removes the negative impacts of
  * longer backup times
  * larger mydata.tgz files
 
 # Known issues
-* Jivelite gets stuck when trying to render the `Now Playing Views` menu if navigated to from `Home`->`Settings`->`Screen`->`Now Playing` . Unstick by entering now playing and then going back.
-* Occasionally now playing view screen starts getting stacked. The trigger for this bug is not known at this point. When this bug triggers clicking on the `back` button `shifts` the view right rather then navigating back up the menu system. Pressing the `back` button repeatedly will eventually navigate back up the menu system.
+Reesizing images on the target can produce stutters in the UI in the NowPlaying views.
+To a large extent this has been addressed by caching the output of resize operations so should occur just once
+Even with caching when loading a resized image consumes time, and results in a noticable delay.
  
 # Thanks
 Thanks to those involved in creating Jivelite,
@@ -177,4 +172,4 @@ Thanks to those involved in creating Jivelite,
  * presslabs-us
  * Adrian Smith,  triode1@btinternet.
 
-Special thanks to Ralph Irving (https://github.com/ralph-irving) and Michael Herger (https://github.com/mherger) for keeping the wheels spinning.
+Special thanks to Ralph Irving (https://github.com/ralph-irving) and Michael Herger (https://github.com/mherger)
