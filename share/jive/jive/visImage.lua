@@ -18,20 +18,20 @@
 
 --
 -- lua package imports
-local math          = require("math")
-local table         = require("table")
-local lfs           = require("lfs")
+local math	= require("math")
+local table	= require("table")
+local lfs	= require("lfs")
 
-local ipairs, pairs, pcall  = ipairs, pairs, pcall
-local coroutine, package    = coroutine, package
+local ipairs, pairs, pcall	= ipairs, pairs, pcall
+local coroutine, package	= coroutine, package
 
 -- jive package imports
-local string        = require("jive.utils.string")
-local Surface       = require("jive.ui.Surface")
-local vis           = require("jive.vis")
-local debug         = require("jive.utils.debug")
-local log           = require("jive.utils.log").logger("jivelite.vis")
-local System        = require("jive.System")
+local string		= require("jive.utils.string")
+local Surface		= require("jive.ui.Surface")
+local vis			= require("jive.vis")
+local debug		 	= require("jive.utils.debug")
+local log			= require("jive.utils.log").logger("jivelite.vis")
+local System		= require("jive.System")
 
 module(...)
 
@@ -41,14 +41,104 @@ SPT_GRADIENT = "gradient"
 
 local vuImages = {}
 local spectrumList = {}
+local npvumeters = {}
+local npspectrums = {}
+
+-- set to true to create all resized images which can be 
+-- then moved to assets/resized 
+CACHE_EAGER = true
+-- cache all images at startup - depending on selected images
+-- this can affect startup times and on platforms like piCorePlayer
+-- jivelite terminate.
+local cacheAtStartup = true
+-- commit cached images to disk
+local saveCachedImages = true
+local saveAsPng = true
+local PLATFORM = ""
+
+function _parseImagePath(imgpath)
+	local parts = string.split("%.", imgpath)
+	local ix = #parts
+	if parts[ix] == 'png' or parts[ix] == 'jpg' or parts[ix] == 'bmp' then
+-- FIXME return array of size 2 always
+		return parts
+	end
+	return nil
+end
+
+-------------------------------------------------------- 
+--- platform
+-------------------------------------------------------- 
+-- at the moment the only distinction is pcp or desktop
+function platformDetect()
+	if PLATFORM ~= "" then
+		return PLATFORM
+	end
+	PLATFORM = "desktop"
+	local mode
+	pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
+	mode = lfs.attributes(pcp_version_file, "mode")
+	log:info("mode ", pcp_version_file, " " , mode)
+	if mode == "file" then
+		PLATFORM = "piCorePlayer"
+		CACHE_EAGER = false
+		cacheAtStartup = false
+		saveCachedImages = false
+		saveAsPng = false
+	end
+	log:info("PLATFORM ", PLATFORM)
+	return PLATFORM
+end
+
+-------------------------------------------------------- 
+--- in memory image cache(s) 
+-------------------------------------------------------- 
+
+-- FIXME: vfdCache should go through imCache
+vfdCache = {}
+local imCache = {}
+function imCachePut(key, img)
+	log:info("imCache <- ", key,  " ", img)
+	imCache[key] = img
+end
+
+function imCacheGet(key)
+	local img = imCache[key]
+	if img ~= nil then
+		log:info("imCache -> ", key,  " ", img)
+	else
+		log:info("imCache X ", key)
+	end
+	return img
+end
+
+function loadImage(path)
+	img = imCacheGet(path)
+	if img == nil  then
+		img = Surface:loadImage(path)
+		imCachePut(path,img)
+	end
+	return img
+end
+
+function saveImage(img, path)
+	imCachePut(path, img)
+	if saveCachedImages then
+		if saveAsPng then
+			img:savePNG(path)
+		else
+			img:saveBMP(path)
+		end
+	end
+end
 
 -------------------------------------------------------- 
 --- disk image cache 
 -------------------------------------------------------- 
 
-local imageCache = {}
+local diskImageCache = {}
 local userdirpath = System.getUserDir()
-local cachedir = userdirpath .. "/visucache"
+local cachedir = userdirpath .. "/resized_cache"
 
 function getImageName(imgPath)
 	local fullpath = string.split("/", imgPath)
@@ -82,16 +172,23 @@ function findPaths(rpath)
 end
 
 function cachedPath(name)
+	-- we don't know/care whether it is a bmp, png or jpeg 
+	-- loading the file just works 
 	local file = cachedir .. "/" .. name .. ".bmp"
 	return file
 end
 
 function cacheClear(tbl)
 	log:debug("cacheClear ")
-	for k,v in pairs(imageCache) do
+	for k,v in pairs(diskImageCache) do
 		log:debug("cacheClear ", k)
---		v:release()
-		imageCache[k] = nil
+		diskImageCache[k] = nil
+	end
+	
+	-- FIXME vfdCache is not using imCache so 
+	-- those images are not released
+	for k,v in pairs(imCache) do
+		v:release()
 	end
 end
 
@@ -102,17 +199,14 @@ function _readCacheDir(search_root)
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
-			local parts = string.split("%.", entry)
-			if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
-				imageCache[parts[1]] = search_root .. "/" .. entry
-				log:debug("readCacheDir: ", parts[1], " ", imageCache[parts[1]])
+			local parts = _parseImagePath(entry)
+			if parts ~= nil then
+				diskImageCache[parts[1]] = search_root .. "/" .. entry
+				log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
 			end
 		end
 	end
 end
-
-local npvumeters = {}
-local npspectrums = {}
 
 function npSettings(tbl, vusettings, spsettings)
 	npvumeters = vusettings
@@ -122,11 +216,11 @@ end
 function initialiseCache()
 	cacheClear()
 	local search_root
-	for search_root in findPaths("../../assets/precache") do
+	for search_root in findPaths("../../assets/resized") do
 		_readCacheDir(search_root)
 	end
 
-	for search_root in findPaths("visucache") do
+	for search_root in findPaths("resized_cache") do
 		_readCacheDir(search_root)
 	end
 end
@@ -134,7 +228,8 @@ end
 function initialiseVUMeters()
 	initVuMeterList()
 	for k, v in pairs(npvumeters) do
-		selectVuImage({},k,v)
+		-- set flags but do not cache
+		selectVuImage({},k,v, cacheAtStartup)
 	end
 	local enabled = false
 	for i, v in ipairs(vuImages) do
@@ -149,7 +244,8 @@ end
 function initialiseSpectrumMeters()
 	initSpectrumList()
 	for k, v in pairs(npspectrums) do
-		selectSpectrum({},k,v)
+		-- set flags but do not cache
+		selectSpectrum({},k,v, cacheAtStartup)
 	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
@@ -160,6 +256,7 @@ function initialiseSpectrumMeters()
 end
 
 function initialise()
+	platformDetect()
 	initialiseCache()
 	initialiseVUMeters()
 	initialiseSpectrumMeters()
@@ -171,7 +268,6 @@ end
 -- scale an image to fit a height - maintaining aspect ration
 function _scaleSpectrumImage(imgPath, w, h)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
-	-- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
@@ -189,19 +285,22 @@ function _scaleSpectrumImage(imgPath, w, h)
 	if scaledW == w then
 		log:debug("scaleSpectrumImage simple resize")
 		scaledImg = img:resize(w, h)
+		log:debug("scaleSpectrumImage simple resize DONE")
 	-- if scaled width is > required clip the horizontal edges
 	elseif scaledW > w then
+		log:debug("scaleSpectrumImage resize + hclip")
 		local tmp = img:resize(scaledW, h)
 		scaledImg = img:resize(w, h)
-		log:debug("scaleSpectrumImage resize + hclip")
 		-- upto 1 pixel smaller for odd numbered width differences
 		tmp:blitClip(math.floor((scaledW-w)/2), 0, w, h, scaledImg, 0, 0)
 		tmp:release()
+		log:debug("scaleSpectrumImage resize + hclip DONE")
 	elseif srcW > w and srcH > h then
 	-- if src image is larger just clip
 		log:debug("scaleSpectrumImage clip x-center y-bottom")
 		scaledImg = img:resize(w, h)
 		img:blitClip(math.floor((srcW-w)/2), srcH-h , w, h, scaledImg, 0, 0)
+		log:debug("scaleSpectrumImage clip x-center y-bottom DONE")
 	elseif srcH > h and scaledW > (w/2) then
 	-- if src image is almost larger enough expand to fill horizontally
 	-- and clip vertically
@@ -211,6 +310,7 @@ function _scaleSpectrumImage(imgPath, w, h)
 		scaledImg = img:resize(w, h)
 		tmp:blitClip(0, (scaledH-h)/2, w, h, scaledImg, 0, 0)
 		tmp:release()
+		log:debug("scaleSpectrumImage expand to w, clip y-center DONE")
 	else
 	-- if scaled width is significantly < than width the expand - this distorts proportion
 	-- desired behaviour for vertically thin source images which typically would be colour
@@ -232,21 +332,20 @@ function _scaleSpectrumImage(imgPath, w, h)
 --		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
 --		tmp:release()
 	img:release()
-	log:debug("scaleSpectrumImage done")
+	log:debug("scaleSpectrumImage DONE")
 	return scaledImg
 end
 
 -- scale an image to fit a width - maintaining aspect ratio 
 function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	local w = w_in
-	log:debug("_scaleAnalogVuMeter imgPath:", imgPath )
+	log:debug("_scaleAnalogVuMeter imgPath:", imgPathi, " START" )
 	-- FIXME hack for screenwidth > 1280 
 	-- resizing too large segfaults so VUMeter resize is capped at 1280
 	if w > 1280 then
 		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
 		w = 1280
 	end
-	-- FIXME: loads a "tile" which is not freed by release call
 	local img = Surface:loadImage(imgPath)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
@@ -255,6 +354,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	local scaledH = math.floor(srcH * (wSeq/srcW))
 	log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	if wSeq == srcW and h == srcH then
+		log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
 		return img
 	-- after scaling:
 	elseif scaledH > h then
@@ -266,6 +366,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	end
 	scaledImg = img:resize(wSeq, scaledH)
 	img:release()
+	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
 	return scaledImg
 end
 
@@ -298,8 +399,8 @@ function initSpectrumList()
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
-				local parts = string.split("%.", entry)
-				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+				local parts = _parseImagePath(entry)
+				if parts ~= nil then
 					local imgName = parts[1]
 					local bgImgName = "bg-" .. imgName
 					if spectrumImagesMap[imgName] == nil then
@@ -316,8 +417,8 @@ function initSpectrumList()
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
-				local parts = string.split("%.", entry)
-				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+				local parts = _parseImagePath(entry)
+				if parts ~= nil then
 					local imgName = parts[1]
 					if spectrumImagesMap[imgName] == nil then
 						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_GRADIENT})
@@ -334,9 +435,9 @@ end
 function _cacheSpectrumImage(imgName, path, w, h, spType)
 	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
 	local bgImgName = nil
-	local icKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = imageCache[icKey]
-	local bgIcKey = nil
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
+	local dcpath = diskImageCache[dicKey]
+	local bgDicKey = nil
 	local bg_dcpath = nil
 
 	-- for backlit we synthesize the backgorund
@@ -344,47 +445,21 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	-- on top of the background image
 	if spType == SPT_BACKLIT then
 		local bgImgName = "bg-" .. imgName
-		bgIcKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
-		bg_dcpath = cachedPath(bgIcKey)
+		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
+		bg_dcpath = cachedPath(bgDicKey)
 	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
 		local fgimg = Surface:newRGB(w, h)
 		img:blit(fgimg, 0, 0, 0)
-		dcpath = cachedPath(icKey)
-		-- imageCache[icKey] = img
-		fgimg:saveBMP(dcpath)
-		fgimg:release()
-		-- the fg and bg images appear identical right down to checksums
-		-- however when rendering if bg and fg are the loaded from same
-		-- the source contrast is lost :-(
-		-- For now duplicate the images.
-		-- It is possible that some lower level caching is 
-		-- means that loading the same image twice does not yield
-	 	-- 2 instances of the same image.
-		-- TODO: figure out if how to use a single image source for both
-		-- foreground and background retaining the contrast
-		if spType == SPT_BACKLIT then
---			local bgimg = Surface:newRGB(w, h)
---			bgimg:filledRectangle(0,0,w,h,0)
---			img:blitAlpha(bgimg, 0, 0, 80)
---			bgimg:saveBMP(bg_dcpath)
---			bgimg:release()
-			local cwd = lfs.currentdir()
-			lfs.chdir(cachedir)
-			lfs.link(icKey .. ".bmp", bgIcKey .. ".bmp", true)
-			lfs.chdir(cwd)
-			imageCache[bgIcKey] = bg_dcpath
-			log:debug("cacheSpectrumImage cached ", bgIcKey)
-		end
+		dcpath = cachedPath(dicKey)
+		-- diskImageCache[dicKey] = img
+		saveImage(fgimg, dcpath)
 		img:release()
-		imageCache[icKey] = dcpath
-		log:debug("cacheSpectrumImage cached ", icKey)
+		diskImageCache[dicKey] = dcpath
+		log:debug("cacheSpectrumImage cached ", dicKey)
 	else
 		log:debug("cacheSpectrumImage found cached ", dcpath)
-		-- imageCache[icKey] = Surface:loadImage(dcpath)
-		-- assume that the background image if any is also
-		-- present in the disk image cache.
 	end
 end
 
@@ -420,34 +495,30 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 		return nil
 	end
 
-	local icKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", icKey)
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey)
 
-	if currentFgImageKey == icKey then
+	if currentFgImageKey == dicKey then
 		return currentFgImage
 	end
 	if currentFgImage ~= nil then
-		log:debug("getFgImage: release currentFgImage ", currentFgImageKey)
-		currentFgImage:release()
 		currentFgImage = nil
 		currentFgImageKey = nil
 	end
-	if imageCache[icKey] ~= nil then 
-		log:debug("getFgImage: load ", icKey, " ", imageCache[icKey])
-		-- FIXME: loads a "tile" which is not freed by release call
-		currentFgImage = Surface:loadImage(imageCache[icKey])
-		currentFgImageKey = icKey
+	if diskImageCache[dicKey] ~= nil then 
+		log:debug("getFgImage: load ", dicKey, " ", diskImageCache[dicKey])
+		currentFgImage = loadImage(diskImageCache[dicKey])
+		currentFgImageKey = dicKey
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if spectrumImagesMap[spkey].src ~= nil then
 			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
-			if imageCache[icKey] == nil then 
+			if diskImageCache[dicKey] == nil then 
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
-			-- FIXME: loads a "tile" which is not freed by release call
-			currentFgImage = Surface:loadImage(imageCache[icKey])
-			currentFgImageKey = icKey
+			currentFgImage = loadImage(diskImageCache[dicKey])
+			currentFgImageKey = dicKey
 		end
 	end
 	return currentFgImage
@@ -461,40 +532,35 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 		return nil
 	end
 
-	local icKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", icKey)
-	if currentBgImageKey == icKey then
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
+	if currentBgImageKey == dicKey then
 		return currentBgImage
 	end
 	if currentBgImage ~= nil then
-		log:debug("getBgImage: release currentBgImage ", currentBgImageKey)
-		currentBgImage:release()
 		currentBgImage = nil
 		currentBgImageKey = nil
 	end
-	if imageCache[icKey] ~= nil then 
-		log:debug("getBgImage: load ", icKey, " ", imageCache[icKey])
-		currentBgImage = Surface:newRGB(w,h)
-		currentBgImage:filledRectangle(0,0,w,h,0)
-		-- FIXME: loads a "tile" which is not freed by release call
-		local img = Surface:loadImage(imageCache[icKey])
-		img:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
-		img:blit(currentBgImage, 0, 0)
-		img:release()
-		currentBgImageKey = icKey
-	else
-		-- this is required to create cached images when skin change, changes the resolution.
-		if spectrumImagesMap[spkey].src ~= nil then
-			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
-			if imageCache[icKey] == nil then 
-				spectrumImagesMap[spkey].src = nil
-				return nil
-			end
-			-- FIXME: loads a "tile" which is not freed by release call
-			currentBgImage = Surface:loadImage(imageCache[icKey])
-			currentBgImageKey = icKey
-		end
+
+	currentBgImage = imCacheGet(dicKey)
+	if currentBgImage ~= nil then
+		currentBgImageKey = dicKey
+		return currentBgImage
 	end
+
+	local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
+	-- if we invoke blitAlpha from the foreground image to the background image
+	-- the foreground image is affected by alpha see SDL_SetAlpha.
+    -- Isolate by blitting foreground to a temporary image and then blitAlpha
+    -- from that to the background image
+	local tmp = Surface:newRGB(w,h)
+	tmp:filledRectangle(0,0,w,h,0)
+	img:blit(tmp, 0, 0)
+	currentBgImage = Surface:newRGB(w,h)
+	tmp:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
+	tmp:release()
+	currentBgImageKey = dicKey
+	imCachePut(dicKey, currentBgImage)
 	return currentBgImage
 end
 
@@ -515,18 +581,18 @@ function getSpectrum(tbl, w, h, spType)
 	return fg, bg, alpha
 end
 
-function selectSpectrum(tbl, name, selected)
+function selectSpectrum(tbl, name, selected, allowCaching)
 	n_enabled = 0
 	log:debug("selectSpectrum", " ", name, " ", selected)
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
-			if not v.enabled and selected then
-				-- create the cached image for skin resolutions 
-				for kr, vr in pairs(spectrumResolutions) do
-					if spectrumImagesMap[name].src ~= nil then
-						_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
+			if (allowCaching and selected) or CACHE_EAGER then
+					-- create the cached image for skin resolutions 
+					for kr, vr in pairs(spectrumResolutions) do
+						if spectrumImagesMap[name].src ~= nil then
+							_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
+						end
 					end
-				end
 			end
 			v.enabled = selected
 		end
@@ -668,18 +734,16 @@ end
 
 function _cacheVUImage(imgName, path, w, h)
 	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
-	local icKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = imageCache[icKey]
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
+	local dcpath = diskImageCache[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(icKey)
-		--imageCache[icKey] = img
-		img:saveBMP(dcpath)
-		img:release()
-		imageCache[icKey] = dcpath
+		dcpath = cachedPath(dicKey)
+		--diskImageCache[dicKey] = img
+		saveImage(img, dcpath)
+		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
-		--imageCache[icKey] = Surface:loadImage(dcpath)
 	end
 end
 
@@ -696,10 +760,10 @@ function initVuMeterList()
 					for f in lfs.dir(path) do
 						mode = lfs.attributes(path .. "/" .. f, "mode")
 						if mode == "file" then
-							local parts = string.split("%.", f)
-							if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+							local parts = _parseImagePath(f)
+							if parts ~= nil then
 								log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-								imageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+								diskImageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
 							end
 						end
 					end
@@ -714,8 +778,8 @@ function initVuMeterList()
 		for entry in lfs.dir(search_root) do
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
-				local parts = string.split("%.", entry)
-				if parts[2] == 'png' or parts[2] == 'jpg' or parts[2] == 'bmp' then
+				local parts = _parseImagePath(entry)
+				if parts ~= nil then
 					local imgName = parts[1]
 					local displayName = imgName
 					local ixSub = string.find(imgName, "25seq")
@@ -754,60 +818,55 @@ function getVuImage(w,h)
 		vuBump()
 	end
 	local entry = vuImages[vuImageIndex]
-	local icKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	if currentVuImageKey == icKey then
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
+	if currentVuImageKey == dicKey then
 		-- image is the current one
 		return currentVuImage, entry.vutype
 	end
 	if currentVuImage ~= nil then
-		-- release the current image
-		log:debug("getVuImage: release currentVuImage ", currentVuImageKey)
-		currentVuImage:release()
 		currentVuImage = nil
 		currentVuImageKey = nil
 	end
 	if entry.vutype ~= "frame" then
 		return getVFDVUmeter(entry.name, w, h), entry.vutype
 	end
-	if imageCache[icKey] ~= nil then 
+	if diskImageCache[dicKey] ~= nil then 
 		-- image is in the cache load and return
-		log:debug("getVuImage: load ", icKey, " ", imageCache[icKey])
-		-- FIXME: loads a "tile" which is not freed by release call
-		currentVuImage = Surface:loadImage(imageCache[icKey])
-		currentVuImageKey = icKey
+		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
+		currentVuImage = loadImage(diskImageCache[dicKey])
+		currentVuImageKey = dicKey
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if vuImagesMap[entry.name].src ~= nil then
-			log:debug("getVuImage: creating image for ", icKey)
+			log:debug("getVuImage: creating image for ", dicKey)
 			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
-			if imageCache[icKey] == nil then
+			if diskImageCache[dicKey] == nil then
 				-- didn't work zap the src string so we don't do this repeatedly
-				log:debug("getVuImage: failed to create image for ", icKey)
+				log:debug("getVuImage: failed to create image for ", dicKey)
 				vumImagesMap[entry.name].src = nil
 			end
-			log:debug("getVuImage: load (new) ", icKey, " ", imageCache[icKey])
-			-- FIXME: loads a "tile" which is not freed by release call
-			currentVuImage = Surface:loadImage(imageCache[icKey])
-			currentVuImageKey = icKey
+			log:debug("getVuImage: load (new) ", dicKey, " ", diskImageCache[dicKey])
+			currentVuImage = loadImage(diskImageCache[dicKey])
+			currentVuImageKey = dicKey
 		else
-			log:debug("getVuImage: no image for ", icKey)
+			log:debug("getVuImage: no image for ", dicKey)
 		end
 	end
 	return currentVuImage, entry.vutype
 end
 
 
-function selectVuImage(tbl, name, selected)
+function selectVuImage(tbl, name, selected, allowCaching)
 	n_enabled = 0
 	log:debug("selectVuImage", " ", name, " ", selected)
 	for k, v in pairs(vuImages) do
 		if v.name == name then
-			if not v.enabled and selected then
+			if (allowCaching and selected) or CACHE_EAGER then
 				if v.vutype == "frame" then
-					-- create the cached image for skin resolutions 
-					for kr, vr in pairs(vuMeterResolutions) do
-						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
-					end
+						-- create the cached image for skin resolutions 
+						for kr, vr in pairs(vuMeterResolutions) do
+							_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
+						end
 				end
 			end
 			v.enabled = selected
@@ -824,7 +883,21 @@ function isCurrentVUMeterEnabled()
 	return vuImages[vuImageIndex].enabled
 end
 
+
+function _resizedVFDElement(key, w, h)
+	local img = loadImage(diskImageCache[key]):resize(w, h)
+    imCachePut(key .. "-" .. w .. "x" .. h, img)
+    return img
+end
+
+-- FIXME: vfdCache should go through imCache
 function getVFDVUmeter(name, w, h)
+	local key = name .. w .. "x" .. h
+	vfd = vfdCache[key]
+	if vfd ~= nil then
+		log:info("vfdCache -> ", key, vfd)
+		return vfd
+	end
 	local bar_on = name .. ":bar-on"
 	local bar_off = name .. ":bar-off"
 	local bar_peak_on = name .. ":bar-peak-on"
@@ -834,9 +907,17 @@ function getVFDVUmeter(name, w, h)
 	local center = name .. ":center"
 	vfd = {}
 	-- bar render x-offset
-	local bw, bh = Surface:loadImage(imageCache[bar_on]):getSize()
-	local lw, lh = Surface:loadImage(imageCache[left]):getSize()
-	local cw, ch = Surface:loadImage(imageCache[center]):getSize()
+	vfd.on = loadImage(diskImageCache[bar_on])
+	vfd.off = loadImage(diskImageCache[bar_off])
+	vfd.peakon = loadImage(diskImageCache[bar_peak_on])
+	vfd.peakoff = loadImage(diskImageCache[bar_peak_off])
+	vfd.leftlead = loadImage(diskImageCache[left])
+	vfd.rightlead = loadImage(diskImageCache[right])
+	vfd.center = loadImage(diskImageCache[center])
+
+	local bw, bh = vfd.on:getSize()
+	local lw, lh = vfd.leftlead:getSize()
+	local cw, ch = vfd.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
 	local barwidth = math.floor((cw - lw)/49)
@@ -847,12 +928,6 @@ function getVFDVUmeter(name, w, h)
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w > dw and h >= dh then
-		vfd.on = Surface:loadImage(imageCache[bar_on])
-		vfd.off = Surface:loadImage(imageCache[bar_off])
-		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on])
-		vfd.peakoff = Surface:loadImage(imageCache[bar_peak_off])
-		vfd.blead = { Surface:loadImage(imageCache[left]), Surface:loadImage(imageCache[right]) }
-		vfd.center = Surface:loadImage(imageCache[center])
 		vfd.w = dw
 		vfd.h = dh
 	else
@@ -868,12 +943,13 @@ function getVFDVUmeter(name, w, h)
 		cw = math.floor((barwidth *49) + (lw *2))
 		ch = math.floor((ch * sf))
 		-- vfd.bar_rxo= barwidth - bw
-		vfd.on = Surface:loadImage(imageCache[bar_on]):resize(bw, bh)
-		vfd.off = Surface:loadImage(imageCache[bar_off]):resize(bw, bh)
-		vfd.peakon = Surface:loadImage(imageCache[bar_peak_on]):resize(bw, bh)
-		vfd.peakoff = Surface:loadImage(imageCache[bar_peak_off]):resize(bw, bh)
-		vfd.blead = { Surface:loadImage(imageCache[left]):resize(lw, lh), Surface:loadImage(imageCache[right]):resize(lw, lh) }
-		vfd.center = Surface:loadImage(imageCache[center]):resize(cw, ch)
+		vfd.on = _resizedVFDElement(bar_on, bw, bh)
+		vfd.off = _resizedVFDElement(bar_off, bw, bh)
+		vfd.peakon = _resizedVFDElement(bar_peak_on, bw, bh)
+		vfd.peakoff = _resizedVFDElement(bar_peak_off, bw, bh)
+		vfd.leftlead = _resizedVFDElement(left, lw, lh)
+		vfd.rightlead = _resizedVFDElement(right, lw, lh)
+		vfd.center = _resizedVFDElement(center, cw, ch)
 		vfd.w = cw
 		vfd.h = ch + (bh * 2)
 	end
@@ -886,6 +962,8 @@ function getVFDVUmeter(name, w, h)
 	vfd.ch = ch
 --	log:debug("####  vfd.w:", vfd.w, " vfd.h:", vfd.h)
 --	log:debug("####  vfd.bw:", vfd.bw, " vfd.bh:", vfd.bh, " vfd.lw:", vfd.lw, " vfd.lh", vfd.lh, " vfd.cw:", vfd.cw, " vfd.ch", vfd.ch)
+	log:info("vfdCache <- ", key, vfd)
+	vfdCache[key] = vfd
 	return vfd
 end
 
