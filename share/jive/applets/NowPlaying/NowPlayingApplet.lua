@@ -305,13 +305,13 @@ function npVUSettingsShow(self)
 
 					if isSelected then
 						-- turn it on
-						settings.vumeters[v.name] = true 
+--						settings.vumeters[v.name] = true 
 						visImage:selectVuImage(v.name, true, false)
 					else
 						-- turn it off conditionally:
 						-- there needs to be at least one VUMeter
 						if visImage:selectVuImage(v.name, false, false) > 0 then
-							settings.vumeters[v.name] = false 
+--							settings.vumeters[v.name] = false 
 						 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
 								self.window = nil
 							end
@@ -358,13 +358,13 @@ function npSpectrumSettingsShow(self)
 
 					if isSelected then
 						-- turn it on
-						settings.spectrum[v.name] = true
+--						settings.spectrum[v.name].enabled = true
 						visImage:selectSpectrum(v.name, true, false)
 					else
 						-- turn it off conditionally:
 						-- there needs to be at least one Spectrum
 						if visImage:selectSpectrum(v.name, false, false) > 0 then
-							settings.spectrum[v.name] = false 
+--							settings.spectrum[v.name].enabled = false 
 							if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
 								self.window = nil
 							end
@@ -2305,10 +2305,10 @@ function updateSettings(self)
 
 	-- Spectrum images
 	npscreenSpectrum = visImage:getSpectrumList()
-	settings.spectrum = {}
-	for i, v in ipairs(npscreenSpectrum) do
-		settings.spectrum[v.name] = npscreenSpectrum[i].enabled
-	end
+	settings.spectrum = visImage:getSpectrumSettings()
+--	for i, v in ipairs(npscreenSpectrum) do
+--		settings.spectrum[v.name] = {enabled=npscreenSpectrum[i].enabled}
+--	end
 
 	-- Spectrum bars format
 	settings.spectrumBarsFormat = visImage:getBarsFormat()
