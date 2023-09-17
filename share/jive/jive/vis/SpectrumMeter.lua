@@ -14,6 +14,7 @@ local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
 
 local FRAME_RATE    = jive.ui.FRAME_RATE
+local type	= type
 
 module(...)
 oo.class(_M, Icon)
@@ -71,7 +72,15 @@ function _layout(self)
 	self.isMono =  self:styleValue("isMono")
 
 	if self.useVisImage then
-		self.fgImg, self.bgImg, self.bgAlpha = visImage:getSpectrum(w, h, self.spType)
+		self.fgImg, self.bgImg, self.bgAlpha, colour, cap = visImage:getSpectrum(w, h, self.spType)
+		log:debug("colour=", colour, " ", type(colour), " cap=", cap, " ", type(cap))
+		log:debug("barColor=", self.barColor, " ", type(self.barColor), " capColor=", self.capColor, " ", type(self.capColor))
+		if type(colour) == "number" then
+			self.barColor = colour
+		end
+		if type(cap) == "number" then
+			self.capColor = cap
+		end
 	end
 
 --	self.capHeight = self:styleValue("capHeight")
