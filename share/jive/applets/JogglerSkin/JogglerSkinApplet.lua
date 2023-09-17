@@ -3710,7 +3710,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				clipSubbands = { 1, 1 },		-- 0 / 1
 --				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=visImage.SPT_GRADIENT,
+				spType=visImage.SPT_IMAGE,
 			}
 		},
 	})
