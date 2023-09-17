@@ -24,6 +24,8 @@ local lfs	= require("lfs")
 
 local ipairs, pairs, pcall	= ipairs, pairs, pcall
 local coroutine, package	= coroutine, package
+local coroutine, package	= coroutine, package
+local type	= type
 
 -- jive package imports
 local string		= require("jive.utils.string")
@@ -37,7 +39,8 @@ module(...)
 
 SPT_DEFAULT = "default"
 SPT_BACKLIT = "backlit"
-SPT_GRADIENT = "gradient"
+SPT_IMAGE = "image"
+SPT_COLOUR = "colour"
 
 local vuImages = {}
 local spectrumList = {}
@@ -210,7 +213,15 @@ end
 
 function npSettings(tbl, vusettings, spsettings)
 	npvumeters = vusettings
-	npspectrums = spsettings
+	for k, v in pairs(spsettings) do
+		if type(v) == "boolean" then
+			npspectrums[k] = {enabled=v}
+		else
+			if v.spType == SPT_COLOUR then
+			end
+			npspectrums[k] = v
+		end
+	end
 end
 
 function initialiseCache()
@@ -238,14 +249,13 @@ function initialiseVUMeters()
 	if not enabled and #vuImages > 0 then
 		vuImages[1].enabled = true
 	end
-
 end
 
 function initialiseSpectrumMeters()
 	initSpectrumList()
 	for k, v in pairs(npspectrums) do
 		-- set flags but do not cache
-		selectSpectrum({},k,v, cacheAtStartup)
+		selectSpectrum({}, k, v.enabled, cacheAtStartup)
 	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
@@ -388,12 +398,26 @@ function getSpectrumList()
 	return spectrumList
 end
 
+function getSpectrumSettings()
+	settings = {}
+	for k,v in ipairs(spectrumList) do
+		settings[v.name]={enabled=v.enabled, spType=v.spType, colour=v.colour, cap=v.cap}
+	end
+	return settings
+end
+
+
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {} 
-	table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
-	spectrumImagesMap[" default"] = {fg=nil, bg=nil, src=nil} 
+--	table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
 
+	for k, v in pairs(npspectrums) do
+		if v.spType == SPT_COLOUR or v.spType == SPT_DEFAULT then
+			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, colour=v.colour, cap=v.cap})
+		end
+	end
+	
 	local search_root
 	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
 		for entry in lfs.dir(search_root) do
@@ -433,6 +457,9 @@ function initSpectrumList()
 end
 
 function _cacheSpectrumImage(imgName, path, w, h, spType)
+	if path == nil then
+		return
+	end
 	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
 	local bgImgName = nil
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
@@ -490,6 +517,9 @@ end
 local currentFgImage = nil
 local currentFgImageKey = nil
 function _getFgSpectrumImage(spkey, w, h, spType)
+	if spectrumImagesMap[spkey] == nil then
+		return nil
+	end
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
 	if spectrumImagesMap[spkey].fg == nil then
 		return nil
@@ -527,6 +557,9 @@ end
 local currentBgImage = nil
 local currentBgImageKey = nil
 function _getBgSpectrumImage(spkey, w, h, spType) 
+	if spectrumImagesMap[spkey] == nil then
+		return nil
+	end
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
 	if spectrumImagesMap[spkey].bg == nil then
 		return nil
@@ -551,8 +584,8 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
 	-- if we invoke blitAlpha from the foreground image to the background image
 	-- the foreground image is affected by alpha see SDL_SetAlpha.
-    -- Isolate by blitting foreground to a temporary image and then blitAlpha
-    -- from that to the background image
+	-- Isolate by blitting foreground to a temporary image and then blitAlpha
+	-- from that to the background image
 	local tmp = Surface:newRGB(w,h)
 	tmp:filledRectangle(0,0,w,h,0)
 	img:blit(tmp, 0, 0)
@@ -575,10 +608,10 @@ function getSpectrum(tbl, w, h, spType)
 		end
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
+	alpha = getBackgroundAlpha
 	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	alpha = getBackgroundAlpha
-	return fg, bg, alpha
+	return fg, bg, alpha, spectrumList[spImageIndex].colour, spectrumList[spImageIndex].cap
 end
 
 function selectSpectrum(tbl, name, selected, allowCaching)
@@ -587,10 +620,12 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
 			if (allowCaching and selected) or CACHE_EAGER then
-					-- create the cached image for skin resolutions 
-					for kr, vr in pairs(spectrumResolutions) do
-						if spectrumImagesMap[name].src ~= nil then
-							_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
+					if spectrumImagesMap[name] ~= nil then
+						-- create the cached image for skin resolutions 
+						for kr, vr in pairs(spectrumResolutions) do
+							if spectrumImagesMap[name].src ~= nil then
+								_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
+							end
 						end
 					end
 			end
@@ -886,8 +921,8 @@ end
 
 function _resizedVFDElement(key, w, h)
 	local img = loadImage(diskImageCache[key]):resize(w, h)
-    imCachePut(key .. "-" .. w .. "x" .. h, img)
-    return img
+	imCachePut(key .. "-" .. w .. "x" .. h, img)
+	return img
 end
 
 -- FIXME: vfdCache should go through imCache
