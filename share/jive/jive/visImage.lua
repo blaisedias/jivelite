@@ -56,7 +56,7 @@ CACHE_EAGER = true
 local cacheAtStartup = true
 -- commit cached images to disk
 local saveCachedImages = true
-local saveAsPng = true
+local saveAsPng = false
 local PLATFORM = ""
 
 function _parseImagePath(imgpath)
@@ -401,7 +401,7 @@ end
 function getSpectrumSettings()
 	settings = {}
 	for k,v in ipairs(spectrumList) do
-		settings[v.name]={enabled=v.enabled, spType=v.spType, colour=v.colour, cap=v.cap}
+		settings[v.name]={enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor}
 	end
 	return settings
 end
@@ -410,11 +410,13 @@ end
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {} 
---	table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
+    if #npspectrums == 0 then
+	    table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
+    end
 
 	for k, v in pairs(npspectrums) do
 		if v.spType == SPT_COLOUR or v.spType == SPT_DEFAULT then
-			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, colour=v.colour, cap=v.cap})
+			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
 		end
 	end
 	
@@ -611,7 +613,7 @@ function getSpectrum(tbl, w, h, spType)
 	alpha = getBackgroundAlpha
 	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	return fg, bg, alpha, spectrumList[spImageIndex].colour, spectrumList[spImageIndex].cap
+	return fg, bg, alpha, spectrumList[spImageIndex].barColor, spectrumList[spImageIndex].capColor
 end
 
 function selectSpectrum(tbl, name, selected, allowCaching)
