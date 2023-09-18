@@ -72,14 +72,13 @@ function _layout(self)
 	self.isMono =  self:styleValue("isMono")
 
 	if self.useVisImage then
-		self.fgImg, self.bgImg, self.bgAlpha, colour, cap = visImage:getSpectrum(w, h, self.spType)
-		log:debug("colour=", colour, " ", type(colour), " cap=", cap, " ", type(cap))
-		log:debug("barColor=", self.barColor, " ", type(self.barColor), " capColor=", self.capColor, " ", type(self.capColor))
-		if type(colour) == "number" then
-			self.barColor = colour
+		self.fgImg, self.bgImg, self.bgAlpha, barColour, capColour = visImage:getSpectrum(w, h, self.spType)
+		log:debug("barColour=", barColour, " ", type(barColour), " capColour=", capColour, " ", type(capColour))
+		if type(barColour) == "number" then
+			self.barColor = barColour
 		end
-		if type(cap) == "number" then
-			self.capColor = cap
+		if type(capColour) == "number" then
+			self.capColor = capColour
 		end
 	end
 
