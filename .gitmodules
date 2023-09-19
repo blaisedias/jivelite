@@ -1,0 +1,3 @@
+[submodule "src/SDL_SavePNG"]
+	path = src/SDL_SavePNG
+	url = https://github.com/driedfruit/SDL_SavePNG.git
