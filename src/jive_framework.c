@@ -1634,6 +1634,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "trigon", jiveL_surface_trigonColor },
 	{ "aatrigon", jiveL_surface_aatrigonColor },
 	{ "filledTrigon", jiveL_surface_filledTrigonColor },
+	{ "savePNG", jiveL_surface_save_png },
 	{ NULL, NULL }
 };
 

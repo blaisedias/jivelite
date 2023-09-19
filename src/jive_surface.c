@@ -6,6 +6,7 @@
 
 #include "common.h"
 #include "jive.h"
+#include "savepng.h"
 
 /*
  * This file combines both JiveSurface and JiveTile into a single implementation.
@@ -992,6 +993,14 @@ int jive_surface_save_bmp(JiveSurface *srf, const char *file) {
 	return SDL_SaveBMP(srf->sdl, file);
 }
 
+int jive_surface_save_png(JiveSurface *srf, const char *file) {
+	if (!srf->sdl) {
+		LOG_ERROR(log_ui, "Underlying sdl surface already freed, possibly with release()");
+		return 0;
+	}
+	return SDL_SavePNG(srf->sdl, file);
+}
+
 
 static int _getPixel(SDL_Surface *s, Uint16 x, Uint16 y) {
 	Uint8 R, G, B;
@@ -1754,6 +1763,21 @@ int jiveL_surface_save_bmp(lua_State *L) {
 	}
 	return 0;
 }
+
+int jiveL_surface_save_png(lua_State *L) {
+	/*
+	  surface
+	  filename
+	*/
+	JiveSurface *srf = *(JiveSurface **)lua_touserdata(L, 1);
+	const char *image = luaL_checklstring(L, 2, NULL);
+	if (srf && image) {
+		lua_pushinteger(L, jive_surface_save_png(srf, image));
+		return 1;
+	}
+	return 0;
+}
+
 
 int jiveL_surface_cmp(lua_State *L) {
 	/*
