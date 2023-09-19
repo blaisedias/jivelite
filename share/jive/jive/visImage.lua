@@ -56,7 +56,7 @@ CACHE_EAGER = true
 local cacheAtStartup = true
 -- commit cached images to disk
 local saveCachedImages = true
-local saveAsPng = false
+local saveAsPng = true
 local PLATFORM = ""
 
 function _parseImagePath(imgpath)
@@ -409,17 +409,17 @@ end
 
 function initSpectrumList()
 	spectrumList = {}
-	spectrumImagesMap = {} 
-    if #npspectrums == 0 then
-	    table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
-    end
+	spectrumImagesMap = {}
+	if #npspectrums == 0 then
+		table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
+	end
 
 	for k, v in pairs(npspectrums) do
-		if v.spType == SPT_COLOUR or v.spType == SPT_DEFAULT then
+		if v.spType == SPT_COLOUR then
 			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
 		end
 	end
-	
+
 	local search_root
 	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
 		for entry in lfs.dir(search_root) do
