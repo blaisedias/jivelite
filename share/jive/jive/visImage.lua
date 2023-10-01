@@ -761,7 +761,7 @@ local vuImagesMap = {}
 local vuMeterResolutions = {}
 
 function registerVUMeterResolution(tbl, w,h)
-	log:debug("registerVUMeterResolution", w, " x ", h)
+	log:debug("registerVUMeterResolution ", w, " x ", h)
 	table.insert(vuMeterResolutions, {w=w, h=h})
 end
 

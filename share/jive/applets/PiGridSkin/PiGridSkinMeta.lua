@@ -42,8 +42,11 @@ end
 function registerApplet(self)
 	jiveMain:registerSkin(self:string("PIGRID_SKIN"), "PiGridSkin", "skin", "PiGridSkin")
 	jiveMain:registerSkin(self:string("PIGRID_SKIN_1024_600"), "PiGridSkin", "skin1024x600", "PiGridSkin_1024x600")
+	jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_400"), "PiGridSkin", "skin1280x400", "PiGridSkin_1280x400")
 	jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_800"), "PiGridSkin", "skin1280x800", "PiGridSkin_1280x800")
 	jiveMain:registerSkin(self:string("PIGRID_SKIN_1366_768"), "PiGridSkin", "skin1366x768", "PiGridSkin_1366x768")
+	jiveMain:registerSkin(self:string("PIGRID_SKIN_1480_320"), "PiGridSkin", "skin1480x320", "PiGridSkin_1480x320")
+	jiveMain:registerSkin(self:string("PIGRID_SKIN_1480_400"), "PiGridSkin", "skin1480x400", "PiGridSkin_1480x400")
 	
 	-- allow user to define a custom screen size
 	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
