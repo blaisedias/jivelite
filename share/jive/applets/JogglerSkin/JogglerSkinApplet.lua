@@ -760,6 +760,21 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local mini_visu_X = screenHeight - 160 + 5
 	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
+	local screenAR = screenWidth/screenHeight
+	local effectiveScreenWidth = screenWidth
+	mini_sp_type = visImage.SPT_GRADIENT
+	if screenAR > 3 then
+		effectiveScreenWidth = screenHeight + math.floor((screenWidth - screenHeight) / 2) - 90
+		mini_visu_X = effectiveScreenWidth + 10
+		mini_visu_W = screenWidth - mini_visu_X - 10
+		mini_visu_Y = (TITLE_HEIGHT)
+		mini_visu_H = screenHeight - mini_visu_Y - 100
+		log:info("screenWidth=", screenWidth, " screenHeight=", screenHeight)
+		log:info("effectiveScreenWidth=", effectiveScreenWidth, " mvX=", mini_visu_X, " mvW=", mini_visu_W, " mvY=", mini_visu_Y, " mvH=", mini_visu_H)
+		log:info("x1=", mini_visu_X, " x2=", (mini_visu_X + mini_visu_W), " y1=", mini_visu_Y, " y2=", (mini_visu_Y + mini_visu_H))
+		mini_sp_type = nil
+	end
+
 -- front load for smoother experience when music is playing
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -2915,7 +2930,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			y          = TITLE_HEIGHT + 10,
 			h          = NP_TRACK_FONT_SIZE,
 			nptrack =  {
-				w          = screenWidth - _tracklayout.x - 10,
+				w          = effectiveScreenWidth - _tracklayout.x - 10,
 				h          = WH_FILL,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
@@ -2933,7 +2948,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			h          = 32,
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
-				w          = screenWidth - _tracklayout.x - 10,
+				w          = effectiveScreenWidth - _tracklayout.x - 10,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
 				fg         = _tracklayout.fg,
@@ -2949,7 +2964,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			y          = TITLE_HEIGHT + 32 + 32 + 32 + 15 + 10,
 			h          = 32,
 			npalbum = {
-				w          = screenWidth - _tracklayout.x - 10,
+				w          = effectiveScreenWidth - _tracklayout.x - 10,
 				padding    = { 0, 6, 0, 0 },
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
@@ -3113,7 +3128,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			},
 			npprogressB = {
 --				w = screenWidth - _tracklayout.x - 2*80 - 25,
-				w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
+				w = math.floor((effectiveScreenWidth - _tracklayout.x - 13)/2)*2 - 120,
 				h = 50,
 				padding = { 0, 0, 0, 0 },
 			        position = LAYOUT_SOUTH,
@@ -3223,9 +3238,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			i = i + 1
 			
 			-- We can't comfortably accomodate more than five items
-			if (screenWidth <= 800 and i > 5) or (i > 2 and v == 'volSlider') then
+			if (effectiveScreenWidth <= 800 and i > 5) or (i > 2 and v == 'volSlider') then
 				smallTbButtons = true
-				if screenWidth <= 800 then break end
+				if effectiveScreenWidth <= 800 then break end
 			end
 			
 			table.insert(buttonOrder, 'div' .. tostring(i))
@@ -3710,7 +3725,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 				clipSubbands = { 1, 1 },		-- 0 / 1
 --				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=visImage.SPT_IMAGE,
+				spType=mini_sp_type,
+--				spType=visImage.SPT_IMAGE,
 			}
 		},
 	})
@@ -3972,6 +3988,16 @@ function skin1024x600(self, s, reload, useDefaultSize)
 	return s
 end
 
+function skin1280x400(self, s, reload, useDefaultSize, w, h)
+	self:skin(s, reload, useDefaultSize, 1280, 400)
+	
+	-- put a space between volume controls and other buttons	
+	s.nowplaying.npcontrols.div5.w = 490
+	s.nowplaying.npcontrols.div5.img = false
+
+	return s
+end
+
 function skin1280x800(self, s, reload, useDefaultSize, w, h)
 	self:skin(s, reload, useDefaultSize, w or 1280, h or 800)
 	
@@ -3997,6 +4023,26 @@ function skin1366x768(self, s, reload, useDefaultSize)
 
 	-- put a space between volume controls and other buttons	
 	s.nowplaying.npcontrols.div5.w = 568
+	s.nowplaying.npcontrols.div5.img = false
+
+	return s
+end
+
+function skin1480x320(self, s, reload, useDefaultSize)
+	self:skin(s, reload, useDefaultSize, 1480, 320)
+
+	-- put a space between volume controls and other buttons	
+	s.nowplaying.npcontrols.div5.w = 700
+	s.nowplaying.npcontrols.div5.img = false
+
+	return s
+end
+
+function skin1480x400(self, s, reload, useDefaultSize)
+	self:skin(s, reload, useDefaultSize, 1480, 400)
+
+	-- put a space between volume controls and other buttons	
+	s.nowplaying.npcontrols.div5.w = 700
 	s.nowplaying.npcontrols.div5.img = false
 
 	return s
