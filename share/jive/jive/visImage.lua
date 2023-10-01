@@ -406,6 +406,42 @@ function getSpectrumSettings()
 	return settings
 end
 
+-- Workaround for mono-colour spectrums
+-- if not present in settings add them
+-- if present in settings then use those settings
+function initColourSpectrums()
+    local csp ={
+        {name="White", enabled=false, spType=SPT_COLOUR,        barColor=0xd0d0d0ff, capColor=0xffffffff},
+        {name="White tsp", enabled=false, spType=SPT_COLOUR,    barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
+        {name="Yellow", enabled=false, spType=SPT_COLOUR,       barColor=0xd0d000ff, capColor=0xffff00ff},
+        {name="Yellow tsp", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
+        {name="Cyan", enabled=false, spType=SPT_COLOUR,         barColor=0x00d0d0ff, capColor=0x00ffffff},
+        {name="Cyan tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x00d0d0a0, capColor=0x00d0d0ff},
+        {name="Magenta", enabled=false, spType=SPT_COLOUR,      barColor=0xd000d0ff, capColor=0xff00ffff},
+        {name="Magenta tsp", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
+        {name="Black", enabled=false, spType=SPT_COLOUR,        barColor=0x101010ff, capColor=0x000000ff},
+        {name="Black tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x000000a0, capColor=0x000000ff},
+        {name="Green", enabled=false, spType=SPT_COLOUR,        barColor=0x00d000ff, capColor=0x00d000ff},
+        {name="Green tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x00d000a0, capColor=0x00ff00ff},
+        {name="Blue", enabled=false, spType=SPT_COLOUR,         barColor=0x0000d0ff, capColor=0x0000ffff},
+        {name="Blue tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x0000d0a0, capColor=0x0000ffff},
+        {name="Red", enabled=false, spType=SPT_COLOUR,          barColor=0xd00000ff, capColor=0xff0000ff},
+        {name="Red tsp", enabled=false, spType=SPT_COLOUR,      barColor=0xd00000a0, capColor=0xff0000ff},
+    }
+    for x,c in pairs(csp) do
+    	for k, v in pairs(npspectrums) do
+    		if v.spType == SPT_COLOUR then
+                if c.name == k then
+                    c.enabled = v.enabled
+                    c.barColor = v.barColor
+                    c.capColor = v.capColor
+                end
+--    			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
+    		end
+        end
+        table.insert(spectrumList, c)
+	end
+end
 
 function initSpectrumList()
 	spectrumList = {}
@@ -414,11 +450,15 @@ function initSpectrumList()
 		table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
 	end
 
-	for k, v in pairs(npspectrums) do
-		if v.spType == SPT_COLOUR then
-			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
-		end
-	end
+    initColourSpectrums()
+-- {hack for now hard code the mono-colour spectrum 
+--	for k, v in pairs(npspectrums) do
+--		if v.spType == SPT_COLOUR then
+--			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
+--		end
+--	end
+
+-- } hack for now hard code the mono-colour spectrum 
 
 	local search_root
 	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
