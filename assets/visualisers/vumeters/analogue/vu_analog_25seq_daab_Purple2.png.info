@@ -1,0 +1,10 @@
+Source:
+Title:		vu_analog_25seq_daab_Purple2.png
+Description:	Community squeezebox controller 3rd party VU image.
+                This is a version of vu_analog_25seq_daab_Purple.png 
+                colour adjusted for smaller displays which have different
+                colour temperature.
+Version:	1.0.0
+Author:		blaisedias
+Original-site:	https://github.com/blaisedias/jivelite
+Copying-policy:	Public Domain

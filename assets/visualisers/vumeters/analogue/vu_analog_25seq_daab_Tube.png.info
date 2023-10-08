@@ -1,0 +1,11 @@
+Source:
+Title:		vu_analog_25seq_daab_Tube.png
+Description:	Community squeezebox controller 3rd party VU image.
+                Inspired by vu_analog_25seq-Peppy_Meter_Tube.png,
+                from https://github.com/project-owner/PeppyMeter.doc/wiki
+                Created from scratch with calibration to match squeezelite,
+                jivelite combination.
+Version:	1.0.0
+Author:		blaisedias
+Original-site:	https://github.com/blaisedias/jivelite
+Copying-policy:	Public Domain
