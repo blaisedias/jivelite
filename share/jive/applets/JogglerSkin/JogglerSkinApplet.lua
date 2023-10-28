@@ -4038,11 +4038,11 @@ function skin1480x320(self, s, reload, useDefaultSize)
 	return s
 end
 
-function skin1480x400(self, s, reload, useDefaultSize)
-	self:skin(s, reload, useDefaultSize, 1480, 400)
+function skin1600x720(self, s, reload, useDefaultSize)
+	self:skin(s, reload, useDefaultSize, 1600, 720)
 
 	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 700
+	s.nowplaying.npcontrols.div5.w = 800
 	s.nowplaying.npcontrols.div5.img = false
 
 	return s
