@@ -186,7 +186,7 @@ function draw(self, surface)
 	-- local volume = self.player:getVolume()
 
 	self.drawMeter(self.left, surface, vol[1]) 
-	self.drawMeter(self.right, surface, vol[1]) 
+	self.drawMeter(self.right, surface, vol[2]) 
 end
 
 function drawVuMeterBackground(params, surface)
