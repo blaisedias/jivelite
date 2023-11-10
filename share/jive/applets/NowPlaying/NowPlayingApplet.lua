@@ -162,6 +162,13 @@ function init(self)
 		visImage:setCapsOn(settings.capsOn)
 	end
 
+	if settings.cacheEnabled == nil then
+		settings.cacheEnabled = visImage:getCacheEnabled()
+	else
+		visImage:setCacheEnabled(settings.cacheEnabled)
+	end
+
+
 	if not settings.channelFlip then
 		settings.channelFlip = visImage:getChannelFlip()
 	else
@@ -427,7 +434,7 @@ function npSpectrumCapsSettingsShow(self)
 
 	local menu = SimpleMenu("menu", {
 		{
-			text = self:string("SPECTRUM_CAPS_ON"),
+			text = self:string("ON"),
 			style = 'item_choice',
 			check = RadioButton("radio", 
 				group, 
@@ -440,7 +447,7 @@ function npSpectrumCapsSettingsShow(self)
 			)
 		},
 		{
-			text = self:string("SPECTRUM_CAPS_OFF"),
+			text = self:string("OFF"),
 			style = 'item_choice',
 			check = RadioButton("radio", 
 				group, 
@@ -489,6 +496,43 @@ function npSpectrumChannelFlipSettingsShow(self)
 
 	--XXX: not sure whether the text is necessary or even helpful here
 	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
+
+	window:addWidget(menu)
+	window:show()
+end
+
+function npVisCachingSettingsShow(self)
+	local window = Window("text_list", self:string('VISUALISER_IMAGE_CACHING') )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu", {
+		{
+			text = self:string("ON"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setCacheEnabled(true)
+					self:updateSettings()
+					self.window = nil
+				end,
+				visImage:getCacheEnabled()
+			)
+		},
+		{
+			text = self:string("OFF"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setCacheEnabled(false)
+					self:updateSettings()
+					self.window = nil
+				end,
+				not visImage:getCacheEnabled()
+			)
+		},
+	})
 
 	window:addWidget(menu)
 	window:show()
@@ -2311,6 +2355,7 @@ function updateSettings(self)
 	settings.spectrumBarsFormat = visImage:getBarsFormat()
 	settings.capsOn = visImage:getCapsOn()
 	settings.channelFlip = visImage:getChannelFlip()
+	settings.cacheEnabled = visImage:getCacheEnabled()
 
 	self:storeSettings()
 	visImage:sync()
