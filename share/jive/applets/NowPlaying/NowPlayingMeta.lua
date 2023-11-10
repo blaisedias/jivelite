@@ -94,6 +94,16 @@ function registerApplet(self)
 			end
 		)
 	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletNowPlayingCachingSettings',
+			'screenSettingsNowPlaying', 
+			'VISUALISER_IMAGE_CACHING', 
+			function(applet, ...) 
+				applet:npVisCachingSettingsShow(...) 
+			end
+		)
+	)
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
 
