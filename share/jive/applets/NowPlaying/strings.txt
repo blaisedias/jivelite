@@ -224,14 +224,17 @@ SPECTRUM_BARS_FORMAT
 SPECTRUM_CAPS
 	EN	Spectrum Caps
 
-SPECTRUM_CAPS_ON
-	EN	Spectrum Caps On
-
-SPECTRUM_CAPS_OFF
-	EN	Spectrum Caps Off
-
 SPECTRUM_CHANNEL_FLIP
 	EN	Spectrum Channel Flip
+
+VISUALISER_IMAGE_CACHING
+	EN	Visualiser Image Caching
+
+ON
+	EN	On
+
+OFF
+	EN	Off
 
 NOW_PLAYING_VIEWS_HELP
 	CS	Na obrazovce Právě hraje je k dispozici několik různých konfigurací, neboli "zobrazení", mezi kterými můžete přepínat. Zde si můžete zvolit požadovaná zobrazení přehrávače.
