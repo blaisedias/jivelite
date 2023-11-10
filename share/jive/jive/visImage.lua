@@ -100,6 +100,24 @@ end
 -- FIXME: vfdCache should go through imCache
 vfdCache = {}
 local imCache = {}
+local imCacheEnabled = false
+
+function getCacheEnabled(tbl)
+	log:info("getCacheEnabled ", imCacheEnabled)
+	return imCacheEnabled
+end
+
+function setCacheEnabled(tbl, v)
+	log:info("setCacheEnabled ", v)
+	if v == false and imCacheEnabled == true then
+		-- precipitate image cache clear
+		-- strictly speaking not necessary as it would be cleared
+	 -- at the next track transition.
+		imCacheClear()
+	end
+	imCacheEnabled = v
+end
+
 function imCachePut(key, img)
 	log:info("imCache <- ", key,  " ", img)
 	imCache[key] = img
@@ -113,6 +131,16 @@ function imCacheGet(key)
 		log:info("imCache X ", key)
 	end
 	return img
+end
+
+function imCacheClear()
+	log:info("imCacheClear")
+	vfdCache = {}
+	for k,v in pairs(imCache) do
+		log:info("releasing ", k)
+		v:release()
+	end
+	imCache={}
 end
 
 function loadImage(path)
@@ -187,12 +215,8 @@ function cacheClear(tbl)
 		log:debug("cacheClear ", k)
 		diskImageCache[k] = nil
 	end
-	
-	-- FIXME vfdCache is not using imCache so 
-	-- those images are not released
-	for k,v in pairs(imCache) do
-		v:release()
-	end
+	diskImageCache = {}
+	imCacheClear()	
 end
 
 
@@ -410,36 +434,36 @@ end
 -- if not present in settings add them
 -- if present in settings then use those settings
 function initColourSpectrums()
-    local csp ={
-        {name="White", enabled=false, spType=SPT_COLOUR,        barColor=0xd0d0d0ff, capColor=0xffffffff},
-        {name="White tsp", enabled=false, spType=SPT_COLOUR,    barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
-        {name="Yellow", enabled=false, spType=SPT_COLOUR,       barColor=0xd0d000ff, capColor=0xffff00ff},
-        {name="Yellow tsp", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
-        {name="Cyan", enabled=false, spType=SPT_COLOUR,         barColor=0x00d0d0ff, capColor=0x00ffffff},
-        {name="Cyan tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x00d0d0a0, capColor=0x00d0d0ff},
-        {name="Magenta", enabled=false, spType=SPT_COLOUR,      barColor=0xd000d0ff, capColor=0xff00ffff},
-        {name="Magenta tsp", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
-        {name="Black", enabled=false, spType=SPT_COLOUR,        barColor=0x101010ff, capColor=0x000000ff},
-        {name="Black tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x000000a0, capColor=0x000000ff},
-        {name="Green", enabled=false, spType=SPT_COLOUR,        barColor=0x00d000ff, capColor=0x00d000ff},
-        {name="Green tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x00d000a0, capColor=0x00ff00ff},
-        {name="Blue", enabled=false, spType=SPT_COLOUR,         barColor=0x0000d0ff, capColor=0x0000ffff},
-        {name="Blue tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x0000d0a0, capColor=0x0000ffff},
-        {name="Red", enabled=false, spType=SPT_COLOUR,          barColor=0xd00000ff, capColor=0xff0000ff},
-        {name="Red tsp", enabled=false, spType=SPT_COLOUR,      barColor=0xd00000a0, capColor=0xff0000ff},
-    }
-    for x,c in pairs(csp) do
-    	for k, v in pairs(npspectrums) do
-    		if v.spType == SPT_COLOUR then
-                if c.name == k then
-                    c.enabled = v.enabled
-                    c.barColor = v.barColor
-                    c.capColor = v.capColor
-                end
---    			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
-    		end
-        end
-        table.insert(spectrumList, c)
+	local csp ={
+		{name="White", enabled=false, spType=SPT_COLOUR,        barColor=0xd0d0d0ff, capColor=0xffffffff},
+		{name="White tsp", enabled=false, spType=SPT_COLOUR,    barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
+		{name="Yellow", enabled=false, spType=SPT_COLOUR,       barColor=0xd0d000ff, capColor=0xffff00ff},
+		{name="Yellow tsp", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
+		{name="Cyan", enabled=false, spType=SPT_COLOUR,         barColor=0x00d0d0ff, capColor=0x00ffffff},
+		{name="Cyan tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x00d0d0a0, capColor=0x00d0d0ff},
+		{name="Magenta", enabled=false, spType=SPT_COLOUR,      barColor=0xd000d0ff, capColor=0xff00ffff},
+		{name="Magenta tsp", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
+		{name="Black", enabled=false, spType=SPT_COLOUR,        barColor=0x101010ff, capColor=0x000000ff},
+		{name="Black tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x000000a0, capColor=0x000000ff},
+		{name="Green", enabled=false, spType=SPT_COLOUR,        barColor=0x00d000ff, capColor=0x00d000ff},
+		{name="Green tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x00d000a0, capColor=0x00ff00ff},
+		{name="Blue", enabled=false, spType=SPT_COLOUR,         barColor=0x0000d0ff, capColor=0x0000ffff},
+		{name="Blue tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x0000d0a0, capColor=0x0000ffff},
+		{name="Red", enabled=false, spType=SPT_COLOUR,          barColor=0xd00000ff, capColor=0xff0000ff},
+		{name="Red tsp", enabled=false, spType=SPT_COLOUR,      barColor=0xd00000a0, capColor=0xff0000ff},
+	}
+	for x,c in pairs(csp) do
+		for k, v in pairs(npspectrums) do
+			if v.spType == SPT_COLOUR then
+				if c.name == k then
+					c.enabled = v.enabled
+					c.barColor = v.barColor
+				 c.capColor = v.capColor
+				end
+--				table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
+			end
+		end
+		table.insert(spectrumList, c)
 	end
 end
 
@@ -450,7 +474,7 @@ function initSpectrumList()
 		table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
 	end
 
-    initColourSpectrums()
+	initColourSpectrums()
 -- {hack for now hard code the mono-colour spectrum 
 --	for k, v in pairs(npspectrums) do
 --		if v.spType == SPT_COLOUR then
@@ -651,6 +675,19 @@ function getSpectrum(tbl, w, h, spType)
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBackgroundAlpha
+	if currentFgImage ~= nil then
+		currentFgImage = nil
+		currentFgImageKey = nil
+	end
+	if currentBgImage ~= nil then
+		currentBgImage = nil
+		currentBgImageKey = nil
+	end
+
+	if imCacheEnabled == false then
+		imCacheClear()
+	end
+
 	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	return fg, bg, alpha, spectrumList[spImageIndex].barColor, spectrumList[spImageIndex].capColor
@@ -896,17 +933,32 @@ function getVuImage(w,h)
 	end
 	local entry = vuImages[vuImageIndex]
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
+	log:info("VUImage keys : current ", currentVuImageKey, " new: ", dicKey)
 	if currentVuImageKey == dicKey then
+		if entry.vutype ~= "frame" then
+			-- FIXME: this will retrieve the vfd from vfdCache 
+			-- need to return a complex type which can contains
+			-- VUImage types 
+			return  getVFDVUmeter(entry.name, w, h), entry.vutype
+		end
 		-- image is the current one
+		log:info("returning : currentVuImage ", currentVuImage, " ", currentVuImageKey)
 		return currentVuImage, entry.vutype
 	end
-	if currentVuImage ~= nil then
-		currentVuImage = nil
-		currentVuImageKey = nil
+
+	if imCacheEnabled == false then
+		imCacheClear()
 	end
+
 	if entry.vutype ~= "frame" then
-		return getVFDVUmeter(entry.name, w, h), entry.vutype
+		currentVuImageKey = dicKey
+		log:info("SETT VUImage keys : current ", currentVuImageKey, " new: ", dicKey)
+		return  getVFDVUmeter(entry.name, w, h), entry.vutype
 	end
+
+	currentVuImage = nil
+	currentVuImageKey = nil
+
 	if diskImageCache[dicKey] ~= nil then 
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
