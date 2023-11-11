@@ -779,6 +779,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
+	visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 	visImage:initialise()
 
 	local smallSpinny = {
