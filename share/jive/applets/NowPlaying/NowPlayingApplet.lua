@@ -284,6 +284,17 @@ function getNPStyles(self)
 end
 
 
+function npStyleHasVuMeter(npstyle)
+	if npstyle == "nowplaying_vuanalog_text" then
+		return true
+	elseif npstyle == "nowplaying_minivumeter_text" then
+		return true
+	elseif npstyle == "nowplaying_vumeter_large_art" then
+		return true
+	end
+	return false
+end
+
 function npVUSettingsShow(self)
 	local window = Window("text_list", self:string('SELECT_VUMETER') )
 --	local window = Window("text_list", "VU Meter" )
@@ -316,7 +327,7 @@ function npVUSettingsShow(self)
 						-- there needs to be at least one VUMeter
 						if visImage:selectVuImage(v.name, false, false) > 0 then
 --							settings.vumeters[v.name] = false 
-						 	if self.selectedStyle == "nowplaying_vuanalog_text" or self.selectedStyle == "nowplaying_minivumeter_text" then
+						 	if npStyleHasVuMeter(self.selectedStyle) then
 								self.window = nil
 							end
 						else
@@ -337,6 +348,16 @@ function npVUSettingsShow(self)
 	window:show()
 end
 
+function npStyleHasSpectrum(npstyle)
+	if npstyle == "nowplaying_spectrum_text" then
+		return true
+	elseif npstyle == "nowplaying_minispectrum_text" then
+		return true
+	elseif npstyle == "nowplaying_spectrum_large_art" then
+		return true
+	end
+	return false
+end
 
 function npSpectrumSettingsShow(self)
 	local window = Window("text_list", self:string('SELECT_SPECTRUM') )
@@ -369,7 +390,7 @@ function npSpectrumSettingsShow(self)
 						-- there needs to be at least one Spectrum
 						if visImage:selectSpectrum(v.name, false, false) > 0 then
 --							settings.spectrum[v.name].enabled = false 
-							if self.selectedStyle == "nowplaying_spectrum_text" or self.selectedStyle == "nowplaying_minispectrum_text" then
+							if npStyleHasSpectrum(selectedStyle) then
 								self.window = nil
 							end
 						else
@@ -1854,20 +1875,7 @@ function _createUI(self)
 	)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
-	if self.windowStyle == "nowplaying_spectrum_text" then
-		self.visuGroup = Button(
-			Group('npvisu', {
-				visu = SpectrumMeter("spectrum"),
-			}),
-			function()
-				Framework:pushAction("go_now_playing")
-				return EVENT_CONSUME
-			end
-		)
-	end
-
-	-- Visualizer: Mini Spectrum Visualizer - only load if needed
-	if self.windowStyle == "nowplaying_minispectrum_text" then
+	if npStyleHasSpectrum(self.windowStyle) then
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = SpectrumMeter("spectrum"),
@@ -1881,20 +1889,7 @@ function _createUI(self)
 
 
 	-- Visualizer: Analog VU Meter - only load if needed
-	if self.windowStyle == "nowplaying_vuanalog_text" then
-		self.visuGroup = Button(
-			Group('npvisu', {
-				visu = VUMeter("vumeter_analog"),
-			}),
-			function()
-				Framework:pushAction("go_now_playing")
-				return EVENT_CONSUME
-			end
-		)
-	end
-
-	-- Visualizer: Analog VU Meter - only load if needed
-	if self.windowStyle == "nowplaying_minivumeter_text" then
+	if npStyleHasVuMeter(self.windowStyle) then
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = VUMeter("vumeter_analog"),
@@ -2063,7 +2058,7 @@ function _createUI(self)
 	window:addWidget(self.artistalbumTitle)
 	window:addWidget(self.artworkGroup)
 	-- Visualizer: Only load if needed
-	if (self.windowStyle == "nowplaying_spectrum_text") or (self.windowStyle == "nowplaying_vuanalog_text") or (self.windowStyle == "nowplaying_minispectrum_text")  or (self.windowStyle == "nowplaying_minivumeter_text") then
+	if npStyleHasSpectrum(self.windowStyle) or npStyleHasVuMeter(self.windowStyle) then
 		window:addWidget(self.visuGroup)
 	end
 
