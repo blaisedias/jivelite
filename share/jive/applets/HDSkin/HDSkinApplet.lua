@@ -239,6 +239,11 @@ function skin_1280_1024(self, s)
 	self:skin(s)
 end
 
+function skin_1600_720(self, s)
+	Framework:setVideoMode(1600, 720, 0, false)
+	self:skin(s)
+end
+
 function skin_wsvga(self, s)
 	Framework:setVideoMode(1024, 600, 0, false)
 	self:skin(s)
