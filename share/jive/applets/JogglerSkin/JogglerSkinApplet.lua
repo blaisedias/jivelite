@@ -158,6 +158,12 @@ function param(self)
 				text = self:string("SPECTRUM_ANALYZER"),
 			},
 			{
+				style = 'nowplaying_spectrum_large_art',
+				artworkSize = maxArtwork,
+				titleXofYonly = true,
+				text = self:string("SPECTRUM_LARGE_ART_AND_TEXT"),
+			},
+			{
 				style = 'nowplaying_minispectrum_text',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
@@ -174,6 +180,12 @@ function param(self)
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("MINI_ANALOG_VU_METER"),
+			},
+			{
+				style = 'nowplaying_vumeter_large_art',
+				artworkSize = maxArtwork,
+				titleXofYonly = true,
+				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
 			},
 		},
 	}
@@ -760,6 +772,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local mini_visu_X = screenHeight - 160 + 5
 	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
+	local large_visu_X = screenHeight + 15
+	local large_visu_W = math.floor((screenWidth - large_visu_X - 10)/2)*2
+	local large_visu_H = mini_visu_H
+	local large_visu_Y = mini_visu_Y
+
 	local screenAR = screenWidth/screenHeight
 	local effectiveScreenWidth = screenWidth
 	mini_sp_type = visImage.SPT_GRADIENT
@@ -778,8 +795,10 @@ function skin(self, s, reload, useDefaultSize, w, h)
 -- front load for smoother experience when music is playing
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
+	visImage:registerVUMeterResolution(large_visu_W, large_visu_H)
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
 	visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
+	visImage:registerSpectrumResolution(large_visu_W, large_visu_H)
 	visImage:initialise()
 
 	local smallSpinny = {
@@ -3228,26 +3247,58 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 
 	local settings = appletManager:callService("getNowPlayingScreenButtons")
-	local buttonOrder = {}
-	local smallTbButtons
+	local largeArtButtonOrder = {}
+	local largeArtSmallTbButtons
 
+	local smallControlWidth = controlWidth - 14
+	-- setup buttons large art now playing views
 	local i = 1
+	local n_shrinkable = 0
+	local c_w_avail = screenWidth - screenHeight
 	for k,v in ipairs(tbButtons) do
 		if settings[v] then
-			table.insert(buttonOrder, v)
-			
-			i = i + 1
-			
-			-- We can't comfortably accomodate more than five items
-			if (effectiveScreenWidth <= 800 and i > 5) or (i > 2 and v == 'volSlider') then
-				smallTbButtons = true
-				if effectiveScreenWidth <= 800 then break end
+			local c_w = 0
+			if v == 'volSlider' then
+				c_w = volumeBarWidth
+			else
+				c_w = controlWidth
+				if largeArtSmallTbButtons then
+					-- shrink is in effect
+					c_w = smallControlWidth
+				end
+			end
+
+			if c_w > c_w_avail  then
+				if not largeArtSmallTbButtons then
+					-- for now volSlider is considered a special case, unshrinkable and prime candidate to skip over
+					-- in favour of volUp. 
+					-- In sequence volDown precedes, volSlider which precedes volUp
+					-- it is preferrable to present volDown with volUp over volDown with volSlider
+					if v ~= 'volSlider' then
+						largeArtSmallTbButtons = true
+						-- controls are newly shrunk horizontally so more space is available 
+						-- adjust available space accordingly
+						c_w_avail = c_w_avail + (n_shrinkable * (controlWidth - smallControlWidth))
+						-- the control under consideration for addition is shrunk as well
+						c_w = smallControlWidth
+						log:info("largeArtSmallTbButtons: ", largeArtSmallTbButtons)
+					end
+				end
 			end
 			
-			table.insert(buttonOrder, 'div' .. tostring(i))
+			if c_w < c_w_avail then
+				table.insert(largeArtButtonOrder, v)
+				i = i + 1
+				table.insert(largeArtButtonOrder, 'div' .. tostring(i))
+				c_w_avail = c_w_avail - c_w
+				-- count the number of shrinkable controls
+				if v ~= 'volSlider' then
+					n_shrinkable = n_shrinkable + 1
+				end
+			end
 		end
 	end
-	
+
 	local npX = screenHeight + 15
 
 	s.nowplaying_large_art = _uses(s.nowplaying, {
@@ -3285,7 +3336,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			} 
 		},
 		npcontrols = {
-			order = buttonOrder,
+			order = largeArtButtonOrder,
 			x = screenHeight,
 		},
 		npprogress = {
@@ -3324,8 +3375,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	s.nowplaying_large_art.pressed = s.nowplaying_large_art
 
 	-- if we have more than four buttons, then make them smaller
-	if (smallTbButtons) then
-		local smallControlWidth = controlWidth - 14
+	if (largeArtSmallTbButtons) then
 		s.nowplaying_large_art.npcontrols.rew = _uses(s.nowplaying.npcontrols.rew, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
@@ -3356,18 +3406,24 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		s.nowplaying_large_art.npcontrols.rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
+
+		s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
+			w = 1,
+			padding = { 0, 0, 1, 0 }
+		})
+
 	else
 		s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
 			w = 6,
 			padding = { 2, 0, 2, 0 }
 		})
 
+	end
 		s.nowplaying_large_art.npcontrols.div2 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div3 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div4 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
-	end
 
 	s.nowplaying_large_art.npcontrols.pressed = {
 		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = keyMiddlePressed }),
@@ -3740,6 +3796,57 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
+	-- Visualizer: large art Spectrum Visualizer
+	s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = large_visu_X,
+			y = large_visu_Y,
+			w = large_visu_W,
+			h = large_visu_H,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			spectrum = {
+				position = LAYOUT_CENTER,
+				x = large_visu_X,
+				y = large_visu_Y,
+				w = large_visu_W,
+				h = large_visu_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				bg = { 0x00, 0x00, 0x00, 0x00 },
+
+				barColor = { 0x14, 0xbc, 0xbc, 0xff },
+				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+				isMono = 0,				-- 0 / 1
+
+				capHeight = { 4, 4 },			-- >= 0
+				capSpace = { 4, 4 },			-- >= 0
+				channelFlipped = { 0, 1 },		-- 0 / 1
+				barsInBin = { 2, 2 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
+				clipSubbands = { 1, 1 },		-- 0 / 1
+--				gradientColours = gradientColours,
+				useVisImage = true,
+				spType=mini_sp_type,
+--				spType=visImage.SPT_IMAGE,
+			}
+		},
+	})
+	s.nowplaying_spectrum_large_art.pressed = s.nowplaying_spectrum_large_art
+
+	s.nowplaying_spectrum_large_art.title.pressed = _uses(s.nowplaying_spectrum_large_art.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
 
 	-- Visualizer: Analog VU Meter
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
@@ -3803,6 +3910,39 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	s.nowplaying_minivumeter_text.pressed = s.nowplaying_minivumeter_text
 
 	s.nowplaying_minivumeter_text.title.pressed = _uses(s.nowplaying_minivumeter_text.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+	-- Visualizer: VuMeter Visualizer large art
+	s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = large_visu_X,
+			y = large_visu_Y,
+			w = large_visu_W,
+			h = large_visu_H,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			vumeter_analog = {
+				position = LAYOUT_CENTER,
+				x = large_visu_X,
+				y = large_visu_Y,
+				w = large_visu_W,
+				h = large_visu_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+			}
+		},
+	})
+	s.nowplaying_vumeter_large_art.pressed = s.nowplaying_vumeter_large_art
+
+	s.nowplaying_vumeter_large_art.title.pressed = _uses(s.nowplaying_vumeter_large_art.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
