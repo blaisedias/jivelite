@@ -291,6 +291,10 @@ function npStyleHasVuMeter(npstyle)
 		return true
 	elseif npstyle == "nowplaying_vumeter_large_art" then
 		return true
+	elseif npstyle == "nowplaying_vumeter_only" then
+		return true
+	elseif npstyle == "nowplaying_vumeter_fullscreen" then
+		return true
 	end
 	return false
 end
@@ -354,6 +358,10 @@ function npStyleHasSpectrum(npstyle)
 	elseif npstyle == "nowplaying_minispectrum_text" then
 		return true
 	elseif npstyle == "nowplaying_spectrum_large_art" then
+		return true
+	elseif npstyle == "nowplaying_spectrum_only" then
+		return true
+	elseif npstyle == "nowplaying_spectrum_fullscreen" then
 		return true
 	end
 	return false
