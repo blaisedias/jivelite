@@ -277,7 +277,7 @@ SPECTRUM_ANALYZER
 	CS	Spektrální analyzátor
 	DA	Spektrumanalyse
 	DE	Oszillograph
-	EN	Spectrum Analyzer
+	EN	Spectrum Analyzer and Text
 	ES	Analizador de espectro
 	FI	Asteikon analysointi
 	FR	Analyseur de spectre
@@ -292,7 +292,7 @@ ANALOG_VU_METER
 	CS	Analogový měřič hlasitosti
 	DA	Analogt VU-meter
 	DE	Analoger VU-Meter
-	EN	Analog VU Meter
+	EN	Analog VU Meter and Text
 	ES	Medidor VU analógico
 	FI	Analoginen VU-mittari
 	FR	VUmètre analogique
@@ -339,3 +339,14 @@ SPECTRUM_LARGE_ART_AND_TEXT
 VU_METER_LARGE_ART_AND_TEXT
 	EN	Large Artwork, Text and VU Meter
 
+SPECTRUM_ANALYSER_NO_TEXT
+	EN	Spectrum Analyser
+
+VU_METER_NO_TEXT
+	EN	VU Meter
+
+SPECTRUM_ANALYSER_FULLSCREEN
+	EN	Spectrum Analyser Full Screen
+
+VU_METER_FULLSCREEN
+	EN	VU Meter Full Screen
