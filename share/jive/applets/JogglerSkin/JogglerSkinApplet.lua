@@ -158,16 +158,33 @@ function param(self)
 				text = self:string("SPECTRUM_ANALYZER"),
 			},
 			{
+				style = 'nowplaying_minispectrum_text',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("MINI_SPECTRUM_ANALYZER"),
+			},
+			{
 				style = 'nowplaying_spectrum_large_art',
+				localPlayerOnly = 1,
 				artworkSize = maxArtwork,
 				titleXofYonly = true,
 				text = self:string("SPECTRUM_LARGE_ART_AND_TEXT"),
 			},
 			{
-				style = 'nowplaying_minispectrum_text',
-				artworkSize = midArtwork,
+				style = 'nowplaying_spectrum_only',
 				localPlayerOnly = 1,
-				text = self:string("MINI_SPECTRUM_ANALYZER"),
+				artworkSize = midArtwork,
+				titleXofYonly = false,
+				suppressTitlebar = 1,
+				text = self:string("SPECTRUM_ANALYSER_NO_TEXT"),
+			},
+			{
+				style = 'nowplaying_spectrum_fullscreen',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				titleXofYonly = false,
+				suppressTitlebar = 1,
+				text = self:string("SPECTRUM_ANALYSER_FULLSCREEN"),
 			},
 			{
 				style = 'nowplaying_vuanalog_text',
@@ -183,9 +200,26 @@ function param(self)
 			},
 			{
 				style = 'nowplaying_vumeter_large_art',
+				localPlayerOnly = 1,
 				artworkSize = maxArtwork,
 				titleXofYonly = true,
 				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
+			},
+			{
+				style = 'nowplaying_vumeter_only',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				titleXofYonly = false,
+				suppressTitlebar = 1,
+				text = self:string("VU_METER_NO_TEXT"),
+			},
+			{
+				style = 'nowplaying_vumeter_fullscreen',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				titleXofYonly = false,
+				suppressTitlebar = 1,
+				text = self:string("VU_METER_FULLSCREEN"),
 			},
 		},
 	}
@@ -765,7 +799,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local TITLE_BUTTON_WIDTH = 76
 
 	local VU_H = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38)
-	local SP_H = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45)
+	local SP_H = screenHeight - TITLE_HEIGHT - 67 - 38 - 38
+	local VU_ONLY_H = screenHeight - 38 - 38
+	local SP_ONLY_H = screenHeight - 38 - 38
 	local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
 	local mini_visu_Y =  230
 	-- see _tracklayout
@@ -796,9 +832,11 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	visImage:registerVUMeterResolution(screenWidth, VU_H)
 	visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 	visImage:registerVUMeterResolution(large_visu_W, large_visu_H)
+	visImage:registerVUMeterResolution(screenWidth, VU_ONLY_H)
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
 	visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 	visImage:registerSpectrumResolution(large_visu_W, large_visu_H)
+	visImage:registerSpectrumResolution(screenWidth, SP_ONLY_H)
 	visImage:initialise()
 
 	local smallSpinny = {
@@ -3848,6 +3886,127 @@ function skin(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
+	-- Visualizer: Spectrum Visualizer only
+	s.nowplaying_spectrum_only = _uses(s.nowplaying, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = 0,
+			w = screenWidth,
+			h = SP_ONLY_H,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			spectrum = {
+				position = LAYOUT_CENTER,
+				x = 0,
+				y = 0,
+				w = screenWidth,
+				h = SP_ONLY_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				bg = { 0x00, 0x00, 0x00, 0x00 },
+
+				barColor = { 0x14, 0xbc, 0xbc, 0xff },
+				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+				isMono = 0,				-- 0 / 1
+
+				capHeight = { 4, 4 },			-- >= 0
+				capSpace = { 4, 4 },			-- >= 0
+				channelFlipped = { 0, 1 },		-- 0 / 1
+				barsInBin = { 2, 2 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
+				clipSubbands = { 1, 1 },		-- 0 / 1
+--				gradientColours = gradientColours,
+				useVisImage = true,
+				spType=mini_sp_type,
+--				spType=visImage.SPT_IMAGE,
+			}
+		},
+        nptitle = { hidden = 1 },
+        npartistgroup = { hidden = 1 },
+        npalbumgroup = { hidden = 1 },
+        npartistalbum = { hidden = 1 },
+        npartwork = { hidden = 1 },
+        npprogress = { hidden = 1 },
+        npprogressNB = { hidden = 1 },
+	})
+	s.nowplaying_spectrum_only.pressed = s.nowplaying_spectrum_only
+
+	s.nowplaying_spectrum_only.title.pressed = _uses(s.nowplaying_spectrum_only.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+
+	-- Visualizer: Spectrum Visualizer Full Screen
+	s.nowplaying_spectrum_fullscreen = _uses(s.nowplaying, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = 0,
+			w = screenWidth,
+			h = screenHeight,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			spectrum = {
+				position = LAYOUT_CENTER,
+				x = 0,
+				y = 0,
+				w = screenWidth,
+				h = screenHeight,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				bg = { 0x00, 0x00, 0x00, 0x00 },
+
+				barColor = { 0x14, 0xbc, 0xbc, 0xff },
+				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+				isMono = 0,				-- 0 / 1
+
+				capHeight = { 4, 4 },			-- >= 0
+				capSpace = { 4, 4 },			-- >= 0
+				channelFlipped = { 0, 1 },		-- 0 / 1
+				barsInBin = { 2, 2 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
+				clipSubbands = { 1, 1 },		-- 0 / 1
+--				gradientColours = gradientColours,
+				useVisImage = true,
+				spType=mini_sp_type,
+--				spType=visImage.SPT_IMAGE,
+			}
+		},
+        nptitle = { hidden = 1 },
+        npartistgroup = { hidden = 1 },
+        npalbumgroup = { hidden = 1 },
+        npartistalbum = { hidden = 1 },
+        npartwork = { hidden = 1 },
+        npprogress = { hidden = 1 },
+        npprogressNB = { hidden = 1 },
+		npcontrols  = { hidden = 1 },
+	})
+	s.nowplaying_spectrum_fullscreen.pressed = s.nowplaying_spectrum_fullscreen
+
+	s.nowplaying_spectrum_fullscreen.title.pressed = _uses(s.nowplaying_spectrum_fullscreen.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+
 	-- Visualizer: Analog VU Meter
 	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
@@ -3948,6 +4107,90 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			padding = { screenWidth, 0, 0, 0 }
 		},
 	})
+
+	-- Visualizer: VU meter only
+	s.nowplaying_vumeter_only = _uses(s.nowplaying, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = 0,
+			w = screenWidth,
+			h = VU_ONLY_H,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+
+			vumeter_analog = {
+				position = LAYOUT_CENTER,
+				x = 0,
+				y = 0,
+				w = screenWidth,
+				h = VU_ONLY_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+			}
+		},
+        nptitle = { hidden = 1 },
+        npartistgroup = { hidden = 1 },
+        npalbumgroup = { hidden = 1 },
+        npartistalbum = { hidden = 1 },
+        npartwork = { hidden = 1 },
+        npprogress = { hidden = 1 },
+        npprogressNB = { hidden = 1 },
+	})
+	s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
+
+	s.nowplaying_vumeter_only.title.pressed = _uses(s.nowplaying_vumeter_only.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+	-- Visualizer: Spectrum Visualizer only
+	s.nowplaying_vumeter_fullscreen = _uses(s.nowplaying, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = 0,
+			w = screenWidth,
+			h = screenHeight,
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+
+			vumeter_analog = {
+				position = LAYOUT_CENTER,
+				x = 0,
+				y = 0,
+				w = screenWidth,
+				h = screenHeight,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+			}
+		},
+        nptitle = { hidden = 1 },
+        npartistgroup = { hidden = 1 },
+        npalbumgroup = { hidden = 1 },
+        npartistalbum = { hidden = 1 },
+        npartwork = { hidden = 1 },
+        npprogress = { hidden = 1 },
+        npprogressNB = { hidden = 1 },
+		npcontrols  = { hidden = 1 },
+	})
+	s.nowplaying_vumeter_fullscreen.pressed = s.nowplaying_vumeter_fullscreen
+
+	s.nowplaying_vumeter_fullscreen.title.pressed = _uses(s.nowplaying_vumeter_fullscreen.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
 
 
 	s.brightness_group = {
