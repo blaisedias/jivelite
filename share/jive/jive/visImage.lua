@@ -21,6 +21,7 @@
 local math	= require("math")
 local table	= require("table")
 local lfs	= require("lfs")
+local os	= require("os")
 
 local ipairs, pairs, pcall	= ipairs, pairs, pcall
 local coroutine, package	= coroutine, package
@@ -47,17 +48,20 @@ local spectrumList = {}
 local npvumeters = {}
 local npspectrums = {}
 
--- set to true to create all resized images which can be 
--- then moved to assets/resized 
-CACHE_EAGER = true
--- cache all images at startup - depending on selected images
--- this can affect startup times and on platforms like piCorePlayer
--- jivelite terminate.
-local cacheAtStartup = true
+-- set to true to create all resized visualiser images at startup
+-- on resource constrained platforms like piCorePlayer jivelite terminate.
+local resizeAll = false
+-- resize all selected images at startup
+-- on resource constrained platforms like piCorePlayer jivelite terminate.
+local resizeAtStartUp = false
 -- commit cached images to disk
-local saveCachedImages = true
+local saveResizedImages = true
 local saveAsPng = true
 local PLATFORM = ""
+
+-- on desktop OSes userPath is persistent
+local workSpace = System.getUserDir()
+local resizedCachePath = workSpace .. "/cache/resized"
 
 function _parseImagePath(imgpath)
 	local parts = string.split("%.", imgpath)
@@ -67,6 +71,26 @@ function _parseImagePath(imgpath)
 		return parts
 	end
 	return nil
+end
+
+function boolOsEnv(envName, defaultValue)
+	local tmp = os.getenv(envName)
+	log:info("boolOsEnv:", envName, " defaultValue:", defaultValue, " got:", tmp)
+	if tmp ~= nil then
+		if defaultValue then
+			if tmp == "0" or tmp == "false" or tmp ~= "False" then
+				log:info("boolOsEnv: -> false")
+				return false
+			end
+		else
+			if tmp == "1" or tmp == "true" or tmp ~= "True" then
+				log:info("boolOsEnv: -> true")
+				return true
+			end
+		end
+	end
+	log:info("boolOsEnv: returning defaultValue: ", defaultValue)
+	return defaultValue
 end
 
 -------------------------------------------------------- 
@@ -84,12 +108,28 @@ function platformDetect()
 	log:info("mode ", pcp_version_file, " " , mode)
 	if mode == "file" then
 		PLATFORM = "piCorePlayer"
-		CACHE_EAGER = false
-		cacheAtStartup = false
-		saveCachedImages = false
-		saveAsPng = false
+		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", false)
+		-- save as png is the exception - it must be explicitly disabled
+		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
 	end
-	log:info("PLATFORM ", PLATFORM)
+	resizeAll = boolOsEnv("JL_RESIZE_ALL", false)
+	resizeAtStartUp = boolOsEnv("JL_RESIZE_AT_STARTUP", false)
+	-- to support saving resized visualiser images
+	-- in locations other then the home directory
+	-- defining a path to a workspace is supported
+	local tmp = os.getenv("JL_WORKSPACE") or nil
+	if tmp ~= nil and string.len(tmp) ~= 0 then
+		workSpace = tmp
+		resizedCachePath = workSpace .. "/cache/resized"
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
+	end
+	os.execute("mkdir -p " .. resizedCachePath)
+	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
+	log:info("resizeAll:", resizeAll, " resizeAtStartUp:" , resizeAtStartUp)
+	log:info("saveResizedImages:", saveResizedImages, " saveAsPng:" , saveAsPng)
 	return PLATFORM
 end
 
@@ -152,10 +192,10 @@ function loadImage(path)
 	return img
 end
 
-function saveImage(img, path)
+function saveImage(img, path, asPng)
 	imCachePut(path, img)
-	if saveCachedImages then
-		if saveAsPng then
+	if saveResizedImages then
+		if saveAsPng and asPng then
 			img:savePNG(path)
 		else
 			img:saveBMP(path)
@@ -168,9 +208,6 @@ end
 -------------------------------------------------------- 
 
 local diskImageCache = {}
-local userdirpath = System.getUserDir()
-local cachedir = userdirpath .. "/resized_cache"
-
 function getImageName(imgPath)
 	local fullpath = string.split("/", imgPath)
 	local name = fullpath[#fullpath]
@@ -202,10 +239,10 @@ function findPaths(rpath)
 	end
 end
 
-function cachedPath(name)
+function cachedPath(name, suffix)
 	-- we don't know/care whether it is a bmp, png or jpeg 
 	-- loading the file just works 
-	local file = cachedir .. "/" .. name .. ".bmp"
+	local file = resizedCachePath .. "/" .. name .. "." .. suffix
 	return file
 end
 
@@ -221,7 +258,7 @@ end
 
 
 function _readCacheDir(search_root)
-	log:debug("_readCacheDir", " ", search_root)
+	log:info("_readCacheDir", " ", search_root)
 
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
@@ -251,20 +288,23 @@ end
 function initialiseCache()
 	cacheClear()
 	local search_root
+	-- find and use artwork resized ahead of time offline 
 	for search_root in findPaths("../../assets/resized") do
 		_readCacheDir(search_root)
 	end
-
-	for search_root in findPaths("resized_cache") do
+	-- find and use artwork resized ahead of time offline 
+	for search_root in findPaths("assets/resized") do
 		_readCacheDir(search_root)
 	end
+
+	_readCacheDir(resizedCachePath)
 end
 
 function initialiseVUMeters()
 	initVuMeterList()
 	for k, v in pairs(npvumeters) do
 		-- set flags but do not cache
-		selectVuImage({},k,v, cacheAtStartup)
+		selectVuImage({},k,v, resizeAtStartUp)
 	end
 	local enabled = false
 	for i, v in ipairs(vuImages) do
@@ -279,7 +319,7 @@ function initialiseSpectrumMeters()
 	initSpectrumList()
 	for k, v in pairs(npspectrums) do
 		-- set flags but do not cache
-		selectSpectrum({}, k, v.enabled, cacheAtStartup)
+		selectSpectrum({}, k, v.enabled, resizeAtStartUp)
 	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
@@ -435,22 +475,22 @@ end
 -- if present in settings then use those settings
 function initColourSpectrums()
 	local csp ={
-		{name="White", enabled=false, spType=SPT_COLOUR,        barColor=0xd0d0d0ff, capColor=0xffffffff},
-		{name="White tsp", enabled=false, spType=SPT_COLOUR,    barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
-		{name="Yellow", enabled=false, spType=SPT_COLOUR,       barColor=0xd0d000ff, capColor=0xffff00ff},
-		{name="Yellow tsp", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
-		{name="Cyan", enabled=false, spType=SPT_COLOUR,         barColor=0x00d0d0ff, capColor=0x00ffffff},
-		{name="Cyan tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x00d0d0a0, capColor=0x00d0d0ff},
-		{name="Magenta", enabled=false, spType=SPT_COLOUR,      barColor=0xd000d0ff, capColor=0xff00ffff},
-		{name="Magenta tsp", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
-		{name="Black", enabled=false, spType=SPT_COLOUR,        barColor=0x101010ff, capColor=0x000000ff},
-		{name="Black tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x000000a0, capColor=0x000000ff},
-		{name="Green", enabled=false, spType=SPT_COLOUR,        barColor=0x00d000ff, capColor=0x00d000ff},
-		{name="Green tsp", enabled=false, spType=SPT_COLOUR,    barColor=0x00d000a0, capColor=0x00ff00ff},
-		{name="Blue", enabled=false, spType=SPT_COLOUR,         barColor=0x0000d0ff, capColor=0x0000ffff},
-		{name="Blue tsp", enabled=false, spType=SPT_COLOUR,     barColor=0x0000d0a0, capColor=0x0000ffff},
-		{name="Red", enabled=false, spType=SPT_COLOUR,          barColor=0xd00000ff, capColor=0xff0000ff},
-		{name="Red tsp", enabled=false, spType=SPT_COLOUR,      barColor=0xd00000a0, capColor=0xff0000ff},
+		{name="mc-White", enabled=false, spType=SPT_COLOUR,		barColor=0xd0d0d0ff, capColor=0xffffffff},
+		{name="mc-White translucent", enabled=false, spType=SPT_COLOUR,	barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
+		{name="mc-Yellow", enabled=false, spType=SPT_COLOUR,	   barColor=0xd0d000ff, capColor=0xffff00ff},
+		{name="mc-Yellow translucent", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
+		{name="mc-Cyan", enabled=false, spType=SPT_COLOUR,		 barColor=0x00d0d0ff, capColor=0x00ffffff},
+		{name="mc-Cyan translucent", enabled=false, spType=SPT_COLOUR,	 barColor=0x00d0d0a0, capColor=0x00d0d0ff},
+		{name="mc-Magenta", enabled=false, spType=SPT_COLOUR,	  barColor=0xd000d0ff, capColor=0xff00ffff},
+		{name="mc-Magenta translucent", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
+		{name="mc-Black", enabled=false, spType=SPT_COLOUR,		barColor=0x101010ff, capColor=0x000000ff},
+		{name="mc-Black translucent", enabled=false, spType=SPT_COLOUR,	barColor=0x000000a0, capColor=0x000000ff},
+		{name="mc-Green", enabled=false, spType=SPT_COLOUR,		barColor=0x00d000ff, capColor=0x00d000ff},
+		{name="mc-Green translucent", enabled=false, spType=SPT_COLOUR,	barColor=0x00d000a0, capColor=0x00ff00ff},
+		{name="mc-Blue", enabled=false, spType=SPT_COLOUR,		 barColor=0x0000d0ff, capColor=0x0000ffff},
+		{name="mc-Blue translucent", enabled=false, spType=SPT_COLOUR,	 barColor=0x0000d0a0, capColor=0x0000ffff},
+		{name="mc-Red", enabled=false, spType=SPT_COLOUR,		  barColor=0xd00000ff, capColor=0xff0000ff},
+		{name="mc-Red translucent", enabled=false, spType=SPT_COLOUR,	  barColor=0xd00000a0, capColor=0xff0000ff},
 	}
 	for x,c in pairs(csp) do
 		for k, v in pairs(npspectrums) do
@@ -467,6 +507,57 @@ function initColourSpectrums()
 	end
 end
 
+--FIXME make idempotent
+function _populateSpectrumBacklitList(search_root)
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+		if mode == "file" then
+			local parts = _parseImagePath(entry)
+			if parts ~= nil then
+				local imgName = 'bl-' .. parts[1]
+				local bgImgName = "bg-" .. imgName
+				if spectrumImagesMap[imgName] == nil then
+					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
+				end
+				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
+				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
+			end
+		end
+	end
+end
+
+function _scanSpectrumBacklitList(rpath)
+	local search_root
+	for search_root in findPaths(rpath) do
+		_populateSpectrumBacklitList(search_root)
+	end
+end
+
+--FIXME make idempotent
+function _populateSpectrumImageList(search_root)
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+		if mode == "file" then
+			local parts = _parseImagePath(entry)
+			if parts ~= nil then
+				local imgName = 'im-' .. parts[1]
+				if spectrumImagesMap[imgName] == nil then
+					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_GRADIENT})
+				end
+				log:debug(" SpectrumImage :", imgName, ", ", search_root .. "/" .. entry)
+				spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
+			end
+		end
+	end
+end
+
+function _scanSpectrumImageList(rpath)
+	local search_root
+	for search_root in findPaths(rpath) do
+		_populateSpectrumImageList(search_root)
+	end
+end
+
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {}
@@ -475,49 +566,19 @@ function initSpectrumList()
 	end
 
 	initColourSpectrums()
--- {hack for now hard code the mono-colour spectrum 
---	for k, v in pairs(npspectrums) do
---		if v.spType == SPT_COLOUR then
---			table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
---		end
---	end
 
--- } hack for now hard code the mono-colour spectrum 
-
-	local search_root
-	for search_root in findPaths("../../assets/visualisers/spectrum/backlit") do
-		for entry in lfs.dir(search_root) do
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "file" then
-				local parts = _parseImagePath(entry)
-				if parts ~= nil then
-					local imgName = parts[1]
-					local bgImgName = "bg-" .. imgName
-					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
-					end
-					log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
-					spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
-				end
-			end
-		end
+	local relativePath = "assets/visualisers/spectrum/backlit"
+	_scanSpectrumBacklitList("../../" .. relativePath)
+	_scanSpectrumBacklitList(relativePath)
+	if workSpace ~= System.getUserDir() then
+		_populateSpectrumBacklitList(workSpace .. "/" .. relativePath)
 	end
 
-	for search_root in findPaths("../../assets/visualisers/spectrum/gradient") do
-		for entry in lfs.dir(search_root) do
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "file" then
-				local parts = _parseImagePath(entry)
-				if parts ~= nil then
-					local imgName = parts[1]
-					if spectrumImagesMap[imgName] == nil then
-						table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_GRADIENT})
-					end
-					log:debug(" SpectrumGradient :", imgName, ", ", search_root .. "/" .. entry)
-					spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
-				end
-			end
-		end
+	relativePath = "assets/visualisers/spectrum/gradient"
+	_scanSpectrumImageList("../../" .. relativePath)
+	_scanSpectrumImageList(relativePath)
+	if workSpace ~= System.getUserDir() then
+		_populateSpectrumImageList(workSpace .. "/" .. relativePath)
 	end
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
@@ -533,21 +594,26 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bgDicKey = nil
 	local bg_dcpath = nil
 
+	local suffix = "png"
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
 	if spType == SPT_BACKLIT then
+   		-- FIXME: using pngs for backlit spectrum meters
+		-- results in black screens on rpi zero 2 - works fine on desktop
+		-- possibly because PNGs have an alpha channel?.
+	 	suffix = "bmp" 
 		local bgImgName = "bg-" .. imgName
 		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
-		bg_dcpath = cachedPath(bgDicKey)
+		bg_dcpath = cachedPath(bgDicKey, suffix)
 	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h)
 		local fgimg = Surface:newRGB(w, h)
 		img:blit(fgimg, 0, 0, 0)
-		dcpath = cachedPath(dicKey)
+		dcpath = cachedPath(dicKey, suffix)
 		-- diskImageCache[dicKey] = img
-		saveImage(fgimg, dcpath)
+		saveImage(fgimg, dcpath, suffix == "png")
 		img:release()
 		diskImageCache[dicKey] = dcpath
 		log:debug("cacheSpectrumImage cached ", dicKey)
@@ -648,13 +714,14 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	end
 
 	local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
-	-- if we invoke blitAlpha from the foreground image to the background image
-	-- the foreground image is affected by alpha see SDL_SetAlpha.
-	-- Isolate by blitting foreground to a temporary image and then blitAlpha
-	-- from that to the background image
+	-- FIXME:
+	-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
+	-- the foreground image is affected by the alpha value.
+	-- For now work around by isolating, blit foreground to a temporary image and then blitAlpha
+	-- from the temporary image to the background image
 	local tmp = Surface:newRGB(w,h)
 	tmp:filledRectangle(0,0,w,h,0)
-	img:blit(tmp, 0, 0)
+	fgimg:blit(tmp, 0, 0)
 	currentBgImage = Surface:newRGB(w,h)
 	tmp:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
 	tmp:release()
@@ -698,7 +765,7 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 	log:debug("selectSpectrum", " ", name, " ", selected)
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
-			if (allowCaching and selected) or CACHE_EAGER then
+			if (allowCaching and selected) or resizeAll then
 					if spectrumImagesMap[name] ~= nil then
 						-- create the cached image for skin resolutions 
 						for kr, vr in pairs(spectrumResolutions) do
@@ -722,7 +789,7 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-local bgAlpha = 40
+local bgAlpha = 80
 
 function setBackgroundAlpha(tbl, v)
 	log:debug("setBackgroundAlpha ", tbl, "; v=", v)
@@ -852,66 +919,92 @@ function _cacheVUImage(imgName, path, w, h)
 	local dcpath = diskImageCache[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(dicKey)
+		dcpath = cachedPath(dicKey, "png")
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath)
+		saveImage(img, dcpath, true)
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
 	end
 end
 
+function _populateVfdVuMeterList(search_root)
+	for entry in lfs.dir(search_root) do
+		if entry ~= "." and entry ~= ".." then
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "directory" then
+				path = search_root .. "/" .. entry
+				for f in lfs.dir(path) do
+					mode = lfs.attributes(path .. "/" .. f, "mode")
+					if mode == "file" then
+						local parts = _parseImagePath(f)
+						if parts ~= nil then
+							log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
+							diskImageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+						end
+					end
+				end
+				table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
+			end
+		end
+	end
+end
+
+function _initVfdVuMeterList(rpath)
+	local search_root
+	for search_root in findPaths(rpath) do
+		_populateVfdVuMeterList(search_root)
+	end
+end
+
+function _populateAnalogueVuMeterList(search_root)
+	for entry in lfs.dir(search_root) do
+		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+		if mode == "file" then
+			local parts = _parseImagePath(entry)
+			if parts ~= nil then
+				local imgName = parts[1]
+				local displayName = imgName
+				local ixSub = string.find(imgName, "25seq")
+				if ixSub ~= nil then
+					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
+						displayName = string.sub(imgName, ixSub + 6)
+					else
+						displayName = string.sub(imgName, ixSub + 5)
+					end
+				end
+				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
+				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
+				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
+			end
+		end
+	end
+end
+
+function _initAnalogueVuMeterList(rpath)
+	local search_root
+	for search_root in findPaths(rpath) do
+		_populateAnalogueVuMeterList(search_root)
+	end
+end
+
 function initVuMeterList()
 	vuImages = {}
 	vuImagesMap = {}
-	local search_root
-	for search_root in findPaths("../../assets/visualisers/vumeters/vfd") do
-		for entry in lfs.dir(search_root) do
-			if entry ~= "." and entry ~= ".." then
-				local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-				if mode == "directory" then
-					path = search_root .. "/" .. entry
-					for f in lfs.dir(path) do
-						mode = lfs.attributes(path .. "/" .. f, "mode")
-						if mode == "file" then
-							local parts = _parseImagePath(f)
-							if parts ~= nil then
-								log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-								diskImageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
-							end
-						end
-					end
-					table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
-				end
-			end
-		end
-	end
 
-	-- Do this the dumb way for now, i.e. repeat the enumeration
-	for search_root in findPaths("../../assets/visualisers/vumeters/analogue") do
-		for entry in lfs.dir(search_root) do
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "file" then
-				local parts = _parseImagePath(entry)
-				if parts ~= nil then
-					local imgName = parts[1]
-					local displayName = imgName
-					local ixSub = string.find(imgName, "25seq")
-					if ixSub ~= nil then
-						if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-							displayName = string.sub(imgName, ixSub + 6)
-						else
-							displayName = string.sub(imgName, ixSub + 5)
-						end
-					end
-					log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
-					table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
-					vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
-				end
-			end
-		end
+	local relativePath = "assets/visualisers/vumeters/vfd"
+	_initVfdVuMeterList("../../" .. relativePath)
+	_initVfdVuMeterList(relativePath)
+	if workSpace ~= System.getUserDir() then
+		_populateVfdVuMeterList(workSpace .. "/" .. relativePath)
 	end
-	table.sort(vuImages, function (left, right) return left.name < right.name end)
+	local relativePath = "assets/visualisers/vumeters/analogue"
+	_initAnalogueVuMeterList("../../" .. relativePath)
+	_initAnalogueVuMeterList(relativePath)
+	if workSpace ~= System.getUserDir() then
+		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
+	end
+	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
 function vuBump()
@@ -990,7 +1083,7 @@ function selectVuImage(tbl, name, selected, allowCaching)
 	log:debug("selectVuImage", " ", name, " ", selected)
 	for k, v in pairs(vuImages) do
 		if v.name == name then
-			if (allowCaching and selected) or CACHE_EAGER then
+			if (allowCaching and selected) or resizeAll then
 				if v.vutype == "frame" then
 						-- create the cached image for skin resolutions 
 						for kr, vr in pairs(vuMeterResolutions) do
