@@ -73,7 +73,8 @@ function _layout(self)
 
 	if self.useVisImage then
 		self.fgImg, self.bgImg, self.bgAlpha, barColour, capColour = visImage:getSpectrum(w, h, self.spType)
-		log:debug("barColour=", barColour, " ", type(barColour), " capColour=", capColour, " ", type(capColour))
+		self.turbine = visImage.getSpectrumTurbine()
+		log:debug("barColour=", barColour, " ", type(barColour), " capColour=", capColour, " ", type(capColour), " turbine=", self.turbine)
 		if type(barColour) == "number" then
 			self.barColor = barColour
 		end
@@ -241,17 +242,21 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
 				if self.fgImg ~= nil then
-					local yBottom = y
-					local yTop = y - bch[i] + 1
-					local xLeft = x + (k * barSize)
-					local xRight = xLeft + (barWidth - 1)
-					self.fgImg:blitClip(xLeft - xshift, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
-
-					if capHeight > 0 and cch[i] > 0 then
-						ytop = y - cch[i] - capHeight - capSpace
-						self.fgImg:blitClip(xLeft - xshift, hh - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
+					if self.turbine then
+						local yTop = y - (hh/2) - (bch[i]/2)
+						local xLeft = x + (k * barSize)
+						self.fgImg:blitClip(xLeft - xshift, (hh/2) - (bch[i]/2), barWidth, bch[i], surface, xLeft, yTop)
+					else
+						local yTop = y - bch[i] + 1
+						local xLeft = x + (k * barSize)
+						local xRight = xLeft + (barWidth - 1)
+						self.fgImg:blitClip(xLeft - xshift, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
+	
+						if capHeight > 0 and cch[i] > 0 then
+							ytop = y - cch[i] - capHeight - capSpace
+							self.fgImg:blitClip(xLeft - xshift, hh - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
+						end
 					end
-
 				elseif self.useGradient > 0 then
 					local yEndValue = y - bch[i] + 1
 					local xLeft = x + (k * barSize)
@@ -272,20 +277,30 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 						end
 					end
 				else
-					surface:filledRectangle(
-					x + (k * barSize),
-					y,
-					x + (barWidth - 1) + (k * barSize),
-					y - bch[i] + 1,
-					self.barColor
-					)
-					if capHeight > 0 and cch[i] > 0 then
+					if self.turbine then
 						surface:filledRectangle(
-							x + (k * barSize),
-							y - cch[i] - capHeight - capSpace,
-							x + (barWidth - 1) + (k * barSize),
-							y - cch[i] - capSpace,
-							self.capColor)
+						x + (k * barSize),
+						y - (hh/2) - (bch[i]/2),
+						x + (barWidth - 1) + (k * barSize),
+						y - (hh/2) + (bch[i]/2),
+						self.barColor
+						)
+					else
+						surface:filledRectangle(
+						x + (k * barSize),
+						y,
+						x + (barWidth - 1) + (k * barSize),
+						y - bch[i] + 1,
+						self.barColor
+						)
+						if capHeight > 0 and cch[i] > 0 then
+							surface:filledRectangle(
+								x + (k * barSize),
+								y - cch[i] - capHeight - capSpace,
+								x + (barWidth - 1) + (k * barSize),
+								y - cch[i] - capSpace,
+								self.capColor)
+						end
 					end
 				end
 			end
