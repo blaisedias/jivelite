@@ -144,10 +144,10 @@ function init(self)
 	end
 
 	visImage:npSettings(settings.vumeters, settings.spectrum)
-	if not settings.backgroundAlpha then
-		settings.backgroundAlpha = visImage:getBackgroundAlpha()
+	if not settings.backlitAlpha then
+		settings.backlitAlpha = visImage:getBacklitAlpha()
 	else
-		visImage:setBackgroundAlpha(settings.backgroundAlpha)
+		visImage:setBacklitAlpha(settings.backlitAlpha)
 	end
 
 	if not settings.spectrumBarsFormat then
@@ -161,6 +161,13 @@ function init(self)
 	else
 		visImage:setCapsOn(settings.capsOn)
 	end
+
+	if settings.spectrumTurbine == nil then
+		settings.spectrumTurbine = visImage:getSpectrumTurbine()
+	else
+		visImage:setSpectrumTurbine(settings.spectrumTurbine)
+	end
+
 
 	if settings.cacheEnabled == nil then
 		settings.cacheEnabled = visImage:getCacheEnabled()
@@ -496,6 +503,44 @@ function npSpectrumCapsSettingsShow(self)
 	window:addWidget(menu)
 	window:show()
 end
+
+function npSpectrumTurbineSettingsShow(self)
+	local window = Window("text_list", self:string('SPECTRUM_TURBINE') )
+	local group = RadioGroup()
+
+	local menu = SimpleMenu("menu", {
+		{
+			text = self:string("ON"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setSpectrumTurbine(true)
+					self:updateSettings()
+					self.window = nil
+				end,
+				visImage:getSpectrumTurbine()
+			)
+		},
+		{
+			text = self:string("OFF"),
+			style = 'item_choice',
+			check = RadioButton("radio", 
+				group, 
+				function(event)
+					visImage:setSpectrumTurbine(false)
+					self:updateSettings()
+					self.window = nil
+				end,
+				not visImage:getSpectrumTurbine()
+			)
+		},
+	})
+
+	window:addWidget(menu)
+	window:show()
+end
+
 
 
 function npSpectrumChannelFlipSettingsShow(self)
@@ -2357,9 +2402,10 @@ function updateSettings(self)
 --		settings.spectrum[v.name] = {enabled=npscreenSpectrum[i].enabled}
 --	end
 
-	-- Spectrum bars format
+	-- Spectrum misc
 	settings.spectrumBarsFormat = visImage:getBarsFormat()
 	settings.capsOn = visImage:getCapsOn()
+	settings.spectrumTurbine = visImage:getSpectrumTurbine()
 	settings.channelFlip = visImage:getChannelFlip()
 	settings.cacheEnabled = visImage:getCacheEnabled()
 
