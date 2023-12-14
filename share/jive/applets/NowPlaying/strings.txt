@@ -224,6 +224,9 @@ SPECTRUM_BARS_FORMAT
 SPECTRUM_CAPS
 	EN	Spectrum Caps
 
+SPECTRUM_TURBINE
+	EN	Spectrum Turbine
+
 SPECTRUM_CHANNEL_FLIP
 	EN	Spectrum Channel Flip
 

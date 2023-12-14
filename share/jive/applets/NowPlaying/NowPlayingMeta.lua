@@ -86,6 +86,16 @@ function registerApplet(self)
 	)
 	jiveMain:addItem(
 		self:menuItem(
+			'appletNowPlayingSpectrumTurbineSettings', 
+			'screenSettingsNowPlaying', 
+			'SPECTRUM_TURBINE', 
+			function(applet, ...) 
+				applet:npSpectrumTurbineSettingsShow(...) 
+			end
+		)
+	)
+	jiveMain:addItem(
+		self:menuItem(
 			'appletNowPlayingSpectrumChannelFlipSettings', 
 			'screenSettingsNowPlaying', 
 			'SPECTRUM_CHANNEL_FLIP', 
