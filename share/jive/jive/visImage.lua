@@ -143,12 +143,12 @@ local imCache = {}
 local imCacheEnabled = false
 
 function getCacheEnabled(tbl)
-	log:info("getCacheEnabled ", imCacheEnabled)
+	log:debug("getCacheEnabled ", imCacheEnabled)
 	return imCacheEnabled
 end
 
 function setCacheEnabled(tbl, v)
-	log:info("setCacheEnabled ", v)
+	log:debug("setCacheEnabled ", v)
 	if v == false and imCacheEnabled == true then
 		-- precipitate image cache clear
 		-- strictly speaking not necessary as it would be cleared
@@ -723,7 +723,7 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	tmp:filledRectangle(0,0,w,h,0)
 	fgimg:blit(tmp, 0, 0)
 	currentBgImage = Surface:newRGB(w,h)
-	tmp:blitAlpha(currentBgImage, 0, 0, getBackgroundAlpha())
+	tmp:blitAlpha(currentBgImage, 0, 0, getBacklitAlpha())
 	tmp:release()
 	currentBgImageKey = dicKey
 	imCachePut(dicKey, currentBgImage)
@@ -741,7 +741,7 @@ function getSpectrum(tbl, w, h, spType)
 		end
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
-	alpha = getBackgroundAlpha
+	alpha = getBacklitAlpha()
 	if currentFgImage ~= nil then
 		currentFgImage = nil
 		currentFgImageKey = nil
@@ -789,15 +789,15 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-local bgAlpha = 80
+local backlitAlpha = 80
 
-function setBackgroundAlpha(tbl, v)
-	log:debug("setBackgroundAlpha ", tbl, "; v=", v)
-	bgAlpha = v
+function setBacklitAlpha(tbl, v)
+	log:debug("setBacklitAlpha ", tbl, "; v=", v)
+	backlitAlpha = v
 end
 
-function getBackgroundAlpha()
-	return bgAlpha
+function getBacklitAlpha()
+	return backlitAlpha
 end
 
 -------------------------------------------------------- 
@@ -866,6 +866,21 @@ function getCapsValues(tbl, capsHeight, capsSpace)
 end
 
 -------------------------------------------------------- 
+--- Spectrum turbine
+-------------------------------------------------------- 
+local spectrumTurbine  = true
+
+function getSpectrumTurbine(tbl)
+	log:debug("getSpectrumTurbine", " ", spectrumTurbine)
+	return spectrumTurbine
+end
+
+function setSpectrumTurbine(tbl, v)
+	log:debug("setSpectrumTurbine", " ", v)
+	spectrumTurbine = v
+end
+
+--------------------------------------------------------- 
 --- Spectrum channel flip
 -------------------------------------------------------- 
 local channelFlips  = {
