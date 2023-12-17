@@ -1071,6 +1071,10 @@ end
 
 
 function _titleText(self, token)
+	if self:getSelectedStyleParam('suppressTitleText') then
+		self.mainTitle = ""
+		return self.mainTitle
+	end
 	local y = self.player and self.player:getPlaylistSize()
 	if token == 'play' and y > 1 then
 		local x = self.player:getPlaylistCurrentIndex()
@@ -1324,7 +1328,24 @@ function _updateTrack(self, trackinfo, pos, length)
 			self.scrollSwitchTimer:stop()
 		end
 		
-		self.trackTitle:setValue(track)
+		if self:getSelectedStyleParam('trackartistalbum') then
+			self.trackartistalbum = track
+			if self.trackartistalbum ~= '' then
+				self.trackartistalbum = self.trackartistalbum ..  ' • ' ..  artist
+			else
+				self.trackartistalbum = artist
+			end
+			if self.trackartistalbum ~= '' then
+				self.trackartistalbum = self.trackartistalbum ..  ' • ' ..  album
+			else
+				self.trackartistalbum = album
+			end
+--			self.trackartistalbum = track ..  ' • ' ..  artist ..  ' • ' .. album
+			self.trackTitle:setValue(self.trackartistalbum)
+		else
+			self.trackTitle:setValue(track)
+		end
+
 		self.albumTitle:setValue(album)
 		self.artistTitle:setValue(artist)
 		self.artistalbumTitle:setValue(artistalbum)
