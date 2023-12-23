@@ -868,7 +868,7 @@ end
 -------------------------------------------------------- 
 --- Spectrum turbine
 -------------------------------------------------------- 
-local spectrumTurbine  = true
+local spectrumTurbine  = false
 
 function getSpectrumTurbine(tbl)
 	log:debug("getSpectrumTurbine", " ", spectrumTurbine)
