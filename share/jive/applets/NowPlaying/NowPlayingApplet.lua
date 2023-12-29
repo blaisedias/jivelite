@@ -297,13 +297,19 @@ end
 function npStyleHasVuMeter(npstyle)
 	if npstyle == "nowplaying_vuanalog_text" then
 		return true
+	elseif npstyle == "nowplaying_vumeter_text" then
+		return true
 	elseif npstyle == "nowplaying_minivumeter_text" then
+		return true
+	elseif npstyle == "nowplaying_vumeter_text_art" then
 		return true
 	elseif npstyle == "nowplaying_vumeter_large_art" then
 		return true
 	elseif npstyle == "nowplaying_vumeter_only" then
 		return true
 	elseif npstyle == "nowplaying_vumeter_fullscreen" then
+		return true
+	elseif npstyle == "nowplaying_large_vumeter" then
 		return true
 	end
 	return false
@@ -367,11 +373,15 @@ function npStyleHasSpectrum(npstyle)
 		return true
 	elseif npstyle == "nowplaying_minispectrum_text" then
 		return true
+	elseif npstyle == "nowplaying_spectrum_text_art" then
+		return true
 	elseif npstyle == "nowplaying_spectrum_large_art" then
 		return true
 	elseif npstyle == "nowplaying_spectrum_only" then
 		return true
 	elseif npstyle == "nowplaying_spectrum_fullscreen" then
+		return true
+	elseif npstyle == "nowplaying_large_spectrum" then
 		return true
 	end
 	return false
@@ -852,17 +862,26 @@ function _setTitleStatus(self, text, duration)
 		-- remove albumTitle and artistTitle until temp message is done
 		if #msgs == 1 then
 			log:debug('one line message')
-			self.titleGroup:setWidgetValue("text", msgs[1], duration)
+		 if self:getSelectedStyleParam('suppressTitleText') then
+				log:info("suppressTitleText")
+			else
+				self.titleGroup:setWidgetValue("text", msgs[1], duration)
+			end
 			self.trackTitle:setValue(self.trackTitle:getValue(), duration)
 			self.albumTitle:setValue('', duration)
 			self.artistTitle:setValue('', duration)
-
+			self.trackartistalbum = ''
 		elseif #msgs == 2 then
 			log:debug('two line message')
-			self.titleGroup:setWidgetValue("text", msgs[1], duration)
+			if self:getSelectedStyleParam('suppressTitleText') then
+				log:info("suppressTitleText")
+			else
+				self.titleGroup:setWidgetValue("text", msgs[1], duration)
+			end
 			self.trackTitle:setValue(msgs[2], duration)
 			self.artistTitle:setValue('', duration) 
 			self.albumTitle:setValue('', duration) 
+			self.trackartistalbum = ''
 
 		end
 	end
