@@ -158,10 +158,10 @@ function param(self)
 				text = self:string("SPECTRUM_ANALYZER"),
 			},
 			{
-				style = 'nowplaying_minispectrum_text',
+				style = 'nowplaying_spectrum_text_art',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
-				text = self:string("MINI_SPECTRUM_ANALYZER"),
+				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
 			},
 			{
 				style = 'nowplaying_spectrum_large_art',
@@ -171,11 +171,11 @@ function param(self)
 				text = self:string("SPECTRUM_LARGE_ART_AND_TEXT"),
 			},
 			{
-				style = 'nowplaying_spectrum_fullscreen',
+				style = 'nowplaying_large_spectrum',
 				localPlayerOnly = 1,
 				artworkSize = midArtwork,
 				trackartistalbum = true,
-				text = self:string("SPECTRUM_ANALYSER_FULLSCREEN"),
+				text = self:string("LARGE_SPECTRUM_ANALYZER"),
 				suppressXofY = true,
 				suppressTitleText = 1,
 			},
@@ -186,20 +186,20 @@ function param(self)
 				suppressXofY = true,
 --				suppressTitlebar = 1,
 				trackartistalbum = true,
-				text = self:string("SPECTRUM_ANALYSER_ONLY"),
+				text = self:string("SPECTRUM_ANALYZER_ONLY"),
 				suppressTitlebar = 1,
 			},
 			{
 				style = 'nowplaying_vuanalog_text',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
-				text = self:string("ANALOG_VU_METER"),
+				text = self:string("VU_METER_TEXT"),
 			},
 			{
-				style = 'nowplaying_minivumeter_text',
+				style = 'nowplaying_vumeter_text_art',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
-				text = self:string("MINI_ANALOG_VU_METER"),
+				text = self:string("VU_METER_TEXT_ART"),
 			},
 			{
 				style = 'nowplaying_vumeter_large_art',
@@ -209,11 +209,11 @@ function param(self)
 				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
 			},
 			{
-				style = 'nowplaying_vumeter_fullscreen',
+				style = 'nowplaying_large_vumeter',
 				localPlayerOnly = 1,
 				artworkSize = midArtwork,
 				trackartistalbum = true,
-				text = self:string("VU_METER_FULLSCREEN"),
+				text = self:string("LARGE_VU_METER"),
 				suppressXofY = true,
 				suppressTitleText = 1,
 			},
@@ -3788,7 +3788,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
 	-- Visualizer: mini Spectrum Visualizer
-	s.nowplaying_minispectrum_text = _uses(s.nowplaying_visualizer_mini, {
+	s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -3830,9 +3830,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			}
 		},
 	})
-	s.nowplaying_minispectrum_text.pressed = s.nowplaying_minispectrum_text
+	s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 
-	s.nowplaying_minispectrum_text.title.pressed = _uses(s.nowplaying_minispectrum_text.title, {
+	s.nowplaying_spectrum_text_art.title.pressed = _uses(s.nowplaying_spectrum_text_art.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
@@ -3892,7 +3892,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 	-- Visualizer: Spectrum Visualizer Full Screen
-	s.nowplaying_spectrum_fullscreen = _uses(s.nowplaying, {
+	s.nowplaying_large_spectrum = _uses(s.nowplaying, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -3955,9 +3955,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
         npprogressNB = { hidden = 1 },
 		npcontrols  = { hidden = 0 },
 	})
-	s.nowplaying_spectrum_fullscreen.pressed = s.nowplaying_spectrum_fullscreen
+	s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
 
-	s.nowplaying_spectrum_fullscreen.title.pressed = _uses(s.nowplaying_spectrum_fullscreen.title, {
+	s.nowplaying_large_spectrum.title.pressed = _uses(s.nowplaying_large_spectrum.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
@@ -3965,7 +3965,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 	-- Visualizer: Spectrum Visualizer only
-	s.nowplaying_spectrum_only = _uses(s.nowplaying_spectrum_fullscreen, {
+	s.nowplaying_spectrum_only = _uses(s.nowplaying_large_spectrum, {
         nptitle = { hidden = 1 },
 		npcontrols  = { hidden = 1 },
 	})
@@ -4016,7 +4016,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 	-- Visualizer: mini Spectrum Visualizer
-	s.nowplaying_minivumeter_text = _uses(s.nowplaying_visualizer_mini, {
+	s.nowplaying_vumeter_text_art = _uses(s.nowplaying_visualizer_mini, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -4039,9 +4039,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			}
 		},
 	})
-	s.nowplaying_minivumeter_text.pressed = s.nowplaying_minivumeter_text
+	s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 
-	s.nowplaying_minivumeter_text.title.pressed = _uses(s.nowplaying_minivumeter_text.title, {
+	s.nowplaying_vumeter_text_art.title.pressed = _uses(s.nowplaying_vumeter_text_art.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
@@ -4082,7 +4082,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 	-- Visualizer: VU meter full screen
-	s.nowplaying_vumeter_fullscreen = _uses(s.nowplaying, {
+	s.nowplaying_large_vumeter = _uses(s.nowplaying, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -4126,9 +4126,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
         npprogressNB = { hidden = 1 },
 		npcontrols  = { hidden = 0 },
 	})
-	s.nowplaying_vumeter_fullscreen.pressed = s.nowplaying_vumeter_fullscreen
+	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
 
-	s.nowplaying_vumeter_fullscreen.title.pressed = _uses(s.nowplaying_vumeter_fullscreen.title, {
+	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
@@ -4136,7 +4136,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 
 
-	s.nowplaying_vumeter_only = _uses(s.nowplaying_vumeter_fullscreen, {
+	s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
 		nptitle = { hidden = 1 }, 
         npartistgroup = { hidden = 1 },
         npalbumgroup = { hidden = 1 },

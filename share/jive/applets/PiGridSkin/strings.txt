@@ -181,50 +181,38 @@ ANALOG_VU_METER
 	RU	Аналоговый волюметр
 	SV	Analog VU-mätare
 
-MINI_SPECTRUM_ANALYZER
-	CS	Obal alba, text a Spektrální analyzátor
-	DA	Albumcover, tekst og Spektrumanalyse
-	DE	Plattenhülle, Text und Oszillographszill
-	EN	Artwork, Text and Spectrum Analyzer
-	ES	Carátula de álbum, texto y Analizador de espectro
-	FI	Kansikuva, tekstii ja Asteikon analysointi
-	FR	Pochette, texte et Analyseur de spectre
-	IT	Copertine, testo e Analizzatore di spettro
-	NL	Hoesafbeelding, tekst en Spectrumanalyser
-	NO	Albumomslag, tekst og Spektralanalyse
-	PL	Pliki graficzne, tekst i Analizator widma
-	RU	Обложка и текст Анализатор спектра
-	SV	Albumomslag, text och Spektrumanalys
+SPECTRUM_ANALYZER_TEXT
+	EN	Spectrum Analyzer and Text
 
-MINI_ANALOG_VU_METER
-	CS	Obal alba, text a nalogový měřič hlasitosti
-	DA	Albumcover, tekst og Analogt VU-meter
-	DE	Plattenhülle, Text und Analoger VU-Meter
-	EN	Artwork, Text and Analog VU Meter
-	ES	Carátula de álbum, texto y Medidor VU analógico
-	FI	Kansikuva, tekstii ja Analoginen VU-mittari
-	FR	Pochette, texte et VUmètre analogique
-	IT	Copertine, testo e Indicatore VU analogico
-	NL	Hoesafbeelding, tekst en Analoge VU-meter
-	NO	Albumomslag, tekst og Analog VU-måler
-	PL	Pliki graficzne, tekst i Analogowy wskaźnik wysterowania
-	RU	Обложка и текст Анализатор спектра
-	SV	Albumomslag, text och Analog VU-mätare
+VU_METER_TEXT
+	EN	VU Meter and Text
+
+SPECTRUM_ANALYZER_TEXT_ART
+	EN	Spectrum Analyzer, Artwork, and Text
+
+VU_METER_TEXT_ART
+	EN	VU Meter, Artwork and Text
 
 SPECTRUM_LARGE_ART_AND_TEXT
-	EN	Large Artwork, Text and Spectrum Analyzer
+	EN	Spectrum Analyzer, Large Artwork and Text
 
 VU_METER_LARGE_ART_AND_TEXT
-	EN	Large Artwork, Text and VU Meter
+	EN	VU Meter, Large Artwork and Text
 
-SPECTRUM_ANALYSER_ONLY
-	EN	Spectrum Analyser Only
+SPECTRUM_ANALYZER_ONLY
+	EN	Spectrum Analyzer Only
 
 VU_METER_ONLY
 	EN	VU Meter Only
 
-SPECTRUM_ANALYSER_FULLSCREEN
-	EN	Spectrum Analyser Full Screen
+SPECTRUM_ANALYZER_FULLSCREEN
+	EN	Spectrum Analyzer Full Screen
 
 VU_METER_FULLSCREEN
 	EN	VU Meter Full Screen
+
+LARGE_SPECTRUM_ANALYZER
+	EN	Large Spectrum Analyzer
+
+LARGE_VU_METER
+	EN	Large VU Meter
