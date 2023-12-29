@@ -95,16 +95,32 @@ function param(self)
 				text = self:string("ART_AND_TEXT"),
 			},
 			{
+				style = 'nowplaying_spectrum_text_art',
+				artworkSize = coverSize .. "x" .. coverSize,
+				localPlayerOnly = 1,
+				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+			},
+			{
+				style = 'nowplaying_vumeter_text_art',
+				artworkSize = coverSize .. "x" .. coverSize,
+				localPlayerOnly = 1,
+				text = self:string("VU_METER_TEXT_ART"),
+			},
+			{
 				style = 'nowplaying_spectrum_text',
 				artworkSize = coverSize .. "x" .. coverSize,
 				localPlayerOnly = 1,
-				text = self:string("SPECTRUM_ANALYZER"),
+				text = self:string("SPECTRUM_ANALYZER_TEXT"),
+				trackartistalbum = true,
+				suppressTitleText = 1,
 			},
 			{
-				style = 'nowplaying_vuanalog_text',
+				style = 'nowplaying_vumeter_text',
 				artworkSize = coverSize .. "x" .. coverSize,
 				localPlayerOnly = 1,
-				text = self:string("ANALOG_VU_METER"),
+				text = self:string("VU_METER_TEXT"),
+				trackartistalbum = true,
+				suppressTitleText = 1,
 			},
 		},
 		disableTimeInput = true,
@@ -3073,6 +3089,7 @@ function skin(self, s)
 	s.nowplaying.npalbumgroup.pressed = _uses(s.nowplaying.npalbumgroup)
 	s.nowplaying.npartistgroup.pressed = _uses(s.nowplaying.npartistgroup)
 	s.nowplaying.npartwork.pressed = s.nowplaying.npartwork
+	s.nowplaying.npvisu.pressed = s.nowplaying.npvisu
 
 	s.nowplaying.npcontrols.pressed = {
 --		hidden = 1,
@@ -3101,8 +3118,7 @@ function skin(self, s)
 
 	-- Visualizer: Spectrum Visualizer
 	visImage:registerSpectrumResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
-	visImage:initialiseSpectrumMeters()
-	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
+	s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -3140,11 +3156,76 @@ function skin(self, s)
 			}
 		},
 	})
+	s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
+
+	-- Visualizer: Spectrum Visualizer
+	visImage:registerSpectrumResolution(screenWidth, screenHeight - (coverSize/6) - (coverSize/6))
+	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = (coverSize/6),
+--			align = "center",
+			w = screenWidth,
+			h = screenHeight - (coverSize/6) - (coverSize/6),
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			spectrum = {
+				position = LAYOUT_NONE,
+				x = 0,
+				y = TITLE_HEIGHT,
+				w = screenWidth,
+				h = screenHeight - (coverSize/6) - (coverSize/6),
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				bg = { 0x00, 0x00, 0x00, 0x00 },
+
+				barColor = { 0x14, 0xbc, 0xbc, 0xff },
+				capColor = { 0xb4, 0x56, 0xa1, 0xff },
+
+				isMono = 0,				-- 0 / 1
+
+				capHeight = { 4, 4 },			-- >= 0
+				capSpace = { 4, 4 },			-- >= 0
+				channelFlipped = { 0, 1 },		-- 0 / 1
+				barsInBin = { 2, 2 },			-- > 1
+				barWidth = { 1, 1 },			-- > 1
+				barSpace = { 3, 3 },			-- >= 0
+				binSpace = { 6, 6 },			-- >= 0
+				clipSubbands = { 1, 1 },		-- 0 / 1
+				useVisImage = true,
+			}
+		},
+		nptitle = { 
+			zOrder = 2,
+			position = LAYOUT_NONE,
+			x = 80,
+			y = 0,
+			h = (coverSize/6),
+			border = { 0, 0 ,0, 0 },
+			padding = { 20, 14, 5, 5 },
+			nptrack = {
+				align = "center",
+				w = screenWidth - 196,
+			},
+		},
+		npartwork = { hidden = 1},
+--		nptitle = { hidden = 1},
+		npartistgroup = { hidden = 1},
+		npalbumgroup = { hidden = 1},
+		npartistalbum = { hidden = 1},
+		npprogress = { hidden = 1},
+		npprogressNB = { hidden = 1},
+	})
+	s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text    
+	visImage:initialiseSpectrumMeters()
 
 	-- Visualizer: VU Meter
 	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
-	visImage:initialiseVUMeters()
-	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
+	s.nowplaying_vumeter_text_art = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -3165,6 +3246,54 @@ function skin(self, s)
 			}
 		},
 	})
+	s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
+
+	visImage:registerVUMeterResolution(screenWidth,  screenHeight - (coverSize/6) - (coverSize/6))
+	s.nowplaying_vumeter_text = _uses(s.nowplaying_visualizer_common, {
+		npvisu = {
+			hidden = 0,
+			position = LAYOUT_NONE,
+			x = 0,
+			y = (coverSize/6),
+--			align = "center",
+			w = screenWidth,
+			h = screenHeight - (coverSize/6) - (coverSize/6),
+			border = { 0, 0, 0, 0 },
+			padding = { 0, 0, 0, 0 },
+
+			vumeter_analog = {
+				position = LAYOUT_NONE,
+				x = _tracklayout.x,
+				y = (coverSize/6),
+				w = screenWidth,
+				h = screenHeight - (coverSize/6) - (coverSize/6),
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+			}
+		},
+		nptitle = { 
+			zOrder = 2,
+			position = LAYOUT_NONE,
+			x = 80,
+			y = 0,
+			h = (coverSize/6),
+			border = { 0, 0 ,0, 0 },
+			padding = { 20, 14, 5, 5 },
+			nptrack = {
+				align = "center",
+				w = screenWidth - 196,
+			},
+		},
+		npartwork = { hidden = 1},
+--		nptitle = { hidden = 1},
+		npartistgroup = { hidden = 1},
+		npalbumgroup = { hidden = 1},
+		npartistalbum = { hidden = 1},
+		npprogress = { hidden = 1},
+		npprogressNB = { hidden = 1},
+	})
+	s.nowplaying_vumeter_text.pressed = s.nowplaying_vumeter_text
+	visImage:initialiseVUMeters()
 
 	s.brightness_group = {
 		order = {  'down', 'div1', 'slider', 'div2', 'up' },
