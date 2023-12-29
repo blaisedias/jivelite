@@ -1,4 +1,5 @@
 #!/bin/sh
+# modified by daab
 
 export LOG=/var/log/jivelite.log
 
@@ -33,8 +34,19 @@ fi
 
 export HOME=/home/tc
 
-if [ -f /home/tc/jivelite.user.cfg ]; then
-    source /home/tc/jivelite.user.cfg >> $LOG
+if [ -f /home/tc/jivelite.sh.cfg ]; then
+    echo "using /home/tc/jivelite.sh.cfg" >> $LOG
+    cat "/home/tc/jivelite.sh.cfg" >> $LOG
+    source /home/tc/jivelite.sh.cfg >> $LOG
+fi
+
+tce_path=$(find /mnt -name tce -maxdepth 2)
+if [ "$tce_path" != "" ]; then
+    if [ -f "$tce_path/jivelite.sh.cfg" ]; then
+        echo "using $tce_path/jivelite.sh.cfg" >> $LOG
+        cat "$tce_path/jivelite.sh.cfg" >> $LOG
+        source "$tce_path/jivelite.sh.cfg" >> $LOG
+    fi
 fi
 
 if [ "${AUTO_TOUCHSCREEN_SETUP}" == "1" ]; then
@@ -54,7 +66,7 @@ fi
 if [ "${AUTO_WORKSPACE_SETUP}" == "1" ]; then
     echo "auto workspace setup:" >> $LOG
     if [ -z $JL_WORKSPACE ]; then
-        tce_path=$(find /mnt -name tce -maxdepth 2)
+#        tce_path=$(find /mnt -name tce -maxdepth 2)
         if [ "$tce_path" != "" ]; then
                 export JL_WORKSPACE="$tce_path/jivelite-workspace"
                 echo "workspace: $JL_WORKSPACE" >> $LOG
