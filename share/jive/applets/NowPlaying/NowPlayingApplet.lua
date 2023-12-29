@@ -2022,29 +2022,31 @@ function _createUI(self)
 			end
 			)
 
-	self.volSlider = Slider('npvolumeB', 0, 100, 0,
-			function(slider, value, done)
-				if self.fixedVolumeSet then
-					log:info('FIXED VOLUME. DO NOTHING')
-				else
-					--rate limiting since these are serial networks calls
-					adjustVolume(self, value, true)
-					self.volumeSliderDragInProgress = true
-				end
-			end,
-			function(slider, value, done)
-				if self.fixedVolumeSet then
-					log:info('FIXED VOLUME. DO NOTHING')
-				else
-					--called after a drag completes to insure final value not missed by rate limiting
-					self.volumeSliderDragInProgress = false
-
-					adjustVolume(self, value, false)
-				end
-			end)
-	self.volSlider.jumpOnDown = true
-	self.volSlider.pillDragOnly = true
-	self.volSlider.dragThreshold = 5
+	if self.player:getDigitalVolumeControl() ~= 0 then
+		self.volSlider = Slider('npvolumeB', 0, 100, 0,
+				function(slider, value, done)
+					if self.fixedVolumeSet then
+						log:info('FIXED VOLUME. DO NOTHING')
+					else
+						--rate limiting since these are serial networks calls
+						adjustVolume(self, value, true)
+						self.volumeSliderDragInProgress = true
+					end
+				end,
+				function(slider, value, done)
+					if self.fixedVolumeSet then
+						log:info('FIXED VOLUME. DO NOTHING')
+					else
+						--called after a drag completes to insure final value not missed by rate limiting
+						self.volumeSliderDragInProgress = false
+	
+						adjustVolume(self, value, false)
+					end
+				end)
+		self.volSlider.jumpOnDown = true
+		self.volSlider.pillDragOnly = true
+		self.volSlider.dragThreshold = 5
+	end
 	window:addActionListener('add', self, function()
 		Framework:pushAction('go_current_track_info')
 		return EVENT_CONSUME
@@ -2058,24 +2060,26 @@ function _createUI(self)
 		end)
 	end
 
-	window:addActionListener("page_down", self,
+	if self.player:getDigitalVolumeControl() ~= 0 then
+		window:addActionListener("page_down", self,
 				function()
 					local e = Event:new(EVENT_SCROLL, 1)
 					Framework:dispatchEvent(self.volSlider, e)
 					return EVENT_CONSUME
 				end)
-	window:addActionListener("page_up", self,
+		window:addActionListener("page_up", self,
 				function()
 					local e = Event:new(EVENT_SCROLL, -1)
 					Framework:dispatchEvent(self.volSlider, e)
 					return EVENT_CONSUME
 				end)
-	self.volSlider:addTimer(1000,
+		self.volSlider:addTimer(1000,
 				function()
 					if not self.volumeSliderDragInProgress then
 						self:_updateVolume()
 					end
 				end)
+	end
 
 	self.rewButton = Button(
 			Icon('rew'),
@@ -2092,56 +2096,72 @@ function _createUI(self)
 			end
 	)
 	
-	self.controlsGroup = Group('npcontrols', {
-			div1 = Icon('div1'),
-			div2 = Icon('div2'),
-			div3 = Icon('div3'),
-			div4 = Icon('div4'),
-			div5 = Icon('div5'),
-			div6 = Icon('div6'),
-			div7 = Icon('div7'),
-
-		  	rew  = self.rewButton,
-		  	play = playIcon,
-			fwd  = self.fwdButton,
-
-			repeatMode  = self.repeatButton,
-			shuffleMode = self.shuffleButton,
-
-		  	volDown  = Button(
-				Icon('volDown'),
-				function()
-					-- Bug 15826: Allow volume events to be sent even if volume is fixed
-					--  at 100% to allow IR Blaster (a server side extra) to work properly.
-					-- Catch volume down button in NP screen on Fab4
-					if self.fixedVolumeSet and System:hasIRBlasterCapability() then
-						-- Send command directly to server w/o updating local volume
-						Player.volume(self.player, 99, true)
+	if self.player:getDigitalVolumeControl() == 0 then
+		self.controlsGroup = Group('npcontrols', {
+				div1 = Icon('div1'),
+				div2 = Icon('div2'),
+				div3 = Icon('div3'),
+				div4 = Icon('div4'),
+	
+			  	rew  = self.rewButton,
+			  	play = playIcon,
+				fwd  = self.fwdButton,
+	
+				repeatMode  = self.repeatButton,
+				shuffleMode = self.shuffleButton,
+		})
+	else
+		self.controlsGroup = Group('npcontrols', {
+				div1 = Icon('div1'),
+				div2 = Icon('div2'),
+				div3 = Icon('div3'),
+				div4 = Icon('div4'),
+				div5 = Icon('div5'),
+				div6 = Icon('div6'),
+				div7 = Icon('div7'),
+	
+			  	rew  = self.rewButton,
+			  	play = playIcon,
+				fwd  = self.fwdButton,
+	
+				repeatMode  = self.repeatButton,
+				shuffleMode = self.shuffleButton,
+	
+			  	volDown  = Button(
+					Icon('volDown'),
+					function()
+						-- Bug 15826: Allow volume events to be sent even if volume is fixed
+						--  at 100% to allow IR Blaster (a server side extra) to work properly.
+						-- Catch volume down button in NP screen on Fab4
+						if self.fixedVolumeSet and System:hasIRBlasterCapability() then
+							-- Send command directly to server w/o updating local volume
+							Player.volume(self.player, 99, true)
+						end
+	
+						local e = Event:new(EVENT_SCROLL, -3)
+						Framework:dispatchEvent(self.volSlider, e)
+						return EVENT_CONSUME
 					end
-
-					local e = Event:new(EVENT_SCROLL, -3)
-					Framework:dispatchEvent(self.volSlider, e)
-					return EVENT_CONSUME
-				end
-			),
- 		  	volUp  = Button(
-				Icon('volUp'),
-				function() 
-					-- Bug 15826: Allow volume events to be sent even if volume is fixed
-					--  at 100% to allow IR Blaster (a server side extra) to work properly.
-					-- Catch volume up button in NP screen on Fab4
-					if self.fixedVolumeSet and System:hasIRBlasterCapability() then
-						-- Send command directly to server w/o updating local volume
-						Player.volume(self.player, 101, true);
+				),
+	 		  	volUp  = Button(
+					Icon('volUp'),
+					function() 
+						-- Bug 15826: Allow volume events to be sent even if volume is fixed
+						--  at 100% to allow IR Blaster (a server side extra) to work properly.
+						-- Catch volume up button in NP screen on Fab4
+						if self.fixedVolumeSet and System:hasIRBlasterCapability() then
+							-- Send command directly to server w/o updating local volume
+							Player.volume(self.player, 101, true);
+						end
+	
+						local e = Event:new(EVENT_SCROLL, 3)
+						Framework:dispatchEvent(self.volSlider, e)
+						return EVENT_CONSUME
 					end
-
-					local e = Event:new(EVENT_SCROLL, 3)
-					Framework:dispatchEvent(self.volSlider, e)
-					return EVENT_CONSUME
-				end
-			),
- 			volSlider = self.volSlider,
-	})
+				),
+	 			volSlider = self.volSlider,
+		})
+	end
 
 	self.preartwork = Icon("artwork") -- not disabled, used for preloading
 
