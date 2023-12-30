@@ -1974,7 +1974,7 @@ function _createUI(self)
 	if npStyleHasSpectrum(self.windowStyle) then
 		self.visuGroup = Button(
 			Group('npvisu', {
-				visu = SpectrumMeter("spectrum"),
+				visu = SpectrumMeter("spectrum", self.windowStyle),
 			}),
 			function()
 				Framework:pushAction("go_now_playing")
