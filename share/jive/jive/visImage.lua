@@ -896,10 +896,10 @@ end
 --- Spectrum channel flip
 -------------------------------------------------------- 
 local channelFlips  = {
-	{name="LF--HF, HF--LF", values={0,1}},
-	{name="HF--LF, HF--LF", values={1,1}},
-	{name="HF--LF, LF--HF", values={1,0}},
-	{name="LF--HF, LF--HF", values={0,0}},
+	{name="Low Freq > High Freq, High Freq > Low Freq", values={0,1}},
+	{name="High Freq > Low Freq, High Freq > Low Freq", values={1,1}},
+	{name="High Freq > Low Freq, Low Freq > High Freq", values={1,0}},
+	{name="Low Freq > High Freq, Low Freq > High Freq", values={0,0}},
 }
 
 local channelFlip  = channelFlips[1]
