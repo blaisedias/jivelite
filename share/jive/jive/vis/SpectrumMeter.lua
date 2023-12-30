@@ -20,10 +20,14 @@ module(...)
 oo.class(_M, Icon)
 
 
-function __init(self, style)
+function __init(self, style, windowStyle)
 	local obj = oo.rawnew(self, Icon(style))
 
 	obj.val = { 0, 0 }
+	obj.vcentered80 = false
+	if windowStyle == "nowplaying_large_spectrum" then
+		obj.vcentered80 = true
+	end
 
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
 
@@ -150,6 +154,10 @@ function _layout(self)
 
 	barHeight[1] = h - t - b - self.capHeight[1] - self.capSpace[1]
 	barHeight[2] = h - t - b - self.capHeight[2] - self.capSpace[2]
+	if self.vcentered80 then
+		barHeight[1] = (h*8/10) - t - b - self.capHeight[1] - self.capSpace[1]
+		barHeight[2] = (h*8/10) - t - b - self.capHeight[2] - self.capSpace[2]
+	end
 
 
 	-- max bin value from C code is 31
@@ -166,6 +174,10 @@ function _layout(self)
 	log:debug("** cw1: " .. self.channelWidth[1] .. " nB1xbS: " .. numBars[1] * barSize[1])
 
 	self.y = y + h - b
+	self.h = h
+	if self.vcentered80 then
+		self.y = y + h - (h/10) - b
+	end
 	-- gradient table y step
 	self.deltaY = math.floor(h / (#self.gradientColours - 1))
 	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY .. " h:" .. h)
@@ -223,8 +235,15 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 	local bch = bins[ch]
 	local cch = self.cap[ch]
 	local barSize = barWidth + barSpace
-	local xx, yy, ww, hh = self:getBounds()
+	local hh = self.h
 	local xshift = self.xshift
+
+	-- Pre calc for turbine 
+	local yCT = y - (hh/2)
+	if self.vcentered80 then
+		-- adjust for large spectrum
+		yCT = y - ((hh*8/10)/2)
+	end
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -243,7 +262,7 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 			for k = 0, barsInBin - 1 do
 				if self.fgImg ~= nil then
 					if self.turbine then
-						local yTop = y - (hh/2) - (bch[i]/2)
+						local yTop = yCT - (bch[i]/2)
 						local xLeft = x + (k * barSize)
 						self.fgImg:blitClip(xLeft - xshift, (hh/2) - (bch[i]/2), barWidth, bch[i], surface, xLeft, yTop)
 					else
@@ -280,9 +299,9 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 					if self.turbine then
 						surface:filledRectangle(
 						x + (k * barSize),
-						y - (hh/2) - (bch[i]/2),
+						yCT - (bch[i]/2),
 						x + (barWidth - 1) + (k * barSize),
-						y - (hh/2) + (bch[i]/2),
+						yCT + (bch[i]/2),
 						self.barColor
 						)
 					else
