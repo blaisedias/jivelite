@@ -181,6 +181,46 @@ function init(self)
 	else
 		visImage:setChannelFlip(settings.channelFlip)
 	end
+
+	self.vic_checkbox = Checkbox("checkbox", function(applet, checked)
+		visImage:setCacheEnabled(checked)
+		self:updateSettings()
+	end)
+	jiveMain:addItem({
+		id = "vic",
+		node = "screenSettingsNowPlaying",
+		text = self:string('VISUALISER_IMAGE_CACHING'),
+		style = 'item_choice',
+		check = self.vic_checkbox,
+	})
+	self.vic_checkbox:setSelected(visImage:getCacheEnabled())
+
+	self.spec_caps_checkbox = Checkbox("checkbox", function(_, checked)
+		visImage:setCapsOn(checked)
+		self:updateSettings()
+	end)
+	jiveMain:addItem({
+		id = "spec_caps",
+		node = "spectrumSettings",
+		text = self:string('SPECTRUM_CAPS'),
+		style = 'item_choice',
+		check = self.spec_caps_checkbox,
+	})
+	self.spec_caps_checkbox:setSelected(visImage:getCapsOn())
+ 
+	self.turbine_checkbox = Checkbox("checkbox", function(_, checked)
+		visImage:setSpectrumTurbine(checked)
+		self:updateSettings()
+	end)
+	jiveMain:addItem({
+		id = "turbine",
+		node = "spectrumSettings",
+		text = self:string('SPECTRUM_TURBINE'),
+		style = 'item_choice',
+		check = self.turbine_checkbox,
+	})
+	self.turbine_checkbox:setSelected(visImage:getSpectrumTurbine())
+ 
 end
 
 -- style names are grabbed from the skin
@@ -272,8 +312,11 @@ function getNPStyles(self)
 			self.selectedStyle = auditedNPStyles[1] and auditedNPStyles[1].style
 		end
 		
-		settings.selectedStyle = self.selectedStyle
-		self:storeSettings()
+		-- only update settings if they have changed
+		if settings.selectedStyle ~= self.selectedStyle then
+			settings.selectedStyle = self.selectedStyle
+			self:storeSettings()
+		end
 	end
 
 	if self.window and self.window:getStyle() then
@@ -474,82 +517,6 @@ function npSpectrumBarSettingsShow(self)
 	window:show()
 end
 
-function npSpectrumCapsSettingsShow(self)
-	local window = Window("text_list", self:string('SPECTRUM_CAPS') )
-	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu", {
-		{
-			text = self:string("ON"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setCapsOn(true)
-					self:updateSettings()
-					self.window = nil
-				end,
-				visImage:getCapsOn()
-			)
-		},
-		{
-			text = self:string("OFF"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setCapsOn(false)
-					self:updateSettings()
-					self.window = nil
-				end,
-				not visImage:getCapsOn()
-			)
-		},
-	})
-
-	window:addWidget(menu)
-	window:show()
-end
-
-function npSpectrumTurbineSettingsShow(self)
-	local window = Window("text_list", self:string('SPECTRUM_TURBINE') )
-	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu", {
-		{
-			text = self:string("ON"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setSpectrumTurbine(true)
-					self:updateSettings()
-					self.window = nil
-				end,
-				visImage:getSpectrumTurbine()
-			)
-		},
-		{
-			text = self:string("OFF"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setSpectrumTurbine(false)
-					self:updateSettings()
-					self.window = nil
-				end,
-				not visImage:getSpectrumTurbine()
-			)
-		},
-	})
-
-	window:addWidget(menu)
-	window:show()
-end
-
-
-
 function npSpectrumChannelFlipSettingsShow(self)
 	local window = Window("text_list", self:string('SPECTRUM_CHANNEL_FLIP') )
 	local group = RadioGroup()
@@ -584,44 +551,6 @@ function npSpectrumChannelFlipSettingsShow(self)
 	window:addWidget(menu)
 	window:show()
 end
-
-function npVisCachingSettingsShow(self)
-	local window = Window("text_list", self:string('VISUALISER_IMAGE_CACHING') )
-	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu", {
-		{
-			text = self:string("ON"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setCacheEnabled(true)
-					self:updateSettings()
-					self.window = nil
-				end,
-				visImage:getCacheEnabled()
-			)
-		},
-		{
-			text = self:string("OFF"),
-			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
-					visImage:setCacheEnabled(false)
-					self:updateSettings()
-					self.window = nil
-				end,
-				not visImage:getCacheEnabled()
-			)
-		},
-	})
-
-	window:addWidget(menu)
-	window:show()
-end
-
 
 function npviewsSettingsShow(self)
 	local window = Window("text_list", self:string('NOW_PLAYING_VIEWS') )

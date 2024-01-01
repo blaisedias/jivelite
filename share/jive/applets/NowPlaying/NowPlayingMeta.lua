@@ -23,7 +23,6 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
-
 	jiveMain:addItem(
 		self:menuItem(
 			'appletNowPlayingScrollMode', 
@@ -67,7 +66,7 @@ function registerApplet(self)
 	jiveMain:addItem(
 		self:menuItem(
 			'appletNowPlayingSpectrumBarSettings', 
-			'screenSettingsNowPlaying', 
+			'spectrumSettings', 
 			'SPECTRUM_BARS_FORMAT', 
 			function(applet, ...) 
 				applet:npSpectrumBarSettingsShow(...) 
@@ -76,44 +75,15 @@ function registerApplet(self)
 	)
 	jiveMain:addItem(
 		self:menuItem(
-			'appletNowPlayingSpectrumCapsSettings', 
-			'screenSettingsNowPlaying', 
-			'SPECTRUM_CAPS', 
-			function(applet, ...) 
-				applet:npSpectrumCapsSettingsShow(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletNowPlayingSpectrumTurbineSettings', 
-			'screenSettingsNowPlaying', 
-			'SPECTRUM_TURBINE', 
-			function(applet, ...) 
-				applet:npSpectrumTurbineSettingsShow(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
 			'appletNowPlayingSpectrumChannelFlipSettings', 
-			'screenSettingsNowPlaying', 
+			'spectrumSettings', 
 			'SPECTRUM_CHANNEL_FLIP', 
 			function(applet, ...) 
 				applet:npSpectrumChannelFlipSettingsShow(...) 
 			end
 		)
 	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletNowPlayingCachingSettings',
-			'screenSettingsNowPlaying', 
-			'VISUALISER_IMAGE_CACHING', 
-			function(applet, ...) 
-				applet:npVisCachingSettingsShow(...) 
-			end
-		)
-	)
+
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
 
