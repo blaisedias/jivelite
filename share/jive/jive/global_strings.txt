@@ -62,6 +62,9 @@ NOW_PLAYING
 	RU	Воспроизводится
 	SV	Nu spelas
 
+SPECTRUM_SETTINGS
+	EN  Spectrum Analyzer Settings
+
 GLOBAL_HELP
 	CS	Nápověda
 	DA	Hjælp
