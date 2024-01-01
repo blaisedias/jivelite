@@ -213,25 +213,25 @@ NOW_PLAYING_VIEWS
 	SV	Nu spelas-vyer
 
 SELECT_VUMETER
-	EN	VU Meter 
+	EN	VU Meter Selection
 
 SELECT_SPECTRUM
-	EN	Spectrum 
+	EN	Spectrum Analyzer Selection 
 
 SPECTRUM_BARS_FORMAT
-	EN	Spectrum Bars Format
+	EN	Bars Format
 
 SPECTRUM_CAPS
-	EN	Spectrum Caps
+	EN	Show Caps
 
 SPECTRUM_TURBINE
-	EN	Spectrum Turbine
+	EN	Turbine
 
 SPECTRUM_CHANNEL_FLIP
-	EN	Spectrum Channel Flip
+	EN	Channel Flip
 
 VISUALISER_IMAGE_CACHING
-	EN	Visualiser Image Caching
+	EN	Visualiser Image RAM Cache
 
 ON
 	EN	On
