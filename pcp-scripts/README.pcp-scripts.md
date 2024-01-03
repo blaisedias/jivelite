@@ -14,17 +14,23 @@ This caching is persistent across system restarts.
 On piCorePlayer this is path not persistent.
 If it were made persistent, it would affect backing up adversely in terms of time.
 
-Finally storing resized images at this path would also consume RAM space.
+Also storing resized images at this path consumes RAM space.
 
-To address this the concept of a Jivelite workspace has been introduced.
+To address this, the concept of a Jivelite visualiser workspace has been introduced.
 
-If a workspace is set Jivelite will save resized images at locations under the workspace.
-The intention is set the workspace to point to a location on the piCorePlayer disk - thus avoiding the impact on backup and RAM space.
+If a workspace is set Jivelite will save resized images at locations under the workspace
+instead of `/home/<username>/.jivelite/userpath/cache/resized`
 
-The trade-off is that Jivelite will now be writing to the piCorePlayer disk.
+The intention is set the workspace to point to a location on the piCorePlayer disk - thus avoiding the impact on backup and RAM usage.
 
-The presence of a workspace directory was used as an opportunity to make it possible to easily
-add custom visualisation artwork and wallpapers for Jivelite in piCorePlayer.
+The trade-off is that Jivelite will now be writing to the piCorePlayer disk,
+whenever and image is resized.
+
+This isn't a frequent activity - maximum once for each resource image and visualisation viewport combination.
+So is considered a worthy trade-off.
+
+The presence of the workspace directory was used as an opportunity to make it possible to easily
+add custom visualisation artwork for Jivelite on piCorePlayer.
 
 ## jivelite.sh.cfg
 This version of `jivelite.sh` supports user selection of options, by setting environment variables.
@@ -33,8 +39,36 @@ This is done by reading the file `jivelite.sh.cfg` in the locations
 * /home/tc
 * /mnt/.../tce
 
-A reference version of `jivelite.sh.cfg` with all features turned off 
-has been created in this location.
+A reference version of `jivelite.sh.cfg` with all features turned off is included here.
+```
+# setup touchscreen environment variables TSLIB_TSDEVICE, SDL_MOUSEDRV and TSLIB_CALIBFILE
+# set to 1 to enable
+AUTO_TOUCHSCREEN_SETUP=0
+
+# workspace : see README.md
+# workspace is set as /mnt/.../tce/jivelite-workspace
+# set to 1 to enable
+AUTO_WORKSPACE_SETUP=0
+# For custom workspace set AUTO_WORKSPACE_SETUP=0
+#export JL_WORKSPACE=......
+
+# Save resized images to "disk"
+export JL_SAVE_RESIZED_IMAGES=false
+
+# Save resized images as PNG instead of BMP
+# size saving + proper Alpha channel 
+# requires modified jivelite binary
+#export JL_SAVE_AS_PNG=true
+
+# WARNING: on resource constrained systems setting the 
+# options below to true may result in jivelite terminating
+# resize all selected images at startup
+#export JL_RESIZE_AT_STARTUP=false
+
+# Modifies behaviour when JL_RESIZE_AT_STARTUP is set
+# to resize all images found
+#export JL_RESIZE_ALL=false
+```
 
 Supported environment variables are
 *  `JL_SAVE_RESIZED_IMAGES` set to true to cache the output of resizing for re-use.
@@ -80,7 +114,7 @@ screen for Jivelite.
 
 Set `AUTO_TOUCHSCREEN_SETUP=1` in `jivelite.sh.cfg`
 
-Note: this functionality has been tested and verified to work on a single platform,
-so may not work on others.
+Note: this functionality has been tested and verified to work on 2 platforms using,
+the same touch screen.
 
-Ideally, touch screen calibration should have been performed and saved prior to this.
+Touch screen calibration should have been performed and saved prior to turning this feature ON.
