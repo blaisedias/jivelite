@@ -14,30 +14,29 @@ This caching is persistent across system restarts.
 On piCorePlayer this is path not persistent.
 If it were made persistent, it would affect backing up adversely in terms of time.
 
-Also storing resized images at this path consumes RAM space.
+Storing resized images at this path will also consume RAM space, which can be an issue on raspberry pi zeroes.
 
 To address this, the concept of a Jivelite visualiser workspace has been introduced.
 
 If a workspace is set Jivelite will save resized images at locations under the workspace
 instead of `/home/<username>/.jivelite/userpath/cache/resized`
 
-The intention is set the workspace to point to a location on the piCorePlayer disk - thus avoiding the impact on backup and RAM usage.
+The intention is to set the workspace to point to a location on the piCorePlayer disk - thus avoiding the impact on backup and RAM usage.
 
 The trade-off is that Jivelite will now be writing to the piCorePlayer disk,
-whenever and image is resized.
+whenever an image is resized.
 
-This isn't a frequent activity - maximum once for each resource image and visualisation viewport combination.
-So is considered a worthy trade-off.
+Saving resized images isn't a frequent activity - it would occur once for each resource image and visualisation viewport combination.
+So is deemed a worthy trade-off.
 
-The presence of the workspace directory was used as an opportunity to make it possible to easily
-add custom visualisation artwork for Jivelite on piCorePlayer.
+The presence of the workspace directory was used as an opportunity to make adding custom visualisation artwork for Jivelite on piCorePlayer.
 
 ## jivelite.sh.cfg
 This version of `jivelite.sh` supports user selection of options, by setting environment variables.
 
-This is done by reading the file `jivelite.sh.cfg` in the locations
-* /home/tc
-* /mnt/.../tce
+This is done by `sourcing` the contents the file `jivelite.sh.cfg` in the locations (in order listed below)
+* `/home/tc`
+* `/mnt/.../tce`
 
 A reference version of `jivelite.sh.cfg` with all features turned off is included here.
 ```
@@ -80,7 +79,7 @@ Supported environment variables are
 *  `AUTO_TOUCHSCREEN_SETUP` see `Touch screen setup` below
 
 Note setting `JL_RESIZE_AT_STARTUP` and `JL_RESIZE_AT_STARTUP` can result in Jivelite terminating
-and "restarting" multiple times, on resource constrained platforms - recommendation is not to turn
+and restarting multiple times, on resource constrained platforms - recommendation is not to turn
 on these settings.
 
 
@@ -95,7 +94,6 @@ the directory `/mnt/.../tce/jivelite-workspace` is created.
 
 ### workspace layout
 * `cache/resized` : resized visualisation images are stored here
-* `wallpapers` : custom wallpapers can be added here
 * `assets` : custom user visualisation can be stored here. The layout is identical to `assets`
   * `assets/visualisers/`
   * `assets/visualisers/spectrum/`
@@ -106,7 +104,7 @@ the directory `/mnt/.../tce/jivelite-workspace` is created.
   * `assets/visualisers/vumeters/vfd/`
   * `assets/visualisers/vumeters/vumeter/`
 
-After images are added to `wallpapers` or under `assets`, Jivelite must be restarted to use the newly added resources.
+After images are added under `assets`, Jivelite must be restarted to use the newly added resources.
 
 ## Touch screen setup
 And additional feature implemented in `jivelite.sh` is the *automatic* setup of the touch
@@ -118,3 +116,11 @@ Note: this functionality has been tested and verified to work on 2 platforms usi
 the same touch screen.
 
 Touch screen calibration should have been performed and saved prior to turning this feature ON.
+
+## Stale cache entries
+Once a resized image is cached the original artwork will not be loaded again by Jivelite even if it
+is changed.
+
+So a cached resized image can be stale.
+The only way to rectify this is to ssh into pCP and delete the resized images.
+Resized images have names including the name of the original artwork.
