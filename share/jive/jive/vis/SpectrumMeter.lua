@@ -175,8 +175,10 @@ function _layout(self)
 
 	self.y = y + h - b
 	self.h = h
+	self.fgimg_yoffset = 0
 	if self.vcentered80 then
-		self.y = y + h - (h/10) - b
+		self.fgimg_yoffset = h/10
+		log:debug("**  fgimg_yoffset: " .. self.fgimg_yoffset)
 	end
 	-- gradient table y step
 	self.deltaY = math.floor(h / (#self.gradientColours - 1))
@@ -231,19 +233,16 @@ end
 
 
 
-function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace, binSpace, barHeightMulti, capHeight, capSpace)
+function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpace, binSpace, barHeightMulti, capHeight, capSpace)
 	local bch = bins[ch]
 	local cch = self.cap[ch]
 	local barSize = barWidth + barSpace
 	local hh = self.h
 	local xshift = self.xshift
+	local y = y_in - self.fgimg_yoffset
 
 	-- Pre calc for turbine 
-	local yCT = y - (hh/2)
-	if self.vcentered80 then
-		-- adjust for large spectrum
-		yCT = y - ((hh*8/10)/2)
-	end
+	local yCT = y_in - (hh/2)
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -261,19 +260,17 @@ function _drawBins(self, surface, bins, ch, x, y, barsInBin, barWidth, barSpace,
 		if bch[i] > 0 then
 			for k = 0, barsInBin - 1 do
 				if self.fgImg ~= nil then
+					local xLeft = x + (k * barSize)
 					if self.turbine then
 						local yTop = yCT - (bch[i]/2)
-						local xLeft = x + (k * barSize)
 						self.fgImg:blitClip(xLeft - xshift, (hh/2) - (bch[i]/2), barWidth, bch[i], surface, xLeft, yTop)
 					else
 						local yTop = y - bch[i] + 1
-						local xLeft = x + (k * barSize)
-						local xRight = xLeft + (barWidth - 1)
-						self.fgImg:blitClip(xLeft - xshift, hh - bch[i] + 1, barWidth, hh, surface, xLeft, yTop)
+						self.fgImg:blitClip(xLeft - xshift, hh - self.fgimg_yoffset - bch[i] + 1, barWidth, bch[i], surface, xLeft, yTop)
 	
 						if capHeight > 0 and cch[i] > 0 then
 							ytop = y - cch[i] - capHeight - capSpace
-							self.fgImg:blitClip(xLeft - xshift, hh - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
+							self.fgImg:blitClip(xLeft - xshift, hh - self.fgimg_yoffset - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
 						end
 					end
 				elseif self.useGradient > 0 then
