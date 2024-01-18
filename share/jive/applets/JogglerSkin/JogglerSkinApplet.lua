@@ -208,15 +208,15 @@ function param(self)
 				titleXofYonly = true,
 				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
 			},
-			{
-				style = 'nowplaying_large_vumeter',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("LARGE_VU_METER"),
-				suppressXofY = true,
-				suppressTitleText = 1,
-			},
+--			{
+--				style = 'nowplaying_large_vumeter',
+--				localPlayerOnly = 1,
+--				artworkSize = midArtwork,
+--				trackartistalbum = true,
+--				text = self:string("LARGE_VU_METER"),
+--				suppressXofY = true,
+--				suppressTitleText = 1,
+--			},
 			{
 				style = 'nowplaying_vumeter_only',
 				localPlayerOnly = 1,
@@ -4126,16 +4126,16 @@ function skin(self, s, reload, useDefaultSize, w, h)
         npprogressNB = { hidden = 1 },
 		npcontrols  = { hidden = 0 },
 	})
-	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
-
-	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
-
-
+--	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
+--
+--	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
+--		text = {
+--			-- Hack: text needs to be there to fill the space, not visible
+--			padding = { screenWidth, 0, 0, 0 }
+--		},
+--	})
+--
+--
 	s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
 		nptitle = { hidden = 1 }, 
         npartistgroup = { hidden = 1 },
@@ -4148,12 +4148,12 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	})
 	s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
 
-	s.nowplaying_vumeter_only.title.pressed = _uses(s.nowplaying_vumeter_only.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+--	s.nowplaying_vumeter_only.title.pressed = _uses(s.nowplaying_vumeter_only.title, {
+--		text = {
+--			-- Hack: text needs to be there to fill the space, not visible
+--			padding = { screenWidth, 0, 0, 0 }
+--		},
+--	})
 
 
 
