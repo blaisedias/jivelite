@@ -15,6 +15,7 @@ local log           = require("jive.utils.log").logger("jivelite.vis")
 
 local FRAME_RATE    = jive.ui.FRAME_RATE
 local type	= type
+local sep = 6
 
 module(...)
 oo.class(_M, Icon)
@@ -127,7 +128,6 @@ function _layout(self)
 	barSize[1] = self.barWidth[1] * self.barsInBin[1] + self.barSpace[1] * (self.barsInBin[1] - 1) + self.binSpace[1]
 	barSize[2] = self.barWidth[2] * self.barsInBin[2] + self.barSpace[2] * (self.barsInBin[2] - 1) + self.binSpace[2]
 
-	sep = 6
 	self.channelWidth[1] = ((w - l - r) / 2) - (sep - self.binSpace[1])
 	self.channelWidth[2] = ((w - l - r) / 2) - (sep - self.binSpace[2])
 
@@ -168,13 +168,19 @@ function _layout(self)
 	self.xshift = x + l
 	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2 
 	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2] + (sep - self.binSpace[1]) + (sep - self.binSpace[2])
+	self.xSpan =  numBars[1] * barSize[1] - self.binSpace[1] - 1
+
+	-- pre calculate base line height
+	self.blH = math.min(math.ceil(self.barHeightMulti[1] * 0.2), 2)
+	self.halfblH = math.ceil(self.blH / 2)
+
 	log:debug("** x: " .. x .. " l: " .. l)
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
-	log:debug("** cw1: " .. self.channelWidth[1] .. " nB1xbS: " .. numBars[1] * barSize[1])
 
 	self.y = y + h - b
 	self.h = h
+	self.yCT = self.y - (self.h/2)
 	self.fgimg_yoffset = 0
 	if self.vcentered80 then
 		self.fgimg_yoffset = h/10
@@ -199,15 +205,14 @@ end
 function draw(self, surface)
 -- Black background instead of image
 --	self.bgImg:blit(surface, self:getBounds())
+	local x, y, w, h = self:getBounds()
 
 	-- Avoid calling this more than once as it's not necessary
 	if not self.backgroundDrawn then
-		local x, y, w, h = self:getBounds()
 		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
 		self.backgroundDrawn = true
 	end
 	if self.bgImg ~= nil then
-		local x, y, w, h = self:getBounds()
 --		self.bgImg:blit(surface, x, y, w, h, 0, 0)
 --		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
 --		self.bgImg:blitAlpha(surface, x, y, self.bgAlpha)
@@ -218,16 +223,41 @@ function draw(self, surface)
 
 	bins[1], bins[2] = vis:spectrum()
 
-	_drawBins(
+	local nz1 = false
+	local nz2 = false
+	nz1 = _drawBins(
 		self, surface, bins, 1, self.x1, self.y, self.barsInBin[1],
 		self.barWidth[1], self.barSpace[1], self.binSpace[1],
 		self.barHeightMulti[1], self.capHeight[1], self.capSpace[1]
 	)
-	_drawBins(
+	nz2 = _drawBins(
 		self, surface, bins, 2, self.x2, self.y, self.barsInBin[2],
 		self.barWidth[2], self.barSpace[2], self.binSpace[2],
 		self.barHeightMulti[2], self.capHeight[2], self.capSpace[2]
 	)
+
+	-- simulate draw analyzer baseline only if playing,
+	-- by not drawing baseline if volume is 0
+	-- good enough
+	if nz1 or nz2 or true then
+		if self.fgImg ~= nil then
+			if self.turbine then
+				self.fgImg:blitClip(self.x1 - x, (h/2) - self.halfblH, self.xSpan, self.blH, surface, self.x1, self.yCT - self.halfblH)
+				self.fgImg:blitClip(self.x2 - x, (h/2) - self.halfblH, self.xSpan, self.blH, surface, self.x2, self.yCT - self.halfblH)
+			else
+				self.fgImg:blitClip(self.x1 - x, h - self.fgimg_yoffset - self.blH, self.xSpan, self.blH, surface, self.x1, self.y - self.fgimg_yoffset - self.blH)
+				self.fgImg:blitClip(self.x2 - x, h - self.fgimg_yoffset - self.blH, self.xSpan, self.blH, surface, self.x2, self.y - self.fgimg_yoffset - self.blH)
+			end
+		else
+			if self.turbine then
+				surface:filledRectangle(self.x1, self.yCT - self.halfblH, self.x1 + self.xSpan , self.yCT + self.blH - self.halfblH, self.barColor)
+				surface:filledRectangle(self.x2, self.yCT - self.halfblH, self.x2 + self.xSpan , self.yCT + self.blH - self.halfblH, self.barColor)
+			else
+				surface:filledRectangle(self.x1, self.y - self.blH - self.fgimg_yoffset, self.x1 + self.xSpan, self.y - self.fgimg_yoffset, self.barColor)
+				surface:filledRectangle(self.x2, self.y - self.blH - self.fgimg_yoffset, self.x2 + self.xSpan, self.y - self.fgimg_yoffset, self.barColor)
+			end
+		end
+	end
 
 end
 
@@ -240,9 +270,7 @@ function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpa
 	local hh = self.h
 	local xshift = self.xshift
 	local y = y_in - self.fgimg_yoffset
-
-	-- Pre calc for turbine 
-	local yCT = y_in - (hh/2)
+	local nz = false
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -258,11 +286,12 @@ function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpa
 
 		-- bar
 		if bch[i] > 0 then
+			nz = true
 			for k = 0, barsInBin - 1 do
 				if self.fgImg ~= nil then
 					local xLeft = x + (k * barSize)
 					if self.turbine then
-						local yTop = yCT - (bch[i]/2)
+						local yTop = self.yCT - (bch[i]/2)
 						self.fgImg:blitClip(xLeft - xshift, (hh/2) - (bch[i]/2), barWidth, bch[i], surface, xLeft, yTop)
 					else
 						local yTop = y - bch[i] + 1
@@ -296,9 +325,9 @@ function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpa
 					if self.turbine then
 						surface:filledRectangle(
 						x + (k * barSize),
-						yCT - (bch[i]/2),
+						self.yCT - (bch[i]/2),
 						x + (barWidth - 1) + (k * barSize),
-						yCT + (bch[i]/2),
+						self.yCT + (bch[i]/2),
 						self.barColor
 						)
 					else
@@ -323,6 +352,7 @@ function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpa
 		end
 		x = x + barWidth * barsInBin + barSpace * (barsInBin - 1) + binSpace
 	end
+	return nz
 end
 --[[
 
