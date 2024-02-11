@@ -91,6 +91,7 @@ function _layout(self)
 --	self.capHeight = self:styleValue("capHeight")
 --	self.capSpace = self:styleValue("capSpace")
 	self.capHeight, self.capSpace = visImage:getCapsValues(self:styleValue("capHeight"), self:styleValue("capSpace"))
+	self.spBaselineAlways, self.spBaselineOn = visImage:getBaselineValues()
 --	self.channelFlipped = self:styleValue("channelFlipped")
 	self.channelFlipped = visImage:getChannelFlipValues()
 	self.clipSubbands = self:styleValue("clipSubbands")
@@ -239,7 +240,7 @@ function draw(self, surface)
 	-- simulate draw analyzer baseline only if playing,
 	-- by not drawing baseline if volume is 0
 	-- good enough
-	if nz1 or nz2 or true then
+	if self.spBaselineAlways or ((nz1 or nz2) and self.spBaselineOn) then
 		if self.fgImg ~= nil then
 			if self.turbine then
 				self.fgImg:blitClip(self.x1 - x, (h/2) - self.halfblH, self.xSpan, self.blH, surface, self.x1, self.yCT - self.halfblH)
