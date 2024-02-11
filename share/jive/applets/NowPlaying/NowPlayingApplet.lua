@@ -162,6 +162,20 @@ function init(self)
 		visImage:setCapsOn(settings.capsOn)
 	end
 
+	if settings.baselineOn == nil then
+		settings.baselineOn = visImage:getBaselineOn()
+	else
+		visImage:setBaselineOn(settings.baselineOn)
+	end
+
+
+	if settings.baselineAlways == nil then
+		settings.baselineAlways = visImage:getBaselineAlways()
+	else
+		visImage:setBaselineAlways(settings.baselineAlways)
+	end
+
+
 	if settings.spectrumTurbine == nil then
 		settings.spectrumTurbine = visImage:getSpectrumTurbine()
 	else
@@ -221,6 +235,31 @@ function init(self)
 	})
 	self.turbine_checkbox:setSelected(visImage:getSpectrumTurbine())
  
+	self.baselineOn_checkbox = Checkbox("checkbox", function(_, checked)
+		visImage:setBaselineOn(checked)
+		self:updateSettings()
+	end)
+	jiveMain:addItem({
+		id = "baselineOn",
+		node = "spectrumSettings",
+		text = self:string('SPECTRUM_BASELINEON'),
+		style = 'item_choice',
+		check = self.baselineOn_checkbox,
+	})
+	self.baselineOn_checkbox:setSelected(visImage:getBaselineOn())
+ 
+	self.baselineAlways_checkbox = Checkbox("checkbox", function(_, checked)
+		visImage:setBaselineAlways(checked)
+		self:updateSettings()
+	end)
+	jiveMain:addItem({
+		id = "baselineAlways",
+		node = "spectrumSettings",
+		text = self:string('SPECTRUM_BASELINEALWAYS'),
+		style = 'item_choice',
+		check = self.baselineAlways_checkbox,
+	})
+	self.baselineAlways_checkbox:setSelected(visImage:getBaselineAlways())
 end
 
 -- style names are grabbed from the skin
@@ -2390,6 +2429,8 @@ function updateSettings(self)
 	-- Spectrum misc
 	settings.spectrumBarsFormat = visImage:getBarsFormat()
 	settings.capsOn = visImage:getCapsOn()
+	settings.baselineOn = visImage:getBaselineOn()
+	settings.baselineAlways = visImage:getBaselineAlways()
 	settings.spectrumTurbine = visImage:getSpectrumTurbine()
 	settings.channelFlip = visImage:getChannelFlip()
 	settings.cacheEnabled = visImage:getCacheEnabled()

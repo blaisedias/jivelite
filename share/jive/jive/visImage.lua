@@ -878,6 +878,37 @@ function getCapsValues(tbl, capsHeight, capsSpace)
 end
 
 -------------------------------------------------------- 
+--- Spectrum baseline
+-------------------------------------------------------- 
+local baselineAlways  = true
+local baselineOn  = true
+
+function getBaselineAlways(tbl)
+	log:debug("getBaselineAlways", " ", baselineAlways)
+	return baselineAlways
+end
+
+function setBaselineAlways(tbl, v)
+	log:debug("setBaselineAlways", " ", v)
+	baselineAlways = v
+end
+
+function getBaselineOn(tbl)
+	log:debug("getBaselineOn", " ", baselineOn)
+	return baselineOn
+end
+
+function setBaselineOn(tbl, v)
+	log:debug("setBaselineOn", " ", v)
+	baselineOn = v
+end
+
+function getBaselineValues(tbl)
+	return baselineAlways, baselineOn
+end
+
+
+-------------------------------------------------------- 
 --- Spectrum turbine
 -------------------------------------------------------- 
 local spectrumTurbine  = false
