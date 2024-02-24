@@ -339,75 +339,35 @@ end
 -------------------------------------------------------- 
 --- image scaling 
 -------------------------------------------------------- 
--- scale an image to fit a height - maintaining aspect ration
-function _scaleSpectrumImage(imgPath, w, h)
+-- scale an image to fit a height - maintaining aspect ratio if required
+function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
 	local img = Surface:loadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
 	local srcW, srcH = img:getSize()
 	if srcW == w and h == srcH then
-		log:debug("scaleSpectrumImage done", img)
+		log:debug("scaleSpectrumImage no scaling", img)
 		return img
 	end
-	log:debug("scaleSpectrumImage: srcW:", srcW, " srcH:", srcH)
-	-- for spectrum height is determines the scaling factor
-	local scaledW = math.floor(srcW * (h/srcH))
-	log:debug("scaleSpectrumImage srcW:", srcW, " srcH:", srcH, " -> w:", w, " h:", h, " scaledW:", scaledW)
-	-- scale: whilst trying to maintain proportions
-	-- perfect match just resize
-	if scaledW == w then
-		log:debug("scaleSpectrumImage simple resize")
-		scaledImg = img:resize(w, h)
-		log:debug("scaleSpectrumImage simple resize DONE")
-	-- if scaled width is > required clip the horizontal edges
-	elseif scaledW > w then
-		log:debug("scaleSpectrumImage resize + hclip")
-		local tmp = img:resize(scaledW, h)
-		scaledImg = img:resize(w, h)
-		-- upto 1 pixel smaller for odd numbered width differences
-		tmp:blitClip(math.floor((scaledW-w)/2), 0, w, h, scaledImg, 0, 0)
-		tmp:release()
-		log:debug("scaleSpectrumImage resize + hclip DONE")
-	elseif srcW > w and srcH > h then
-	-- if src image is larger just clip
-		log:debug("scaleSpectrumImage clip x-center y-bottom")
-		scaledImg = img:resize(w, h)
-		img:blitClip(math.floor((srcW-w)/2), srcH-h , w, h, scaledImg, 0, 0)
-		log:debug("scaleSpectrumImage clip x-center y-bottom DONE")
-	elseif srcH > h and scaledW > (w/2) then
-	-- if src image is almost larger enough expand to fill horizontally
-	-- and clip vertically
-		log:debug("scaleSpectrumImage expand to w, clip y-center")
-		local scaledH = math.floor(srcH * (w/srcW))
-		local tmp = img:resize(w, scaledH)
-		scaledImg = img:resize(w, h)
-		tmp:blitClip(0, (scaledH-h)/2, w, h, scaledImg, 0, 0)
-		tmp:release()
-		log:debug("scaleSpectrumImage expand to w, clip y-center DONE")
-	else
-	-- if scaled width is significantly < than width the expand - this distorts proportion
-	-- desired behaviour for vertically thin source images which typically would be colour
-	-- gradients
-		log:debug("scaleSpectrumImage resize expand H")
-		scaledImg = img:resize(w, h)
-	end
---	elseif srcW > w and srcH > h then
---		log:debug("scaleSpectrumImage clip x-center y-bottom")
---		scaledImg = img:resize(w, h)
---		img:blitClip(math.floor((srcW-w)/2), srcH -h , w, h, scaledImg, 0, 0)
---	else
---	-- if width > then window width then clip the source image,
---	-- this preserves proportion
---		log:debug("scaleSpectrumImage resize and clip")
---		local tmp = img:resize(scaledW, h)
---		-- FIXME: find cheaper way to create an image of wxh
---		scaledImg = img:resize(w,h)
---		tmp:blitClip(math.floor((scaledW-w)/2), 0, scaledW-w, h, scaledImg, 0, 0)
---		tmp:release()
-	img:release()
-	log:debug("scaleSpectrumImage DONE")
-	return scaledImg
+    local retImg = img:resize(w, h)
+    if retainAR == false then
+	    log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
+        img:release()
+        return retImg
+    end
+    
+    -- scale + centered crop
+    local scaleF = math.max(w/srcW, h/srcH)
+    local scaledW = math.floor(srcW*scaleF)
+    local scaledH = math.floor(srcH*scaleF)
+    scaledImg = img:resize(scaledW, scaledH)
+    img:release()
+    log:info("scaleSpectrumImage: scale factor: ", scaleF)
+    log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
+    scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
+    scaledImg:release()
+    return retImg
 end
 
 -- scale an image to fit a width - maintaining aspect ratio 
@@ -608,7 +568,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 		bg_dcpath = cachedPath(bgDicKey, suffix)
 	end
 	if dcpath == nil then
-		local img = _scaleSpectrumImage(path, w, h)
+		local img = _scaleSpectrumImage(path, w, h, spType == SPT_BACKLIT)
 		local fgimg = Surface:newRGB(w, h)
 		img:blit(fgimg, 0, 0, 0)
 		dcpath = cachedPath(dicKey, suffix)
