@@ -110,7 +110,7 @@ function platformDetect()
 		PLATFORM = "piCorePlayer"
 		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", false)
 		-- save as png is the exception - it must be explicitly disabled
-		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
 	end
 	resizeAll = boolOsEnv("JL_RESIZE_ALL", false)
 	resizeAtStartUp = boolOsEnv("JL_RESIZE_AT_STARTUP", false)
@@ -937,9 +937,10 @@ function _cacheVUImage(imgName, path, w, h)
 	local dcpath = diskImageCache[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(dicKey, "png")
+		local suffix = "bmp"
+		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath, true)
+		saveImage(img, dcpath, suffix == "bmp")
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
@@ -1217,5 +1218,39 @@ function sync()
 	end
 	if not spectrumList[spImageIndex].enabled then
 		spBump(nil,nil)
+	end
+end
+
+-------------------------------------------------------
+--- Resize
+-------------------------------------------------------
+function resizeSpectrums(tbl, name)
+	log:info("resizeSpectrums")
+	for k, v in pairs(spectrumList) do
+		if v.enabled and (name == nil or name == v.name) then
+			-- create the resized images for skin resolutions 
+			for kr, vr in pairs(spectrumResolutions) do
+				if spectrumImagesMap[v.name].src ~= nil then
+				 log:info("resizing spectrum ", v.name, " -> ", vr.w, "x", vr.h)
+					_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, vr.w, vr.h, v.spType)
+					log:info("resizing done ", v.name, " -> ", vr.w, "x", vr.h)
+				end
+			end
+		end
+	end
+end
+
+function resizeVuMeters(tbl, name)
+	log:info("resizeVuMeters")
+	for k, v in pairs(vuImages) do
+		if v.enabled and (name == nil or name == v.name) then
+			if v.vutype == "frame" then
+					-- create the resized images for skin resolutions 
+					for kr, vr in pairs(vuMeterResolutions) do
+						log:info("resizing Vu Meter", v.name, " -> ", vr.w, "x", vr.h)
+						_cacheVUImage(v.name, vuImagesMap[v.name].src, vr.w, vr.h)
+					end
+			end
+		end
 	end
 end
