@@ -554,7 +554,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bgDicKey = nil
 	local bg_dcpath = nil
 
-	local suffix = "png"
+	local suffix = "bmp"
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
@@ -940,7 +940,7 @@ function _cacheVUImage(imgName, path, w, h)
 		local suffix = "bmp"
 		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath, suffix == "bmp")
+		saveImage(img, dcpath, false)
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
