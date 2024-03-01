@@ -110,7 +110,7 @@ function platformDetect()
 		PLATFORM = "piCorePlayer"
 		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", false)
 		-- save as png is the exception - it must be explicitly disabled
-		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
 	end
 	resizeAll = boolOsEnv("JL_RESIZE_ALL", false)
 	resizeAtStartUp = boolOsEnv("JL_RESIZE_AT_STARTUP", false)
@@ -554,7 +554,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bgDicKey = nil
 	local bg_dcpath = nil
 
-	local suffix = "png"
+	local suffix = "bmp"
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
@@ -937,9 +937,10 @@ function _cacheVUImage(imgName, path, w, h)
 	local dcpath = diskImageCache[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(dicKey, "png")
+		local suffix = "bmp"
+		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath, true)
+		saveImage(img, dcpath, false)
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
