@@ -45,8 +45,8 @@ module(..., Framework.constants)
 oo.class(_M, Applet)
 
 local _defaultSkinNameForType = {
-		["touch"] = "PiGridSkin_800x480",
-		["remote"] = "PiGridSkin_800x480",
+		["touch"] = "WQVGAsmallSkin",
+		["remote"] = "WQVGAlargeSkin",
 }
 
 
