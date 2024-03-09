@@ -25,7 +25,6 @@ local os	= require("os")
 
 local ipairs, pairs, pcall	= ipairs, pairs, pcall
 local coroutine, package	= coroutine, package
-local coroutine, package	= coroutine, package
 local type	= type
 
 -- jive package imports
@@ -555,6 +554,9 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bg_dcpath = nil
 
 	local suffix = "bmp"
+    if saveAsPng then
+        suffix = "png"
+    end
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
@@ -938,9 +940,12 @@ function _cacheVUImage(imgName, path, w, h)
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
 		local suffix = "bmp"
+        if saveAsPng then
+            suffix = "png"
+        end
 		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath, false)
+		saveImage(img, dcpath, suffix == "png")
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
@@ -1225,7 +1230,7 @@ end
 --- Resize
 -------------------------------------------------------
 function resizeSpectrums(tbl, name)
-	log:info("resizeSpectrums")
+	log:info("resizeSpectrums ", name)
 	for k, v in pairs(spectrumList) do
 		if v.enabled and (name == nil or name == v.name) then
 			-- create the resized images for skin resolutions 
@@ -1241,7 +1246,7 @@ function resizeSpectrums(tbl, name)
 end
 
 function resizeVuMeters(tbl, name)
-	log:info("resizeVuMeters")
+	log:info("resizeVuMeters ", name)
 	for k, v in pairs(vuImages) do
 		if v.enabled and (name == nil or name == v.name) then
 			if v.vutype == "frame" then
