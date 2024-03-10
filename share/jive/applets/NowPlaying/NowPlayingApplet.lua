@@ -36,7 +36,7 @@ local SpectrumMeter    = require("jive.vis.SpectrumMeter")
 
 local debug            = require("jive.utils.debug")
 local datetime         = require("jive.utils.datetime")
-
+local VisualiserApplet = require("applets.Visualiser.VisualiserApplet")
 local appletManager    = appletManager
 
 local jiveMain               = jiveMain
@@ -419,6 +419,7 @@ function npVUSettingsShow(self)
 					if isSelected then
 						-- turn it on
 --						settings.vumeters[v.name] = true 
+						VisualiserApplet:resizeVUMeter(self, v.name)
 						visImage:selectVuImage(v.name, true, false)
 					else
 						-- turn it off conditionally:
@@ -490,6 +491,7 @@ function npSpectrumSettingsShow(self)
 					if isSelected then
 						-- turn it on
 --						settings.spectrum[v.name].enabled = true
+						VisualiserApplet:resizeSpectrumMeter(self, v.name)
 						visImage:selectSpectrum(v.name, true, false)
 					else
 						-- turn it off conditionally:

@@ -39,27 +39,29 @@ function menu(self, menuItem)
     local window = Window("text_list", "Visualiser")
     local menu = SimpleMenu("menu")
 
---    menu:addItem({ text = self:string("MENU_SAVE_SETTINGS"),
     menu:addItem({ text = "Reset Image Caches",
-            callback = function(event, menuItem)
-                visImage:cacheClear()
-            end })
-
+        callback = function(event, menuItem)
+            visImage:cacheClear()
+        end
+    })
 
     menu:addItem({ text = "Resize Visualiser Images",
-            callback = function(event, menuItem)
-                self:resizeImages(menuItem, true, true)
-            end })
+        callback = function(event, menuItem)
+            self:resizeImages(self, true, true)
+        end
+    })
 
     menu:addItem({ text = "Resize Spectrum Images",
-            callback = function(event, menuItem)
-                self:resizeImages(menuItem, true, false)
-            end })
+        callback = function(event, menuItem)
+            self:resizeImages(self, true, false)
+        end
+    })
 
     menu:addItem({ text = "Resize VU Meter Images",
-            callback = function(event, menuItem)
-                self:resizeImages(menuItem, false, true)
-            end })
+        callback = function(event, menuItem)
+            self:resizeImages(self, false, true)
+        end
+    })
 
     window:addWidget(menu)
 
@@ -67,7 +69,7 @@ function menu(self, menuItem)
     return window
 end
 
-function resizeImages(self, menuItem, bSpectrum, bVuMeters)
+function resizeImages(tbl, self, bSpectrum, bVuMeters)
 
         local popup = Popup("toast_popup_text")
 
@@ -78,7 +80,6 @@ function resizeImages(self, menuItem, bSpectrum, bVuMeters)
         -- popup will hide when resizing is done
         popup:ignoreAllInputExcept({""})
 
---        local text = Label("text", tostring(self:string("LABEL_SAVING_SETTINGS")))
         local text = Label("text", "Resizing...")
 
         popup:addWidget(text)
@@ -98,7 +99,7 @@ function resizeImages(self, menuItem, bSpectrum, bVuMeters)
         local vumeter_names = {}
         if bVuMeters then
             for k, v in pairs(tmp) do
-                if v.enabled then
+                if v.enabled and v.vutype == "frame" then
                     table.insert(vumeter_names, v.name)
                 end
             end
@@ -146,8 +147,120 @@ function resizeImages(self, menuItem, bSpectrum, bVuMeters)
                 end
             end)
 
-        self:tieAndShowWindow(popup, Window.transitionFadeIn)
-        return popup
+        popup:show()
 end
 
+function resizeSpectrumMeter(tbl, self, spectrum_meter_name)
+    local resizable = false
+    local tmp = {}
+    local spectrum_names = {}
+    tmp = visImage:getSpectrumList()
+    for k, v in pairs(tmp) do
+        if v.name == spectrum_meter_name and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
+            resizable = true
+        end
+    end
+
+   if not resizable then
+       return
+   end
+
+    local popup = Popup("toast_popup_text")
+
+    popup:setAllowScreensaver(false)
+    popup:setAutoHide(false)
+
+    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
+    -- popup will hide when resizing is done
+    popup:ignoreAllInputExcept({""})
+
+
+    local msgResizing = "Resizing"
+    local msgResized = "Resized"
+    msgResizing = msgResizing .. " Spectrum Meter:" .. spectrum_meter_name
+    msgResized = msgResized .. " Spectrum Meter:" .. spectrum_meter_name
+    local text = Label("text", msgResizing)
+
+    popup:addWidget(text)
+
+    local state = "resize sp"
+    popup:addTimer(250, function()
+        if state == "resize sp" then
+            if spectrum_meter_name ~= nil then
+                log:info("resize ", spectrum_meter_name, " ", i_sp)
+                visImage:resizeSpectrums(spectrum_meter_name)
+                log:info("done ", spectrum_meter_name)
+            end
+            state = "resize vu"
+        elseif state == "resize vu" then
+            state = "resized"
+        elseif state == "resized" then
+            text:setValue(msgResized)
+            state = "done"
+        elseif state == "done" then
+            state = "hide"
+        elseif state == "hide" then
+            popup:hide(Window.transitionFadeOut)
+        end
+    end)
+
+    popup:show()
+end
+
+function resizeVUMeter(tbl, self, vu_meter_name)
+    local resizable = false
+    local tmp = visImage:getVUImageList()
+    for k, v in pairs(tmp) do
+        if v.name == vu_meter_name then
+            if v.vutype == "frame" then
+                resizable = true
+            end
+        end
+    end
+
+    if not resizable then
+        return
+    end
+
+    local popup = Popup("toast_popup_text")
+
+    popup:setAllowScreensaver(false)
+    popup:setAutoHide(false)
+
+    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
+    -- popup will hide when resizing is done
+    popup:ignoreAllInputExcept({""})
+
+
+    local msgResizing = "Resizing"
+    local msgResized = "Resized"
+    msgResizing = msgResizing .. " VU Meter:" .. vu_meter_name
+    msgResized = msgResized .. " VU Meter:" .. vu_meter_name
+    local text = Label("text", msgResizing)
+
+    popup:addWidget(text)
+
+    local state = "resize sp"
+    popup:addTimer(250, function()
+        if state == "resize sp" then
+            state = "resize vu"
+        elseif state == "resize vu" then
+            if vu_meter_name ~= nil then
+                log:info("resize ", vu_meter_name, " ", i_vu)
+                visImage:resizeVuMeters(vu_meter_name)
+                log:info("done ", vu_meter_name)
+            end
+            state = "resized"
+        elseif state == "resized" then
+            text:setValue(msgResized)
+            state = "done"
+        elseif state == "done" then
+            state = "hide"
+        elseif state == "hide" then
+            popup:hide(Window.transitionFadeOut)
+        end
+    end)
+
+    popup:show()
+end
 
