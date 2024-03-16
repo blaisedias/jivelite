@@ -12,10 +12,12 @@ See L<applets.Visualiser.VisualiserApplet>.
 
 See L<jive.AppletMeta> for a description of standard applet meta functions.
 
+ (c) Blaise Dias, 2024
+
 =cut
 --]]
 
-local bit = bit
+--local bit = bit
 
 local oo            = require("loop.simple")
 
@@ -25,11 +27,11 @@ local Framework     = require("jive.ui.Framework")
 
 local appletManager = appletManager
 local jiveMain      = jiveMain
-local Checkbox      = require("jive.ui.Checkbox")
-local visImage      = require("jive.visImage")
-local os            = require("os")
+--local Checkbox      = require("jive.ui.Checkbox")
+--local visImage      = require("jive.visImage")
+--local os            = require("os")
 
-local arg, ipairs, string = arg, ipairs, string
+--local arg, ipairs, string = arg, ipairs, string
 
 module(...)
 oo.class(_M, AppletMeta)
@@ -60,8 +62,7 @@ function configureApplet(self)
 --		check = self.vic_checkbox,
 --	})
 --	self.vic_checkbox:setSelected(visImage:getCacheEnabled())
-   local icon = 'hm_settings'
-    
+    local icon = 'hm_settings'
 
 	-- we only register the menu her, as registerApplet is being called before the skin is initialized
     jiveMain:addItem(
