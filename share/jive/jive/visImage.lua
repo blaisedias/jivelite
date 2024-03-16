@@ -46,6 +46,8 @@ local vuImages = {}
 local spectrumList = {}
 local npvumeters = {}
 local npspectrums = {}
+local vuSeq = {}
+local spSeq = {}
 
 -- set to true to create all resized visualiser images at startup
 -- on resource constrained platforms like piCorePlayer jivelite terminate.
@@ -90,6 +92,13 @@ function boolOsEnv(envName, defaultValue)
 	end
 	log:info("boolOsEnv: returning defaultValue: ", defaultValue)
 	return defaultValue
+end
+
+local function ShuffleInPlace(t)
+	for i = #t, 2, -1 do
+		local j = math.random(i)
+		t[i], t[j] = t[j], t[i]
+	end
 end
 
 -------------------------------------------------------- 
@@ -333,6 +342,8 @@ function initialise()
 	initialiseCache()
 	initialiseVUMeters()
 	initialiseSpectrumMeters()
+	spBump()
+	vuBump()
 end
 
 -------------------------------------------------------- 
@@ -349,24 +360,24 @@ function _scaleSpectrumImage(imgPath, w, h, retainAR)
 		log:debug("scaleSpectrumImage no scaling", img)
 		return img
 	end
-    local retImg = img:resize(w, h)
-    if retainAR == false then
-	    log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
-        img:release()
-        return retImg
-    end
-    
-    -- scale + centered crop
-    local scaleF = math.max(w/srcW, h/srcH)
-    local scaledW = math.floor(srcW*scaleF)
-    local scaledH = math.floor(srcH*scaleF)
-    scaledImg = img:resize(scaledW, scaledH)
-    img:release()
-    log:info("scaleSpectrumImage: scale factor: ", scaleF)
-    log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
-    scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
-    scaledImg:release()
-    return retImg
+	local retImg = img:resize(w, h)
+	if retainAR == false then
+		log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
+		img:release()
+		return retImg
+	end
+	
+	-- scale + centered crop
+	local scaleF = math.max(w/srcW, h/srcH)
+	local scaledW = math.floor(srcW*scaleF)
+	local scaledH = math.floor(srcH*scaleF)
+	scaledImg = img:resize(scaledW, scaledH)
+	img:release()
+	log:info("scaleSpectrumImage: scale factor: ", scaleF)
+	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
+	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
+	scaledImg:release()
+	return retImg
 end
 
 -- scale an image to fit a width - maintaining aspect ratio 
@@ -554,9 +565,9 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bg_dcpath = nil
 
 	local suffix = "bmp"
-    if saveAsPng then
-        suffix = "png"
-    end
+	if saveAsPng then
+		suffix = "png"
+	end
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
@@ -584,17 +595,31 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	end
 end
 
-function spBump(tbl, spType)
+function populateSpSeq()
+	local indx = 1
 	for i = 1, #spectrumList do
-		spImageIndex = (spImageIndex % #spectrumList) + 1
-		if spectrumList[spImageIndex].enabled == true then
-			if spType == nil or spectrumList[spImageIndex].spType == spType then 
-				log:debug("spBump is ", spImageIndex, " of ", #spectrumList, ", ", spectrumList[spImageIndex].name)
-				return true
-			end
+		if spectrumList[i].enabled == true then
+		 spSeq[indx] = i
+			indx = indx + 1
 		end
 	end
-	return false
+end
+
+local spSeqIndex = 1
+function spBump(tbl, spType)
+	if #spSeq == 0 then
+		populateSpSeq()
+		ShuffleInPlace(spSeq)
+        spSeqIndex = #spSeq +1
+	end
+
+	if spSeqIndex > #spSeq then
+		spSeqIndex = 1
+		ShuffleInPlace(spSeq)
+	end
+	spImageIndex = spSeq[spSeqIndex]
+	spSeqIndex = spSeqIndex + 1
+	return true
 end
 
 function spFindSpectrumByType(spType)
@@ -696,11 +721,12 @@ function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
 	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
-		if not spBump(nil, spType) then
-			spkey = spFindSpectrumByType(spType)
-		else
-			spkey = spectrumList[spImageIndex].name
-		end
+--		if not spBump(nil, spType) then
+--			spkey = spFindSpectrumByType(spType)
+--		else
+--			spkey = spectrumList[spImageIndex].name
+--		end
+		spBump(nil, nil)
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBacklitAlpha()
@@ -744,6 +770,8 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 		end
 	end
 	log:debug("selectSpectrum", " enabled count: ", n_enabled)
+	spSeq = {}
+	spBump()
 	return n_enabled
 end
 
@@ -940,9 +968,9 @@ function _cacheVUImage(imgName, path, w, h)
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
 		local suffix = "bmp"
-        if saveAsPng then
-            suffix = "png"
-        end
+		if saveAsPng then
+			suffix = "png"
+		end
 		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
 		saveImage(img, dcpath, suffix == "png")
@@ -1031,14 +1059,29 @@ function initVuMeterList()
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
-function vuBump()
+function populateVuSeq()
+	local indx = 1
 	for i = 1, #vuImages do
-		vuImageIndex = (vuImageIndex % #vuImages) + 1
-		if vuImages[vuImageIndex].enabled == true then
-			log:debug("vuBump is ", vuImageIndex, " of ", #vuImages, ", ", vuImages[vuImageIndex].name)
-			return
+		if vuImages[i].enabled == true then
+			vuSeq[indx] = i
+			indx = indx + 1
 		end
 	end
+end
+
+local vuSeqIndex = 1
+function vuBump()
+	if #vuSeq == 0 then
+		populateVuSeq()
+		ShuffleInPlace(vuSeq)
+        vuSeqIndex = #vuSeq +1
+	end
+	if vuSeqIndex > #vuSeq then
+		vuSeqIndex = 1
+		ShuffleInPlace(vuSeq)
+	end
+	vuImageIndex = vuSeq[vuSeqIndex]
+	vuSeqIndex = vuSeqIndex + 1
 end
 
 local currentVuImage = nil
@@ -1122,6 +1165,8 @@ function selectVuImage(tbl, name, selected, allowCaching)
 		end
 	end
 	log:debug("selectVuImage", " enabled count: ", n_enabled)
+	vuSeq = {}
+	vuBump()
 	return n_enabled
 end
 
