@@ -1584,6 +1584,7 @@ static const struct luaL_Reg event_methods[] = {
 };
 
 static const struct luaL_Reg font_methods[] = {
+	{ "default", jiveL_font_default },
 	{ "load", jiveL_font_load },
 	{ "free", jiveL_font_free },
 	{ "width", jiveL_font_width },

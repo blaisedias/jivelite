@@ -7,6 +7,7 @@
 #include "common.h"
 #include "jive.h"
 
+extern const char* jive_get_defaultFont();
 
 static void get_jive_ui_style(lua_State *L) {
 	lua_getglobal(L, "jive");
@@ -598,7 +599,8 @@ int jiveL_style_font(lua_State *L) {
 
 		/* default font */
 		p = (JiveFont **)lua_newuserdata(L, sizeof(JiveFont *));
-		*p = jive_font_load("fonts/FreeSans.ttf", 15);
+		// fprintf(stderr, "jiveL_style_font %s\n", jive_get_defaultFont());
+		*p = jive_font_load(jive_get_defaultFont(), 15);
 		luaL_getmetatable(L, "JiveFont");
 		lua_setmetatable(L, -2);
 	}
