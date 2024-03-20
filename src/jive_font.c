@@ -9,6 +9,11 @@
 #include "jive.h"
 
 
+// hard coded default font name definition
+static const char* defDefaultFontName="fonts/FreeSans.ttf";
+// configurable default font name
+static char* defaultFontName = NULL;
+
 static const char *JIVE_FONT_MAGIC = "Font";
 
 static JiveFont *fonts = NULL;
@@ -26,6 +31,7 @@ static SDL_Surface *draw_ttf_font(JiveFont *font, Uint32 color, const char *str)
 
 JiveFont *jive_font_load(const char *name, Uint16 size) {
 
+	//fprintf(stderr, "jive_font_load %s %d\n", name, (int)size);
 	// Do we already have this font loaded?
 	JiveFont *ptr = fonts;
 	while (ptr) {
@@ -441,3 +447,49 @@ int jiveL_font_gc(lua_State *L) {
 	}
 	return 0;
 }
+
+int jiveL_font_default(lua_State *L) {
+	/*
+	  class
+	  fontname
+	*/
+	const char *fontname = luaL_checklstring(L, 2, NULL);
+
+	fprintf(stderr, "jiveL_font_default %s\n", fontname);
+	if (fontname ) {
+        char* newDefaultFontName;
+        // try allocating memory for the new default font name
+		newDefaultFontName = calloc(strlen(fontname)+1,1);
+		if (newDefaultFontName != NULL) {
+            // success!
+	    	if (defaultFontName != defDefaultFontName 
+		    		&& defaultFontName != NULL) {
+                // if default font name was set previously release the associated memory
+    			free(defaultFontName);
+    		}
+            defaultFontName = newDefaultFontName;
+			strcpy(defaultFontName, fontname);
+            return 1;
+		}
+	}
+    // failed:
+    //  - fontname wasn't specified
+    //  - memory for default font name could not be allocated
+	return 0;
+}
+
+
+// accessor function to avoid creating a global variable.
+const char* jive_get_defaultFont() {
+    // if the default font hasn't been set then default it
+    // the hard-coded value of FreeSans 
+    // use defDefaultFontName so that we can avoid trying to free
+    // static memory.
+    // We could alloc and copy - but that is less robust in case
+    // of memory allocation failure.
+	if (defaultFontName == NULL) {
+		defaultFontName = (char *)defDefaultFontName;
+	}
+	return (const char *)defaultFontName;
+}
+
