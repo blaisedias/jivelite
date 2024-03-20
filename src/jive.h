@@ -563,6 +563,7 @@ int jiveL_style_color(lua_State *L);
 int jiveL_style_array_color(lua_State *L);
 int jiveL_style_font(lua_State *L);
 
+int jiveL_font_default(lua_State *L);
 int jiveL_font_load(lua_State *L);
 int jiveL_font_free(lua_State *L);
 int jiveL_font_width(lua_State *L);
