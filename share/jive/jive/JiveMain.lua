@@ -38,6 +38,7 @@ local Task          = require("jive.ui.Task")
 local Timer         = require("jive.ui.Timer")
 local Event         = require("jive.ui.Event")
 local table         = require("jive.utils.table")
+local Font          = require("jive.ui.Font")
 
 local Canvas        = require("jive.ui.Canvas")
 
@@ -562,6 +563,7 @@ local function _loadSkin(self, skinId, reload, useDefaultSize)
 		return false
 	end
 
+	Font:setupFonts()
 	local appletName, name, method = unpack(self.skins[skinId])
 	local obj = appletManager:loadApplet(appletName)
 	assert(obj, "Cannot load skin " .. appletName)
