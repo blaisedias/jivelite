@@ -42,10 +42,42 @@ Return the ascend height of the font.
 -- C implementation
 
 local oo = require("loop.base")
+local math             = require("math")
+local debug            = require("jive.utils.debug")
+local log              = require("jive.utils.log").logger("jivelite.ui")
+local appletManager    = require("jive.AppletManager")
 
 module(..., oo.class)
 
+local fontpath = "fonts/"
+local FONT_NAME = "FreeSans"
+local BOLD_FONT_NAME = "FreeSansBold"
 
+function setupFonts(self)
+	-- load the font settings directly
+	local fonts = appletManager:loadFontSettings()
+	if fonts ~= nil then
+		log:info("got font settings: regular:", fonts['regular'], " bold:" , fonts['bold'])
+		if fonts['regular'] ~= nil then
+	ONT_NAME = fonts['regular']
+		end
+
+		if fonts['bold'] ~= nil then
+			BOLD_FONT_NAME = fonts['bold']
+		end
+	end
+	log:info("fonts: regular:", FONT_NAME, " bold:" , BOLD_FONT_NAME)
+	-- setup the default font for C code
+	self:default(fontpath .. FONT_NAME .. ".ttf")
+end
+
+function regularFont(self, fontSize)
+	return self:load(fontpath .. FONT_NAME .. ".ttf", fontSize)
+end
+
+function boldFont(self, fontSize)
+	return self:load(fontpath .. BOLD_FONT_NAME .. ".ttf", fontSize)
+end
 --[[
 
 =head1 LICENSE
