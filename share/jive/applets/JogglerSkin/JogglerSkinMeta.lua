@@ -36,7 +36,7 @@ function jiveVersion(self)
 end
 
 function defaultSettings(self)
-	return { 
+	return {
 		rew = true, 
 		play = true, 
 		fwd = true,

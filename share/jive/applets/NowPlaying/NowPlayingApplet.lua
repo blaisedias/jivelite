@@ -396,7 +396,7 @@ end
 function npVUSettingsShow(self)
 	local window = Window("text_list", self:string('SELECT_VUMETER') )
 --	local window = Window("text_list", "VU Meter" )
-	local group = RadioGroup()
+--	local group = RadioGroup()
 
 	local menu = SimpleMenu("menu")
 
@@ -468,7 +468,7 @@ end
 
 function npSpectrumSettingsShow(self)
 	local window = Window("text_list", self:string('SELECT_SPECTRUM') )
-	local group = RadioGroup()
+--	local group = RadioGroup()
 
 	local menu = SimpleMenu("menu")
 
