@@ -51,9 +51,6 @@ local jogglerSkinAlarmX = 748
 local jogglerSkinAlarmY = 11
 
 -- Define useful variables for this skin
-local fontpath = "fonts/"
-local FONT_NAME = "FreeSans"
-local BOLD_PREFIX = "Bold"
 
 local function _isJogglerSkin(skinName)
 	if string.match(skinName, 'PiGridSkin') or string.match(skinName, 'JogglerSkin') then
@@ -97,12 +94,12 @@ end
 
 -- define a local function that makes it easier to set fonts
 local function _font(fontSize)
-    return Font:load(fontpath .. FONT_NAME .. ".ttf", fontSize)
+    return Font:regularFont(fontSize)
 end
 
 -- define a local function that makes it easier to set bold fonts
 local function _boldfont(fontSize)
-    return Font:load(fontpath .. FONT_NAME .. BOLD_PREFIX .. ".ttf", fontSize)
+    return Font:boldFont(fontSize)
 end
 
 -- defines a new style that inherrits from an existing style
