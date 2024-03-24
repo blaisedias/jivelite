@@ -540,6 +540,10 @@ int main (int argc, char **argv) {
 	// say hello
 #if !defined(WIN32)
 	l_message(NULL, "\nJiveLite " JIVE_VERSION);
+// FIXME: make features selectable by defines
+	l_message(NULL, "features:");
+	l_message(NULL, "        : savePNG");
+	l_message(NULL, "        : default font");
 #endif
 	
 	// create state
