@@ -64,7 +64,7 @@ function configureApplet(self)
 --	self.vic_checkbox:setSelected(visImage:getCacheEnabled())
     local icon = 'hm_settings'
 
-	-- we only register the menu her, as registerApplet is being called before the skin is initialized
+	-- we only register the menu here, as registerApplet is being called before the skin is initialized
     jiveMain:addItem(
     	self:menuItem(
     		'VisualiserApplet',
