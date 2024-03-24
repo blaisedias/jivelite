@@ -23,7 +23,7 @@ local Choice            = require("jive.ui.Choice")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local visImage          = require("jive.visImage")
-local log			    = require("jive.utils.log").logger("jivelite.vis")
+local log			    = require("jive.utils.log").logger("applet.Visualiser")
 
 local debug             = require("jive.utils.debug")
 
