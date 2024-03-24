@@ -818,6 +818,32 @@ function callService(self, service, ...)
 	return _applet[service](_applet, ...)
 end
 
+-- helper function to load font settings.
+-- FIXME: delegate to applet SelectFonts (TBD)
+function loadFontSettings(self)
+	local settingsFilepath = _usersettingsdir .. "/SelectFonts.lua"
+	local fh = io.open(settingsFilepath)
+
+	log:info('loadFontSettings settingsFilePath:', settingsFilepath, " filehandle:", fh)
+
+	if fh == nil then
+		-- no settings file
+		return nil
+	end
+
+	local f, err = load(function() return fh:read() end)
+	fh:close()
+
+	if not f then
+		return nil
+	else
+		local env = {}
+		setfenv(f, env)
+		f()
+		return env.settings
+	end
+	return nil
+end
 
 --[[
 

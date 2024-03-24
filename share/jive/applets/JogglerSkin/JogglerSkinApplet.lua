@@ -94,9 +94,6 @@ oo.class(_M, Applet)
 
 -- Define useful variables for this skin
 local imgpath = "applets/JogglerSkin/images/"
-local fontpath = "fonts/"
-local FONT_NAME = "FreeSans"
-local BOLD_PREFIX = "Bold"
 
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'volDown', 'volSlider', 'volUp' }
 
@@ -314,12 +311,12 @@ end
 
 -- define a local function that makes it easier to set fonts
 local function _font(fontSize)
-	return Font:load(fontpath .. FONT_NAME .. ".ttf", fontSize)
+	return Font:regularFont(fontSize)
 end
 
 -- define a local function that makes it easier to set bold fonts
 local function _boldfont(fontSize)
-	return Font:load(fontpath .. FONT_NAME .. BOLD_PREFIX .. ".ttf", fontSize)
+	return Font:boldFont(fontSize)
 end
 
 -- defines a new style that inherrits from an existing style
@@ -937,7 +934,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
         })
 
 --------- DEFAULT WIDGET STYLES ---------
-	--
+    --
 	-- These are the default styles for the widgets 
 
 	s.window = {
