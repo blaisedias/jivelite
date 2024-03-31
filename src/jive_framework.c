@@ -42,6 +42,10 @@ static bool update_screen = true;
 static JiveTile *jive_background = NULL;
 
 static Uint16 screen_w, screen_h, screen_bpp;
+/* display width and height orignally reported by SDL prior to any calls
+ * to set video mode
+ */
+static Uint16 display_w, display_h;
 
 static bool screen_isfull = false;
 
@@ -269,10 +273,15 @@ static int jiveL_initSDL(lua_State *L) {
 		jive_surface_free(icon);
 	}
 
-	screen_w = video_info->current_w;
-	screen_h = video_info->current_h;
+	display_w = screen_w = video_info->current_w;
+	display_h = screen_h = video_info->current_h;
 
 	screen_bpp = video_info->vfmt->BitsPerPixel;
+	fprintf(stderr, "display resolution: %dx%d BitsPerPixel:%d wmAvailable:%d\n",
+            (int)screen_w, (int)screen_h,
+            (int)screen_bpp,
+            (int)video_info->wm_available
+            );
 
 	splash = NULL;
 	if (!video_info->wm_available) {
@@ -286,12 +295,15 @@ static int jiveL_initSDL(lua_State *L) {
 		splash = jive_surface_load_image("jive/splash.png");
 	}
 	
+
 	if (splash) {
 		jive_surface_get_size(splash, &splash_w, &splash_h);
-		if (video_info->wm_available) {
-			screen_w = splash_w;
-			screen_h = splash_h;
-		}
+	}
+
+	if (video_info->wm_available) {
+		screen_w = 640;
+		screen_h = 480;
+		fprintf(stderr, "window manager available setting intial screen to: %dx%d\n", (int)screen_w, (int)screen_h);
 	}
 
 	srf = jive_surface_set_video_mode(screen_w, screen_h, screen_bpp, video_info->wm_available ? false : true);
@@ -324,6 +336,12 @@ static int jiveL_initSDL(lua_State *L) {
 	lua_rawseti(L, -2, 3);
 	lua_pushinteger(L, screen_h);
 	lua_rawseti(L, -2, 4);
+	lua_pushinteger(L, display_w);
+	lua_rawseti(L, -2, 5);
+	lua_pushinteger(L, display_h);
+	lua_rawseti(L, -2, 6);
+	lua_pushinteger(L, (Uint16)video_info->wm_available);
+	lua_rawseti(L, -2, 7);
 	lua_pop(L, 2);
 
 	/* background image */
