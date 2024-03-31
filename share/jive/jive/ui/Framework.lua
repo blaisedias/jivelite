@@ -98,7 +98,8 @@ sound = {} -- sounds
 soundEnabled = {} -- sound enabled state
 
 screen = {}
-screen.bounds = { 0, 0, 0, 0 }
+--                x  y  w  h  dw dh wm
+screen.bounds = { 0, 0, 0, 0, 0, 0, 0}
 
 actions = {}
 actions.byName = {}
@@ -258,6 +259,13 @@ function init(self)
 	-- initialize SDL
 	self:initSDL()
 
+        local dispw, disph = self:getDisplaySize()
+        local wmAvailable = self:getWmAvailable()
+        log:info("#######################################")
+        log:info("wmAvailable: ", wmAvailable)
+        log:info("display WxH: ", dispw, ' x ', disph)
+        log:info("#######################################")
+
 	-- action mapping listener, should be last listener in chain to 
 	-- allow for direct access to keys/other input types if needed.
 	self:addListener(bit.bor(jive.ui.EVENT_KEY_ALL, jive.ui.EVENT_CHAR_PRESS, jive.ui.EVENT_IR_ALL, jive.ui.EVENT_GESTURE),
@@ -408,7 +416,6 @@ function isWindowInStack(self, window)
 	return false
 end
 
-
 --[[
 
 =head2 jive.ui.Framework:getScreenSize()
@@ -420,6 +427,33 @@ Returns I<w, h> the current screen size.
 function getScreenSize(self)
 	local bounds = screen.bounds
 	return bounds[3], bounds[4]
+end
+
+
+--[[
+
+=head2 jive.ui.Framework:getDisplaySize()
+
+Returns I<w, h, wm> the current DisplaySize size.
+
+=cut
+--]]
+function getDisplaySize(self)
+	local bounds = screen.bounds
+	return bounds[5], bounds[6]
+end
+
+
+--[[
+
+=head2 jive.ui.Framework:isWindowed()
+
+Returns B<wm> the current DisplaySize size.
+
+=cut
+--]]
+function getWmAvailable(self)
+    return screen.bounds[7] ~= 0
 end
 
 

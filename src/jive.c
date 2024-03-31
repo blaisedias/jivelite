@@ -544,6 +544,7 @@ int main (int argc, char **argv) {
 	l_message(NULL, "features:");
 	l_message(NULL, "        : savePNG");
 	l_message(NULL, "        : default font");
+	l_message(NULL, "        : displaySize");
 #endif
 	
 	// create state
