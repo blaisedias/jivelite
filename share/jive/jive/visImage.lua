@@ -264,9 +264,12 @@ function cacheClear(tbl)
 	imCacheClear()	
 end
 
-
 function _readCacheDir(search_root)
 	log:info("_readCacheDir", " ", search_root)
+
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
 
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
@@ -479,6 +482,10 @@ end
 
 --FIXME make idempotent
 function _populateSpectrumBacklitList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
+
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
@@ -505,6 +512,10 @@ end
 
 --FIXME make idempotent
 function _populateSpectrumImageList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
+
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
@@ -981,6 +992,10 @@ function _cacheVUImage(imgName, path, w, h)
 end
 
 function _populateVfdVuMeterList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
+
 	for entry in lfs.dir(search_root) do
 		if entry ~= "." and entry ~= ".." then
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
@@ -1010,6 +1025,10 @@ function _initVfdVuMeterList(rpath)
 end
 
 function _populateAnalogueVuMeterList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
+
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
