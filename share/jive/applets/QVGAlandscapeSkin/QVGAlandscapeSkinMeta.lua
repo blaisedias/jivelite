@@ -23,6 +23,7 @@ local AppletMeta    = require("jive.AppletMeta")
 local appletManager = appletManager
 local jiveMain      = jiveMain
 local debug         = require('jive.utils.debug')
+local Framework     = require("jive.ui.Framework")
 
 
 module(...)
@@ -38,6 +39,12 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
+	if Framework:getWmAvailable() == false then
+			skin_width, skin_height = Framework:getDisplaySize()
+			if skin_width >= 800 and skin_height >= 480 then
+				return
+			end
+	end
 	jiveMain:registerSkin(self:string("QVGALANDSCAPE_SKIN"), "QVGAlandscapeSkin", "skin")
 end
 
