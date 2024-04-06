@@ -655,7 +655,20 @@ end
 
 
 function JiveMain:getDefaultSkin()
-	return _defaultSkin or "QVGAportraitSkin"
+    if _defaultSkin ~= nil then
+        return _defaultSkin
+    else
+        if FrameWork:getWmAvailable() == false then
+            -- no window manager => embedded system and full screen
+            -- for larger displays default to Joggler skin
+	        local dispW, dispH = Framework:getDisplaySize()
+	        log:info("Display size:", dispW, 'x', dispH)
+	        if dispW >= 800 or dispH >= 480 then
+	            return "JogglerSkin"
+	        end
+        end
+    end
+	return "QVGAportraitSkin"
 end
 
 
