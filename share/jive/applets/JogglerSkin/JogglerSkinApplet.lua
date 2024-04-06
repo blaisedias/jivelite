@@ -341,9 +341,7 @@ end
 
 -- skin
 -- The meta arranges for this to be called to skin the interface.
-function skin(self, s, reload, useDefaultSize, w, h)
-	if (not w) then w = 800 end
-	if (not h) then h = 480 end
+function skin0(self, s, reload, useDefaultSize, w, h)
 	
 	Framework:setVideoMode(w, h, 0, false)
 
@@ -4324,88 +4322,58 @@ function buttonSettingsMenuItem(self)
 	}
 end
 
-
 function skin1024x600(self, s, reload, useDefaultSize)
-	self:skin(s, reload, useDefaultSize, 1024, 600)
-
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 230
-	s.nowplaying.npcontrols.div5.img = false
-	
-	return s
+	return self:skin(s, reload, useDefaultSize, 1024, 600)
 end
 
 function skin1280x400(self, s, reload, useDefaultSize, w, h)
-	self:skin(s, reload, useDefaultSize, 1280, 400)
-	
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 490
-	s.nowplaying.npcontrols.div5.img = false
-
-	return s
+	return self:skin(s, reload, useDefaultSize, 1280, 400)
 end
 
 function skin1280x800(self, s, reload, useDefaultSize, w, h)
-	self:skin(s, reload, useDefaultSize, w or 1280, h or 800)
-	
-	local c = s.CONSTANTS
-
-	s.nowplaying.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-	s.nowplaying.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-	s.nowplaying.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-
-	s.nowplaying_large_art.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-	s.nowplaying_large_art.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-	s.nowplaying_large_art.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
-
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 490
-	s.nowplaying.npcontrols.div5.img = false
-
-	return s
+	return self:skin(s, reload, useDefaultSize, w or 1280, h or 800)
 end
 
 function skin1366x768(self, s, reload, useDefaultSize)
-	self:skin(s, reload, useDefaultSize, 1366, 768)
-
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 568
-	s.nowplaying.npcontrols.div5.img = false
-
-	return s
+	return self:skin(s, reload, useDefaultSize, 1366, 768)
 end
 
 function skin1480x320(self, s, reload, useDefaultSize)
-	self:skin(s, reload, useDefaultSize, 1480, 320)
-
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 700
-	s.nowplaying.npcontrols.div5.img = false
-
-	return s
+	return self:skin(s, reload, useDefaultSize, 1480, 320)
 end
 
 function skin1600x720(self, s, reload, useDefaultSize)
-	self:skin(s, reload, useDefaultSize, 1600, 720)
-
-	-- put a space between volume controls and other buttons	
-	s.nowplaying.npcontrols.div5.w = 800
-	s.nowplaying.npcontrols.div5.img = false
-
-	return s
+	return self:skin(s, reload, useDefaultSize, 1600, 720)
 end
 
 function skinCustom(self, s, reload, useDefaultSize)
 	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH'))
 	local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT'))
 
-	self:skin(s, reload, useDefaultSize, screen_width, screen_height)
+	return self:skin(s, reload, useDefaultSize, screen_width, screen_height)
+end
+
+function skin(self, s, reload, useDefaultSize, skin_width, skin_height)
+	if not Framework:getWmAvailable() then
+		skin_width, skin_height = Framework:getDisplaySize()
+		log:info("from SDL ", skin_width, "x", skin_height)
+	else
+        if not skin_width or not skin_height then
+			skin_width = 800
+			skin_height = 480
+			log:info("defaulted ", skin_width, "x", skin_height)
+		end
+	end
+
+	log:info("screen: ", skin_width, "x", skin_height)
+	self:skin0(s, reload, useDefaultSize, skin_width, skin_height)
 	
 	-- now let's tweak a few elements for some well known resolutions
 	-- put a space between volume controls and other buttons etc.	
 	local c = s.CONSTANTS
 	
 	local _largerFont = function()
+		log:info("larger fonts")
 		-- we can afford slightly larger fonts in the Now Playing screen
 		s.nowplaying.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
 		s.nowplaying.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
@@ -4416,17 +4384,29 @@ function skinCustom(self, s, reload, useDefaultSize)
 		s.nowplaying_large_art.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 1.2) 
 	end
 
-	if screen_width == 1024 and screen_height == 600 then
-		s.nowplaying.npcontrols.div5.w = 230
+	local _smallerFont = function()
+		log:info("smaller fonts")
+		-- we can slightly smaller fonts in the Now Playing screen
+		s.nowplaying.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+		s.nowplaying.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+		s.nowplaying.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+	
+		s.nowplaying_large_art.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+		s.nowplaying_large_art.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+		s.nowplaying_large_art.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
+	end
+
+	if skin_width > 800 then
+		s.nowplaying.npcontrols.div5.w = skin_width - 800
 		s.nowplaying.npcontrols.div5.img = false
-	elseif screen_width == 1280 and screen_height == 800 then
-		s.nowplaying.npcontrols.div5.w = 490
-		s.nowplaying.npcontrols.div5.img = false
+	end
+
+	if skin_width >= 1280 and skin_height >= 600  then
 		_largerFont()
-	elseif screen_width == 1366 and screen_height == 768 then
-		s.nowplaying.npcontrols.div5.w = 568
-		s.nowplaying.npcontrols.div5.img = false
-		_largerFont()
+	end
+
+	if skin_height < 480  then
+		_smallerFont()
 	end
 
 	return s
