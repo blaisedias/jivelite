@@ -39,19 +39,33 @@ local Timer            = require("jive.ui.Timer")
 local appletManager   = appletManager
 
 local JiveMain        = jiveMain
+local log             = require("jive.utils.log").logger("applet.SelectSkin")
 
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
 
 local _defaultSkinNameForType = {
-		["touch"] = "PiGridSkin_800x480",
-		["remote"] = "PiGridSkin_800x480",
+		["touch"] = "WQVGAsmallSkin",
+		["remote"] = "WQVGAlargeSkin",
 }
-
 
 --service method
 function getSelectedSkinNameForType(self, skinType)
+	if Framework:getWmAvailable() == false then
+		-- No window manager => embedded system and full screen
+		-- for larger displays default to Joggler skin
+		local dispW, dispH = Framework:getDisplaySize()
+		log:info("Display size:", dispW, 'x', dispH, ", wmAvailable:", wmAvailable)
+        -- FIXME: skinType is ignored
+		if dispW >= 800 or dispH >= 480 then
+			return self:getSettings()[skinType] or "JogglerSkin"
+		end
+        if dispW == 400 and dispH == 240 then
+			return self:getSettings()[skinType] or "WQVGAsmallSkin"
+        end
+        -- FIXME: QVGA 
+	end
 	return self:getSettings()[skinType] or _defaultSkinNameForType[skinType]
 end
 
