@@ -1,3 +1,6 @@
+HD_SKIN
+	EN	HD Skin
+
 HD_SKIN_1080
 	EN	HD Skin (1920x1080)
 
