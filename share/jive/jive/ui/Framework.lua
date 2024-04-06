@@ -440,6 +440,10 @@ Returns I<w, h, wm> the current DisplaySize size.
 --]]
 function getDisplaySize(self)
 	local bounds = screen.bounds
+    if bounds[5] > 1920 and bounds[6] > 1080 then
+        log:info("capping display resolution to 1920x1080 from ", bounds[5],'x',bounds[6])
+        return 1920, 1080
+    end
 	return bounds[5], bounds[6]
 end
 
@@ -453,7 +457,8 @@ Returns B<wm> the current DisplaySize size.
 =cut
 --]]
 function getWmAvailable(self)
-    return screen.bounds[7] ~= 0
+    return false
+--    return screen.bounds[7] ~= 0
 end
 
 
