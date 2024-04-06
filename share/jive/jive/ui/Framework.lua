@@ -457,8 +457,7 @@ Returns B<wm> the current DisplaySize size.
 =cut
 --]]
 function getWmAvailable(self)
-    return false
---    return screen.bounds[7] ~= 0
+    return screen.bounds[7] ~= 0
 end
 
 
