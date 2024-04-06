@@ -25,6 +25,7 @@ local AppletMeta    = require("jive.AppletMeta")
 
 local appletManager = appletManager
 local jiveMain      = jiveMain
+local Framework     = require("jive.ui.Framework")
 
 
 module(...)
@@ -40,23 +41,24 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
-	jiveMain:registerSkin(self:string("PIGRID_SKIN"), "PiGridSkin", "skin", "PiGridSkin")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1024_600"), "PiGridSkin", "skin1024x600", "PiGridSkin_1024x600")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_400"), "PiGridSkin", "skin1280x400", "PiGridSkin_1280x400")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_800"), "PiGridSkin", "skin1280x800", "PiGridSkin_1280x800")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1366_768"), "PiGridSkin", "skin1366x768", "PiGridSkin_1366x768")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1480_320"), "PiGridSkin", "skin1480x320", "PiGridSkin_1480x320")
-	jiveMain:registerSkin(self:string("PIGRID_SKIN_1600_720"), "PiGridSkin", "skin1600x720", "PiGridSkin_1600x720")
-	
-	-- allow user to define a custom screen size
-	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
-	local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
-	
-	-- this skin only really works in landscape mode with a decent ratio of > 1.3
-	if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
-		jiveMain:registerSkin(tostring(self:string("PIGRID_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "PiGridSkin", "skinCustom", "PiGridSkin_Custom")
-	elseif screen_width > 0 or screen_height > 0 then
-		log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
+	if Framework:getWmAvailable() == true then
+		jiveMain:registerSkin(self:string("PIGRID_SKIN"), "PiGridSkin", "skin", "PiGridSkin")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1024_600"), "PiGridSkin", "skin1024x600", "PiGridSkin_1024x600")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_400"), "PiGridSkin", "skin1280x400", "PiGridSkin_1280x400")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_800"), "PiGridSkin", "skin1280x800", "PiGridSkin_1280x800")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1366_768"), "PiGridSkin", "skin1366x768", "PiGridSkin_1366x768")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1480_320"), "PiGridSkin", "skin1480x320", "PiGridSkin_1480x320")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1600_720"), "PiGridSkin", "skin1600x720", "PiGridSkin_1600x720")
+		local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
+		local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
+		-- this skin only really works in landscape mode with a decent ratio of > 1.3
+		if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
+			jiveMain:registerSkin(tostring(self:string("PIGRID_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "PiGridSkin", "skinCustom", "PiGridSkin_Custom")
+		elseif screen_width > 0 or screen_height > 0 then
+			log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
+		end
+	else
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_NORES"), "PiGridSkin", "skin", "PiGridSkin")
 	end
 end
 

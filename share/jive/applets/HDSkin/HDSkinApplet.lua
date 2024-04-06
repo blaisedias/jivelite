@@ -8,7 +8,8 @@ applets.HDSkin.HDSkinApplet
 
 
 -- stuff we use
-local ipairs, pairs, setmetatable, type, tostring = ipairs, pairs, setmetatable, type, tostring
+local ipairs, pairs, setmetatable, type, tostring, tonumber = ipairs, pairs, setmetatable, type, tostring, tonumber
+local os                     = require("os")
 
 local oo                     = require("loop.simple")
 
@@ -236,6 +237,19 @@ end
 
 -- skin
 -- The meta arranges for this to be called to skin the interface.
+function skin_hd(self, s)
+	local skin_width = 1920
+	local skin_height = 1080
+	if not Framework:getWmAvailable() then
+    	skin_width, skin_height = Framework:getDisplaySize()
+   		log:info("from display ", skin_width, "x", skin_height)
+	else
+		log:info("defaulted ", skin_width, "x", skin_height)
+	end
+	Framework:setVideoMode(skin_width, skin_height, 0, false)
+	self:skin(s)
+end
+
 function skin_1080p(self, s)
 	Framework:setVideoMode(1920, 1080, 0, false)
 	self:skin(s)
@@ -260,6 +274,14 @@ function skin_wsvga(self, s)
 	Framework:setVideoMode(1024, 600, 0, false)
 	self:skin(s)
 end
+
+function skin_custom(self, s, reload, useDefaultSize)
+	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH'))
+	local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT'))
+	Framework:setVideoMode(screen_width, screen_height, 0, false)
+	return self:skin(s)
+end
+
 
 -- this is the startup screen - not intended to be used beyond this
 function skin_vga(self, s)
