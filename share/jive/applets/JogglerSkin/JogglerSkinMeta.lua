@@ -25,6 +25,7 @@ local AppletMeta    = require("jive.AppletMeta")
 
 local appletManager = appletManager
 local jiveMain      = jiveMain
+local Framework     = require("jive.ui.Framework")
 
 
 module(...)
@@ -53,23 +54,21 @@ function registerApplet(self)
 	self:registerService('getNowPlayingScreenButtons')
 	self:registerService('setNowPlayingScreenButtons')
 
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN"), "JogglerSkin", "skin")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1024_600"), "JogglerSkin", "skin1024x600", "JogglerSkin_1024x600")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_400"), "JogglerSkin", "skin1280x400", "JogglerSkin_1280x400")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_800"), "JogglerSkin", "skin1280x800", "JogglerSkin_1280x800")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1366_768"), "JogglerSkin", "skin1366x768", "JogglerSkin_1366x768")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1480_320"), "JogglerSkin", "skin1480x320", "JogglerSkin_1480x320")
-	jiveMain:registerSkin(self:string("JOGGLER_SKIN_1600_720"), "JogglerSkin", "skin1600x720", "JogglerSkin_1600x720")
-	
-	-- allow user to define a custom screen size
-	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
-	local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
-	
-	-- this skin only really works in landscape mode with a decent ratio of > 1.3
-	if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
-		jiveMain:registerSkin(tostring(self:string("JOGGLER_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "JogglerSkin", "skinCustom", "JogglerSkin_Custom")
-	elseif screen_width > 0 or screen_height > 0 then
-		log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
+	jiveMain:registerSkin(self:string("JOGGLER_SKIN"), "JogglerSkin", "skin", "JogglerSkin")
+	if Framework:getWmAvailable() == true then
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1024_600"), "JogglerSkin", "skin1024x600", "JogglerSkin_1024x600")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_400"), "JogglerSkin", "skin1280x400", "JogglerSkin_1280x400")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_800"), "JogglerSkin", "skin1280x800", "JogglerSkin_1280x800")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1366_768"), "JogglerSkin", "skin1366x768", "JogglerSkin_1366x768")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1480_320"), "JogglerSkin", "skin1480x320", "JogglerSkin_1480x320")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1600_720"), "JogglerSkin", "skin1600x720", "JogglerSkin_1600x720")
+		local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
+		local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
+		if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
+			jiveMain:registerSkin(tostring(self:string("JOGGLER_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "JogglerSkin", "skinCustom", "JogglerSkin_Custom")
+		elseif screen_width > 0 or screen_height > 0 then
+			log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
+		end
 	end
 end
 
