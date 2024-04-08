@@ -47,21 +47,40 @@ function menu(self, menuItem)
 
     menu:addItem({ text = "Resize Visualiser Images",
         callback = function(event, menuItem)
-            self:resizeImages(self, true, true)
+            self:resizeImages(self, true, true, false)
         end
     })
 
     menu:addItem({ text = "Resize Spectrum Images",
         callback = function(event, menuItem)
-            self:resizeImages(self, true, false)
+            self:resizeImages(self, true, false, false)
         end
     })
 
     menu:addItem({ text = "Resize VU Meter Images",
         callback = function(event, menuItem)
-            self:resizeImages(self, false, true)
+            self:resizeImages(self, false, true, false)
         end
     })
+
+    menu:addItem({ text = "Resize ALL Visualiser Images",
+        callback = function(event, menuItem)
+            self:resizeImages(self, true, true, true)
+        end
+    })
+
+    menu:addItem({ text = "Resize ALL Spectrum Images",
+        callback = function(event, menuItem)
+            self:resizeImages(self, true, false, true)
+        end
+    })
+
+    menu:addItem({ text = "Resize ALL VU Meter Images",
+        callback = function(event, menuItem)
+            self:resizeImages(self, false, true, true)
+        end
+    })
+
 
     window:addWidget(menu)
 
@@ -69,7 +88,7 @@ function menu(self, menuItem)
     return window
 end
 
-function resizeImages(tbl, self, bSpectrum, bVuMeters)
+function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
 
         local popup = Popup("toast_popup_text")
 
@@ -89,7 +108,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters)
         tmp = visImage:getSpectrumList()
         if bSpectrum then
             for k, v in pairs(tmp) do
-                if v.enabled and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
+                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
                     table.insert(spectrum_names, v.name)
                 end
             end
@@ -99,7 +118,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters)
         local vumeter_names = {}
         if bVuMeters then
             for k, v in pairs(tmp) do
-                if v.enabled and v.vutype == "frame" then
+                if (all or v.enabled) and v.vutype == "frame" then
                     table.insert(vumeter_names, v.name)
                 end
             end
@@ -108,7 +127,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters)
         local state = "resize sp"
         local i_vu = 1
         local i_sp = 1
-        popup:addTimer(500, function()
+        popup:addTimer(50, function()
                 if state == "resize sp" then
                     if i_sp <= #spectrum_names then
                         local spectrum_meter_name = spectrum_names[i_sp]
