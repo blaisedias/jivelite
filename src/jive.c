@@ -539,11 +539,15 @@ int main (int argc, char **argv) {
 
 	// say hello
 #if !defined(WIN32)
+#if defined SRC_GIT_VERSION
+	l_message(NULL, "\nJiveLite " JIVE_VERSION " src:rev:" SRC_GIT_VERSION);
+#else
 	l_message(NULL, "\nJiveLite " JIVE_VERSION);
+#endif
 // FIXME: make features selectable by defines
 	l_message(NULL, "features:");
 	l_message(NULL, "        : savePNG");
-	l_message(NULL, "        : default font");
+	l_message(NULL, "        : fontSelection");
 	l_message(NULL, "        : displaySize");
 #endif
 	
