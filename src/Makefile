@@ -1,6 +1,8 @@
 LDFLAGS ?= -lrt
 SOURCES ?= platform_linux.c
 
+SRC_GIT_VERSION := "$(shell git rev-parse HEAD:src)"
+CFLAGS += -DSRC_GIT_VERSION=\"$(SRC_GIT_VERSION)\"
 CFLAGS  += -I. -I$(PREFIX)/include/luajit-$(LUAJIT_VERSION)  -I/usr/include/SDL -ISDL_SavePNG -Wall -fPIC
 LDFLAGS += -lSDL -lSDL_ttf -lSDL_image -lSDL_gfx -lluajit-5.1 -lm -lpthread -lpng
 EXE = ../bin/jivelite
