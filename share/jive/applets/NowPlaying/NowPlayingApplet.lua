@@ -183,13 +183,6 @@ function init(self)
 	end
 
 
-	if settings.cacheEnabled == nil then
-		settings.cacheEnabled = visImage:getCacheEnabled()
-	else
-		visImage:setCacheEnabled(settings.cacheEnabled)
-	end
-
-
 	if not settings.channelFlip then
 		settings.channelFlip = visImage:getChannelFlip()
 	else
@@ -2418,7 +2411,6 @@ function updateSettings(self)
 	settings.baselineAlways = visImage:getBaselineAlways()
 	settings.spectrumTurbine = visImage:getSpectrumTurbine()
 	settings.channelFlip = visImage:getChannelFlip()
-	settings.cacheEnabled = visImage:getCacheEnabled()
 
 	self:storeSettings()
 	visImage:sync()

@@ -28,7 +28,7 @@ local Framework     = require("jive.ui.Framework")
 local appletManager = appletManager
 local jiveMain      = jiveMain
 --local Checkbox      = require("jive.ui.Checkbox")
---local visImage      = require("jive.visImage")
+local visImage      = require("jive.visImage")
 --local os            = require("os")
 
 --local arg, ipairs, string = arg, ipairs, string
@@ -45,7 +45,7 @@ end
 function defaultSettings(self)
 	return {
 		cacheEnabled=false,
-		randomSequence=true,
+		randomSequence=false,
 		spectrum={
 			baselineOn=true,
 			baselineAlways=false,
@@ -63,22 +63,13 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
-	-- we only register the menu here, as registerApplet is being called before the skin is initialized
---	jiveMain:addItem(
---		self:menuItem(
---			'VisualiserApplet',
---			'settings',
---			'Visualiser',
---			function(applet, ...) 
---				applet:menu(...)
---			end,
---			100,
---			nil,
---			'hm_settings'
---		)
---	)
+	-- early setup of visualiser image module settings
+	local settings = self:getSettings()
+	visImage:setVisSettings(settings)
+
 	local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  } 
-	jiveMain:addNode( node )
+
+	jiveMain:addNode(node)
 	jiveMain:addItem(
 		self:menuItem(
 			'appletVisualiserSettings',
@@ -93,6 +84,6 @@ end
 
 function configureApplet(self)
 	-- make resident applet
-	appletManager:loadApplet("Visualiser")
+	-- appletManager:loadApplet("Visualiser")
 end
 
