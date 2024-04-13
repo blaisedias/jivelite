@@ -1,6 +1,7 @@
 local tostring          = tostring
 local tonumber          = tonumber
 local pairs             = pairs
+local ipairs            = ipairs
 
 local table             = require("table")
 local string            = require("string")
@@ -19,6 +20,8 @@ local Textarea          = require("jive.ui.Textarea")
 local Group             = require("jive.ui.Group")
 local Framework         = require("jive.ui.Framework")
 local Checkbox          = require("jive.ui.Checkbox")
+local RadioButton       = require("jive.ui.RadioButton")
+local RadioGroup        = require("jive.ui.RadioGroup")
 local Choice            = require("jive.ui.Choice")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
@@ -42,7 +45,7 @@ function init(self)
     jiveMain:addItem({
         id = "vic",
         node = 'visualiserSettings',
-        text = "Cache Visualiser Images in RAM",
+        text = self:string("VISUALISER_CACHE_IMAGE_RAM"),
         style = 'item_choice',
         check = Checkbox("checkbox", function(applet, checked)
             local cb_settings = self:getSettings()
@@ -55,7 +58,7 @@ function init(self)
     jiveMain:addItem({ 
         id = "viseqrand",
         node = 'visualiserSettings',
-        text = "Randomise Visualiser Sequence",
+        text = self:string("VISUALISER_RANDOMISE_SEQUENCE"),
         style = 'item_choice',
         check =  Checkbox("checkbox", function(applet, checked)
             local cb_settings = self:getSettings()
@@ -64,6 +67,59 @@ function init(self)
         	end,
             settings.randomSequence)
     })
+
+	jiveMain:addItem({
+		id = "caps_on",
+		node = "visualiserSpectrumSettings",
+		text = self:string('SPECTRUM_CAPS'),
+		style = 'item_choice',
+		check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.capsOn = checked
+    		self:storeSettings()
+    	end,
+        settings.spectrum.capsOn)
+	})
+ 
+	jiveMain:addItem({
+		id = "turbine",
+		node = "visualiserSpectrumSettings",
+		text = self:string('SPECTRUM_TURBINE'),
+		style = 'item_choice',
+		check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.turbine = checked
+    		self:storeSettings()
+    	end,
+        settings.spectrum.turbine)
+	})
+ 
+	jiveMain:addItem({
+		id = "baselineOn",
+		node = "visualiserSpectrumSettings",
+		text = self:string('SPECTRUM_BASELINEON'),
+		style = 'item_choice',
+		check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.baselineOn = checked
+    		self:storeSettings()
+    	end,
+        settings.spectrum.baselineOn)
+	})
+ 
+	jiveMain:addItem({
+		id = "baselineAlways",
+		node = "visualiserSpectrumSettings",
+		text = self:string('SPECTRUM_BASELINEALWAYS'),
+		style = 'item_choice',
+		check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.baselineAlways = checked
+    		self:storeSettings()
+    	end,
+        settings.spectrum.baselineAlways)
+	})
+    
 end
 
 function imagesMenu(self, menuItem)
@@ -113,6 +169,103 @@ function imagesMenu(self, menuItem)
     })
     window:addWidget(menu)
     window:show()
+end
+
+local channelFlips  = {
+	{name="Low Freq > High Freq, High Freq > Low Freq", values={0,1}},
+	{name="High Freq > Low Freq, High Freq > Low Freq", values={1,1}},
+	{name="High Freq > Low Freq, Low Freq > High Freq", values={1,0}},
+	{name="Low Freq > High Freq, Low Freq > High Freq", values={0,0}},
+}
+
+function selectSpectrumChannelFlip(self)
+    local window = Window("text_list", "SPECTRUM_CHANNEL_FLIP")
+    local menu = SimpleMenu("menu")
+	local group = RadioGroup()
+    local settings = self:getSettings()
+
+    local current = settings.spectrum.channelFlip
+    log:info("###### 1")
+	for i, v in ipairs(channelFlips) do
+        log:info("###### 2 ", i)
+		menu:addItem( {
+			text = v.name,
+			style = 'item_choice',
+			check = RadioButton("radio", group,
+				function()
+                    local rb_settings = self:getSettings()
+					rb_settings.spectrum.channelFlip=v
+					self:storeSettings()
+				end,
+			v.name == current.name),
+		} )
+	end
+
+    window:addWidget(menu)
+    window:show()
+end
+
+local barsFormats  = {
+	{name="2-1-3-6", values={barsInBin=2, barWidth=1, barSpace=3, binSpace=6}},
+	{name="2-2-3-4", values={barsInBin=2, barWidth=2, barSpace=3, binSpace=4}},
+	{name="2-3-3-2", values={barsInBin=2, barWidth=3, barSpace=3, binSpace=2}},
+	{name="2-4-1-4", values={barsInBin=2, barWidth=4, barSpace=1, binSpace=4}},
+	{name="1-10-0-10", values={barsInBin=1, barWidth=10, barSpace=0, binSpace=10}},
+	{name="2-03-2-10", values={barsInBin=2, barWidth=3, barSpace=2, binSpace=10}},
+	{name="2-04-3-06", values={barsInBin=2, barWidth=4, barSpace=3, binSpace=6}},
+	{name="3-03-2-05", values={barsInBin=3, barWidth=3, barSpace=2, binSpace=5}},
+	{name="4-02-2-04", values={barsInBin=4, barWidth=2, barSpace=2, binSpace=4}},
+	{name="1-15-0-5", values={barsInBin=1, barWidth=15, barSpace=0, binSpace=5}},
+	{name="1-18-0-2", values={barsInBin=1, barWidth=18, barSpace=0, binSpace=2}},
+	{name="2-07-2-5", values={barsInBin=2, barWidth=7, barSpace=2, binSpace=5}},
+	{name="2-05-4-5", values={barsInBin=2, barWidth=5, barSpace=4, binSpace=5}},
+	{name="3-03-2-5", values={barsInBin=3, barWidth=3, barSpace=2, binSpace=5}},
+	{name="1-10-0-5", values={barsInBin=1, barWidth=10, barSpace=0, binSpace=5}},
+	{name="1-13-0-2", values={barsInBin=1, barWidth=13, barSpace=0, binSpace=2}},
+	{name="1-4-0-6", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=6}},
+	{name="1-6-0-4", values={barsInBin=1, barWidth=6, barSpace=0, binSpace=4}},
+	{name="1-8-0-2", values={barsInBin=1, barWidth=8, barSpace=0, binSpace=2}},
+	{name="1-5-0-5", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=5}},
+	{name="1-5-0-3", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=3}},
+	{name="1-4-0-4", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=4}},
+	{name="1-4-0-3", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=3}},
+	{name="1-5-0-2", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=2}},
+	{name="2-2-1-2", values={barsInBin=2, barWidth=2, barSpace=1, binSpace=2}},
+	{name="1-4-0-2", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=2}},
+	{name="1-3-0-3", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=3}},
+	{name="1-3-0-2", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=2}},
+	{name="2-1-1-2", values={barsInBin=2, barWidth=1, barSpace=1, binSpace=2}},
+	{name="1-2-0-2", values={barsInBin=1, barWidth=2, barSpace=0, binSpace=2}},
+	{name="1-3-0-1", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=1}},
+	{name="1-2-0-1", values={barsInBin=1, barWidth=2, barSpace=0, binSpace=1}},
+	{name="1-1-1-1", values={barsInBin=1, barWidth=1, barSpace=0, binSpace=1}},
+}
+
+
+function selectSpectrumBarsFormat(self)
+	local window = Window("text_list", self:string('SPECTRUM_BARS_FORMAT') )
+	local menu = SimpleMenu("menu")
+	local group = RadioGroup()
+    local settings = self:getSettings()
+
+	local current = settings.spectrum.barsFormat
+
+	for i, v in ipairs(barsFormats) do
+		menu:addItem( {
+			text = v.name,
+			style = 'item_choice',
+			check = RadioButton("radio", group,
+				function()
+                    local rb_settings = self:getSettings()
+					rb_settings.spectrum.barsFormat=v
+					self:storeSettings()
+				end,
+			v.name == current.name),
+		})
+	end
+
+	window:addWidget(menu)
+	window:show()
 end
 
 

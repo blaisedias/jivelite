@@ -48,7 +48,6 @@ local npvumeters = {}
 local npspectrums = {}
 local vuSeq = {}
 local spSeq = {}
-local randomiseSequence = true
 local visSettings = {}
 
 -- set to true to create all resized visualiser images at startup
@@ -287,12 +286,6 @@ end
 function setVisSettings(tbl, settings)
     visSettings = settings
     log:info("setVisSettings: ", settings, " ", visSettings.randomSequence)
-end
-
-function setRandomiseSequence(tbl, v)
-    if v ~= randomiseSequence then
-        randomiseSequence = v
-    end
 end
 
 function initialiseCache()
@@ -789,89 +782,23 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-local backlitAlpha = 80
-
-function setBacklitAlpha(tbl, v)
-	log:debug("setBacklitAlpha ", tbl, "; v=", v)
-	backlitAlpha = v
-end
-
 function getBacklitAlpha()
-	return backlitAlpha
+	return visSettings.spectrum.backlitAlpha
 end
 
 -------------------------------------------------------- 
 --- Spectrum bars format
 -------------------------------------------------------- 
-local barsFormats  = {
-	{name="2-1-3-6", values={barsInBin=2, barWidth=1, barSpace=3, binSpace=6}},
-	{name="2-2-3-4", values={barsInBin=2, barWidth=2, barSpace=3, binSpace=4}},
-	{name="2-3-3-2", values={barsInBin=2, barWidth=3, barSpace=3, binSpace=2}},
-	{name="2-4-1-4", values={barsInBin=2, barWidth=4, barSpace=1, binSpace=4}},
-	{name="1-10-0-10", values={barsInBin=1, barWidth=10, barSpace=0, binSpace=10}},
-	{name="2-03-2-10", values={barsInBin=2, barWidth=3, barSpace=2, binSpace=10}},
-	{name="2-04-3-06", values={barsInBin=2, barWidth=4, barSpace=3, binSpace=6}},
-	{name="3-03-2-05", values={barsInBin=3, barWidth=3, barSpace=2, binSpace=5}},
-	{name="4-02-2-04", values={barsInBin=4, barWidth=2, barSpace=2, binSpace=4}},
-	{name="1-15-0-5", values={barsInBin=1, barWidth=15, barSpace=0, binSpace=5}},
-	{name="1-18-0-2", values={barsInBin=1, barWidth=18, barSpace=0, binSpace=2}},
-	{name="2-07-2-5", values={barsInBin=2, barWidth=7, barSpace=2, binSpace=5}},
-	{name="2-05-4-5", values={barsInBin=2, barWidth=5, barSpace=4, binSpace=5}},
-	{name="3-03-2-5", values={barsInBin=3, barWidth=3, barSpace=2, binSpace=5}},
-	{name="1-10-0-5", values={barsInBin=1, barWidth=10, barSpace=0, binSpace=5}},
-	{name="1-13-0-2", values={barsInBin=1, barWidth=13, barSpace=0, binSpace=2}},
-	{name="1-4-0-6", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=6}},
-	{name="1-6-0-4", values={barsInBin=1, barWidth=6, barSpace=0, binSpace=4}},
-	{name="1-8-0-2", values={barsInBin=1, barWidth=8, barSpace=0, binSpace=2}},
-	{name="1-5-0-5", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=5}},
-	{name="1-5-0-3", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=3}},
-	{name="1-4-0-4", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=4}},
-	{name="1-4-0-3", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=3}},
-	{name="1-5-0-2", values={barsInBin=1, barWidth=5, barSpace=0, binSpace=2}},
-	{name="2-2-1-2", values={barsInBin=2, barWidth=2, barSpace=1, binSpace=2}},
-	{name="1-4-0-2", values={barsInBin=1, barWidth=4, barSpace=0, binSpace=2}},
-	{name="1-3-0-3", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=3}},
-	{name="1-3-0-2", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=2}},
-	{name="2-1-1-2", values={barsInBin=2, barWidth=1, barSpace=1, binSpace=2}},
-	{name="1-2-0-2", values={barsInBin=1, barWidth=2, barSpace=0, binSpace=2}},
-	{name="1-3-0-1", values={barsInBin=1, barWidth=3, barSpace=0, binSpace=1}},
-	{name="1-2-0-1", values={barsInBin=1, barWidth=2, barSpace=0, binSpace=1}},
-	{name="1-1-1-1", values={barsInBin=1, barWidth=1, barSpace=0, binSpace=1}},
-}
-
-local barsFormat  = barsFormats[1]
-
 function getBarsFormat()
-	log:debug("getBarFormat", " ", barsFormat.name)
-	return barsFormat
-end
-
-function getBarFormats()
-	return barsFormats
-end
-
-function setBarsFormat(tbl, format)
-	log:debug("setBarsFormat", " ", format.name)
-	barsFormat = format
+	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat.name)
+	return visSettings.spectrum.barsFormat
 end
 
 -------------------------------------------------------- 
 --- Spectrum caps
 -------------------------------------------------------- 
-local capsOn  = true
-
-function getCapsOn(tbl)
-	log:debug("getCapsOn", " ", capsOn)
-	return capsOn
-end
-
-function setCapsOn(tbl, v)
-	log:debug("setCapsOn", " ", v)
-	capsOn = v
-end
-
 function getCapsValues(tbl, capsHeight, capsSpace)
-	if not capsOn then
+	if not visSettings.spectrum.capsOn then
 		return {0,0}, {0,0}
 	end
 	return capsHeight, capsSpace
@@ -880,80 +807,26 @@ end
 -------------------------------------------------------- 
 --- Spectrum baseline
 -------------------------------------------------------- 
-local baselineAlways  = true
-local baselineOn  = true
-
-function getBaselineAlways(tbl)
-	log:debug("getBaselineAlways", " ", baselineAlways)
-	return baselineAlways
-end
-
-function setBaselineAlways(tbl, v)
-	log:debug("setBaselineAlways", " ", v)
-	baselineAlways = v
-end
-
-function getBaselineOn(tbl)
-	log:debug("getBaselineOn", " ", baselineOn)
-	return baselineOn
-end
-
-function setBaselineOn(tbl, v)
-	log:debug("setBaselineOn", " ", v)
-	baselineOn = v
-end
-
 function getBaselineValues(tbl)
-	return baselineAlways, baselineOn
+	return visSettings.spectrum.baselineAlways, visSettings.spectrum.baselineOn
 end
 
 
 -------------------------------------------------------- 
 --- Spectrum turbine
 -------------------------------------------------------- 
-local spectrumTurbine  = false
-
 function getSpectrumTurbine(tbl)
-	log:debug("getSpectrumTurbine", " ", spectrumTurbine)
-	return spectrumTurbine
-end
-
-function setSpectrumTurbine(tbl, v)
-	log:debug("setSpectrumTurbine", " ", v)
-	spectrumTurbine = v
+	log:debug("getSpectrumTurbine", " ", visSettings.spectrum.turbine)
+	return visSettings.spectrum.turbine
 end
 
 --------------------------------------------------------- 
 --- Spectrum channel flip
 -------------------------------------------------------- 
-local channelFlips  = {
-	{name="Low Freq > High Freq, High Freq > Low Freq", values={0,1}},
-	{name="High Freq > Low Freq, High Freq > Low Freq", values={1,1}},
-	{name="High Freq > Low Freq, Low Freq > High Freq", values={1,0}},
-	{name="Low Freq > High Freq, Low Freq > High Freq", values={0,0}},
-}
-
-local channelFlip  = channelFlips[1]
-
 function getChannelFlipValues()
-	log:debug("getChannelFlipValues", " ", channelFlip.name, " ", channelFlip.values)
-	return channelFlip.values
+	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip.name, " ", visSettings.spectrum.channelFlip.values)
+	return visSettings.spectrum.channelFlip.values
 end
-
-function getChannelFlip()
-	log:debug("getChannelFlip", " ", channelFlip.name)
-	return channelFlip
-end
-
-function getChannelFlips()
-	return channelFlips
-end
-
-function setChannelFlip(tbl, flip)
-	log:debug("setChannelFlip", " ", flip.name)
-	channelFlip = flip
-end
-
 
 -------------------------------------------------------- 
 --- VU meter

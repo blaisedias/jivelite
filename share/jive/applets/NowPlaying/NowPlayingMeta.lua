@@ -45,7 +45,7 @@ function registerApplet(self)
 	)
 	jiveMain:addItem(
 		self:menuItem(
-			'appletNowPlayingVUSettings', 
+			'appletSelectVuMeterSettings', 
 			'screenSettingsNowPlaying', 
 			'SELECT_VUMETER', 
 			function(applet, ...) 
@@ -55,31 +55,11 @@ function registerApplet(self)
 	)
 	jiveMain:addItem(
 		self:menuItem(
-			'appletNowPlayingSpectrumSettings', 
+			'appletSelectSpectrumSettings', 
 			'screenSettingsNowPlaying', 
 			'SELECT_SPECTRUM', 
 			function(applet, ...) 
 				applet:npSpectrumSettingsShow(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletNowPlayingSpectrumBarSettings', 
-			'spectrumSettings', 
-			'SPECTRUM_BARS_FORMAT', 
-			function(applet, ...) 
-				applet:npSpectrumBarSettingsShow(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletNowPlayingSpectrumChannelFlipSettings', 
-			'spectrumSettings', 
-			'SPECTRUM_CHANNEL_FLIP', 
-			function(applet, ...) 
-				applet:npSpectrumChannelFlipSettingsShow(...) 
 			end
 		)
 	)
