@@ -621,7 +621,7 @@ function spBump(tbl, spType)
 	if #spSeq == 0 then
 		populateSpSeq()
 		ShuffleInPlace(spSeq)
-        spSeqIndex = #spSeq +1
+	    spSeqIndex = #spSeq +1
 	end
 
 	if spSeqIndex > #spSeq then
@@ -1093,7 +1093,7 @@ function vuBump()
 	if #vuSeq == 0 then
 		populateVuSeq()
 		ShuffleInPlace(vuSeq)
-        vuSeqIndex = #vuSeq +1
+	    vuSeqIndex = #vuSeq +1
 	end
 	if vuSeqIndex > #vuSeq then
 		vuSeqIndex = 1
@@ -1293,10 +1293,11 @@ end
 -------------------------------------------------------
 --- Resize
 -------------------------------------------------------
-function resizeSpectrums(tbl, name)
+function resizeSpectrumMeter(tbl, name)
 	log:info("resizeSpectrums ", name)
 	for k, v in pairs(spectrumList) do
-		if v.enabled and (name == nil or name == v.name) then
+--		if v.enabled and (name == nil or name == v.name) then
+		if name == v.name then
 			-- create the resized images for skin resolutions 
 			for kr, vr in pairs(spectrumResolutions) do
 				if spectrumImagesMap[v.name].src ~= nil then
@@ -1309,10 +1310,11 @@ function resizeSpectrums(tbl, name)
 	end
 end
 
-function resizeVuMeters(tbl, name)
+function resizeVuMeter(tbl, name)
 	log:info("resizeVuMeters ", name)
 	for k, v in pairs(vuImages) do
-		if v.enabled and (name == nil or name == v.name) then
+--		if v.enabled and (name == nil or name == v.name) then
+		if name == v.name then
 			if v.vutype == "frame" then
 					-- create the resized images for skin resolutions 
 					for kr, vr in pairs(vuMeterResolutions) do

@@ -45,19 +45,19 @@ function menu(self, menuItem)
         end
     })
 
-    menu:addItem({ text = "Resize Visualiser Images",
+    menu:addItem({ text = "Resize Selected Visualiser Images",
         callback = function(event, menuItem)
             self:resizeImages(self, true, true, false)
         end
     })
 
-    menu:addItem({ text = "Resize Spectrum Images",
+    menu:addItem({ text = "Resize Selected Spectrum Images",
         callback = function(event, menuItem)
             self:resizeImages(self, true, false, false)
         end
     })
 
-    menu:addItem({ text = "Resize VU Meter Images",
+    menu:addItem({ text = "Resize Selected VU Meter Images",
         callback = function(event, menuItem)
             self:resizeImages(self, false, true, false)
         end
@@ -80,7 +80,6 @@ function menu(self, menuItem)
             self:resizeImages(self, false, true, true)
         end
     })
-
 
     window:addWidget(menu)
 
@@ -110,6 +109,8 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
             for k, v in pairs(tmp) do
                 if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
                     table.insert(spectrum_names, v.name)
+                else
+                    log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)  
                 end
             end
         end
@@ -120,6 +121,8 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
             for k, v in pairs(tmp) do
                 if (all or v.enabled) and v.vutype == "frame" then
                     table.insert(vumeter_names, v.name)
+                else
+                    log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)  
                 end
             end
         end
@@ -136,7 +139,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
                         -- if the resize op failed
                         i_sp = i_sp + 1
                         text:setValue("Resizing spectrum meter " .. spectrum_meter_name)
-                        visImage:resizeSpectrums(spectrum_meter_name)
+                        visImage:resizeSpectrumMeter(spectrum_meter_name)
                         text:setValue("Resized spectrum meter " .. spectrum_meter_name)
                         log:info("done ", spectrum_meter_name)
                     else
@@ -150,7 +153,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
                         -- if the resize op failed
                         i_vu = i_vu + 1
                         text:setValue("Resizing VU meter " .. vu_meter_name)
-                        visImage:resizeVuMeters(vu_meter_name)
+                        visImage:resizeVuMeter(vu_meter_name)
                         text:setValue("Resized VU meter " .. vu_meter_name)
                         log:info("done ", vu_meter_name)
                     else
@@ -203,11 +206,11 @@ function resizeSpectrumMeter(tbl, self, spectrum_meter_name)
     popup:addWidget(text)
 
     local state = "resize sp"
-    popup:addTimer(250, function()
+    popup:addTimer(50, function()
         if state == "resize sp" then
             if spectrum_meter_name ~= nil then
                 log:info("resize ", spectrum_meter_name, " ", i_sp)
-                visImage:resizeSpectrums(spectrum_meter_name)
+                visImage:resizeSpectrumMeter(spectrum_meter_name)
                 log:info("done ", spectrum_meter_name)
             end
             state = "resize vu"
@@ -260,13 +263,13 @@ function resizeVUMeter(tbl, self, vu_meter_name)
     popup:addWidget(text)
 
     local state = "resize sp"
-    popup:addTimer(250, function()
+    popup:addTimer(50, function()
         if state == "resize sp" then
             state = "resize vu"
         elseif state == "resize vu" then
             if vu_meter_name ~= nil then
                 log:info("resize ", vu_meter_name, " ", i_vu)
-                visImage:resizeVuMeters(vu_meter_name)
+                visImage:resizeVuMeter(vu_meter_name)
                 log:info("done ", vu_meter_name)
             end
             state = "resized"
