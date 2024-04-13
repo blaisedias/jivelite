@@ -196,70 +196,53 @@ function init(self)
 		visImage:setChannelFlip(settings.channelFlip)
 	end
 
-	self.vic_checkbox = Checkbox("checkbox", function(applet, checked)
-		visImage:setCacheEnabled(checked)
-		self:updateSettings()
-	end)
-	jiveMain:addItem({
-		id = "vic",
-		node = "screenSettingsNowPlaying",
-		text = self:string('VISUALISER_IMAGE_CACHING'),
-		style = 'item_choice',
-		check = self.vic_checkbox,
-	})
-	self.vic_checkbox:setSelected(visImage:getCacheEnabled())
-
-	self.spec_caps_checkbox = Checkbox("checkbox", function(_, checked)
-		visImage:setCapsOn(checked)
-		self:updateSettings()
-	end)
 	jiveMain:addItem({
 		id = "spec_caps",
 		node = "spectrumSettings",
 		text = self:string('SPECTRUM_CAPS'),
 		style = 'item_choice',
-		check = self.spec_caps_checkbox,
+		check = Checkbox("checkbox", function(_, checked)
+    		visImage:setCapsOn(checked)
+    		self:updateSettings()
+    	end,
+        visImage:getCapsOn())
 	})
-	self.spec_caps_checkbox:setSelected(visImage:getCapsOn())
  
-	self.turbine_checkbox = Checkbox("checkbox", function(_, checked)
-		visImage:setSpectrumTurbine(checked)
-		self:updateSettings()
-	end)
 	jiveMain:addItem({
 		id = "turbine",
 		node = "spectrumSettings",
 		text = self:string('SPECTRUM_TURBINE'),
 		style = 'item_choice',
-		check = self.turbine_checkbox,
+		check = Checkbox("checkbox", function(_, checked)
+    		visImage:setSpectrumTurbine(checked)
+	    	self:updateSettings()
+    	end,
+        visImage:getSpectrumTurbine())
 	})
-	self.turbine_checkbox:setSelected(visImage:getSpectrumTurbine())
  
-	self.baselineOn_checkbox = Checkbox("checkbox", function(_, checked)
-		visImage:setBaselineOn(checked)
-		self:updateSettings()
-	end)
 	jiveMain:addItem({
 		id = "baselineOn",
 		node = "spectrumSettings",
 		text = self:string('SPECTRUM_BASELINEON'),
 		style = 'item_choice',
-		check = self.baselineOn_checkbox,
+		check = Checkbox("checkbox", function(_, checked)
+	    	visImage:setBaselineOn(checked)
+    		self:updateSettings()
+    	end,
+        visImage:getBaselineOn())
 	})
-	self.baselineOn_checkbox:setSelected(visImage:getBaselineOn())
  
-	self.baselineAlways_checkbox = Checkbox("checkbox", function(_, checked)
-		visImage:setBaselineAlways(checked)
-		self:updateSettings()
-	end)
 	jiveMain:addItem({
 		id = "baselineAlways",
 		node = "spectrumSettings",
 		text = self:string('SPECTRUM_BASELINEALWAYS'),
 		style = 'item_choice',
-		check = self.baselineAlways_checkbox,
+		check = Checkbox("checkbox", function(_, checked)
+    		visImage:setBaselineAlways(checked)
+	    	self:updateSettings()
+    	end,
+        visImage:getBaselineAlways())
 	})
-	self.baselineAlways_checkbox:setSelected(visImage:getBaselineAlways())
 end
 
 -- style names are grabbed from the skin
