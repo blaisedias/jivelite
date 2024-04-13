@@ -30,13 +30,46 @@ local debug             = require("jive.utils.debug")
 local Applet            = require("jive.Applet")
 
 local appletManager     = appletManager
+local jiveMain      = jiveMain
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
 
 
-function menu(self, menuItem)
-    local window = Window("text_list", "Visualiser")
+function init(self)
+    local settings = self:getSettings()
+    visImage:setRandomiseSequence(settings.randomSequence)
+    visImage:setCacheEnabled(settings.cacheEnabled)
+
+    jiveMain:addItem({
+        id = "vic",
+        node = 'visualiserSettings',
+        text = "Cache Visualiser Images in RAM",
+        style = 'item_choice',
+        check = Checkbox("checkbox", function(applet, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.cacheEnabled = checked
+    		self:storeSettings()
+        	end,
+            settings.cacheEnabled)
+    })
+
+    jiveMain:addItem({ 
+        id = "viseqrand",
+        node = 'visualiserSettings',
+        text = "Randomise Visualiser Sequence",
+        style = 'item_choice',
+        check =  Checkbox("checkbox", function(applet, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.randomSequence = checked
+    		self:storeSettings()
+        	end,
+            settings.randomSequence)
+    })
+end
+
+function imagesMenu(self, menuItem)
+    local window = Window("text_list", "Images")
     local menu = SimpleMenu("menu")
 
     menu:addItem({ text = "Reset Image Caches",
@@ -80,12 +113,10 @@ function menu(self, menuItem)
             self:resizeImages(self, false, true, true)
         end
     })
-
     window:addWidget(menu)
-
-    self:tieAndShowWindow(window)
-    return window
+    window:show()
 end
+
 
 function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
 
