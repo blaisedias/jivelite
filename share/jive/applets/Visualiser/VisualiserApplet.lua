@@ -38,8 +38,6 @@ oo.class(_M, Applet)
 
 function init(self)
     local settings = self:getSettings()
-    visImage:setRandomiseSequence(settings.randomSequence)
-    visImage:setCacheEnabled(settings.cacheEnabled)
 
     jiveMain:addItem({
         id = "vic",
@@ -316,4 +314,3 @@ function resizeVUMeter(tbl, self, vu_meter_name)
 
     popup:show()
 end
-
