@@ -59,7 +59,7 @@ function setupFonts(self)
 	if fonts ~= nil then
 		log:info("got font settings: regular:", fonts['regular'], " bold:" , fonts['bold'])
 		if fonts['regular'] ~= nil then
-	ONT_NAME = fonts['regular']
+			FONT_NAME = fonts['regular']
 		end
 
 		if fonts['bold'] ~= nil then
