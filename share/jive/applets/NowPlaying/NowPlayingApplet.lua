@@ -133,7 +133,6 @@ function init(self)
 	local settings      = self:getSettings()
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
-	self.spbfchanged = false
 
 	local settings = self:getSettings()
 	if not settings.vumeters then
@@ -144,98 +143,6 @@ function init(self)
 	end
 
 	visImage:npSettings(settings.vumeters, settings.spectrum)
-	if not settings.backlitAlpha then
-		settings.backlitAlpha = visImage:getBacklitAlpha()
-	else
-		visImage:setBacklitAlpha(settings.backlitAlpha)
-	end
-
-	if not settings.spectrumBarsFormat then
-		settings.spectrumBarsFormat = visImage:getBarsFormat()
-	else
-		visImage:setBarsFormat(settings.spectrumBarsFormat)
-	end
-
-	if settings.capsOn == nil then
-		settings.capsOn = visImage:getCapsOn()
-	else
-		visImage:setCapsOn(settings.capsOn)
-	end
-
-	if settings.baselineOn == nil then
-		settings.baselineOn = visImage:getBaselineOn()
-	else
-		visImage:setBaselineOn(settings.baselineOn)
-	end
-
-
-	if settings.baselineAlways == nil then
-		settings.baselineAlways = visImage:getBaselineAlways()
-	else
-		visImage:setBaselineAlways(settings.baselineAlways)
-	end
-
-
-	if settings.spectrumTurbine == nil then
-		settings.spectrumTurbine = visImage:getSpectrumTurbine()
-	else
-		visImage:setSpectrumTurbine(settings.spectrumTurbine)
-	end
-
-
-	if not settings.channelFlip then
-		settings.channelFlip = visImage:getChannelFlip()
-	else
-		visImage:setChannelFlip(settings.channelFlip)
-	end
-
-	jiveMain:addItem({
-		id = "spec_caps",
-		node = "spectrumSettings",
-		text = self:string('SPECTRUM_CAPS'),
-		style = 'item_choice',
-		check = Checkbox("checkbox", function(_, checked)
-    		visImage:setCapsOn(checked)
-    		self:updateSettings()
-    	end,
-        visImage:getCapsOn())
-	})
- 
-	jiveMain:addItem({
-		id = "turbine",
-		node = "spectrumSettings",
-		text = self:string('SPECTRUM_TURBINE'),
-		style = 'item_choice',
-		check = Checkbox("checkbox", function(_, checked)
-    		visImage:setSpectrumTurbine(checked)
-	    	self:updateSettings()
-    	end,
-        visImage:getSpectrumTurbine())
-	})
- 
-	jiveMain:addItem({
-		id = "baselineOn",
-		node = "spectrumSettings",
-		text = self:string('SPECTRUM_BASELINEON'),
-		style = 'item_choice',
-		check = Checkbox("checkbox", function(_, checked)
-	    	visImage:setBaselineOn(checked)
-    		self:updateSettings()
-    	end,
-        visImage:getBaselineOn())
-	})
- 
-	jiveMain:addItem({
-		id = "baselineAlways",
-		node = "spectrumSettings",
-		text = self:string('SPECTRUM_BASELINEALWAYS'),
-		style = 'item_choice',
-		check = Checkbox("checkbox", function(_, checked)
-    		visImage:setBaselineAlways(checked)
-	    	self:updateSettings()
-    	end,
-        visImage:getBaselineAlways())
-	})
 end
 
 -- style names are grabbed from the skin
@@ -495,78 +402,6 @@ function npSpectrumSettingsShow(self)
 	window:show()
 end
 
-
-function npSpectrumBarSettingsShow(self)
-	local window = Window("text_list", self:string('SPECTRUM_BARS_FORMAT') )
-	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu")
-
-	local npscreenSpectrumBars = visImage:getBarFormats()
-
-	local current =  visImage:getBarsFormat()
-	self.spbfchanged = false
-	for i, v in ipairs(npscreenSpectrumBars) do
-		local selected = false
-		if v.name == current.name then
-			selected = true
-		end
-		
-		menu:addItem( {
-			text = v.name,
-			style = 'item_choice',
-			check = RadioButton("radio", group,
-				function()
-					visImage:setBarsFormat(v)
-					self:updateSettings()
-					self.spbfchanged = true
-					self.window = nil
-				end,
-			selected),
-		} )
-	end
-
-	--XXX: not sure whether the text is necessary or even helpful here
-	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
-
-	window:addWidget(menu)
-	window:show()
-end
-
-function npSpectrumChannelFlipSettingsShow(self)
-	local window = Window("text_list", self:string('SPECTRUM_CHANNEL_FLIP') )
-	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu")
-
-	local npscreenChannelFlips = visImage:getChannelFlips()
-
-	local current =  visImage:getChannelFlip()
-	for i, v in ipairs(npscreenChannelFlips) do
-		local selected = false
-		if v.name == current.name then
-			selected = true
-		end
-		
-		menu:addItem( {
-			text = v.name,
-			style = 'item_choice',
-			check = RadioButton("radio", group,
-				function()
-					visImage:setChannelFlip(v)
-					self:updateSettings()
-					self.window = nil
-				end,
-			selected),
-		} )
-	end
-
-	--XXX: not sure whether the text is necessary or even helpful here
-	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
-
-	window:addWidget(menu)
-	window:show()
-end
 
 function npviewsSettingsShow(self)
 	local window = Window("text_list", self:string('NOW_PLAYING_VIEWS') )
@@ -2400,17 +2235,6 @@ function updateSettings(self)
 	-- Spectrum images
 	npscreenSpectrum = visImage:getSpectrumList()
 	settings.spectrum = visImage:getSpectrumSettings()
---	for i, v in ipairs(npscreenSpectrum) do
---		settings.spectrum[v.name] = {enabled=npscreenSpectrum[i].enabled}
---	end
-
-	-- Spectrum misc
-	settings.spectrumBarsFormat = visImage:getBarsFormat()
-	settings.capsOn = visImage:getCapsOn()
-	settings.baselineOn = visImage:getBaselineOn()
-	settings.baselineAlways = visImage:getBaselineAlways()
-	settings.spectrumTurbine = visImage:getSpectrumTurbine()
-	settings.channelFlip = visImage:getChannelFlip()
 
 	self:storeSettings()
 	visImage:sync()
