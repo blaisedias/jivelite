@@ -2,6 +2,40 @@
 # The two letter codes are defined by ISO 639-1
 # http://en.wikipedia.org/wiki/List_of_ISO_639_codes
 
-VISUALISER_IMAGE_CACHING
-	EN	Visualise Image Caching
+SELECT_VUMETER
+	EN	VU Meter Selection
+
+SELECT_SPECTRUM
+	EN	Spectrum Analyzer Selection 
+
+SPECTRUM_BARS_FORMAT
+	EN	Bars Format
+
+SPECTRUM_CAPS
+	EN	Show Caps
+
+SPECTRUM_TURBINE
+	EN	Turbine
+
+SPECTRUM_BASELINEON
+	EN	Baseline On
+
+SPECTRUM_BASELINEALWAYS
+	EN	Baseline On Always
+
+SPECTRUM_CHANNEL_FLIP
+	EN	Channel Flip
+
+VISUALISER_CACHE_IMAGE_RAM
+	EN	Cache Visualiser Images in RAM
+
+VISUALISER_RANDOMISE_SEQUENCE
+	EN	Randomise Visualiser Image Sequence
+
+ON
+	EN	On
+
+OFF
+	EN	Off
+
 

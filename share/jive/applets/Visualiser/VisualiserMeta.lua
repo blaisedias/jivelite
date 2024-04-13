@@ -68,8 +68,12 @@ function registerApplet(self)
 	visImage:setVisSettings(settings)
 
 	local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  } 
-
 	jiveMain:addNode(node)
+
+	node = { id = 'visualiserSpectrumSettings', iconStyle = 'hm_settings', node = 'visualiserSettings', text = 'Spectrum Meter Settings', windowStyle = 'text_only'  } 
+	jiveMain:addNode(node)
+
+
 	jiveMain:addItem(
 		self:menuItem(
 			'appletVisualiserSettings',
@@ -80,10 +84,53 @@ function registerApplet(self)
 			end
 		)
 	)
+
+	jiveMain:addItem(
+		self:menuItem(
+			'appletVuMeterSelection', 
+			'visualiserSettings', 
+			'SELECT_VUMETER', 
+			function(applet, ...) 
+				applet:selectVuMeters(...) 
+			end
+		)
+	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletSpectrumMeterSelection', 
+			'visualiserSettings', 
+			'SELECT_SPECTRUM', 
+			function(applet, ...) 
+				applet:selectSpectrumMeters(...) 
+			end
+		)
+	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletSpectrumBarSettings', 
+			'visualiserSpectrumSettings', 
+			'SPECTRUM_BARS_FORMAT', 
+			function(applet, ...) 
+				applet:selectSpectrumBarsFormat(...) 
+			end
+		)
+	)
+	jiveMain:addItem(
+		self:menuItem(
+			'appletSpectrumChannelFlipSettings', 
+			'visualiserSpectrumSettings', 
+			'SPECTRUM_CHANNEL_FLIP', 
+			function(applet, ...) 
+				applet:selectSpectrumChannelFlip(...) 
+			end
+		)
+	)
+
+
 end
 
 function configureApplet(self)
 	-- make resident applet
-	-- appletManager:loadApplet("Visualiser")
+	appletManager:loadApplet("Visualiser")
 end
 
