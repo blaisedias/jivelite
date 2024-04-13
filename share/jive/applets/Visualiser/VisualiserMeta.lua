@@ -42,40 +42,57 @@ function jiveVersion(self)
 end
 
 
+function defaultSettings(self)
+	return {
+		cacheEnabled=false,
+		randomSequence=true,
+		spectrum={
+			baselineOn=true,
+			baselineAlways=false,
+			turbine=false,
+			channelFlip={values={0,1,},name="Low Freq > High Freq, High Freq > Low Freq",},
+			backlitAlpha=80,
+			barsFormat={values={barsInBin=1,barSpace=0,barWidth=4,binSpace=2,},name="1-4-0-2",},
+			capsOn=true,
+		},
+		vuMeterSelection={["RS-M250"]=true,},
+		spectrumMeterSelection={
+			["mc-White translucent"]={spType="colour",capColor=3503345919,barColor=3503345824,enabled=true,},
+		},
+	}
+end
+
 function registerApplet(self)
+	-- we only register the menu here, as registerApplet is being called before the skin is initialized
+--	jiveMain:addItem(
+--		self:menuItem(
+--			'VisualiserApplet',
+--			'settings',
+--			'Visualiser',
+--			function(applet, ...) 
+--				applet:menu(...)
+--			end,
+--			100,
+--			nil,
+--			'hm_settings'
+--		)
+--	)
+	local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  } 
+	jiveMain:addNode( node )
+	jiveMain:addItem(
+		self:menuItem(
+			'appletVisualiserSettings',
+			'visualiserSettings',
+			'Images',
+			function(applet, ...) 
+				applet:imagesMenu(...)
+			end
+		)
+	)
 end
 
 function configureApplet(self)
-
---	self.vic_checkbox = Checkbox("checkbox", function(applet, checked)
---		visImage:setCacheEnabled(checked)
---        local popup = jive.ui.Popup("waiting_popup", "Boo1")
---        popup:show()
---        os.sleep(5)
---        popup:hide()
---	end)
---	jiveMain:addItem({
---		id = "vic",
---		node = "settings",
---		text = self:string('VISUALISER_IMAGE_CACHING'),
---		style = 'item_choice',
---		check = self.vic_checkbox,
---	})
---	self.vic_checkbox:setSelected(visImage:getCacheEnabled())
-    local icon = 'hm_settings'
-
-	-- we only register the menu here, as registerApplet is being called before the skin is initialized
-    jiveMain:addItem(
-    	self:menuItem(
-    		'VisualiserApplet',
-    		'settings',
-    		'Visualiser',
-    		function(applet, ...) 
-    			applet:menu(...)
-    		end,
-    		100,
-    		nil,
-		icon
-    	)
-    )
+	-- make resident applet
+	appletManager:loadApplet("Visualiser")
 end
+

@@ -48,6 +48,7 @@ local npvumeters = {}
 local npspectrums = {}
 local vuSeq = {}
 local spSeq = {}
+local randomiseSequence = true
 
 -- set to true to create all resized visualiser images at startup
 -- on resource constrained platforms like piCorePlayer jivelite terminate.
@@ -95,10 +96,12 @@ function boolOsEnv(envName, defaultValue)
 end
 
 local function ShuffleInPlace(t)
-	for i = #t, 2, -1 do
-		local j = math.random(i)
-		t[i], t[j] = t[j], t[i]
-	end
+    if randomiseSequence == true then
+		for i = #t, 2, -1 do
+			local j = math.random(i)
+			t[i], t[j] = t[j], t[i]
+		end
+    end
 end
 
 -------------------------------------------------------- 
@@ -294,6 +297,12 @@ function npSettings(tbl, vusettings, spsettings)
 			npspectrums[k] = v
 		end
 	end
+end
+
+function setRandomiseSequence(tbl, v)
+    if v ~= randomiseSequence then
+        randomiseSequence = v
+    end
 end
 
 function initialiseCache()
