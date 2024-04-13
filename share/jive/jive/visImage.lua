@@ -49,6 +49,7 @@ local npspectrums = {}
 local vuSeq = {}
 local spSeq = {}
 local randomiseSequence = true
+local visSettings = {}
 
 -- set to true to create all resized visualiser images at startup
 -- on resource constrained platforms like piCorePlayer jivelite terminate.
@@ -96,7 +97,7 @@ function boolOsEnv(envName, defaultValue)
 end
 
 local function ShuffleInPlace(t)
-    if randomiseSequence == true then
+    if visSettings.randomSequence == true then
 		for i = #t, 2, -1 do
 			local j = math.random(i)
 			t[i], t[j] = t[j], t[i]
@@ -151,23 +152,6 @@ end
 -- FIXME: vfdCache should go through imCache
 vfdCache = {}
 local imCache = {}
-local imCacheEnabled = false
-
-function getCacheEnabled(tbl)
-	log:debug("getCacheEnabled ", imCacheEnabled)
-	return imCacheEnabled
-end
-
-function setCacheEnabled(tbl, v)
-	log:debug("setCacheEnabled ", v)
-	if v == false and imCacheEnabled == true then
-		-- precipitate image cache clear
-		-- strictly speaking not necessary as it would be cleared
-	 -- at the next track transition.
-		imCacheClear()
-	end
-	imCacheEnabled = v
-end
 
 function imCachePut(key, img)
 	log:info("imCache <- ", key,  " ", img)
@@ -297,6 +281,12 @@ function npSettings(tbl, vusettings, spsettings)
 			npspectrums[k] = v
 		end
 	end
+end
+
+
+function setVisSettings(tbl, settings)
+    visSettings = settings
+    log:info("setVisSettings: ", settings, " ", visSettings.randomSequence)
 end
 
 function setRandomiseSequence(tbl, v)
@@ -759,7 +749,7 @@ function getSpectrum(tbl, w, h, spType)
 		currentBgImageKey = nil
 	end
 
-	if imCacheEnabled == false then
+	if visSettings.cacheEnabled == false then
 		imCacheClear()
 	end
 
@@ -1134,7 +1124,7 @@ function getVuImage(w,h)
 		return currentVuImage, entry.vutype
 	end
 
-	if imCacheEnabled == false then
+	if visSettings.cacheEnabled == false then
 		imCacheClear()
 	end
 
