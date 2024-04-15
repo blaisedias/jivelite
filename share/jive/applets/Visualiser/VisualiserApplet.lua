@@ -309,38 +309,44 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
             end
         end
 
-        local state = "resize sp"
+        local state = "resize_sp"
         local i_vu = 1
         local i_sp = 1
+        local spectrum_meter_name = spectrum_names[i_sp]
+        local vu_meter_name =  vumeter_names[i_vu]
         popup:addTimer(50, function()
-                if state == "resize sp" then
+                if state == "resize_sp" then
                     if i_sp <= #spectrum_names then
-                        local spectrum_meter_name = spectrum_names[i_sp]
-                        log:info("resize ", spectrum_meter_name, " ", i_sp)
+                        spectrum_meter_name = spectrum_names[i_sp]
                         -- this odd-ball pre-increment because we do not want to keep on repeating
                         -- if the resize op failed
                         i_sp = i_sp + 1
                         text:setValue("Resizing spectrum meter " .. spectrum_meter_name)
-                        visImage:resizeSpectrumMeter(spectrum_meter_name)
-                        text:setValue("Resized spectrum meter " .. spectrum_meter_name)
-                        log:info("done ", spectrum_meter_name)
+                        state = "resize_sp_exec"
                     else
-                        state = "resize vu"
+                        state = "resize_vu"
                     end
-                elseif state == "resize vu" then
+                elseif state == "resize_sp_exec" then
+                    log:info("resize ", spectrum_meter_name)
+                    visImage:resizeSpectrumMeter(spectrum_meter_name)
+                    log:info("done ", spectrum_meter_name)
+                    state = "resize_sp"
+                elseif state == "resize_vu" then
                     if i_vu <= #vumeter_names then
-                        local vu_meter_name =  vumeter_names[i_vu]
-                        log:info("resize ", vu_meter_name, " ", i_vu)
+                        vu_meter_name =  vumeter_names[i_vu]
                         -- this odd-ball pre-increment because we do not want to keep on repeating
                         -- if the resize op failed
                         i_vu = i_vu + 1
                         text:setValue("Resizing VU meter " .. vu_meter_name)
-                        visImage:resizeVuMeter(vu_meter_name)
-                        text:setValue("Resized VU meter " .. vu_meter_name)
-                        log:info("done ", vu_meter_name)
+                        state = "resize_vu_exec"
                     else
                         state = "resized"
                     end
+                elseif state == "resize_vu_exec" then
+                    log:info("resize ", vu_meter_name)
+                    visImage:resizeVuMeter(vu_meter_name)
+                    log:info("done ", vu_meter_name)
+                    state = "resize_vu"
                 elseif state == "resized" then
                     text:setValue("Resize of visualisation complete.")
                     state = "done"
