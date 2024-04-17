@@ -92,6 +92,31 @@ static int system_lua_get_machine(lua_State *L) {
 	}
 }
 
+static int system_get_memory_usage(lua_State *L) {
+    // the primary reason this function exists is to 
+    // allow throttling of actions on piCorePlayer.
+    // For now initialise to fake values for platforms
+    // that do not support memory usage.
+    struct_mem_usage mem_usage = {
+        100, 100, 100, 0, 100, 100
+    };
+	lua_newtable(L);
+    platform_get_memory_usage(&mem_usage);
+	lua_pushinteger(L, mem_usage.MemTotal);
+	lua_setfield(L, -2, "MemTotal");
+	lua_pushinteger(L, mem_usage.MemFree);
+	lua_setfield(L, -2, "MemFree");
+	lua_pushinteger(L, mem_usage.MemAvailable);
+	lua_setfield(L, -2, "MemAvailable");
+	lua_pushinteger(L, mem_usage.SwapCached);
+	lua_setfield(L, -2, "SwapCached");
+	lua_pushinteger(L, mem_usage.SwapTotal);
+	lua_setfield(L, -2, "SwapTotal");
+	lua_pushinteger(L, mem_usage.SwapFree);
+	lua_setfield(L, -2, "SwapFree");
+
+    return 1;
+}
 
 static int system_get_uptime(lua_State *L) {
 	Uint32 uptime;
@@ -392,6 +417,7 @@ static const struct luaL_Reg jive_system_methods[] = {
 	{ "findFile", system_find_file },
 	{ "atomicWrite", system_atomic_write },
 	{ "init", system_init },
+	{ "getMemoryUsage", system_get_memory_usage },
 	{ NULL, NULL }
 };
 
