@@ -1617,6 +1617,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "newRGB", jiveL_surface_newRGB },
 	{ "newRGBA", jiveL_surface_newRGBA },
 	{ "loadImage", jiveL_surface_load_image },
+	{ "altLoadImage", jiveL_surface_alt_load_image },
 	{ "loadImageData", jiveL_surface_load_image_data },
 	{ "drawText", jiveL_surface_draw_text },
 	{ "free", jiveL_surface_free },

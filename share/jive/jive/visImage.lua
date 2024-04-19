@@ -96,12 +96,12 @@ function boolOsEnv(envName, defaultValue)
 end
 
 local function ShuffleInPlace(t)
-    if visSettings.randomSequence == true then
+	if visSettings.randomSequence == true then
 		for i = #t, 2, -1 do
 			local j = math.random(i)
 			t[i], t[j] = t[j], t[i]
 		end
-    end
+	end
 end
 
 -------------------------------------------------------- 
@@ -180,7 +180,7 @@ end
 function loadImage(path)
 	img = imCacheGet(path)
 	if img == nil  then
-		img = Surface:loadImage(path)
+		img = Surface:altLoadImage(path)
 		imCachePut(path,img)
 	end
 	return img
@@ -284,8 +284,8 @@ end
 
 
 function setVisSettings(tbl, settings)
-    visSettings = settings
-    log:info("setVisSettings: ", settings, " ", visSettings.randomSequence)
+	visSettings = settings
+	log:info("setVisSettings: ", settings, " ", visSettings.randomSequence)
 end
 
 function initialiseCache()
@@ -347,7 +347,7 @@ end
 -- scale an image to fit a height - maintaining aspect ratio if required
 function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
-	local img = Surface:loadImage(imgPath)
+	local img = Surface:altLoadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
 	local scaledImg
 	local srcW, srcH = img:getSize()
@@ -359,6 +359,7 @@ function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	if retainAR == false then
 		log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
 		img:release()
+		img = nil
 		return retImg
 	end
 	
@@ -368,10 +369,12 @@ function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	local scaledH = math.floor(srcH*scaleF)
 	scaledImg = img:resize(scaledW, scaledH)
 	img:release()
+	img = nil
 	log:info("scaleSpectrumImage: scale factor: ", scaleF)
 	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
 	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
 	scaledImg:release()
+	scaledImg = nil
 	return retImg
 end
 
@@ -385,7 +388,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
 		w = 1280
 	end
-	local img = Surface:loadImage(imgPath)
+	local img = Surface:altLoadImage(imgPath)
 	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
 	local srcW, srcH = img:getSize()
 	local wSeq = math.floor((w/2))*seq
@@ -405,6 +408,7 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	end
 	scaledImg = img:resize(wSeq, scaledH)
 	img:release()
+	img = nil
 	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
 	return scaledImg
 end
@@ -590,7 +594,10 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 		dcpath = cachedPath(dicKey, suffix)
 		-- diskImageCache[dicKey] = img
 		saveImage(fgimg, dcpath, suffix == "png")
+		fgimg:release()
+		fgimg = nil
 		img:release()
+		img = nil
 		diskImageCache[dicKey] = dcpath
 		log:debug("cacheSpectrumImage cached ", dicKey)
 	else
@@ -613,7 +620,7 @@ function spBump(tbl, spType)
 	if #spSeq == 0 then
 		populateSpSeq()
 		ShuffleInPlace(spSeq)
-	    spSeqIndex = #spSeq +1
+		spSeqIndex = #spSeq +1
 	end
 
 	if spSeqIndex > #spSeq then
@@ -715,6 +722,7 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	currentBgImage = Surface:newRGB(w,h)
 	tmp:blitAlpha(currentBgImage, 0, 0, getBacklitAlpha())
 	tmp:release()
+	tmp = nil
 	currentBgImageKey = dicKey
 	imCachePut(dicKey, currentBgImage)
 	return currentBgImage
@@ -734,10 +742,12 @@ function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBacklitAlpha()
 	if currentFgImage ~= nil then
+		currentFgImage:release()
 		currentFgImage = nil
 		currentFgImageKey = nil
 	end
 	if currentBgImage ~= nil then
+		currentBgImage:release()
 		currentBgImage = nil
 		currentBgImageKey = nil
 	end
@@ -857,6 +867,8 @@ function _cacheVUImage(imgName, path, w, h)
 		dcpath = cachedPath(dicKey, suffix)
 		--diskImageCache[dicKey] = img
 		saveImage(img, dcpath, suffix == "png")
+		img:release()
+		img = nil
 		diskImageCache[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
@@ -965,7 +977,7 @@ function vuBump()
 	if #vuSeq == 0 then
 		populateVuSeq()
 		ShuffleInPlace(vuSeq)
-	    vuSeqIndex = #vuSeq +1
+		vuSeqIndex = #vuSeq +1
 	end
 	if vuSeqIndex > #vuSeq then
 		vuSeqIndex = 1
