@@ -966,6 +966,16 @@ JiveSurface *jive_surface_load_image(const char *path) {
 	return jive_tile_load_image(path);
 }
 
+JiveSurface *jive_surface_alt_load_image(const char *path) {
+	SDL_Surface *sdl = IMG_Load(path);
+
+	JiveSurface *srf = calloc(sizeof(JiveSurface), 1);
+	srf->refcount = 1;
+	srf->sdl = sdl;
+
+	return jive_surface_display_format(srf);
+}
+
 
 JiveSurface *jive_surface_load_image_data(const char *data, size_t len) {
 	SDL_RWops *src = SDL_RWFromConstMem(data, (int) len);
@@ -1283,6 +1293,7 @@ void jive_surface_release(JiveSurface *srf) {
 	}
 
 	if (srf->sdl) {
+		LOG_INFO(log_ui, "jive_surface_release OK");
 		SDL_FreeSurface (srf->sdl);
 		srf->sdl = NULL;
 	}
@@ -1687,6 +1698,27 @@ int jiveL_surface_load_image(lua_State *L) {
 
 	return 0;
 }
+
+int jiveL_surface_alt_load_image(lua_State *L) {
+	/*
+	  class
+	  imagepath
+	*/
+	const char *imagepath = luaL_checklstring(L, 2, NULL);
+	if (imagepath) {
+		JiveSurface *srf = jive_surface_alt_load_image(imagepath);
+		if (srf) {
+			JiveSurface **p = (JiveSurface **)lua_newuserdata(L, sizeof(JiveSurface *));
+			*p = srf;
+			luaL_getmetatable(L, "JiveSurface");
+			lua_setmetatable(L, -2);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
 
 int jiveL_surface_load_image_data(lua_State *L) {
 	/*
