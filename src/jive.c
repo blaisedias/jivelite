@@ -549,6 +549,7 @@ int main (int argc, char **argv) {
 	l_message(NULL, "        : savePNG");
 	l_message(NULL, "        : fontSelection");
 	l_message(NULL, "        : displaySize");
+	l_message(NULL, "        : altImageLoad");
 #endif
 	
 	// create state
