@@ -47,6 +47,7 @@ function init(self)
         node = 'visualiserSettings',
         text = self:string("VISUALISER_CACHE_IMAGE_RAM"),
         style = 'item_choice',
+        weight = 50,
         check = Checkbox("checkbox", function(applet, checked)
             local cb_settings = self:getSettings()
             cb_settings.cacheEnabled = checked
@@ -55,11 +56,12 @@ function init(self)
             settings.cacheEnabled)
     })
 
-    jiveMain:addItem({ 
+    jiveMain:addItem({
         id = "viseqrand",
         node = 'visualiserSettings',
         text = self:string("VISUALISER_RANDOMISE_SEQUENCE"),
         style = 'item_choice',
+        weight = 40,
         check =  Checkbox("checkbox", function(applet, checked)
             local cb_settings = self:getSettings()
             cb_settings.randomSequence = checked
@@ -80,7 +82,7 @@ function init(self)
     	end,
         settings.spectrum.capsOn)
 	})
- 
+
 	jiveMain:addItem({
 		id = "turbine",
 		node = "visualiserSpectrumSettings",
@@ -93,7 +95,7 @@ function init(self)
     	end,
         settings.spectrum.turbine)
 	})
- 
+
 	jiveMain:addItem({
 		id = "baselineOn",
 		node = "visualiserSpectrumSettings",
@@ -106,7 +108,7 @@ function init(self)
     	end,
         settings.spectrum.baselineOn)
 	})
- 
+
 	jiveMain:addItem({
 		id = "baselineAlways",
 		node = "visualiserSpectrumSettings",
@@ -119,54 +121,62 @@ function init(self)
     	end,
         settings.spectrum.baselineAlways)
 	})
-    
+
 end
 
 function imagesMenu(self, menuItem)
     local window = Window("text_list", "Images")
     local menu = SimpleMenu("menu")
 
-    menu:addItem({ text = "Reset Image Caches",
-        callback = function(event, menuItem)
-            visImage:cacheClear()
-        end
-    })
-
     menu:addItem({ text = "Resize Selected Visualiser Images",
         callback = function(event, menuItem)
             self:resizeImages(self, true, true, false)
-        end
+        end,
+        weight=10
     })
 
     menu:addItem({ text = "Resize Selected Spectrum Images",
         callback = function(event, menuItem)
             self:resizeImages(self, true, false, false)
-        end
+        end,
+        weight=20
     })
 
     menu:addItem({ text = "Resize Selected VU Meter Images",
         callback = function(event, menuItem)
             self:resizeImages(self, false, true, false)
-        end
-    })
-
-    menu:addItem({ text = "Resize ALL Visualiser Images",
-        callback = function(event, menuItem)
-            self:resizeImages(self, true, true, true)
-        end
+        end,
+        weight=30
     })
 
     menu:addItem({ text = "Resize ALL Spectrum Images",
         callback = function(event, menuItem)
             self:resizeImages(self, true, false, true)
-        end
+        end,
+        weight=40
     })
 
     menu:addItem({ text = "Resize ALL VU Meter Images",
         callback = function(event, menuItem)
             self:resizeImages(self, false, true, true)
-        end
+        end,
+        weight=50
     })
+
+    menu:addItem({ text = "Resize ALL Visualiser Images",
+        callback = function(event, menuItem)
+            self:resizeImages(self, true, true, true)
+        end,
+        weight=60
+    })
+
+    menu:addItem({ text = "Clear Resized Image Cache (force resize ops)",
+        callback = function(event, menuItem)
+            visImage:cacheClear()
+        end,
+        weight=70
+    })
+
     window:addWidget(menu)
     window:show()
 end
@@ -185,9 +195,7 @@ function selectSpectrumChannelFlip(self)
     local settings = self:getSettings()
 
     local current = settings.spectrum.channelFlip
-    log:info("###### 1")
 	for i, v in ipairs(channelFlips) do
-        log:info("###### 2 ", i)
 		menu:addItem( {
 			text = v.name,
 			style = 'item_choice',
@@ -292,7 +300,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
                 if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
                     table.insert(spectrum_names, v.name)
                 else
-                    log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)  
+                    log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)
                 end
             end
         end
@@ -304,7 +312,7 @@ function resizeImages(tbl, self, bSpectrum, bVuMeters, all)
                 if (all or v.enabled) and v.vutype == "frame" then
                     table.insert(vumeter_names, v.name)
                 else
-                    log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)  
+                    log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)
                 end
             end
         end
@@ -439,7 +447,7 @@ function resizeVUMeter(tbl, self, vu_meter_name)
 
     -- don't allow any keypress/touch command so user cannot interrupt the resizing command
     -- popup will hide when resizing is done
-    popup:ignoreAllInputExcept({""})
+    -- popup:ignoreAllInputExcept({""})
 
 
     local msgResizing = "Resizing"
