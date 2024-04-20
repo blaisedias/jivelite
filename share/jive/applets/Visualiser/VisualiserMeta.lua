@@ -67,10 +67,34 @@ function registerApplet(self)
 	local settings = self:getSettings()
 	visImage:setVisSettings(settings)
 
-	local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  } 
+	local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  }
 	jiveMain:addNode(node)
 
-	node = { id = 'visualiserSpectrumSettings', iconStyle = 'hm_settings', node = 'visualiserSettings', text = 'Spectrum Meter Settings', windowStyle = 'text_only'  } 
+-- TODO:
+--	jiveMain:addItem(
+--		self:menuItem(
+--			'appletVuMeterSelection',
+--			'visualiserSettings',
+--			'SELECT_VUMETER',
+--			function(applet, ...)
+--				applet:selectVuMeters(...)
+--			end,
+--            10
+--		)
+--	)
+--	jiveMain:addItem(
+--		self:menuItem(
+--			'appletSpectrumMeterSelection',
+--			'visualiserSettings',
+--			'SELECT_SPECTRUM',
+--			function(applet, ...)
+--				applet:selectSpectrumMeters(...)
+--			end,
+--            20
+--		)
+--	)
+
+	node = { id = 'visualiserSpectrumSettings', iconStyle = 'hm_settings', node = 'visualiserSettings', text = 'Spectrum Meter Settings', windowStyle = 'text_only', weight=30  }
 	jiveMain:addNode(node)
 
 
@@ -78,50 +102,32 @@ function registerApplet(self)
 		self:menuItem(
 			'appletVisualiserSettings',
 			'visualiserSettings',
-			'Images',
-			function(applet, ...) 
+			'Resize Images',
+			function(applet, ...)
 				applet:imagesMenu(...)
-			end
+			end,
+            100
 		)
 	)
 
+
 	jiveMain:addItem(
 		self:menuItem(
-			'appletVuMeterSelection', 
-			'visualiserSettings', 
-			'SELECT_VUMETER', 
-			function(applet, ...) 
-				applet:selectVuMeters(...) 
+			'appletSpectrumBarSettings',
+			'visualiserSpectrumSettings',
+			'SPECTRUM_BARS_FORMAT',
+			function(applet, ...)
+				applet:selectSpectrumBarsFormat(...)
 			end
 		)
 	)
 	jiveMain:addItem(
 		self:menuItem(
-			'appletSpectrumMeterSelection', 
-			'visualiserSettings', 
-			'SELECT_SPECTRUM', 
-			function(applet, ...) 
-				applet:selectSpectrumMeters(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletSpectrumBarSettings', 
-			'visualiserSpectrumSettings', 
-			'SPECTRUM_BARS_FORMAT', 
-			function(applet, ...) 
-				applet:selectSpectrumBarsFormat(...) 
-			end
-		)
-	)
-	jiveMain:addItem(
-		self:menuItem(
-			'appletSpectrumChannelFlipSettings', 
-			'visualiserSpectrumSettings', 
-			'SPECTRUM_CHANNEL_FLIP', 
-			function(applet, ...) 
-				applet:selectSpectrumChannelFlip(...) 
+			'appletSpectrumChannelFlipSettings',
+			'visualiserSpectrumSettings',
+			'SPECTRUM_CHANNEL_FLIP',
+			function(applet, ...)
+				applet:selectSpectrumChannelFlip(...)
 			end
 		)
 	)
