@@ -53,27 +53,10 @@ AUTO_WORKSPACE_SETUP=0
 
 # Save resized images to "disk"
 export JL_SAVE_RESIZED_IMAGES=false
-
-# Save resized images as PNG instead of BMP
-# size saving + proper Alpha channel 
-# requires modified jivelite binary
-#export JL_SAVE_AS_PNG=true
-
-# WARNING: on resource constrained systems setting the 
-# options below to true may result in jivelite terminating
-# resize all selected images at startup
-#export JL_RESIZE_AT_STARTUP=false
-
-# Modifies behaviour when JL_RESIZE_AT_STARTUP is set
-# to resize all images found
-#export JL_RESIZE_ALL=false
 ```
 
 Supported environment variables are
 *  `JL_SAVE_RESIZED_IMAGES` set to true to cache the output of resizing for re-use.
-*  `JL_SAVE_AS_PNG` set to true to save images as PNGs - smaller and intrinsic support for alpha channel.
-*  `JL_RESIZE_AT_STARTUP` resize `selected` visualisation images at startup for smoother user experience
-*  `JL_RESIZE_ALL` modify resize at startup to resize all assets that can be found
 *  `AUTO_WORKSPACE_SETUP` see `Setting up a workspace` below
 *  `JL_WORKSPACE` see `Setting up a workspace` below
 *  `AUTO_TOUCHSCREEN_SETUP` see `Touch screen setup` below
