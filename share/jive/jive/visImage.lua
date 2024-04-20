@@ -50,12 +50,6 @@ local vuSeq = {}
 local spSeq = {}
 local visSettings = {}
 
--- set to true to create all resized visualiser images at startup
--- on resource constrained platforms like piCorePlayer jivelite terminate.
-local resizeAll = false
--- resize all selected images at startup
--- on resource constrained platforms like piCorePlayer jivelite terminate.
-local resizeAtStartUp = false
 -- commit cached images to disk
 local saveResizedImages = true
 local saveAsPng = true
@@ -121,11 +115,9 @@ function platformDetect()
 		PLATFORM = "piCorePlayer"
 		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", false)
 		-- save as png is the exception - it must be explicitly disabled
-		saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
+		-- saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
 	end
-	resizeAll = boolOsEnv("JL_RESIZE_ALL", false)
-	resizeAtStartUp = boolOsEnv("JL_RESIZE_AT_STARTUP", false)
-	-- to support saving resized visualiser images
+	-- To support saving resized visualiser images
 	-- in locations other then the home directory
 	-- defining a path to a workspace is supported
 	local tmp = os.getenv("JL_WORKSPACE") or nil
@@ -139,7 +131,6 @@ function platformDetect()
 	end
 	os.execute("mkdir -p " .. resizedCachePath)
 	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
-	log:info("resizeAll:", resizeAll, " resizeAtStartUp:" , resizeAtStartUp)
 	log:info("saveResizedImages:", saveResizedImages, " saveAsPng:" , saveAsPng)
 	return PLATFORM
 end
@@ -307,7 +298,7 @@ function initialiseVUMeters()
 	initVuMeterList()
 	for k, v in pairs(npvumeters) do
 		-- set flags but do not cache
-		selectVuImage({},k,v, resizeAtStartUp)
+		selectVuImage({},k,v, false)
 	end
 	local enabled = false
 	for i, v in ipairs(vuImages) do
@@ -322,7 +313,7 @@ function initialiseSpectrumMeters()
 	initSpectrumList()
 	for k, v in pairs(npspectrums) do
 		-- set flags but do not cache
-		selectSpectrum({}, k, v.enabled, resizeAtStartUp)
+		selectSpectrum({}, k, v.enabled, false)
 	end
 	for i, v in ipairs(spectrumList) do
 		enabled = enabled or v.enabled
@@ -766,7 +757,7 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 	log:debug("selectSpectrum", " ", name, " ", selected)
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
-			if (allowCaching and selected) or resizeAll then
+			if (allowCaching and selected) then
 					if spectrumImagesMap[name] ~= nil then
 						-- create the cached image for skin resolutions 
 						for kr, vr in pairs(spectrumResolutions) do
@@ -1053,7 +1044,7 @@ function selectVuImage(tbl, name, selected, allowCaching)
 	log:debug("selectVuImage", " ", name, " ", selected)
 	for k, v in pairs(vuImages) do
 		if v.name == name then
-			if (allowCaching and selected) or resizeAll then
+			if (allowCaching and selected) then
 				if v.vutype == "frame" then
 						-- create the cached image for skin resolutions 
 						for kr, vr in pairs(vuMeterResolutions) do
