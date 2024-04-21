@@ -36,7 +36,6 @@ local SpectrumMeter    = require("jive.vis.SpectrumMeter")
 
 local debug            = require("jive.utils.debug")
 local datetime         = require("jive.utils.datetime")
-local VisualiserApplet = require("applets.Visualiser.VisualiserApplet")
 local appletManager    = appletManager
 
 local jiveMain               = jiveMain
@@ -133,16 +132,6 @@ function init(self)
 	local settings      = self:getSettings()
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
-
-	local settings = self:getSettings()
-	if not settings.vumeters then
-		settings.vumeters = {}
-	end
-	if not settings.spectrum then
-		settings.spectrum = {}
-	end
-
-	visImage:npSettings(settings.vumeters, settings.spectrum)
 end
 
 -- style names are grabbed from the skin
@@ -254,6 +243,9 @@ function getNPStyles(self)
 	return auditedNPStyles
 end
 
+function invalidateWindow(self)
+    self.window = nil
+end
 
 function npStyleHasVuMeter(npstyle)
 	if npstyle == "nowplaying_vuanalog_text" then
@@ -276,59 +268,6 @@ function npStyleHasVuMeter(npstyle)
 	return false
 end
 
-function npVUSettingsShow(self)
-	local window = Window("text_list", self:string('SELECT_VUMETER') )
---	local window = Window("text_list", "VU Meter" )
---	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu")
-
-	local npscreenVumeters = visImage:getVUImageList()
-
-	for i, v in ipairs(npscreenVumeters) do
-		local selected = true
-		if v.enabled == false then
-			selected = false
-		end
-		
-		menu:addItem( {
-			text = v.displayName,
-			style = 'item_choice',
-			check = Checkbox("checkbox", 
-				function(object, isSelected)
-					local settings = self:getSettings()
-					local playerId = self.player:getId()
-
-					if isSelected then
-						-- turn it on
---						settings.vumeters[v.name] = true 
-						VisualiserApplet:resizeVUMeter(self, v.name)
-						visImage:selectVuImage(v.name, true, false)
-					else
-						-- turn it off conditionally:
-						-- there needs to be at least one VUMeter
-						if visImage:selectVuImage(v.name, false, false) > 0 then
---							settings.vumeters[v.name] = false 
-						 	if npStyleHasVuMeter(self.selectedStyle) then
-								self.window = nil
-							end
-						else
-							visImage:selectVuImage(v.name, true, false)
-							object:setSelected(true)
-						end
-					end
-					self:updateSettings()
-				end,
-			selected),
-		} )
-	end
-
-	--XXX: not sure whether the text is necessary or even helpful here
-	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
-
-	window:addWidget(menu)
-	window:show()
-end
 
 function npStyleHasSpectrum(npstyle)
 	if npstyle == "nowplaying_spectrum_text" then
@@ -347,59 +286,6 @@ function npStyleHasSpectrum(npstyle)
 		return true
 	end
 	return false
-end
-
-function npSpectrumSettingsShow(self)
-	local window = Window("text_list", self:string('SELECT_SPECTRUM') )
---	local group = RadioGroup()
-
-	local menu = SimpleMenu("menu")
-
-	local npscreenSpectrum = visImage:getSpectrumList()
-
-	for i, v in ipairs(npscreenSpectrum) do
-		local selected = true
-		if v.enabled == false then
-			selected = false
-		end
-		
-		menu:addItem( {
-			text = v.name,
-			style = 'item_choice',
-			check = Checkbox("checkbox", 
-				function(object, isSelected)
-					local settings = self:getSettings()
-					local playerId = self.player:getId()
-
-					if isSelected then
-						-- turn it on
---						settings.spectrum[v.name].enabled = true
-						VisualiserApplet:resizeSpectrumMeter(self, v.name)
-						visImage:selectSpectrum(v.name, true, false)
-					else
-						-- turn it off conditionally:
-						-- there needs to be at least one Spectrum
-						if visImage:selectSpectrum(v.name, false, false) > 0 then
---							settings.spectrum[v.name].enabled = false 
-							if npStyleHasSpectrum(selectedStyle) then
-								self.window = nil
-							end
-						else
-							visImage:selectSpectrum(v.name, true, false)
-							object:setSelected(true)
-						end
-					end
-					self:updateSettings()
-				end,
-			selected),
-		} )
-	end
-
-	--XXX: not sure whether the text is necessary or even helpful here
-	--menu:setHeaderWidget(Textarea("help_text", self:string("NOW_PLAYING_VIEWS_HELP")))
-
-	window:addWidget(menu)
-	window:show()
 end
 
 
@@ -2052,7 +1938,6 @@ end
 function showNowPlaying(self, transition, direct)
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
---	self:updateSettings()
 
 	if not self.selectedStyle then
 		local settings = self:getSettings()
@@ -2219,23 +2104,4 @@ function free(self)
 	end
 
 	return true
-end
-
-function updateSettings(self)
-	local settings = self:getSettings()
-
-	-- VUMeters
-	npscreenVumeters = visImage:getVUImageList()
-	settings.vumeters = {}
-	for i, v in ipairs(npscreenVumeters) do
-		settings.vumeters[v.name] = npscreenVumeters[i].enabled
-	end
-
-
-	-- Spectrum images
-	npscreenSpectrum = visImage:getSpectrumList()
-	settings.spectrum = visImage:getSpectrumSettings()
-
-	self:storeSettings()
-	visImage:sync()
 end
