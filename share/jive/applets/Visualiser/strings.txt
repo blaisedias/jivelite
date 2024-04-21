@@ -32,6 +32,9 @@ VISUALISER_CACHE_IMAGE_RAM
 VISUALISER_RANDOMISE_SEQUENCE
 	EN	Randomise Visualiser Image Sequence
 
+RESIZE_IMAGES
+	EN	Resize Images
+
 ON
 	EN	On
 
