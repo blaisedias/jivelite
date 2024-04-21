@@ -44,8 +44,6 @@ SPT_COLOUR = "colour"
 
 local vuImages = {}
 local spectrumList = {}
-local npvumeters = {}
-local npspectrums = {}
 local vuSeq = {}
 local spSeq = {}
 local visSettings = {}
@@ -260,23 +258,81 @@ function _readCacheDir(search_root)
 	end
 end
 
-function npSettings(tbl, vusettings, spsettings)
-	npvumeters = vusettings
-	for k, v in pairs(spsettings) do
-		if type(v) == "boolean" then
-			npspectrums[k] = {enabled=v}
-		else
-			if v.spType == SPT_COLOUR then
-			end
-			npspectrums[k] = v
-		end
-	end
-end
-
 
 function setVisSettings(tbl, settings)
 	visSettings = settings
-	log:info("setVisSettings: ", settings, " ", visSettings.randomSequence)
+
+    platformDetect()
+	initialiseCache()
+
+	initSpectrumList()
+    local enabled_count = 0
+    local k,v 
+	for k, v in pairs(settings.spectrumMeterSelection) do
+		-- set flags but do not cache
+		selectSpectrum(nil, k, v, false)
+        if v then
+            enabled_count = enabled_count + 1
+        end
+	end
+    if enabled_count == 0 and #spectrumList > 0 then
+        -- try to select a default which does require a resize
+        -- 1: try white colour
+        for k, v in pairs(spectrumList) do
+            if v.name == "mc-White" and v.spType == "colour" then
+                v.enabled = true
+                enabled_count = 1
+            end
+        end
+        if enabled_count == 0 then
+            -- 2: try a colour
+            for k, v in pairs(spectrumList) do
+                if v.spType == "colour" then
+                    v.enabled = true
+                    enabled_count = 1
+                end
+            end
+        end
+        if enabled_count == 0 then
+            -- 3: finally just use whatever is first in the list
+            -- a resize may be involved at a later stage
+    		spectrumList[1].enabled = true
+        end
+    end
+
+    initVuMeterList()
+    enabled_count = 0
+    for k, v in pairs(settings.vuMeterSelection) do
+		-- set flags but do not cache
+		selectVuImage(nil, k, v , false)
+        if v then
+            enabled_count = enabled_count + 1
+        end
+    end
+	if enabled_count == 0 and #vuImages > 0 then
+        -- select a default try to find a vfd (no resize required)
+        -- 1: try "VFD3-Cyan-Orange"
+        for k, v in pairs(vuImages) do
+            if v.name == "VFD-White-Orange" and v.vutype=="vfd" then
+                v.enabled = true
+                enabled_count = 1
+            end
+        end
+        if enabled_count == 0 then
+            -- 2: try any VFD
+            for k, v in pairs(vuImages) do
+                if v.vutype=="vfd" then
+                    v.enabled = true
+                    enabled_count = 1
+                end
+            end
+        end
+        if enabled_count == 0 then
+            -- 3: finally just use whatever is first in the list
+            -- a resize may be involved at a later stage
+    		vuImage[1].enabled = true
+        end
+	end
 end
 
 function initialiseCache()
@@ -294,40 +350,7 @@ function initialiseCache()
 	_readCacheDir(resizedCachePath)
 end
 
-function initialiseVUMeters()
-	initVuMeterList()
-	for k, v in pairs(npvumeters) do
-		-- set flags but do not cache
-		selectVuImage({},k,v, false)
-	end
-	local enabled = false
-	for i, v in ipairs(vuImages) do
-		enabled = enabled or v.enabled
-	end
-	if not enabled and #vuImages > 0 then
-		vuImages[1].enabled = true
-	end
-end
-
-function initialiseSpectrumMeters()
-	initSpectrumList()
-	for k, v in pairs(npspectrums) do
-		-- set flags but do not cache
-		selectSpectrum({}, k, v.enabled, false)
-	end
-	for i, v in ipairs(spectrumList) do
-		enabled = enabled or v.enabled
-	end
-	if not enabled and #spectrumList > 0 then
-		spectrumList[1].enabled = true
-	end
-end
-
 function initialise()
-	platformDetect()
-	initialiseCache()
-	initialiseVUMeters()
-	initialiseSpectrumMeters()
 	spBump()
 	vuBump()
 end
@@ -418,7 +441,7 @@ function registerSpectrumResolution(tbl, w,h)
 end
 
 
-function getSpectrumList()
+function getSpectrumMeterList()
 	return spectrumList
 end
 
@@ -453,16 +476,6 @@ function initColourSpectrums()
 		{name="mc-Red translucent", enabled=false, spType=SPT_COLOUR,	  barColor=0xd00000a0, capColor=0xff0000ff},
 	}
 	for x,c in pairs(csp) do
-		for k, v in pairs(npspectrums) do
-			if v.spType == SPT_COLOUR then
-				if c.name == k then
-					c.enabled = v.enabled
-					c.barColor = v.barColor
-				 c.capColor = v.capColor
-				end
---				table.insert(spectrumList, {name=k, enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor})
-			end
-		end
 		table.insert(spectrumList, c)
 	end
 end
@@ -529,9 +542,6 @@ end
 function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {}
-	if #npspectrums == 0 then
-		table.insert(spectrumList, {name=" default", enabled=false, spType=SPT_DEFAULT})
-	end
 
 	initColourSpectrums()
 
@@ -841,7 +851,7 @@ function registerVUMeterResolution(tbl, w,h)
 	table.insert(vuMeterResolutions, {w=w, h=h})
 end
 
-function getVUImageList()
+function getVuMeterList()
 	return vuImages
 end
 
@@ -886,7 +896,7 @@ function _populateVfdVuMeterList(search_root)
 						end
 					end
 				end
-				table.insert(vuImages, {name=entry, enabled=false, displayName=entry, vutype="vfd"})
+				table.insert(vuImages, {name=entry, enabled=false, displayName='vfd-' .. entry, vutype="vfd"})
 			end
 		end
 	end
@@ -914,9 +924,9 @@ function _populateAnalogueVuMeterList(search_root)
 				local ixSub = string.find(imgName, "25seq")
 				if ixSub ~= nil then
 					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-						displayName = string.sub(imgName, ixSub + 6)
+						displayName = 'anlg-' .. string.sub(imgName, ixSub + 6)
 					else
-						displayName = string.sub(imgName, ixSub + 5)
+						displayName = 'anlg-' .. string.sub(imgName, ixSub + 5)
 					end
 				end
 				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
