@@ -290,6 +290,7 @@ function setVisSettings(tbl, settings)
                 if v.spType == "colour" then
                     v.enabled = true
                     enabled_count = 1
+                    break
                 end
             end
         end
@@ -311,9 +312,9 @@ function setVisSettings(tbl, settings)
     end
 	if enabled_count == 0 and #vuImages > 0 then
         -- select a default try to find a vfd (no resize required)
-        -- 1: try "VFD3-Cyan-Orange"
+        -- 1: try "RS-M250"
         for k, v in pairs(vuImages) do
-            if v.name == "VFD-White-Orange" and v.vutype=="vfd" then
+            if v.name == "RS-M250" and v.vutype=="vfd" then
                 v.enabled = true
                 enabled_count = 1
             end
@@ -324,6 +325,7 @@ function setVisSettings(tbl, settings)
                 if v.vutype=="vfd" then
                     v.enabled = true
                     enabled_count = 1
+                    break
                 end
             end
         end
@@ -801,8 +803,8 @@ end
 --- Spectrum bars format
 -------------------------------------------------------- 
 function getBarsFormat()
-	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat.name)
-	return visSettings.spectrum.barsFormat
+	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat)
+	return visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat]
 end
 
 -------------------------------------------------------- 
@@ -834,9 +836,16 @@ end
 --------------------------------------------------------- 
 --- Spectrum channel flip
 -------------------------------------------------------- 
+local channelFlips  = {
+        LHHL={0,1},
+        HLHL={1,1},
+        HLLH={1,0},
+        LHLH={0,0},
+}
+
 function getChannelFlipValues()
-	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip.name, " ", visSettings.spectrum.channelFlip.values)
-	return visSettings.spectrum.channelFlip.values
+	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip, " ", channelFlips[visSettings.spectrum.channelFlip])
+	return channelFlips[visSettings.spectrum.channelFlip]
 end
 
 -------------------------------------------------------- 

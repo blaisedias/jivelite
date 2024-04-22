@@ -35,6 +35,15 @@ VISUALISER_RANDOMISE_SEQUENCE
 RESIZE_IMAGES
 	EN	Resize Images
 
+LHHL
+	EN	Low Freq > High Freq, High Freq > Low Freq
+HLHL
+	EN	High Freq > Low Freq, High Freq > Low Freq
+HLLH
+	EN	High Freq > Low Freq, Low Freq > High Freq
+LHLH
+	EN	Low Freq > High Freq, Low Freq > High Freq
+
 ON
 	EN	On
 
