@@ -51,8 +51,8 @@ function defaultSettings(self)
         vuMeterSelection={},
         spectrumMeterSelection={},
         spectrum={
-            baselineOn=true,
-            baselineAlways=false,
+            baselineOn=false,
+            baselineAlways=true,
             turbine=false,
             channelFlip="LHHL",
             backlitAlpha=80,
