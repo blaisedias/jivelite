@@ -242,17 +242,30 @@ function selectSpectrumBarsFormat(self)
 
     local current = settings.spectrum.barsFormat
 
+    -- sort the bars format for display based on the number of bars that would be 
+    -- rendered
+    local sorted_bf = {}
     for k, v in pairs(settings.spectrum.barFormats) do
+        local binWidth = (v.barsInBin * v.barWidth) + v.binSpace + ((v.barsInBin-1) * v.barSpace)
+        table.insert(sorted_bf, {name=k, binWidth=binWidth})
+    end
+    table.sort(sorted_bf, function(left, right) return left.binWidth > right.binWidth end)
+
+    for i, v in ipairs(sorted_bf) do
         menu:addItem( {
-            text = k,
+            text = v.name,
             style = 'item_choice',
             check = RadioButton("radio", group,
                 function()
                     local rb_settings = self:getSettings()
-                    rb_settings.spectrum.barsFormat=k
+                    rb_settings.spectrum.barsFormat=v.name
                     self:storeSettings()
+                    local np = appletManager:getAppletInstance("NowPlaying")
+                    if np ~= nil then
+                        np:invalidateWindow(nil)
+                    end
                 end,
-            k == current),
+            v.name == current),
         })
     end
 
