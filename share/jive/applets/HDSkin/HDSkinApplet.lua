@@ -719,12 +719,6 @@ function skin(self, s)
 	local TITLE_BUTTON_WIDTH = 76
 
 
--- front load for smoother experience when music is playing
---	visImage:registerVUMeterResolution(coverSize, coverSize)
---	visImage:registerSpectrumResolution(coverSize, coverSize)
---	visImage:initialise()
-	visImage:initialiseCache()
-
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_med.png"),
 		frameRate = 8,
@@ -3050,7 +3044,6 @@ function skin(self, s)
 		npprogressNB = { hidden = 1},
 	})
 	s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
-	visImage:initialiseSpectrumMeters()
 
 	-- Visualizer: VU Meter
 	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),  math.floor(coverSize * 2 / 6))
@@ -3124,7 +3117,6 @@ function skin(self, s)
 		npprogressNB = { hidden = 1},
 	})
 	s.nowplaying_vumeter_text.pressed = s.nowplaying_vumeter_text
-	visImage:initialiseVUMeters()
 
 
 	s.brightness_group = {
