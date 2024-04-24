@@ -685,11 +685,6 @@ function skin(self, s)
 	local FIVE_ITEM_HEIGHT = 76
 	local TITLE_BUTTON_WIDTH = 76
 
--- front load for smoother experience when music is playing
---	visImage:registerVUMeterResolution(coverSize, coverSize)
---	visImage:registerSpectrumResolution(coverSize, coverSize)
---	visImage:initialiseCache()
-	visImage:initialiseCache()
 
 	-- alternatives for grid view
 	local ALBUMMENU_FONT_SIZE_G = 26
@@ -3217,7 +3212,6 @@ function skin(self, s)
 		npprogressNB = { hidden = 1},
 	})
 	s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text    
-	visImage:initialiseSpectrumMeters()
 
 	-- Visualizer: VU Meter
 	visImage:registerVUMeterResolution(screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920), math.floor(coverSize * 2 / 6))
@@ -3289,7 +3283,6 @@ function skin(self, s)
 		npprogressNB = { hidden = 1},
 	})
 	s.nowplaying_vumeter_text.pressed = s.nowplaying_vumeter_text
-	visImage:initialiseVUMeters()
 
 	s.brightness_group = {
 		order = {  'down', 'div1', 'slider', 'div2', 'up' },
