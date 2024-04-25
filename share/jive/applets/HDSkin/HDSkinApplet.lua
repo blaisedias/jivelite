@@ -2956,7 +2956,7 @@ function skin(self, s)
 				x = _tracklayout.x,
 				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
 				w = screenWidth - _tracklayout.x - math.floor(50 * screenWidth / 1920),
-				h = coverSize * 2 / 6,
+				h = math.floor(coverSize * 2 / 6),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -2982,7 +2982,7 @@ function skin(self, s)
 	s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 
 	-- Visualizer: Spectrum Visualizer
-	visImage:registerSpectrumResolution(screenWidth, screenHeight - (coverSize/6) - (coverSize/6))
+	visImage:registerSpectrumResolution(screenWidth, math.floor(screenHeight - (coverSize/6) - (coverSize/6)))
 	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
@@ -2991,7 +2991,7 @@ function skin(self, s)
 			y = (coverSize/6),
 --			align = "center",
 			w = screenWidth,
-			h = screenHeight - (coverSize/6) - (coverSize/6),
+			h = math.floor(screenHeight - (coverSize/6) - (coverSize/6)),
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -3000,7 +3000,7 @@ function skin(self, s)
 				x = 0,
 				y = TITLE_HEIGHT,
 				w = screenWidth,
-				h = screenHeight - (coverSize/6) - (coverSize/6),
+				h = math.floor(screenHeight - (coverSize/6) - (coverSize/6)),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -3072,7 +3072,7 @@ function skin(self, s)
 	})
 	s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 
-	visImage:registerVUMeterResolution(screenWidth,  screenHeight - (coverSize/6) - (coverSize/6))
+	visImage:registerVUMeterResolution(screenWidth,  math.floor(screenHeight - (coverSize/6) - (coverSize/6)))
 	s.nowplaying_vumeter_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
@@ -3081,7 +3081,7 @@ function skin(self, s)
 			y = (coverSize/6),
 --			align = "center",
 			w = screenWidth,
-			h = screenHeight - (coverSize/6) - (coverSize/6),
+			h = math.floor(screenHeight - (coverSize/6) - (coverSize/6)),
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -3090,7 +3090,7 @@ function skin(self, s)
 				x = _tracklayout.x,
 				y = (coverSize/6),
 				w = screenWidth,
-				h = screenHeight - (coverSize/6) - (coverSize/6),
+				h = math.floor(screenHeight - (coverSize/6) - (coverSize/6)),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 			}
