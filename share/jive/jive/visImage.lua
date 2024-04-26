@@ -646,9 +646,8 @@ function spFindSpectrumByType(spType)
 	return spectrumList[1].name
 end
 
-local currentFgImage = nil
-local currentFgImageKey = nil
 function _getFgSpectrumImage(spkey, w, h, spType)
+	local fgImage = nil
 	if spectrumImagesMap[spkey] == nil then
 		return nil
 	end
@@ -660,17 +659,9 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey)
 
-	if currentFgImageKey == dicKey then
-		return currentFgImage
-	end
-	if currentFgImage ~= nil then
-		currentFgImage = nil
-		currentFgImageKey = nil
-	end
 	if diskImageCache[dicKey] ~= nil then 
 		log:debug("getFgImage: load ", dicKey, " ", diskImageCache[dicKey])
-		currentFgImage = loadImage(diskImageCache[dicKey])
-		currentFgImageKey = dicKey
+		fgImage = loadImage(diskImageCache[dicKey])
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if spectrumImagesMap[spkey].src ~= nil then
@@ -679,16 +670,14 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 				spectrumImagesMap[spkey].src = nil
 				return nil
 			end
-			currentFgImage = loadImage(diskImageCache[dicKey])
-			currentFgImageKey = dicKey
+			fgImage = loadImage(diskImageCache[dicKey])
 		end
 	end
-	return currentFgImage
+	return fgImage
 end
 
-local currentBgImage = nil
-local currentBgImageKey = nil
 function _getBgSpectrumImage(spkey, w, h, spType) 
+	local bgImage = nil
 	if spectrumImagesMap[spkey] == nil then
 		return nil
 	end
@@ -699,18 +688,10 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
-	if currentBgImageKey == dicKey then
-		return currentBgImage
-	end
-	if currentBgImage ~= nil then
-		currentBgImage = nil
-		currentBgImageKey = nil
-	end
 
-	currentBgImage = imCacheGet(dicKey)
-	if currentBgImage ~= nil then
-		currentBgImageKey = dicKey
-		return currentBgImage
+	bgImage = imCacheGet(dicKey)
+	if bgImage ~= nil then
+		return bgImage
 	end
 
 	local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
@@ -722,13 +703,12 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	local tmp = Surface:newRGB(w,h)
 	tmp:filledRectangle(0,0,w,h,0)
 	fgimg:blit(tmp, 0, 0)
-	currentBgImage = Surface:newRGB(w,h)
-	tmp:blitAlpha(currentBgImage, 0, 0, getBacklitAlpha())
+	bgImage = Surface:newRGB(w,h)
+	tmp:blitAlpha(bgImage, 0, 0, getBacklitAlpha())
 	tmp:release()
 	tmp = nil
-	currentBgImageKey = dicKey
-	imCachePut(dicKey, currentBgImage)
-	return currentBgImage
+	imCachePut(dicKey, bgImage)
+	return bgImage
 end
 
 function getSpectrum(tbl, w, h, spType)
@@ -744,16 +724,6 @@ function getSpectrum(tbl, w, h, spType)
 	end
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBacklitAlpha()
-	if currentFgImage ~= nil then
-		currentFgImage:release()
-		currentFgImage = nil
-		currentFgImageKey = nil
-	end
-	if currentBgImage ~= nil then
-		currentBgImage:release()
-		currentBgImage = nil
-		currentBgImageKey = nil
-	end
 
 	if visSettings.cacheEnabled == false then
 		imCacheClear()
@@ -997,8 +967,6 @@ function vuBump()
 	vuSeqIndex = vuSeqIndex + 1
 end
 
-local currentVuImage = nil
-local currentVuImageKey = nil
 function getVuImage(w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
 	if vuImages[vuImageIndex].enabled == false then
@@ -1006,37 +974,21 @@ function getVuImage(w,h)
 	end
 	local entry = vuImages[vuImageIndex]
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	log:info("VUImage keys : current ", currentVuImageKey, " new: ", dicKey)
-	if currentVuImageKey == dicKey then
-		if entry.vutype ~= "frame" then
-			-- FIXME: this will retrieve the vfd from vfdCache 
-			-- need to return a complex type which can contains
-			-- VUImage types 
-			return  getVFDVUmeter(entry.name, w, h), entry.vutype
-		end
-		-- image is the current one
-		log:info("returning : currentVuImage ", currentVuImage, " ", currentVuImageKey)
-		return currentVuImage, entry.vutype
-	end
 
 	if visSettings.cacheEnabled == false then
 		imCacheClear()
 	end
 
 	if entry.vutype ~= "frame" then
-		currentVuImageKey = dicKey
-		log:info("SETT VUImage keys : current ", currentVuImageKey, " new: ", dicKey)
 		return  getVFDVUmeter(entry.name, w, h), entry.vutype
 	end
 
-	currentVuImage = nil
-	currentVuImageKey = nil
+	local frameVU = nil
 
 	if diskImageCache[dicKey] ~= nil then 
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
-		currentVuImage = loadImage(diskImageCache[dicKey])
-		currentVuImageKey = dicKey
+		frameVU = loadImage(diskImageCache[dicKey])
 	else
 		-- this is required to create cached images when skin change, changes the resolution.
 		if vuImagesMap[entry.name].src ~= nil then
@@ -1048,13 +1000,12 @@ function getVuImage(w,h)
 				vumImagesMap[entry.name].src = nil
 			end
 			log:debug("getVuImage: load (new) ", dicKey, " ", diskImageCache[dicKey])
-			currentVuImage = loadImage(diskImageCache[dicKey])
-			currentVuImageKey = dicKey
+			frameVU = loadImage(diskImageCache[dicKey])
 		else
 			log:debug("getVuImage: no image for ", dicKey)
 		end
 	end
-	return currentVuImage, entry.vutype
+	return frameVU, entry.vutype
 end
 
 
