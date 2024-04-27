@@ -27,7 +27,6 @@ local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local visImage          = require("jive.visImage")
 local log               = require("jive.utils.log").logger("applet.Visualiser")
-local appletManager     = appletManager
 
 local debug             = require("jive.utils.debug")
 
@@ -73,6 +72,42 @@ function init(self)
             end
         end,
         settings.randomSequence)
+    })
+
+    jiveMain:addItem({
+        id = "visuChangeOnTrackChange",
+        node = 'visualiserSettings',
+        text = self:string("VISU_CHANGE_ON_TRACK_CHANGE"),
+        style = 'item_choice',
+        weight = 41,
+        check =  Checkbox("checkbox", function(applet, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.visuChangeOnTrackChange = checked
+            self:storeSettings()
+            local np = appletManager:getAppletInstance("NowPlaying")
+            if np ~= nil then
+                np:invalidateWindow(nil)
+            end
+        end,
+        settings.visuChangeOnTrackChange)
+    })
+
+    jiveMain:addItem({
+        id = "visuChangeOnNpViewChange",
+        node = 'visualiserSettings',
+        text = self:string("VISU_CHANGE_ON_NP_VIEW"),
+        style = 'item_choice',
+        weight = 42,
+        check =  Checkbox("checkbox", function(applet, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.visuChangeOnNpViewChange = checked
+            self:storeSettings()
+            local np = appletManager:getAppletInstance("NowPlaying")
+            if np ~= nil then
+                np:invalidateWindow(nil)
+            end
+        end,
+        settings.visuChangeOnNpViewChange)
     })
 
     jiveMain:addItem({
