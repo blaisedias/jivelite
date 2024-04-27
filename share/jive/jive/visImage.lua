@@ -176,7 +176,6 @@ function loadImage(path)
 end
 
 function saveImage(img, path, asPng)
-	imCachePut(path, img)
 	if saveResizedImages then
 		if saveAsPng and asPng then
 			img:savePNG(path)
@@ -262,78 +261,78 @@ end
 function setVisSettings(tbl, settings)
 	visSettings = settings
 
-    platformDetect()
+	platformDetect()
 	initialiseCache()
 
 	initSpectrumList()
-    local enabled_count = 0
-    local k,v 
+	local enabled_count = 0
+	local k,v 
 	for k, v in pairs(settings.spectrumMeterSelection) do
 		-- set flags but do not cache
 		selectSpectrum(nil, k, v, false)
-        if v then
-            enabled_count = enabled_count + 1
-        end
+		if v then
+			enabled_count = enabled_count + 1
+		end
 	end
-    if enabled_count == 0 and #spectrumList > 0 then
-        -- try to select a default which does require a resize
-        -- 1: try white colour
-        for k, v in pairs(spectrumList) do
-            if v.name == "mc-White" and v.spType == "colour" then
-                v.enabled = true
-                enabled_count = 1
-            end
-        end
-        if enabled_count == 0 then
-            -- 2: try a colour
-            for k, v in pairs(spectrumList) do
-                if v.spType == "colour" then
-                    v.enabled = true
-                    enabled_count = 1
-                    break
-                end
-            end
-        end
-        if enabled_count == 0 then
-            -- 3: finally just use whatever is first in the list
-            -- a resize may be involved at a later stage
-    		spectrumList[1].enabled = true
-        end
-    end
+	if enabled_count == 0 and #spectrumList > 0 then
+		-- try to select a default which does require a resize
+		-- 1: try white colour
+		for k, v in pairs(spectrumList) do
+			if v.name == "mc-White" and v.spType == "colour" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try a colour
+			for k, v in pairs(spectrumList) do
+				if v.spType == "colour" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			spectrumList[1].enabled = true
+		end
+	end
 
-    initVuMeterList()
-    enabled_count = 0
-    for k, v in pairs(settings.vuMeterSelection) do
+	initVuMeterList()
+	enabled_count = 0
+	for k, v in pairs(settings.vuMeterSelection) do
 		-- set flags but do not cache
 		selectVuImage(nil, k, v , false)
-        if v then
-            enabled_count = enabled_count + 1
-        end
-    end
+		if v then
+			enabled_count = enabled_count + 1
+		end
+	end
 	if enabled_count == 0 and #vuImages > 0 then
-        -- select a default try to find a vfd (no resize required)
-        -- 1: try "RS-M250"
-        for k, v in pairs(vuImages) do
-            if v.name == "RS-M250" and v.vutype=="vfd" then
-                v.enabled = true
-                enabled_count = 1
-            end
-        end
-        if enabled_count == 0 then
-            -- 2: try any VFD
-            for k, v in pairs(vuImages) do
-                if v.vutype=="vfd" then
-                    v.enabled = true
-                    enabled_count = 1
-                    break
-                end
-            end
-        end
-        if enabled_count == 0 then
-            -- 3: finally just use whatever is first in the list
-            -- a resize may be involved at a later stage
-    		vuImage[1].enabled = true
-        end
+		-- select a default try to find a vfd (no resize required)
+		-- 1: try "RS-M250"
+		for k, v in pairs(vuImages) do
+			if v.name == "RS-M250" and v.vutype=="vfd" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try any VFD
+			for k, v in pairs(vuImages) do
+				if v.vutype=="vfd" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			vuImage[1].enabled = true
+		end
 	end
 end
 
@@ -353,8 +352,8 @@ function initialiseCache()
 end
 
 function initialise()
-	spBump()
-	vuBump()
+	__spBump()
+	__vuBump()
 end
 
 -------------------------------------------------------- 
@@ -619,7 +618,7 @@ function populateSpSeq()
 end
 
 local spSeqIndex = 1
-function spBump(tbl, spType)
+function __spBump(tbl, spType)
 	if #spSeq == 0 then
 		populateSpSeq()
 		ShuffleInPlace(spSeq)
@@ -633,6 +632,18 @@ function spBump(tbl, spType)
 	spImageIndex = spSeq[spSeqIndex]
 	spSeqIndex = spSeqIndex + 1
 	return true
+end
+
+function spChange(tbl, name)
+	if name == "visuChangeOnTrackChange" and visSettings.visuChangeOnTrackChange then
+		__spBump()
+	end
+	if name == "visuChangeOnNpViewChange" and visSettings.visuChangeOnNpViewChange then
+		__spBump()
+	end
+	if name == "force" then
+		__spBump()
+	end
 end
 
 function spFindSpectrumByType(spType)
@@ -714,14 +725,14 @@ end
 function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
-	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
---		if not spBump(nil, spType) then
+--	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
+--		if not __spBump(nil, spType) then
 --			spkey = spFindSpectrumByType(spType)
 --		else
 --			spkey = spectrumList[spImageIndex].name
 --		end
-		spBump(nil, nil)
-	end
+--		__spBump(nil, nil)
+--	end
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBacklitAlpha()
 
@@ -737,6 +748,7 @@ end
 function selectSpectrum(tbl, name, selected, allowCaching)
 	n_enabled = 0
 	log:debug("selectSpectrum", " ", name, " ", selected)
+
 	for k, v in pairs(spectrumList) do
 		if v.name == name then
 			if (allowCaching and selected) then
@@ -749,6 +761,12 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 						end
 					end
 			end
+			if not selected and v.enabled then
+				v.enabled = selected
+				-- deselected so re-sequence
+				spSeq = {}
+				__spBump()
+			end
 			v.enabled = selected
 		end
 		if v.enabled then
@@ -756,8 +774,8 @@ function selectSpectrum(tbl, name, selected, allowCaching)
 		end
 	end
 	log:debug("selectSpectrum", " enabled count: ", n_enabled)
-	spSeq = {}
-	spBump()
+--	spSeq = {}
+--	__spBump()
 	return n_enabled
 end
 
@@ -807,10 +825,10 @@ end
 --- Spectrum channel flip
 -------------------------------------------------------- 
 local channelFlips  = {
-        LHHL={0,1},
-        HLHL={1,1},
-        HLLH={1,0},
-        LHLH={0,0},
+		LHHL={0,1},
+		HLHL={1,1},
+		HLLH={1,0},
+		LHLH={0,0},
 }
 
 function getChannelFlipValues()
@@ -953,7 +971,7 @@ function populateVuSeq()
 end
 
 local vuSeqIndex = 1
-function vuBump()
+function __vuBump()
 	if #vuSeq == 0 then
 		populateVuSeq()
 		ShuffleInPlace(vuSeq)
@@ -967,11 +985,23 @@ function vuBump()
 	vuSeqIndex = vuSeqIndex + 1
 end
 
+function vuChange(tbl, name)
+	if name == "visuChangeOnTrackChange" and visSettings.visuChangeOnTrackChange then
+		__vuBump()
+	end
+	if name == "visuChangeOnNpViewChange" and visSettings.visuChangeOnNpViewChange then
+		__vuBump()
+	end
+	if name == "force" then
+		__vuBump()
+	end
+end
+
 function getVuImage(w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
-	if vuImages[vuImageIndex].enabled == false then
-		vuBump()
-	end
+--	if vuImages[vuImageIndex].enabled == false then
+--		__vuBump()
+--	end
 	local entry = vuImages[vuImageIndex]
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 
@@ -1022,6 +1052,12 @@ function selectVuImage(tbl, name, selected, allowCaching)
 						end
 				end
 			end
+			if not selected and v.enabled then
+				v.enabled = selected
+				-- deselected so re-sequence in 
+				vuSeq = {}
+				__vuBump()
+			end
 			v.enabled = selected
 		end
 		if v.enabled then
@@ -1029,8 +1065,6 @@ function selectVuImage(tbl, name, selected, allowCaching)
 		end
 	end
 	log:debug("selectVuImage", " enabled count: ", n_enabled)
-	vuSeq = {}
-	vuBump()
 	return n_enabled
 end
 
@@ -1126,14 +1160,14 @@ end
 --- Misc
 -------------------------------------------------------- 
 
-function sync()
-	if not vuImages[vuImageIndex].enabled then
-		vuBump()
-	end
-	if not spectrumList[spImageIndex].enabled then
-		spBump(nil,nil)
-	end
-end
+--function sync()
+--	if not vuImages[vuImageIndex].enabled then
+--		__vuBump()
+--	end
+--	if not spectrumList[spImageIndex].enabled then
+--		__spBump(nil,nil)
+--	end
+--end
 
 -------------------------------------------------------
 --- Resize
