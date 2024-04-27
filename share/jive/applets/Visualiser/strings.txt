@@ -26,11 +26,23 @@ SPECTRUM_BASELINEALWAYS
 SPECTRUM_CHANNEL_FLIP
 	EN	Channel Flip
 
+SPECTRUM_BACKLIT_ALPHA
+	EN	Backlit Alpha
+
 VISUALISER_CACHE_IMAGE_RAM
 	EN	Cache Visualiser Images in RAM
 
 VISUALISER_RANDOMISE_SEQUENCE
 	EN	Randomise Visualiser Image Sequence
+
+VISU_CHANGE_ON_TRACK_CHANGE
+	EN	Change Visualiser On Track Change
+
+VISU_CHANGE_ON_NP_VIEW
+	EN	Change Visualiser On Now Playing View Change
+
+VISU_CHANGE_ON_TIMER
+	EN	Change Visualiser On Timer
 
 RESIZE_IMAGES
 	EN	Resize Images
