@@ -626,8 +626,8 @@ function notify_playerTrackChange(self, player, nowPlaying)
 	end
 
 	-- cycle to the next set of visualiser images
-	visImage:vuBump()
-	visImage:spBump(nil)
+	visImage:vuChange("visuChangeOnTrackChange")
+	visImage:spChange("visuChangeOnTrackChange")
 
 	self:replaceNPWindow()
 end
@@ -1635,6 +1635,7 @@ function _createUI(self)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
+		visImage:spChange("visuChangeOnNpViewChange")
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = SpectrumMeter("spectrum", self.windowStyle),
@@ -1649,6 +1650,7 @@ function _createUI(self)
 
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
+		visImage:vuChange("visuChangeOnNpViewChange")
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = VUMeter("vumeter_analog"),

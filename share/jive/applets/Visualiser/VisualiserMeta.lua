@@ -48,6 +48,9 @@ function defaultSettings(self)
     return {
         cacheEnabled=false,
         randomSequence=false,
+        visuChangeOnTrackChange=true,
+        visuChangeOnNpViewChange=false,
+        visuChangeOnTimer=0,
         vuMeterSelection={},
         spectrumMeterSelection={},
         spectrum={
