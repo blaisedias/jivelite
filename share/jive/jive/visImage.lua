@@ -524,7 +524,7 @@ function _populateSpectrumImageList(search_root)
 			if parts ~= nil then
 				local imgName = 'im-' .. parts[1]
 				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_GRADIENT})
+					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_IMAGE})
 				end
 				log:debug(" SpectrumImage :", imgName, ", ", search_root .. "/" .. entry)
 				spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
@@ -627,6 +627,7 @@ function __spBump(tbl, spType)
 
 	if spSeqIndex > #spSeq then
 		spSeqIndex = 1
+		populateSpSeq()
 		ShuffleInPlace(spSeq)
 	end
 	spImageIndex = spSeq[spSeqIndex]
@@ -673,16 +674,17 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 	if diskImageCache[dicKey] ~= nil then 
 		log:debug("getFgImage: load ", dicKey, " ", diskImageCache[dicKey])
 		fgImage = loadImage(diskImageCache[dicKey])
-	else
-		-- this is required to create cached images when skin change, changes the resolution.
-		if spectrumImagesMap[spkey].src ~= nil then
-			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
-			if diskImageCache[dicKey] == nil then 
-				spectrumImagesMap[spkey].src = nil
-				return nil
-			end
-			fgImage = loadImage(diskImageCache[dicKey])
-		end
+---- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
+--	else
+--		-- this is required to create cached images when skin change, changes the resolution.
+--		if spectrumImagesMap[spkey].src ~= nil then
+--			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
+--			if diskImageCache[dicKey] == nil then 
+--				spectrumImagesMap[spkey].src = nil
+--				return nil
+--			end
+--			fgImage = loadImage(diskImageCache[dicKey])
+--		end
 	end
 	return fgImage
 end
@@ -701,24 +703,24 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
 
 	bgImage = imCacheGet(dicKey)
-	if bgImage ~= nil then
-		return bgImage
+	if bgImage == nil then
+		local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
+		if fgimg ~= nil then
+			-- FIXME:
+			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
+			-- the foreground image is affected by the alpha value.
+			-- For now work around by isolating, blit foreground to a temporary image and then blitAlpha
+			-- from the temporary image to the background image
+			local tmp = Surface:newRGB(w,h)
+			tmp:filledRectangle(0,0,w,h,0)
+			fgimg:blit(tmp, 0, 0)
+			bgImage = Surface:newRGB(w,h)
+			tmp:blitAlpha(bgImage, 0, 0, getBacklitAlpha())
+			tmp:release()
+			tmp = nil
+			imCachePut(dicKey, bgImage)
+	    end
 	end
-
-	local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
-	-- FIXME:
-	-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
-	-- the foreground image is affected by the alpha value.
-	-- For now work around by isolating, blit foreground to a temporary image and then blitAlpha
-	-- from the temporary image to the background image
-	local tmp = Surface:newRGB(w,h)
-	tmp:filledRectangle(0,0,w,h,0)
-	fgimg:blit(tmp, 0, 0)
-	bgImage = Surface:newRGB(w,h)
-	tmp:blitAlpha(bgImage, 0, 0, getBacklitAlpha())
-	tmp:release()
-	tmp = nil
-	imCachePut(dicKey, bgImage)
 	return bgImage
 end
 
@@ -979,6 +981,7 @@ function __vuBump()
 	end
 	if vuSeqIndex > #vuSeq then
 		vuSeqIndex = 1
+		populateVuSeq()
 		ShuffleInPlace(vuSeq)
 	end
 	vuImageIndex = vuSeq[vuSeqIndex]
@@ -1009,7 +1012,7 @@ function getVuImage(w,h)
 		imCacheClear()
 	end
 
-	if entry.vutype ~= "frame" then
+	if entry.vutype == "vfd" then
 		return  getVFDVUmeter(entry.name, w, h), entry.vutype
 	end
 
@@ -1019,21 +1022,22 @@ function getVuImage(w,h)
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
 		frameVU = loadImage(diskImageCache[dicKey])
-	else
-		-- this is required to create cached images when skin change, changes the resolution.
-		if vuImagesMap[entry.name].src ~= nil then
-			log:debug("getVuImage: creating image for ", dicKey)
-			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
-			if diskImageCache[dicKey] == nil then
-				-- didn't work zap the src string so we don't do this repeatedly
-				log:debug("getVuImage: failed to create image for ", dicKey)
-				vumImagesMap[entry.name].src = nil
-			end
-			log:debug("getVuImage: load (new) ", dicKey, " ", diskImageCache[dicKey])
-			frameVU = loadImage(diskImageCache[dicKey])
-		else
-			log:debug("getVuImage: no image for ", dicKey)
-		end
+---- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
+--	else
+--		-- this is required to create cached images when skin change, changes the resolution.
+--		if vuImagesMap[entry.name].src ~= nil then
+--			log:debug("getVuImage: creating image for ", dicKey)
+--			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
+--			if diskImageCache[dicKey] == nil then
+--				-- didn't work zap the src string so we don't do this repeatedly
+--				log:debug("getVuImage: failed to create image for ", dicKey)
+--				vumImagesMap[entry.name].src = nil
+--			end
+--			log:debug("getVuImage: load (new) ", dicKey, " ", diskImageCache[dicKey])
+--			frameVU = loadImage(diskImageCache[dicKey])
+--		else
+--			log:debug("getVuImage: no image for ", dicKey)
+--		end
 	end
 	return frameVU, entry.vutype
 end
@@ -1174,6 +1178,7 @@ end
 -------------------------------------------------------
 function resizeSpectrumMeter(tbl, name)
 	log:info("resizeSpectrums ", name)
+
 	for k, v in pairs(spectrumList) do
 --		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
@@ -1191,6 +1196,7 @@ end
 
 function resizeVuMeter(tbl, name)
 	log:info("resizeVuMeters ", name)
+
 	for k, v in pairs(vuImages) do
 --		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
@@ -1203,4 +1209,57 @@ function resizeVuMeter(tbl, name)
 			end
 		end
 	end
+end
+
+function getCurrentVuMeterName()
+	return '' .. vuImages[vuImageIndex].name
+end
+
+function getCurrentSpectrumMeterName()
+	return '' .. spectrumList[spImageIndex].name
+end
+
+function resizeRequiredSpectrumMeter(tbl, name)
+    local kr,vr, k,v
+    for k, v in pairs(spectrumList) do
+        if v.name == name then
+            -- spectrum meter found
+			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
+                -- of type that does require resize
+				if spectrumImagesMap[name].src ~= nil then
+                    -- have path to source image
+				   	for kr, vr in pairs(spectrumResolutions) do
+						if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+							return true
+						end
+					end
+				end
+			end
+            -- not resizable 1) not resizable type 2) no source image
+			break
+        end
+    end
+    -- spectrum meter not resizable : not found, not resizable, no source images
+	return false
+end
+
+function resizeRequiredVuMeter(tbl, name)
+    local kr, vr, k, v
+
+    for k, v in pairs(vuImages) do
+        if v.name == name then
+            -- found vu meter
+            if v.vutype == "frame" then
+                -- resizable type
+                for kr, vr in pairs(vuMeterResolutions) do
+                    if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+                        return true
+                    end
+                end
+            end
+            break
+        end
+    end
+    -- vu meter not resizable : not found, not resizable
+    return false
 end

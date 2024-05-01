@@ -39,7 +39,7 @@ VISU_CHANGE_ON_TRACK_CHANGE
 	EN	Change Visualiser On Track Change
 
 VISU_CHANGE_ON_NP_VIEW
-	EN	Change Visualiser On Now Playing View Change
+	EN	Change Visualiser On Click
 
 VISU_CHANGE_ON_TIMER
 	EN	Change Visualiser On Timer
