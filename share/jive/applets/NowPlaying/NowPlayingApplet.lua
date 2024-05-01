@@ -29,6 +29,7 @@ local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 local Tile             = require("jive.ui.Tile")
 local Timer            = require("jive.ui.Timer")
 local Player           = require("jive.slim.Player")
+local Popup             = require("jive.ui.Popup")
 
 local visImage         = require("jive.visImage")
 local VUMeter          = require("jive.vis.VUMeter")
@@ -1469,6 +1470,113 @@ function replaceNPWindow(self,noTrans)
 	self.window:replace(oldWindow, noTrans and Window.transitionNone or Window.transitionFadeIn)
 end
 
+----------------------------------------------------------------------------------------
+-- Resize visualiser support, UI support
+-- resizing requires time, so UI cues are important for a good user experience
+
+--- Resize VU meter images with UI cues that resize is in progess
+--- returns true if resize is required and is pending,
+--- false otherwise
+function resizeSpectrumMeter(self)
+    local spectrum_meter_name = visImage:getCurrentSpectrumMeterName()
+
+    if not visImage:resizeRequiredSpectrumMeter(spectrum_meter_name) then
+        return false
+    end
+
+    if self.window == nil then
+        -- return pending because we are unable to resize with visible UI cues
+        return true
+    end
+
+    local popup = Popup("toast_popup_text")
+
+    popup:setAllowScreensaver(false)
+    popup:setAutoHide(false)
+
+    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
+    -- popup will hide when resizing is done
+    popup:ignoreAllInputExcept({""})
+
+    local text = Label("text", "Resizing spectrum meter " .. spectrum_meter_name)
+
+    popup:addWidget(text)
+
+    local state = 1
+    popup:addTimer(10, function()
+        if state == 1 then
+            if spectrum_meter_name ~= nil then
+                log:info("resize ", spectrum_meter_name, " ", i_sp)
+                visImage:resizeSpectrumMeter(spectrum_meter_name)
+                log:info("done ", spectrum_meter_name)
+            end
+            state = state + 1
+        elseif state == 2 then
+            text:setValue("Resized spectrum meter " .. spectrum_meter_name)
+            state = state +1
+        else
+            popup:hide(Window.transitionFadeOut)
+            -- the popup UI is asynchronous, to use the currently selected 
+            -- resized resource, replace the NP window 
+            self:replaceNPWindow()
+        end
+    end)
+
+    popup:show()
+    return false
+end
+
+--- Resize spectrum meter images with UI cues that resize is in progess
+--- returns true if resize is required and is pending,
+--- false otherwise
+function resizeVUMeter(self)
+    local vu_meter_name = visImage:getCurrentVuMeterName()
+
+    if not visImage:resizeRequiredVuMeter(vu_meter_name) then
+        return false
+    end
+
+    if self.window == nil then
+        -- return pending because we are unable to resize with visible UI cues
+        return true
+    end
+
+    local popup = Popup("toast_popup_text")
+
+    popup:setAllowScreensaver(false)
+    popup:setAutoHide(false)
+
+    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
+    -- popup will hide when resizing is done
+    popup:ignoreAllInputExcept({""})
+
+    local text = Label("text", "Resizing vu meter " .. vu_meter_name)
+
+    popup:addWidget(text)
+
+    local state = 1
+    popup:addTimer(10, function()
+        if state == 1 then
+            if vu_meter_name ~= nil then
+                log:info("resize ", vu_meter_name, " ", i_vu)
+                visImage:resizeVuMeter(vu_meter_name)
+                log:info("done ", vu_meter_name)
+            end
+            state = state + 1
+        elseif state == 2 then
+            text:setValue("Resized vu meter " .. vu_meter_name)
+            state = state + 1
+        else
+            popup:hide(Window.transitionFadeOut)
+            -- the popup UI is asynchronous, to use the currently selected 
+            -- resized resource, replace the NP window 
+            self:replaceNPWindow()
+        end
+    end)
+
+    popup:show()
+    return false
+end
 
 ----------------------------------------------------------------------------------------
 -- Screen Saver Display 
@@ -1635,12 +1743,13 @@ function _createUI(self)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
-		visImage:spChange("visuChangeOnNpViewChange")
+		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = SpectrumMeter("spectrum", self.windowStyle),
 			}),
 			function()
+				visImage:spChange("visuChangeOnNpViewChange")
 				Framework:pushAction("go_now_playing")
 				return EVENT_CONSUME
 			end
@@ -1650,18 +1759,18 @@ function _createUI(self)
 
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
-		visImage:vuChange("visuChangeOnNpViewChange")
+		self.resizeVUMeterPending = self:resizeVUMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = VUMeter("vumeter_analog"),
 			}),
 			function()
+				visImage:vuChange("visuChangeOnNpViewChange")
 				Framework:pushAction("go_now_playing")
 				return EVENT_CONSUME
 			end
 		)
 	end
-
 
 	local playIcon = Button(Icon('play'),
 				function() 
@@ -1936,7 +2045,6 @@ function openScreensaver(self)
 	return false
 end
 
-
 function showNowPlaying(self, transition, direct)
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
@@ -2050,7 +2158,15 @@ function showNowPlaying(self, transition, direct)
 
 	-- Initialize with current data from Player
 	self.window:show(transitionOn)
+
 	self:_updateAll()
+	if self.resizeSpectrumMeterPending then
+		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
+	end
+	if self.resizeVUMeterPending then
+		self.resizeVUMeterPending = self:resizeVUMeter()
+	end
+
 end
 
 
