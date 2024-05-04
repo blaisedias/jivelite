@@ -29,7 +29,7 @@ local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 local Tile             = require("jive.ui.Tile")
 local Timer            = require("jive.ui.Timer")
 local Player           = require("jive.slim.Player")
-local Popup             = require("jive.ui.Popup")
+local Popup            = require("jive.ui.Popup")
 
 local visImage         = require("jive.visImage")
 local VUMeter          = require("jive.vis.VUMeter")
@@ -1446,6 +1446,10 @@ function toggleNPScreenStyle(self)
 	if self.window and self.window:getStyle() == self.selectedStyle then
 		-- no need to replace this window with the same style
 		log:debug('the style of self.window matches self.selectedStyle. No need to do anything')
+		-- blaise dias: this shouldn't be required but things go awry, when rendering VUMeters
+		-- but not SpectrumMeters.
+		-- Can also be reproduced by changing wallpapers and transitioning back to Now Playing 
+		self:replaceNPWindow()
 	else
 		local settings = self:getSettings()
 		settings.selectedStyle = self.selectedStyle
