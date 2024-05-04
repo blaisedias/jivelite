@@ -2,14 +2,16 @@
 
 Artwork created by Blaise Dias (2023)
 
-* ./LED-Green-Red
+* ./Cyan-Orange
+* ./Cyan-Orange-2
+* ./Cyan-Orange-3
+* ./Green-Red
+* ./Green-Red-Bars
 * ./RS-M250
 * ./RS-M250-CYAN
-* ./VFD-Cyan-Orange
-* ./VFD-Green-Red
-* ./VFD-White-Orange
-
-Licence is Creative Commons, CCO License.
+* ./White-Orange
+* ./White-Orange-2
+* ./White-Orange-3
 
 Tools used:
 * gimp https://www.gimp.org/
