@@ -719,7 +719,7 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 			tmp:release()
 			tmp = nil
 			imCachePut(dicKey, bgImage)
-	    end
+		end
 	end
 	return bgImage
 end
@@ -1097,6 +1097,9 @@ function getVFDVUmeter(name, w, h)
 	local bar_peak_off = name .. ":bar-peak-off"
 	local left = name .. ":left"
 	local right = name .. ":right"
+	local left_trail = name .. ":left-trail"
+	local right_trail = name .. ":right-trail"
+	local right = name .. ":right"
 	local center = name .. ":center"
 	vfd = {}
 	-- bar render x-offset
@@ -1106,34 +1109,44 @@ function getVFDVUmeter(name, w, h)
 	vfd.peakoff = loadImage(diskImageCache[bar_peak_off])
 	vfd.leftlead = loadImage(diskImageCache[left])
 	vfd.rightlead = loadImage(diskImageCache[right])
+	vfd.lefttrail = loadImage(diskImageCache[left_trail])
+	vfd.righttrail = loadImage(diskImageCache[right_trail])
 	vfd.center = loadImage(diskImageCache[center])
 
 	local bw, bh = vfd.on:getSize()
 	local lw, lh = vfd.leftlead:getSize()
+	local tw, th = 0, 0
+	if vfd.lefttrail ~= nil then
+		tw, th = vfd.lefttrail:getSize()
+	end
 	local cw, ch = vfd.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
 	local barwidth = math.floor((cw - lw)/49)
+	local calcbw = (cw - lw - tw)/49
 --	log:debug("#### bw:", bw, " barwidth:", barwidth)
 	-- vfd.bar_rxo= barwidth - bw
 	vfd.bar_rxo= 0
-
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w > dw and h >= dh then
 		vfd.w = dw
 		vfd.h = dh
 	else
-		local sf = math.min((w-20)/dw, h/dh)
+		local sf = math.min(w/dw, h/dh)
+--		log:debug("#### vfd : sf : ", sf)
 		barwidth = math.floor(barwidth * sf)
+		calcbw = math.floor(calcbw * sf)
 		bw = math.floor(bw * sf)
 		bh = math.floor(bh * sf)
 		lw = math.floor(lw * sf)
 		lh = math.floor(lh * sf)
-		-- doh. Due to rounding differences,  scaling the calibration part like so
-		-- cw = math.floor((cw*w)/dw)
+		tw = math.floor(tw * sf)
+		-- Due to rounding errors, scaling the calibration part like so
+		cw = math.floor((cw * sf))
 		-- scales at odds with the smaller bits.
-		cw = math.floor((barwidth *49) + (lw *2))
+--	  	log:debug("delta calc vs sf ", (calcbw *49) + lw + tw - cw)
+		cw = (calcbw *49) + lw + tw
 		ch = math.floor((ch * sf))
 		-- vfd.bar_rxo= barwidth - bw
 		vfd.on = _resizedVFDElement(bar_on, bw, bh)
@@ -1220,14 +1233,14 @@ function getCurrentSpectrumMeterName()
 end
 
 function resizeRequiredSpectrumMeter(tbl, name)
-    local kr,vr, k,v
-    for k, v in pairs(spectrumList) do
-        if v.name == name then
-            -- spectrum meter found
+	local kr,vr, k,v
+	for k, v in pairs(spectrumList) do
+		if v.name == name then
+			-- spectrum meter found
 			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
-                -- of type that does require resize
+				-- of type that does require resize
 				if spectrumImagesMap[name].src ~= nil then
-                    -- have path to source image
+					-- have path to source image
 				   	for kr, vr in pairs(spectrumResolutions) do
 						if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
 							return true
@@ -1235,31 +1248,31 @@ function resizeRequiredSpectrumMeter(tbl, name)
 					end
 				end
 			end
-            -- not resizable 1) not resizable type 2) no source image
+			-- not resizable 1) not resizable type 2) no source image
 			break
-        end
-    end
-    -- spectrum meter not resizable : not found, not resizable, no source images
+		end
+	end
+	-- spectrum meter not resizable : not found, not resizable, no source images
 	return false
 end
 
 function resizeRequiredVuMeter(tbl, name)
-    local kr, vr, k, v
+	local kr, vr, k, v
 
-    for k, v in pairs(vuImages) do
-        if v.name == name then
-            -- found vu meter
-            if v.vutype == "frame" then
-                -- resizable type
-                for kr, vr in pairs(vuMeterResolutions) do
-                    if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
-                        return true
-                    end
-                end
-            end
-            break
-        end
-    end
-    -- vu meter not resizable : not found, not resizable
-    return false
+	for k, v in pairs(vuImages) do
+		if v.name == name then
+			-- found vu meter
+			if v.vutype == "frame" then
+				-- resizable type
+				for kr, vr in pairs(vuMeterResolutions) do
+					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+						return true
+					end
+				end
+			end
+			break
+		end
+	end
+	-- vu meter not resizable : not found, not resizable
+	return false
 end
