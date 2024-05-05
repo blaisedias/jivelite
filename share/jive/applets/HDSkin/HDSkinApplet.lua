@@ -2472,6 +2472,9 @@ function skin(self, s)
 	s.hm_settings = _uses(_buttonicon, {
 		img = _loadImage(self, "IconsResized/icon_settings" .. skinSuffix),
 	})
+	s.hm_settings_pcp = _uses(_buttonicon, {
+		img = _loadImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
+	})
 	s.hm_advancedSettings = _uses(_buttonicon, {
 		img = _loadImage(self, "IconsResized/icon_settings_adv" .. skinSuffix),
 	})
