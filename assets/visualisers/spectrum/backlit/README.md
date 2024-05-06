@@ -9,8 +9,6 @@ Accreditations
  * source: https://pixabay.com/illustrations/background-colorful-geometric-1466092/
 * background-1783718.png
  * source: https://pixabay.com/illustrations/background-flower-green-yellow-1783718/
-* technology-3357605.png
- * https://pixabay.com/illustrations/technology-network-connection-3357605/
 * vision-2730257_1920
  * source: https://pixabay.com/illustrations/vision-wallpaper-decoration-2730257/
 * kaleidoscope-2661292_1920
@@ -25,3 +23,7 @@ Accreditations
  * source: https://pixabay.com/illustrations/tile-background-image-wallpaper-1179386/
 * geometric-art-7773597_1920.jpg
  * source: https://pixabay.com/illustrations/geometric-art-digital-art-shapes-7773597/
+* kaleidoscope-2926569_1920.jpg
+ * source: https://pixabay.com/illustrations/kaleidoscope-kaleidoscope-background-2926569/
+* kaleidoscope-4573365_1920.jpg
+ * source: https://pixabay.com/illustrations/kaleidoscope-mandala-to-dye-4573365/
