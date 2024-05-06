@@ -117,7 +117,7 @@ function registerApplet(self)
 
     self:storeSettings()
 
-    local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'settings', text = 'Visualiser', windowStyle = 'text_only'  }
+    local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'screenSettingsNowPlaying', text = 'Visualiser', windowStyle = 'text_only'  }
     jiveMain:addNode(node)
 
     jiveMain:addItem(
