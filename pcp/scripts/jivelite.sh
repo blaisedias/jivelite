@@ -3,6 +3,9 @@
 
 export LOG=/var/log/jivelite.log
 
+AUTO_WORKSPACE_SETUP=1
+AUTO_TOUCHSCREEN_SETUP=0
+
 if [ -f /usr/local/sbin/config.cfg ]; then
     source /usr/local/sbin/config.cfg
 fi
@@ -40,13 +43,12 @@ if [ -f /home/tc/jivelite.sh.cfg ]; then
     source /home/tc/jivelite.sh.cfg >> $LOG
 fi
 
-tce_path=$(find /mnt -name tce -maxdepth 2)
-if [ "$tce_path" != "" ]; then
-    if [ -f "$tce_path/jivelite.sh.cfg" ]; then
-        echo "using $tce_path/jivelite.sh.cfg" >> $LOG
-        cat "$tce_path/jivelite.sh.cfg" >> $LOG
-        source "$tce_path/jivelite.sh.cfg" >> $LOG
-    fi
+TCEMNT="/mnt/$(readlink /etc/sysconfig/tcedir | cut -d '/' -f3)"
+TCEDIR="${TCEMNT}/tce"
+if [ -f "${TCEDIR}/jivelite.sh.cfg" ]; then
+    echo "using ${TCEDIR}/jivelite.sh.cfg" >> $LOG
+    cat "${TCEDIR}/jivelite.sh.cfg" >> $LOG
+    source "${TCEDIR}/jivelite.sh.cfg" >> $LOG
 fi
 
 if [ "${AUTO_TOUCHSCREEN_SETUP}" == "1" ]; then
@@ -63,17 +65,14 @@ if [ "${AUTO_TOUCHSCREEN_SETUP}" == "1" ]; then
     fi
 fi
 
-if [ "${AUTO_WORKSPACE_SETUP}" == "1" ]; then
+if [ "${AUTO_WORKSPACE_SETUP}" == "1" ] && [ "$JL_WORKSPACE" == "" ]; then
     echo "auto workspace setup:" >> $LOG
     if [ -z $JL_WORKSPACE ]; then
-#        tce_path=$(find /mnt -name tce -maxdepth 2)
-        if [ "$tce_path" != "" ]; then
-                export JL_WORKSPACE="$tce_path/jivelite-workspace"
-                echo "workspace: $JL_WORKSPACE" >> $LOG
-                if [ ! -d "$JL_WORKSPACE" ]; then
-                        echo  "mkdir -p $JL_WORKSPACE" >> $LOG
-                        mkdir -p $JL_WORKSPACE
-                fi
+        export JL_WORKSPACE="${TCEDIR}/jivelite-workspace"
+        echo "workspace: $JL_WORKSPACE" >> $LOG
+        if [ ! -d "$JL_WORKSPACE" ]; then
+                echo  "mkdir -p $JL_WORKSPACE" >> $LOG
+                mkdir -p $JL_WORKSPACE
         fi
     fi
 fi
