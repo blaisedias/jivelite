@@ -111,7 +111,7 @@ function platformDetect()
 	log:info("mode ", pcp_version_file, " " , mode)
 	if mode == "file" then
 		PLATFORM = "piCorePlayer"
-		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", false)
+		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
 		-- save as png is the exception - it must be explicitly disabled
 		-- saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
 	end
