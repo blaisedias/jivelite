@@ -181,6 +181,24 @@ function registerApplet(self)
             end
         )
     )
+
+    local wmAvail = Framework:getWmAvailable()
+    local strWMA = "no"
+    if wmAvail then
+        strWMA = "yes"
+    end
+    local disp_w, disp_h = Framework:getDisplaySize()
+    
+    jiveMain:addItem(
+        self:menuItem(
+            'appletVisualiserSettings',
+            'screenSettings',
+            "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
+            function(applet, ...)
+            end,
+            1000
+        )
+    )
 end
 
 function configureApplet(self)
