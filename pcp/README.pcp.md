@@ -28,8 +28,8 @@ rm -f /home/blaise/.jivelite/userpath/settings/*
 ssh into pCP, then type the following commands
 ```
 ce
-wget https://raw.githubusercontent.com/blaisedias/jivelite/visu-3/pcp/scripts/dl-visu-3.sh && chmod +x dl-visu-3.sh
-./dl-visu-3.sh
+wget https://raw.githubusercontent.com/blaisedias/jivelite/visu-3/pcp/scripts/install-visu-3.sh && chmod +x install-visu-3.sh
+./install-visu-3.sh
 ```
 A screen similar to below will be presented
 ```
