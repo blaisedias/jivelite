@@ -22,6 +22,7 @@ oo.class(_M, Icon)
 
 
 function __init(self, style, windowStyle)
+    log:info("######## spectrum init")
 	local obj = oo.rawnew(self, Icon(style))
 
 	obj.val = { 0, 0 }
@@ -39,6 +40,7 @@ end
 function _skin(self)
 	Icon._skin(self)
 
+    log:info("######## spectrum _skin")
 -- Black background instead of image
 ---	self.bgImg = self:styleImage("bgImg")
 	self.bgCol = self:styleColor("bg", { 0xff, 0xff, 0xff, 0xff })
@@ -47,14 +49,13 @@ function _skin(self)
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
 
-	self.gradientColours = self:styleValue("gradientColours", {self.barColor})
-	self.useGradient = #self.gradientColours - 1
 	self.useVisImage = self:styleValue("useVisImage", false)
 	self.spType = self:styleValue("spType")
 end
 
 
 function _layout(self)
+    log:info("######## spectrum _layout")
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
@@ -180,9 +181,6 @@ function _layout(self)
 		self.fgimg_yoffset = h/10
 		log:debug("**  fgimg_yoffset: " .. self.fgimg_yoffset)
 	end
-	-- gradient table y step
-	self.deltaY = math.floor(h / (#self.gradientColours - 1))
-	log:debug("** y: " .. self.y .. " deltaY: " .. self.deltaY .. " h:" .. h)
 
 	self.cap = { {}, {} }
 	for i = 1, numBars[1] do
@@ -294,25 +292,6 @@ function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpa
 						if capHeight > 0 and cch[i] > 0 then
 							ytop = y - cch[i] - capHeight - capSpace
 							self.fgImg:blitClip(xLeft - xshift, hh - self.fgimg_yoffset - cch[i] - capHeight - capSpace , barWidth, capHeight, surface, xLeft, ytop)
-						end
-					end
-				elseif self.useGradient > 0 then
-					local yEndValue = y - bch[i] + 1
-					local xLeft = x + (k * barSize)
-					local xRight = xLeft + (barWidth - 1)
-
-					local yBottom = y
-					local yTop = 0
-
-					for iColor = 1, #self.gradientColours do
-						yTop = yBottom - self.deltaY
-						if yTop < yEndValue then
-							yTop = yEndValue
-						end
-						surface:filledRectangle(xLeft, yTop, xRight, yBottom, self.gradientColours[iColor])
-						yBottom = yBottom - self.deltaY
-						if yBottom <= yEndValue then
-							break
 						end
 					end
 				else

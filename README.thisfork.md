@@ -10,22 +10,26 @@ Features:
     * foreground image over a background image simulating lighting up vertical bars on an image
   * Spectrum analyzers are also render as coloured bars
   * Spectrum analyzers can be configured see [README.visualiser](./README.visualiserapplet.md)
-* Now Playing Views, some new views have been added.
-for Joggler, PiGrid and Touch skins the set of views with visualisers is:
-  * `Spectrum Analyzer and Text` - smaller spectrum meter
+* Now Playing Views, new views with visualisers have been added
+
+The set of available Now Playing Views with visualisers are dependent on the selected skin.
+
+Joggler, PiGrid and Touch skins:
+  * `Spectrum Analyzer and Text`
   * `Spectrum Analyzer, Artwork and Text` - smaller spectrum meter
   * `Spectrum Analyzer, Large Artwork and Text` - even smaller spectrum meter
-  * `Large Spectrum Analyzer` - full screen with player controls
-  * `Spectrum Analyzer Only` - full screen - no controls
+  * `Large Spectrum Analyzer` - full screen spectrum analyzer
+  * `Spectrum Analyzer Only` - full screen spectrum analyser - no controls
   * `VU Meter and Text`
   * `VU Meter, Artwork and Text` - smaller vu meters
   * `VU Meter, Large Artwork and Text` - even smaller vu meters
   * `VU Meter Only` full screen - no controls
-for HDSkins the set of views with visualisers is:
+
+HD and HDGrid skins:
+  * `Spectrum Analyzer and Text`
   * `Spectrum Analyzer, Artwork and Text` - smaller spectrum meter
+  * `VU Meter and Text` 
   * `VU Meter, Artwork and Text` - smaller vu meters
-  * `Spectrum Analyzer and Text` - smaller spectrum meter
-  * `VU Meter and Text`
 
 The layout of `Artwork and Text` now playing views has been altered for consistency.
 
