@@ -30,10 +30,10 @@ echo "on top of an existing installation of jivelite"
 echo ""
 
 case $(uname -m) in
-        "aarch64")
+        aarch64)
                 echo "installation type: 64 bit"
                 ;;
-        "armv6l" | "armv7l")
+        armv6l | armv7l)
                 echo "installation type: 32 bit"
                 ;;
         *)
@@ -64,7 +64,7 @@ then
                 ls pcp-jivelite* | sort | grep -v .dep | xargs sha1sum
                 echo ""
                 case $(uname -m) in
-                        armv6l)
+                        armv6l | armv7l)
                                 download ${PCP_JIVELITE_32BIT} pcp-jivelite.tcz
                                 download ${PCP_JIVELITE_32BIT_MD5} pcp-jivelite.tcz.md5.txt
                         ;;
