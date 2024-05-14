@@ -33,7 +33,7 @@ case $(uname -m) in
         "aarch64")
                 echo "installation type: 64 bit"
                 ;;
-        "armv6l")
+        "armv6l" | "armv7l")
                 echo "installation type: 32 bit"
                 ;;
         *)
