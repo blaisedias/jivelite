@@ -7,9 +7,9 @@ For now pre-built tcz images are available on google drive see Installation step
 Note: Installing these images overwrites jivelite images and settings,
 to restore to stock settings either
 * Uninstall JiveLite and install JiveLite again
-* Back up jivelite tczs and settings by copying them before installing these images and restoring later
- * `/home/tc/.jivelite`
- * `/mnt/.../tce/optional/*jivelite*`
+* Back up jivelite tczs and settings by copying them before installing
+  * `/home/tc/.jivelite` ( backup this directory tree)
+  * `/mnt/.../tce/optional/*jivelite*` ( backup these files)
  
 To avoid conflicts in settings it is best to do a clean install.
 
