@@ -22,13 +22,12 @@ oo.class(_M, Icon)
 
 
 function __init(self, style, windowStyle)
-    log:info("######## spectrum init")
 	local obj = oo.rawnew(self, Icon(style))
 
 	obj.val = { 0, 0 }
-	obj.vcentered80 = false
+	obj.nplarge = false
 	if windowStyle == "nowplaying_large_spectrum" then
-		obj.vcentered80 = true
+		obj.nplarge = true
 	end
 
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
@@ -40,7 +39,6 @@ end
 function _skin(self)
 	Icon._skin(self)
 
-    log:info("######## spectrum _skin")
 -- Black background instead of image
 ---	self.bgImg = self:styleImage("bgImg")
 	self.bgCol = self:styleColor("bg", { 0xff, 0xff, 0xff, 0xff })
@@ -55,7 +53,6 @@ end
 
 
 function _layout(self)
-    log:info("######## spectrum _layout")
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
@@ -149,11 +146,6 @@ function _layout(self)
 
 	barHeight[1] = h - t - b - self.capHeight[1] - self.capSpace[1]
 	barHeight[2] = h - t - b - self.capHeight[2] - self.capSpace[2]
-	if self.vcentered80 then
-		barHeight[1] = (h*8/10) - t - b - self.capHeight[1] - self.capSpace[1]
-		barHeight[2] = (h*8/10) - t - b - self.capHeight[2] - self.capSpace[2]
-	end
-
 
 	-- max bin value from C code is 31
 	self.barHeightMulti = {}
@@ -177,9 +169,10 @@ function _layout(self)
 	self.h = h
 	self.yCT = self.y - (self.h/2)
 	self.fgimg_yoffset = 0
-	if self.vcentered80 then
-		self.fgimg_yoffset = h/10
-		log:debug("**  fgimg_yoffset: " .. self.fgimg_yoffset)
+	if self.nplarge then
+	    self.y = y + h
+	    self.yCT = self.y - (self.h/2)
+		self.fgimg_yoffset = t
 	end
 
 	self.cap = { {}, {} }
