@@ -574,9 +574,9 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bg_dcpath = nil
 
 	local suffix = "bmp"
-	if saveAsPng then
-		suffix = "png"
-	end
+--	if saveAsPng then
+--		suffix = "png"
+--	end
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
