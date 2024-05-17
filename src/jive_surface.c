@@ -1008,7 +1008,14 @@ int jive_surface_save_png(JiveSurface *srf, const char *file) {
 		LOG_ERROR(log_ui, "Underlying sdl surface already freed, possibly with release()");
 		return 0;
 	}
-	return SDL_SavePNG(srf->sdl, file);
+    if (srf->sdl->format->BitsPerPixel <= 24 || srf->sdl->format->Amask) {
+	    return SDL_SavePNG(srf->sdl, file);
+    } else {
+        SDL_Surface *spfa = SDL_PNGFormatAlpha(srf->sdl);
+        int rv = SDL_SavePNG(spfa, file);
+        SDL_FreeSurface(spfa);
+        return rv;
+    }
 }
 
 
