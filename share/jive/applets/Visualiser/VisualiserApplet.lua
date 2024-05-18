@@ -226,9 +226,9 @@ function imagesMenu(self, menuItem)
         weight=60
     })
 
-    menu:addItem({ text = "Clear Resized Image Cache (force resize ops)",
+    menu:addItem({ text = "Delete Resized Images",
         callback = function(event, menuItem)
-            visImage:cacheClear()
+            visImage:cacheDelete()
         end,
         weight=70
     })
@@ -486,6 +486,7 @@ function resizeImages(self, bSpectrum, bVuMeters, all)
                     text:setValue("Resize of visualisation complete.")
                     state = "done"
                 elseif state == "done" then
+                    visImage:initialiseCache()
                     state = "hide"
                 elseif state == "hide" then
                     popup:hide(Window.transitionFadeOut)
