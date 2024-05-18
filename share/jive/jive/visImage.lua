@@ -169,6 +169,9 @@ end
 function loadImage(path)
 	img = imCacheGet(path)
 	if img == nil  then
+		if path == nil then
+			return nil
+		end
 		img = Surface:altLoadImage(path)
 		imCachePut(path,img)
 	end
@@ -237,6 +240,18 @@ function cacheClear(tbl)
 	diskImageCache = {}
 	imCacheClear()	
 end
+
+function cacheDelete(tbl)
+	log:info("cacheDelete ")
+	for k,v in pairs(diskImageCache) do
+		log:info("cacheDelete ", k, " ", v)
+		os.execute('rm  ' .. '"'.. v .. '"') 
+		diskImageCache[k] = nil
+	end
+	diskImageCache = {}
+	imCacheClear()	
+end
+
 
 function _readCacheDir(search_root)
 	log:info("_readCacheDir", " ", search_root)
@@ -574,17 +589,13 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bg_dcpath = nil
 
 	local suffix = "bmp"
---	if saveAsPng then
---		suffix = "png"
---	end
+	if saveAsPng then
+		suffix = "png"
+	end
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
 	if spType == SPT_BACKLIT then
-   		-- FIXME: using pngs for backlit spectrum meters
-		-- results in black screens on rpi zero 2 - works fine on desktop
-		-- possibly because PNGs have an alpha channel?.
-	 	suffix = "bmp" 
 		local bgImgName = "bg-" .. imgName
 		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
 		bg_dcpath = cachedPath(bgDicKey, suffix)
@@ -844,6 +855,7 @@ end
 local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
+local vfdImageSources = {}
 
 function registerVUMeterResolution(tbl, w,h)
 	log:debug("registerVUMeterResolution ", w, " x ", h)
@@ -891,7 +903,7 @@ function _populateVfdVuMeterList(search_root)
 						local parts = _parseImagePath(f)
 						if parts ~= nil then
 							log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-							diskImageCache[entry .. ":" .. parts[1]] = path .. "/" .. f
+							vfdImageSources[entry .. ":" .. parts[1]] = path .. "/" .. f
 						end
 					end
 				end
@@ -1077,9 +1089,17 @@ function isCurrentVUMeterEnabled()
 end
 
 
-function _resizedVFDElement(key, w, h)
-	local img = loadImage(diskImageCache[key]):resize(w, h)
-	imCachePut(key .. "-" .. w .. "x" .. h, img)
+function _resizedVFDElement(srcImg, key, w, h)
+	local dicKey = key .. "-" .. w .. "x" .. h
+	local img =  loadImage(diskImageCache[dicKey])
+	if diskImageCache[dicKey] == nil then
+		img = srcImg:resize(w, h)
+		local suffix = "png"
+		local dcPath = cachedPath(dicKey, suffix)
+		saveImage(img, dcPath, suffix == "png")
+		imCachePut(dicKey, img)
+	end
+	srcImg:release()
 	return img
 end
 
@@ -1103,15 +1123,15 @@ function getVFDVUmeter(name, w, h)
 	local center = name .. ":center"
 	vfd = {}
 	-- bar render x-offset
-	vfd.on = loadImage(diskImageCache[bar_on])
-	vfd.off = loadImage(diskImageCache[bar_off])
-	vfd.peakon = loadImage(diskImageCache[bar_peak_on])
-	vfd.peakoff = loadImage(diskImageCache[bar_peak_off])
-	vfd.leftlead = loadImage(diskImageCache[left])
-	vfd.rightlead = loadImage(diskImageCache[right])
-	vfd.lefttrail = loadImage(diskImageCache[left_trail])
-	vfd.righttrail = loadImage(diskImageCache[right_trail])
-	vfd.center = loadImage(diskImageCache[center])
+	vfd.on = loadImage(vfdImageSources[bar_on])
+	vfd.off = loadImage(vfdImageSources[bar_off])
+	vfd.peakon = loadImage(vfdImageSources[bar_peak_on])
+	vfd.peakoff = loadImage(vfdImageSources[bar_peak_off])
+	vfd.leftlead = loadImage(vfdImageSources[left])
+	vfd.rightlead = loadImage(vfdImageSources[right])
+	vfd.lefttrail = loadImage(vfdImageSources[left_trail])
+	vfd.righttrail = loadImage(vfdImageSources[right_trail])
+	vfd.center = loadImage(vfdImageSources[center])
 
 	local bw, bh = vfd.on:getSize()
 	local lw, lh = vfd.leftlead:getSize()
@@ -1149,13 +1169,13 @@ function getVFDVUmeter(name, w, h)
 		cw = (calcbw *49) + lw + tw
 		ch = math.floor((ch * sf))
 		-- vfd.bar_rxo= barwidth - bw
-		vfd.on = _resizedVFDElement(bar_on, bw, bh)
-		vfd.off = _resizedVFDElement(bar_off, bw, bh)
-		vfd.peakon = _resizedVFDElement(bar_peak_on, bw, bh)
-		vfd.peakoff = _resizedVFDElement(bar_peak_off, bw, bh)
-		vfd.leftlead = _resizedVFDElement(left, lw, lh)
-		vfd.rightlead = _resizedVFDElement(right, lw, lh)
-		vfd.center = _resizedVFDElement(center, cw, ch)
+		vfd.on = _resizedVFDElement(vfd.on, bar_on, bw, bh)
+		vfd.off = _resizedVFDElement(vfd.off, bar_off, bw, bh)
+		vfd.peakon = _resizedVFDElement(vfd.peakon, bar_peak_on, bw, bh)
+		vfd.peakoff = _resizedVFDElement(vfd.peakoff, bar_peak_off, bw, bh)
+		vfd.leftlead = _resizedVFDElement(vfd.leftlead, left, lw, lh)
+		vfd.rightlead = _resizedVFDElement(vfd.rightlead, right, lw, lh)
+		vfd.center = _resizedVFDElement(vfd.center, center, cw, ch)
 		vfd.w = cw
 		vfd.h = ch + (bh * 2)
 	end
