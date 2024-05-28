@@ -411,7 +411,7 @@ end
 -- scale an image to fit a width - maintaining aspect ratio 
 function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	local w = w_in
-	log:debug("_scaleAnalogVuMeter imgPath:", imgPathi, " START" )
+	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " START" )
 	-- FIXME hack for screenwidth > 1280 
 	-- resizing too large segfaults so VUMeter resize is capped at 1280
 	if w > 1280 then
@@ -935,9 +935,9 @@ function _populateAnalogueVuMeterList(search_root)
 				local ixSub = string.find(imgName, "25seq")
 				if ixSub ~= nil then
 					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-						displayName = 'anlg-' .. string.sub(imgName, ixSub + 6)
+						displayName = '25f-' .. string.sub(imgName, ixSub + 6)
 					else
-						displayName = 'anlg-' .. string.sub(imgName, ixSub + 5)
+						displayName = '25f-' .. string.sub(imgName, ixSub + 5)
 					end
 				end
 				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
@@ -1115,6 +1115,25 @@ function getVFDVUmeter(name, w, h)
 	local bar_off = name .. ":bar-off"
 	local bar_peak_on = name .. ":bar-peak-on"
 	local bar_peak_off = name .. ":bar-peak-off"
+
+	local r_bar_on = name .. ":r-bar-on"
+	local r_bar_off = name .. ":r-bar-off"
+	local r_bar_peak_on = name .. ":r-bar-peak-on"
+	local r_bar_peak_off = name .. ":r-bar-peak-off"
+
+	if vfdImageSources[r_bar_on] == nil then
+		r_bar_on = bar_on
+	end
+	if vfdImageSources[r_bar_off] == nil then
+		r_bar_off = bar_off
+	end
+	if vfdImageSources[r_bar_peak_on] == nil then
+		r_bar_peak_on = bar_peak_on
+	end
+	if vfdImageSources[r_bar_peak_off] == nil then
+		r_bar_peak_off = bar_peak_off
+	end
+
 	local left = name .. ":left"
 	local right = name .. ":right"
 	local left_trail = name .. ":left-trail"
@@ -1122,18 +1141,26 @@ function getVFDVUmeter(name, w, h)
 	local right = name .. ":right"
 	local center = name .. ":center"
 	vfd = {}
+	vfd.left={}
+	vfd.right={}
 	-- bar render x-offset
-	vfd.on = loadImage(vfdImageSources[bar_on])
-	vfd.off = loadImage(vfdImageSources[bar_off])
-	vfd.peakon = loadImage(vfdImageSources[bar_peak_on])
-	vfd.peakoff = loadImage(vfdImageSources[bar_peak_off])
+	vfd.left.on = loadImage(vfdImageSources[bar_on])
+	vfd.left.off = loadImage(vfdImageSources[bar_off])
+	vfd.left.peakon = loadImage(vfdImageSources[bar_peak_on])
+	vfd.left.peakoff = loadImage(vfdImageSources[bar_peak_off])
+
+	vfd.right.on = loadImage(vfdImageSources[r_bar_on])
+	vfd.right.off = loadImage(vfdImageSources[r_bar_off])
+	vfd.right.peakon = loadImage(vfdImageSources[r_bar_peak_on])
+	vfd.right.peakoff = loadImage(vfdImageSources[r_bar_peak_off])
+
 	vfd.leftlead = loadImage(vfdImageSources[left])
 	vfd.rightlead = loadImage(vfdImageSources[right])
 	vfd.lefttrail = loadImage(vfdImageSources[left_trail])
 	vfd.righttrail = loadImage(vfdImageSources[right_trail])
 	vfd.center = loadImage(vfdImageSources[center])
 
-	local bw, bh = vfd.on:getSize()
+	local bw, bh = vfd.left.on:getSize()
 	local lw, lh = vfd.leftlead:getSize()
 	local tw, th = 0, 0
 	if vfd.lefttrail ~= nil then
@@ -1146,7 +1173,8 @@ function getVFDVUmeter(name, w, h)
 	local calcbw = (cw - lw - tw)/49
 --	log:debug("#### bw:", bw, " barwidth:", barwidth)
 	-- vfd.bar_rxo= barwidth - bw
-	vfd.bar_rxo= 0
+	vfd.left.bar_rxo= 0
+	vfd.right.bar_rxo= 0
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w > dw and h >= dh then
@@ -1169,17 +1197,23 @@ function getVFDVUmeter(name, w, h)
 		cw = (calcbw *49) + lw + tw
 		ch = math.floor((ch * sf))
 		-- vfd.bar_rxo= barwidth - bw
-		vfd.on = _resizedVFDElement(vfd.on, bar_on, bw, bh)
-		vfd.off = _resizedVFDElement(vfd.off, bar_off, bw, bh)
-		vfd.peakon = _resizedVFDElement(vfd.peakon, bar_peak_on, bw, bh)
-		vfd.peakoff = _resizedVFDElement(vfd.peakoff, bar_peak_off, bw, bh)
+		vfd.left.on = _resizedVFDElement(vfd.left.on, bar_on, bw, bh)
+		vfd.left.off = _resizedVFDElement(vfd.left.off, bar_off, bw, bh)
+		vfd.left.peakon = _resizedVFDElement(vfd.left.peakon, bar_peak_on, bw, bh)
+		vfd.left.peakoff = _resizedVFDElement(vfd.left.peakoff, bar_peak_off, bw, bh)
+		vfd.right.on = _resizedVFDElement(vfd.right.on, r_bar_on, bw, bh)
+		vfd.right.off = _resizedVFDElement(vfd.right.off, r_bar_off, bw, bh)
+		vfd.right.peakon = _resizedVFDElement(vfd.right.peakon, r_bar_peak_on, bw, bh)
+		vfd.right.peakoff = _resizedVFDElement(vfd.right.peakoff, r_bar_peak_off, bw, bh)
+
 		vfd.leftlead = _resizedVFDElement(vfd.leftlead, left, lw, lh)
 		vfd.rightlead = _resizedVFDElement(vfd.rightlead, right, lw, lh)
 		vfd.center = _resizedVFDElement(vfd.center, center, cw, ch)
 		vfd.w = cw
 		vfd.h = ch + (bh * 2)
 	end
-	vfd.barwidth = barwidth
+	vfd.left.barwidth = barwidth
+	vfd.right.barwidth = barwidth
 	vfd.bw = bw
 	vfd.bh = bh
 	vfd.lw = lw
