@@ -147,8 +147,8 @@ function _layout(self)
 			local vfdx = x + math.floor((w - self.vfd.w)/2)
 			local y1 = y + math.floor((h - self.vfd.h)/2)
 			local y2 = y1 + self.vfd.bh + self.vfd.ch
-			self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd}
-			self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd}
+			self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd.left}
+			self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd.right}
 			self.drawMeter = drawVFD
 
 			self.bgParams = {x=vfdx, y=y1 + self.vfd.bh, vfd=self.vfd, left=self.left, right=self.right}
