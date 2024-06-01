@@ -277,11 +277,15 @@ static int jiveL_initSDL(lua_State *L) {
 	display_h = screen_h = video_info->current_h;
 
 	screen_bpp = video_info->vfmt->BitsPerPixel;
-	fprintf(stderr, "display resolution: %dx%d BitsPerPixel:%d wmAvailable:%d\n",
+	fprintf(stderr, "display:\n\tresolution: %dx%d\n\tBitsPerPixel:%d,\n\tBytesPerPixel:%d\n\tWindow manager:%d,\n\tHardware Acceleration:%d\n\tvideo memory:%u KiB\n",
             (int)screen_w, (int)screen_h,
             (int)screen_bpp,
-            (int)video_info->wm_available
+            (int)video_info->vfmt->BytesPerPixel,
+            (int)video_info->wm_available,
+            (int)video_info->hw_available,
+            video_info->video_mem
             );
+	fprintf(stderr, "\tjivelite frame rate:%d fps\n", jive_frame_rate());
 
 	splash = NULL;
 	if (!video_info->wm_available) {
