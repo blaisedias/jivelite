@@ -819,6 +819,7 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 	SDL_Surface *sdl;
 	Uint32 flags;
 
+	LOG_INFO(log_ui_draw, "set_video_mode: WxH=%dx%d, bpp=%d, fullscreen=%d", (int)w, (int)h, (int)bpp, (int)fullscreen);
 	if (fullscreen) {
 	    flags = SDL_FULLSCREEN;
 	}
@@ -827,10 +828,11 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 	}
 
 	sdl = SDL_GetVideoSurface();
-
 	if (sdl) {
 		const SDL_VideoInfo *video_info;
 		Uint32 mask;
+
+		LOG_INFO(log_ui_draw, "set_video_mode: SDL_GetVideoSurface() returned: sdl flags %x", sdl->flags);
 
 		/* check if we can reuse the existing suface? */
 		video_info = SDL_GetVideoInfo();
@@ -844,12 +846,16 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 		if ((sdl->w != w) || (sdl->h != h)
 		    || (bpp && sdl->format->BitsPerPixel != bpp)
 		    || ((sdl->flags & mask) != (flags & mask))) {
+		    LOG_INFO(log_ui_draw, "set_video_mode: reconfiguring");
 			sdl = NULL;
 		}
 	}
 
 	if (!sdl) {
 		/* create new surface */
+		LOG_INFO(log_ui_draw, "set_video_mode: setting: WxH=%dx%d, bpp=%d, flags=%x",
+                (int)w, (int)h, (int)bpp, flags);
+
 		sdl = SDL_SetVideoMode(w, h, bpp, flags);
 		if (!sdl) {
 			LOG_ERROR(log_ui_draw, "SDL_SetVideoMode(%d,%d,%d): %s",
@@ -861,9 +867,9 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 			LOG_INFO(log_ui_draw, "Using a hardware double buffer");
 		}
 
-		LOG_DEBUG(log_ui_draw, "Video mode: %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d]", sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift);
-
 	}
+//	LOG_INFO(log_ui_draw, "Video mode : %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d] flags=%x", sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift, sdl->flags);
+	fprintf(stderr, "Video mode : %dx%d %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d] flags=%x\n", sdl->w, sdl->h, sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift, sdl->flags);
 
 	srf = calloc(sizeof(JiveSurface), 1);
 	srf->refcount = 1;
@@ -1009,8 +1015,10 @@ int jive_surface_save_png(JiveSurface *srf, const char *file) {
 		return 0;
 	}
     if (srf->sdl->format->BitsPerPixel <= 24 || srf->sdl->format->Amask) {
+	    LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha not required");
 	    return SDL_SavePNG(srf->sdl, file);
     } else {
+	    LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha");
         SDL_Surface *spfa = SDL_PNGFormatAlpha(srf->sdl);
         int rv = SDL_SavePNG(spfa, file);
         SDL_FreeSurface(spfa);
