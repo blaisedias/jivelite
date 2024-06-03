@@ -50,7 +50,7 @@ local visSettings = {}
 
 -- commit cached images to disk
 local saveResizedImages = true
-local saveAsPng = true
+local saveimage_type = "png"
 local PLATFORM = ""
 
 -- on desktop OSes userPath is persistent
@@ -113,7 +113,10 @@ function platformDetect()
 		PLATFORM = "piCorePlayer"
 		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
 		-- save as png is the exception - it must be explicitly disabled
-		-- saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", false)
+		local saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+		if not saveAsPng then
+			saveimage_type = 'bmp'
+		end
 	end
 	-- To support saving resized visualiser images
 	-- in locations other then the home directory
@@ -129,7 +132,7 @@ function platformDetect()
 	end
 	os.execute("mkdir -p " .. resizedCachePath)
 	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
-	log:info("saveResizedImages:", saveResizedImages, " saveAsPng:" , saveAsPng)
+	log:info("saveResizedImages:", saveResizedImages, " save image type:" , saveimage_type)
 	return PLATFORM
 end
 
@@ -178,12 +181,14 @@ function loadImage(path)
 	return img
 end
 
-function saveImage(img, path, asPng)
+function saveImage(img, path)
 	if saveResizedImages then
-		if saveAsPng and asPng then
+		if saveimage_type == "png" then
 			img:savePNG(path)
-		else
+		elseif saveimage_type == "bmp" then
 			img:saveBMP(path)
+		else
+			log:error('unsupported image type: ', saveimage_type)
 		end
 	end
 end
@@ -224,10 +229,10 @@ function findPaths(rpath)
 	end
 end
 
-function cachedPath(name, suffix)
+function cachedPath(name)
 	-- we don't know/care whether it is a bmp, png or jpeg 
 	-- loading the file just works 
-	local file = resizedCachePath .. "/" .. name .. "." .. suffix
+	local file = resizedCachePath .. "/" .. name .. "." .. saveimage_type
 	return file
 end
 
@@ -588,25 +593,21 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	local bgDicKey = nil
 	local bg_dcpath = nil
 
-	local suffix = "bmp"
-	if saveAsPng then
-		suffix = "png"
-	end
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
 	if spType == SPT_BACKLIT then
 		local bgImgName = "bg-" .. imgName
 		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
-		bg_dcpath = cachedPath(bgDicKey, suffix)
+		bg_dcpath = cachedPath(bgDicKey)
 	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h, spType == SPT_BACKLIT)
 		local fgimg = Surface:newRGB(w, h)
 		img:blit(fgimg, 0, 0, 0)
-		dcpath = cachedPath(dicKey, suffix)
+		dcpath = cachedPath(dicKey)
 		-- diskImageCache[dicKey] = img
-		saveImage(fgimg, dcpath, suffix == "png")
+		saveImage(fgimg, dcpath)
 		fgimg:release()
 		fgimg = nil
 		img:release()
@@ -872,13 +873,9 @@ function _cacheVUImage(imgName, path, w, h)
 	local dcpath = diskImageCache[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		local suffix = "bmp"
-		if saveAsPng then
-			suffix = "png"
-		end
-		dcpath = cachedPath(dicKey, suffix)
+		dcpath = cachedPath(dicKey)
 		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath, suffix == "png")
+		saveImage(img, dcpath)
 		img:release()
 		img = nil
 		diskImageCache[dicKey] = dcpath
@@ -1094,9 +1091,8 @@ function _resizedVFDElement(srcImg, key, w, h)
 	local img =  loadImage(diskImageCache[dicKey])
 	if diskImageCache[dicKey] == nil then
 		img = srcImg:resize(w, h)
-		local suffix = "png"
-		local dcPath = cachedPath(dicKey, suffix)
-		saveImage(img, dcPath, suffix == "png")
+		local dcPath = cachedPath(dicKey)
+		saveImage(img, dcPath)
 		imCachePut(dicKey, img)
 	end
 	srcImg:release()
