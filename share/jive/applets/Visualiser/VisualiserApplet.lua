@@ -436,7 +436,7 @@ function resizeImages(self, bSpectrum, bVuMeters, all)
         local vumeter_names = {}
         if bVuMeters then
             for k, v in pairs(tmp) do
-                if (all or v.enabled) and v.vutype == "frame" then
+                if (all or v.enabled) and (v.vutype == "frame" or v.vutype == "25framesLR") then
                     table.insert(vumeter_names, v.name)
                 else
                     log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)
