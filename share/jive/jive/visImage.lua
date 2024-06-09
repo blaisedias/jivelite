@@ -952,6 +952,51 @@ function _initAnalogueVuMeterList(rpath)
 	end
 end
 
+function _populate25fLRVuMeterList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
+
+	for entry in lfs.dir(search_root) do
+		if entry ~= "." and entry ~= ".." then
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "directory" then
+				path = search_root .. "/" .. entry
+				local found = 0
+				for f in lfs.dir(path) do
+					mode = lfs.attributes(path .. "/" .. f, "mode")
+					if mode == "file" then
+						local parts = _parseImagePath(f)
+						if parts ~= nil then
+							log:debug("25framesLR ", path .. "/" .. f)
+							if string.find(parts[#parts-1], 'left') ~= nil then
+								vuImagesMap[entry .. ':left'] = {src= path .. "/" .. f}
+								found = found + 1
+							end
+							if string.find(parts[#parts-1], 'right') ~= nil then
+								vuImagesMap[entry .. ':right'] = {src= path .. "/" .. f}
+								found = found + 1
+							end
+						end
+					end
+				end
+				if found == 2 then
+					log:debug("25framesLR ", entry)
+					table.insert(vuImages, {name=entry, enabled=false, displayName='25flr-' .. entry, vutype="25framesLR"})
+				end
+			end
+		end
+	end
+end
+
+function _init25fLRVuMeterList(rpath)
+	local search_root
+	for search_root in findPaths(rpath) do
+		_populate25fLRVuMeterList(search_root)
+	end
+end
+
+
 function initVuMeterList()
 	vuImages = {}
 	vuImagesMap = {}
@@ -962,11 +1007,17 @@ function initVuMeterList()
 	if workSpace ~= System.getUserDir() then
 		_populateVfdVuMeterList(workSpace .. "/" .. relativePath)
 	end
-	local relativePath = "assets/visualisers/vumeters/analogue"
+	relativePath = "assets/visualisers/vumeters/analogue"
 	_initAnalogueVuMeterList("../../" .. relativePath)
 	_initAnalogueVuMeterList(relativePath)
 	if workSpace ~= System.getUserDir() then
 		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
+	end
+	relativePath = "assets/visualisers/vumeters/25framesLR"
+	_init25fLRVuMeterList("../../" .. relativePath)
+	_init25fLRVuMeterList(relativePath)
+	if workSpace ~= System.getUserDir() then
+		_populate25fLRVuMeterList(workSpace .. "/" .. relativePath)
 	end
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
@@ -1015,18 +1066,26 @@ function getVuImage(w,h)
 --		__vuBump()
 --	end
 	local entry = vuImages[vuImageIndex]
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 
 	if visSettings.cacheEnabled == false then
 		imCacheClear()
 	end
 
 	if entry.vutype == "vfd" then
-		return  getVFDVUmeter(entry.name, w, h), entry.vutype
+		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
 	end
 
 	local frameVU = nil
 
+	if entry.vutype == "25framesLR" then
+		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
+		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
+		local leftImg = loadImage(diskImageCache[ldicKey])
+		local rightImg = loadImage(diskImageCache[rdicKey])
+		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
+	end
+
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 	if diskImageCache[dicKey] ~= nil then 
 		-- image is in the cache load and return
 		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
@@ -1048,7 +1107,7 @@ function getVuImage(w,h)
 --			log:debug("getVuImage: no image for ", dicKey)
 --		end
 	end
-	return frameVU, entry.vutype
+	return {vutype=entry.vutype, bgImg=frameVU}
 end
 
 
@@ -1059,10 +1118,17 @@ function selectVuImage(tbl, name, selected, allowCaching)
 		if v.name == name then
 			if (allowCaching and selected) then
 				if v.vutype == "frame" then
-						-- create the cached image for skin resolutions 
-						for kr, vr in pairs(vuMeterResolutions) do
-							_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
-						end
+					-- create the cached image for skin resolutions 
+					for kr, vr in pairs(vuMeterResolutions) do
+						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
+					end
+				end
+				if v.vutype == "25framesLR" then
+					-- create the cached image for skin resolutions 
+					for kr, vr in pairs(vuMeterResolutions) do
+						_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
+						_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
+					end
 				end
 			end
 			if not selected and v.enabled then
@@ -1264,11 +1330,18 @@ function resizeVuMeter(tbl, name)
 --		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
 			if v.vutype == "frame" then
-					-- create the resized images for skin resolutions 
-					for kr, vr in pairs(vuMeterResolutions) do
-						log:info("resizing Vu Meter", v.name, " -> ", vr.w, "x", vr.h)
-						_cacheVUImage(v.name, vuImagesMap[v.name].src, vr.w, vr.h)
-					end
+				-- create the resized images for skin resolutions 
+				for kr, vr in pairs(vuMeterResolutions) do
+					log:info("resizing Vu Meter", v.name, " -> ", vr.w, "x", vr.h)
+					_cacheVUImage(v.name, vuImagesMap[v.name].src, vr.w, vr.h)
+				end
+			end
+			if v.vutype == "25framesLR" then
+				-- create the cached image for skin resolutions 
+				for kr, vr in pairs(vuMeterResolutions) do
+					_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
+					_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
+				end
 			end
 		end
 	end
@@ -1316,6 +1389,17 @@ function resizeRequiredVuMeter(tbl, name)
 				-- resizable type
 				for kr, vr in pairs(vuMeterResolutions) do
 					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+						return true
+					end
+				end
+			end
+			if v.vutype == "25framesLR" then
+				-- create the cached image for skin resolutions 
+				for kr, vr in pairs(vuMeterResolutions) do
+					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':left'] == nil then
+						return true
+					end
+					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':right'] == nil then
 						return true
 					end
 				end
