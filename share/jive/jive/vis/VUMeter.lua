@@ -112,17 +112,22 @@ function _layout(self)
 		self.right = { img=self.bgImg, x=self.left.x + frame_w, y=y, src_y=0, w=frame_w, h=imgH, cap=0}
 		self.drawMeter = draw25FrameVuMeter
 	elseif self.style == "vumeter_v2" then
+		self.drawMeter = nullDraw
 		log:debug("-----------------------------------------------------------------------")
-		self.vutbl, self.vutype = visImage.getVuImage(w,h)
-   		if self.vutype == "frame"  then
-			self.bgImg = self.vutbl
+		self.vutbl = visImage.getVuImage(w,h)
+   		if self.vutbl.vutype == "frame"  then
+			self.bgImg = self.vutbl.bgImg
 			if self.bgImg ~= nil then
 				local imgW, imgH = self.bgImg:getSize()
 				-- FIXME VU Meter images will not always be 25 frames
 				local frame_w = imgW/25
 				-- centre the VUMeter image within the designated space
 				-- horizontally
-				local fx = x + math.floor(w / 2) - frame_w
+--				local lx = x + math.floor(w / 4) - math.floor(frame_w / 2)
+--				local rx = x + math.floor((3*w) / 4) - math.floor(frame_w / 2)
+				local spacing = math.floor((w - frame_w - frame_w)/3)
+				local lx = x + spacing
+				local rx = lx + frame_w + spacing
 				-- vertically
 				local fy = y
 				local src_y = 0
@@ -132,8 +137,10 @@ function _layout(self)
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
 				end
-				self.left =  { img=self.bgImg, x=fx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-				self.right = { img=self.bgImg, x=self.left.x + frame_w, y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				self.left =  { img=self.bgImg, x=lx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+--				self.right = { img=self.bgImg, x=self.left.x + frame_w, y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				self.right = { img=self.bgImg, x=rx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:", self.left.src_y, " w:", self.left.w, " h:", self.left.h)
 				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y, " w:", self.right.w, " h:", self.right.h)
 				self.drawMeter = draw25FrameVuMeter
@@ -142,8 +149,40 @@ function _layout(self)
 				self.right = { img=bgImg }
 				self.drawMeter = nullDraw
 			end
-		elseif self.vutype == "vfd" then
-			self.vfd = self.vutbl
+   		elseif self.vutbl.vutype == "25framesLR"  then
+			if self.vutbl.leftImg ~= nil and self.vutbl.rightImg ~= nil then
+				local imgW, imgH = self.vutbl.leftImg:getSize()
+				-- FIXME VU Meter images will not always be 25 frames
+				local frame_w = imgW/25
+				-- centre the VUMeter image within the designated space
+				-- horizontally
+--				local lx = x + math.floor(w / 4) - math.floor(frame_w / 2)
+--				local rx = x + math.floor((3*w) / 4) - math.floor(frame_w / 2)
+				local spacing = math.floor((w - frame_w - frame_w)/3)
+				local lx = x + spacing
+				local rx = lx + frame_w + spacing
+				-- vertically
+				local fy = y
+				local src_y = 0
+				if imgH < h then
+					fy = math.floor(y + ((h - imgH)/2))
+				elseif imgH > h then
+					-- clip the image at the top and bottom
+					src_y = math.floor((imgH - h)/2)
+				end
+				self.left =  { img=self.vutbl.leftImg, x=lx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				self.right = { img=self.vutbl.rightImg, x=rx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
+				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:", self.left.src_y, " w:", self.left.w, " h:", self.left.h)
+				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y, " w:", self.right.w, " h:", self.right.h)
+				self.drawMeter = draw25FrameVuMeter
+			else
+				self.left =  { img=bgImg }
+				self.right = { img=bgImg }
+				self.drawMeter = nullDraw
+			end
+		elseif self.vutbl.vutype == "vfd" then
+			self.vfd = self.vutbl.vfd
 			local vfdx = x + math.floor((w - self.vfd.w)/2)
 			local y1 = y + math.floor((h - self.vfd.h)/2)
 			local y2 = y1 + self.vfd.bh + self.vfd.ch
