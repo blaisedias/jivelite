@@ -71,6 +71,8 @@ function _layout(self)
 	self.barSpace = {}
 	self.binSpace = {}
 	self.clipSubbands = {}
+	self.counter = FRAME_RATE * visImage.getVisualiserChangeOnTimerValue()
+	self.countDown = self.counter ~= 0
 
 	self.isMono =  self:styleValue("isMono")
 
@@ -243,10 +245,19 @@ function draw(self, surface)
 			end
 		end
 	end
-
+	if self.countDown then
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			visImage:spChange('force', 'force')
+			self:_layout()
+		end
+	end
 end
 
-
+function twiddle(self)
+	visImage:spChange('force', 'force')
+	self:_layout()
+end
 
 function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpace, binSpace, barHeightMulti, capHeight, capSpace)
 	local bch = bins[ch]
