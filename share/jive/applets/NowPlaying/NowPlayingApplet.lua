@@ -867,6 +867,7 @@ function _updateButtons(self, playerStatus)
 		else
 			self.controlsGroup:setWidget('fwd', self.fwdButton)
 		end
+		self.controlsGroup:setWidget('tiwddle', self.twiddleButton)
 
 		if buttons.shuffle then
 			local callback = function()
@@ -912,11 +913,13 @@ function _updateButtons(self, playerStatus)
 			log:debug('reset buttons to defaults')
 			self.controlsGroup:setWidget('rew', self.rewButton)
 			self.controlsGroup:setWidget('fwd', self.fwdButton)
+			self.controlsGroup:setWidget('twiddle', self.twiddleButton)
 			self.controlsGroup:setWidget('shuffleMode', self.shuffleButton)
 			self.controlsGroup:setWidget('repeatMode', self.repeatButton)
 			-- bug 15618: explicitly set style of rew and fwd here, since setWidget doesn't appear to be doing the job
 			self.controlsGroup:getWidget('rew'):setStyle('rew')
 			self.controlsGroup:getWidget('fwd'):setStyle('fwd')
+			self.controlsGroup:getWidget('twiddle'):setStyle('twiddle')
 		end
 	end
 end
@@ -1747,10 +1750,12 @@ function _createUI(self)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
+		self.VISU = SpectrumMeter("spectrum", self.windowStyle)
 		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
-				visu = SpectrumMeter("spectrum", self.windowStyle),
+--				visu = SpectrumMeter("spectrum", self.windowStyle),
+				visu = self.VISU,
 			}),
 			function()
 				visImage:spChange("visuChangeOnNpViewChange")
@@ -1763,10 +1768,12 @@ function _createUI(self)
 
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
+		self.VISU = VUMeter("vumeter_analog")
 		self.resizeVUMeterPending = self:resizeVUMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
-				visu = VUMeter("vumeter_analog"),
+--				visu = VUMeter("vumeter_analog"),
+				visu = self.VISU
 			}),
 			function()
 				visImage:vuChange("visuChangeOnNpViewChange")
@@ -1876,13 +1883,21 @@ function _createUI(self)
 				return EVENT_CONSUME
 			end
 	)
-	
+	self.twiddleButton = Button(
+			Icon('fwd'),
+			function()
+				self.VISU:twiddle(self.VISU)
+				return EVENT_CONSUME
+			end
+	)
+
 	if self.player:getDigitalVolumeControl() == 0 then
 		self.controlsGroup = Group('npcontrols', {
 				div1 = Icon('div1'),
 				div2 = Icon('div2'),
 				div3 = Icon('div3'),
 				div4 = Icon('div4'),
+				div5 = Icon('div5'),
 	
 			  	rew  = self.rewButton,
 			  	play = playIcon,
@@ -1890,6 +1905,7 @@ function _createUI(self)
 	
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
+				twiddle  = self.twiddleButton,
 		})
 	else
 		self.controlsGroup = Group('npcontrols', {
@@ -1900,6 +1916,7 @@ function _createUI(self)
 				div5 = Icon('div5'),
 				div6 = Icon('div6'),
 				div7 = Icon('div7'),
+				div8 = Icon('div8'),
 	
 			  	rew  = self.rewButton,
 			  	play = playIcon,
@@ -1907,6 +1924,7 @@ function _createUI(self)
 	
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
+				twiddle  = self.twiddleButton,
 	
 			  	volDown  = Button(
 					Icon('volDown'),

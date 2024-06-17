@@ -56,6 +56,9 @@ function _layout(self)
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
+	self.counter = FRAME_RATE * visImage.getVisualiserChangeOnTimerValue()
+	self.countDown = self.counter ~= 0
+
 	self.player = appletManager:callService("getCurrentPlayer")
 
 	-- When used in NP screen _layout gets called with strange values
@@ -69,6 +72,8 @@ function _layout(self)
 	if (w <= 0) and (h <= 0) then
 		return
 	end
+
+    self.bgParams = nil
 
 	if self.style == "vumeter" then
 		local vu_w = w - l - r
@@ -225,7 +230,19 @@ function draw(self, surface)
 	-- local volume = self.player:getVolume()
 
 	self.drawMeter(self.left, surface, vol[1]) 
-	self.drawMeter(self.right, surface, vol[2]) 
+	self.drawMeter(self.right, surface, vol[2])
+	if self.countDown then
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			visImage:vuChange('force', 'force')
+			self:_layout(self)
+		end
+	end
+end
+
+function twiddle(self)
+	visImage:vuChange('force', 'force')
+	self:_layout(self)
 end
 
 function drawVuMeterBackground(params, surface)
