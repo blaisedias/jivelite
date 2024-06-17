@@ -95,7 +95,7 @@ oo.class(_M, Applet)
 -- Define useful variables for this skin
 local imgpath = "applets/JogglerSkin/images/"
 
-local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'volDown', 'volSlider', 'volUp' }
+local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 
 function init(self)
 	self.images = {}
@@ -3059,7 +3059,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		--transport controls
 		npcontrols = {
 			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode', 
-					'div5', 'volDown', 'div6', 'volSlider', 'div7', 'volUp' },
+					'div5', 'twiddle',
+					'div6', 'volDown', 'div7', 'volSlider', 'div8', 'volUp' },
 			position = LAYOUT_SOUTH,
 			h = controlHeight,
 			w = WH_FILL,
@@ -3072,6 +3073,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			div5 = _uses(_transportControlBorder),
 			div6 = _uses(_transportControlBorder),
 			div7 = _uses(_transportControlBorder),
+			div8 = _uses(_transportControlBorder),
 
 			rew   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_rew.png"),
@@ -3084,6 +3086,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			}),
 			fwd   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_ffwd.png"),
+			}),
+			twiddle   = _uses(_transportControlButton, {
+				img = _loadImage(self, "Icons/icon_toolbar_twiddle.png"),
 			}),
 			shuffleMode   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_shuffle_off.png"),
@@ -3262,6 +3267,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		play    = _uses(s.nowplaying.npcontrols.play, { bgImg = keyMiddlePressed }),
 		pause   = _uses(s.nowplaying.npcontrols.pause, { bgImg = keyMiddlePressed }),
 		fwd     = _uses(s.nowplaying.npcontrols.fwd, { bgImg = keyMiddlePressed }),
+		twiddle     = _uses(s.nowplaying.npcontrols.twiddle, { bgImg = keyMiddlePressed }),
 		repeatPlaylist  = _uses(s.nowplaying.npcontrols.repeatPlaylist, { bgImg = keyMiddlePressed }),
 		repeatSong      = _uses(s.nowplaying.npcontrols.repeatSong, { bgImg = keyMiddlePressed }),
 		repeatOff       = _uses(s.nowplaying.npcontrols.repeatOff, { bgImg = keyMiddlePressed }),
@@ -3420,6 +3426,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		s.nowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
+		s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
 		
 		s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
 		s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
@@ -3464,12 +3471,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		s.nowplaying_large_art.npcontrols.div4 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
+		s.nowplaying_large_art.npcontrols.div7 = _uses(s.nowplaying_large_art.npcontrols.div1)
 
 	s.nowplaying_large_art.npcontrols.pressed = {
 		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = keyMiddlePressed }),
 		play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = keyMiddlePressed }),
 		pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = keyMiddlePressed }),
 		fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = keyMiddlePressed }),
+		twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = keyMiddlePressed }),
 		repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = keyMiddlePressed }),
 		repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = keyMiddlePressed }),
 		repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = keyMiddlePressed }),
@@ -4443,8 +4452,8 @@ function skin(self, s, reload, useDefaultSize, skin_width, skin_height)
 	end
 
 	if skin_width > 800 then
-		s.nowplaying.npcontrols.div5.w = skin_width - 800
-		s.nowplaying.npcontrols.div5.img = false
+		s.nowplaying.npcontrols.div6.w = skin_width - 800
+		s.nowplaying.npcontrols.div6.img = false
 	end
 
 	if skin_width >= 1280 and skin_height >= 600  then
