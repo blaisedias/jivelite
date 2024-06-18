@@ -2963,6 +2963,17 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	
 	local maxArtwork = screenHeight - 180
 
+	local buttOrder = {}
+	local ii = 1
+	local settings = appletManager:callService("getNowPlayingScreenButtons")
+	for k,v in ipairs(tbButtons) do
+		if settings[v] then
+				table.insert(buttOrder, v)
+				ii = ii + 1
+				table.insert(buttOrder, 'div' .. tostring(ii))
+		end
+	end
+
 	s.nowplaying = _uses(s.window, {
 		--title bar
 		title = _uses(s.title, {
@@ -3058,9 +3069,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	
 		--transport controls
 		npcontrols = {
-			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode', 
-					'div5', 'twiddle',
-					'div6', 'volDown', 'div7', 'volSlider', 'div8', 'volUp' },
+--			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode', 
+--					'div5', 'twiddle',
+--					'div6', 'volDown', 'div7', 'volSlider', 'div8', 'volUp' },
+			order = buttOrder,
 			position = LAYOUT_SOUTH,
 			h = controlHeight,
 			w = WH_FILL,
@@ -3292,7 +3304,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	}
 
 
-	local settings = appletManager:callService("getNowPlayingScreenButtons")
+--	local settings = appletManager:callService("getNowPlayingScreenButtons")
 	local largeArtButtonOrder = {}
 	local largeArtSmallTbButtons
 
