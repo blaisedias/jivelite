@@ -27,8 +27,8 @@ JOGGLER_SKIN_CUSTOM
 	EN	Touch Skin
 
 NOW_PLAYING_BUTTONS
-	DE	Schaltflächen für die "Grosse Plattenhülle und Text" Ansicht
-	EN	Buttons for "Large Artwork and Text" view
+	DE	Schaltflächen
+	EN	Buttons
 
 WQVGA_SMALL_SKIN
 # SLT: WQVGA refers to the "wide quarter VGA" resolution of the display
@@ -222,6 +222,9 @@ NOW_PLAYING_BUTTON_VOLUP
 	PL	Głośniej
 	PT	Aumentar
 	SV	Högre
+
+NOW_PLAYING_BUTTON_TWIDDLE
+	EN	Next Visualiser
 
 LARGE_ART_AND_TEXT
 	DE	Grosse Plattenhülle und Text
