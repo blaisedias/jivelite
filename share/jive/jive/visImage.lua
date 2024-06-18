@@ -1160,8 +1160,8 @@ function _resizedVFDElement(srcImg, key, w, h)
 		local dcPath = cachedPath(dicKey)
 		saveImage(img, dcPath)
 		imCachePut(dicKey, img)
+	    srcImg:release()
 	end
-	srcImg:release()
 	return img
 end
 
