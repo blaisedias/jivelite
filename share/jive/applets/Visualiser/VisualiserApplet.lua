@@ -228,7 +228,7 @@ function imagesMenu(self, menuItem)
 
     menu:addItem({ text = "Delete Resized Images",
         callback = function(event, menuItem)
-            visImage:cacheDelete()
+            visImage:deleteResizedImages()
         end,
         weight=70
     })

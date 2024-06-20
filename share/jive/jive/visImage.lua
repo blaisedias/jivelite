@@ -37,6 +37,7 @@ local System		= require("jive.System")
 
 module(...)
 
+-- Spectrum visualisation types
 SPT_DEFAULT = "default"
 SPT_BACKLIT = "backlit"
 SPT_IMAGE = "image"
@@ -48,9 +49,16 @@ local vuSeq = {}
 local spSeq = {}
 local visSettings = {}
 
--- commit cached images to disk
+-- commit resized images to disk
 local saveResizedImages = true
 local saveimage_type = "png"
+-- resized images table this table is populated on startup by searching for files
+-- at pre-defined locations.
+-- It is used to determine if a particular resized image exists,
+-- so that unnecessary expensive resize operations are not repeated.
+-- In that sense it is a bit like a cache.
+local resizedImagesTable = {}
+
 local PLATFORM = ""
 
 -- on desktop OSes userPath is persistent
@@ -181,12 +189,20 @@ function loadImage(path)
 	return img
 end
 
-function saveImage(img, path)
+-- when a resized image is saved
+--  update the table so that it can be found subsequently
+function saveImage(img, key, path)
+	if img == nil or key == nil or path == nil then
+		log:error("saveImage got nil parameter img=", img, " key=", key, " path=", path)
+		return
+	end
 	if saveResizedImages then
 		if saveimage_type == "png" then
 			img:savePNG(path)
+			resizedImagesTable[key] = path
 		elseif saveimage_type == "bmp" then
 			img:saveBMP(path)
+			resizedImagesTable[key] = path
 		else
 			log:error('unsupported image type: ', saveimage_type)
 		end
@@ -194,16 +210,23 @@ function saveImage(img, path)
 end
 
 -------------------------------------------------------- 
---- disk image cache 
+--- resized images hashtable
 -------------------------------------------------------- 
-
-local diskImageCache = {}
-function getImageName(imgPath)
-	local fullpath = string.split("/", imgPath)
-	local name = fullpath[#fullpath]
-	local parts = string.split("%.", name)
-	return parts[1]
+-- debug function
+function dumpResizedImagesTable()
+	log:info("dumpResizedImagesTable")
+	for k,v in pairs(resizedImagesTable) do
+		log:info("    ", k, " -> ", v)
+	end
+	log:info("\n\n")
 end
+
+-- function getImageName(imgPath)
+-- 	local fullpath = string.split("/", imgPath)
+-- 	local name = fullpath[#fullpath]
+-- 	local parts = string.split("%.", name)
+-- 	return parts[1]
+-- end
 
 function pathIter(rpath)
 	local hist = {}
@@ -229,37 +252,37 @@ function findPaths(rpath)
 	end
 end
 
-function cachedPath(name)
+function resizedImagePath(name)
 	-- we don't know/care whether it is a bmp, png or jpeg 
-	-- loading the file just works 
+	-- saving and loading the file just works 
 	local file = resizedCachePath .. "/" .. name .. "." .. saveimage_type
 	return file
 end
 
-function cacheClear(tbl)
-	log:debug("cacheClear ")
-	for k,v in pairs(diskImageCache) do
-		log:debug("cacheClear ", k)
-		diskImageCache[k] = nil
-	end
-	diskImageCache = {}
-	imCacheClear()	
-end
+-- function cacheClear(tbl)
+-- 	log:debug("cacheClear ")
+-- 	for k,v in pairs(resizedImagesTable) do
+-- 		log:debug("cacheClear ", k)
+-- 		resizedImagesTable[k] = nil
+-- 	end
+-- --	resizedImagesTable = {}
+-- 	imCacheClear()	
+-- end
 
-function cacheDelete(tbl)
-	log:info("cacheDelete ")
-	for k,v in pairs(diskImageCache) do
-		log:info("cacheDelete ", k, " ", v)
+function deleteResizedImages(tbl)
+	log:info("deleteResizedImages ")
+	for k,v in pairs(resizedImagesTable) do
+		log:info("deleteResizedImages ", k, " ", v)
 		os.execute('rm  ' .. '"'.. v .. '"') 
-		diskImageCache[k] = nil
+		resizedImagesTable[k] = nil
 	end
-	diskImageCache = {}
+--	resizedImagesTable = {}
 	imCacheClear()	
 end
 
 
-function _readCacheDir(search_root)
-	log:info("_readCacheDir", " ", search_root)
+function _populateResizedImagesTable(search_root)
+	log:info("_populateResizedImagesTable", " ", search_root)
 
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
@@ -270,14 +293,16 @@ function _readCacheDir(search_root)
 		if mode == "file" then
 			local parts = _parseImagePath(entry)
 			if parts ~= nil then
-				diskImageCache[parts[1]] = search_root .. "/" .. entry
-				log:debug("readCacheDir: ", parts[1], " ", diskImageCache[parts[1]])
+				resizedImagesTable[parts[1]] = search_root .. "/" .. entry
+				log:debug("_populateResizedImagesTable: ", parts[1], " ", resizedImagesTable[parts[1]])
 			end
 		end
 	end
 end
 
-
+-------------------------------------------------------- 
+--- Initialisation and settings
+-------------------------------------------------------- 
 function setVisSettings(tbl, settings)
 	visSettings = settings
 
@@ -357,18 +382,18 @@ function setVisSettings(tbl, settings)
 end
 
 function initialiseCache()
-	cacheClear()
+	imCacheClear()
 	local search_root
 	-- find and use artwork resized ahead of time offline 
 	for search_root in findPaths("../../assets/resized") do
-		_readCacheDir(search_root)
+		_populateResizedImagesTable(search_root)
 	end
 	-- find and use artwork resized ahead of time offline 
 	for search_root in findPaths("assets/resized") do
-		_readCacheDir(search_root)
+		_populateResizedImagesTable(search_root)
 	end
 
-	_readCacheDir(resizedCachePath)
+	_populateResizedImagesTable(resizedCachePath)
 end
 
 function initialise()
@@ -589,7 +614,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
 	local bgImgName = nil
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[dicKey]
+	local dcpath = resizedImagesTable[dicKey]
 	local bgDicKey = nil
 	local bg_dcpath = nil
 
@@ -599,20 +624,20 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	if spType == SPT_BACKLIT then
 		local bgImgName = "bg-" .. imgName
 		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
-		bg_dcpath = cachedPath(bgDicKey)
+		bg_dcpath = resizedImagePath(bgDicKey)
 	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h, spType == SPT_BACKLIT)
 		local fgimg = Surface:newRGB(w, h)
 		img:blit(fgimg, 0, 0, 0)
-		dcpath = cachedPath(dicKey)
-		-- diskImageCache[dicKey] = img
-		saveImage(fgimg, dcpath)
+		dcpath = resizedImagePath(dicKey)
+		-- resizedImagesTable[dicKey] = img
+		saveImage(fgimg, dicKey, dcpath)
 		fgimg:release()
 		fgimg = nil
 		img:release()
 		img = nil
-		diskImageCache[dicKey] = dcpath
+--		resizedImagesTable[dicKey] = dcpath
 		log:debug("cacheSpectrumImage cached ", dicKey)
 	else
 		log:debug("cacheSpectrumImage found cached ", dcpath)
@@ -683,19 +708,19 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey)
 
-	if diskImageCache[dicKey] ~= nil then 
-		log:debug("getFgImage: load ", dicKey, " ", diskImageCache[dicKey])
-		fgImage = loadImage(diskImageCache[dicKey])
+	if resizedImagesTable[dicKey] ~= nil then 
+		log:debug("getFgImage: load ", dicKey, " ", resizedImagesTable[dicKey])
+		fgImage = loadImage(resizedImagesTable[dicKey])
 ---- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
 --	else
 --		-- this is required to create cached images when skin change, changes the resolution.
 --		if spectrumImagesMap[spkey].src ~= nil then
 --			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
---			if diskImageCache[dicKey] == nil then 
+--			if resizedImagesTable[dicKey] == nil then 
 --				spectrumImagesMap[spkey].src = nil
 --				return nil
 --			end
---			fgImage = loadImage(diskImageCache[dicKey])
+--			fgImage = loadImage(resizedImagesTable[dicKey])
 --		end
 	end
 	return fgImage
@@ -870,15 +895,15 @@ end
 function _cacheVUImage(imgName, path, w, h)
 	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = diskImageCache[dicKey]
+	local dcpath = resizedImagesTable[dicKey]
 	if dcpath == nil then
 		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = cachedPath(dicKey)
-		--diskImageCache[dicKey] = img
-		saveImage(img, dcpath)
+		dcpath = resizedImagePath(dicKey)
+		--resizedImagesTable[dicKey] = img
+		saveImage(img, dicKey, dcpath)
 		img:release()
 		img = nil
-		diskImageCache[dicKey] = dcpath
+--		resizedImagesTable[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
 	end
@@ -1080,29 +1105,29 @@ function getVuImage(w,h)
 	if entry.vutype == "25framesLR" then
 		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
 		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
-		local leftImg = loadImage(diskImageCache[ldicKey])
-		local rightImg = loadImage(diskImageCache[rdicKey])
+		local leftImg = loadImage(resizedImagesTable[ldicKey])
+		local rightImg = loadImage(resizedImagesTable[rdicKey])
 		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	if diskImageCache[dicKey] ~= nil then 
+	if resizedImagesTable[dicKey] ~= nil then 
 		-- image is in the cache load and return
-		log:debug("getVuImage: load ", dicKey, " ", diskImageCache[dicKey])
-		frameVU = loadImage(diskImageCache[dicKey])
+		log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
+		frameVU = loadImage(resizedImagesTable[dicKey])
 ---- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
 --	else
 --		-- this is required to create cached images when skin change, changes the resolution.
 --		if vuImagesMap[entry.name].src ~= nil then
 --			log:debug("getVuImage: creating image for ", dicKey)
 --			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
---			if diskImageCache[dicKey] == nil then
+--			if resizedImagesTable[dicKey] == nil then
 --				-- didn't work zap the src string so we don't do this repeatedly
 --				log:debug("getVuImage: failed to create image for ", dicKey)
 --				vumImagesMap[entry.name].src = nil
 --			end
---			log:debug("getVuImage: load (new) ", dicKey, " ", diskImageCache[dicKey])
---			frameVU = loadImage(diskImageCache[dicKey])
+--			log:debug("getVuImage: load (new) ", dicKey, " ", resizedImagesTable[dicKey])
+--			frameVU = loadImage(resizedImagesTable[dicKey])
 --		else
 --			log:debug("getVuImage: no image for ", dicKey)
 --		end
@@ -1154,13 +1179,15 @@ end
 
 function _resizedVFDElement(srcImg, key, w, h)
 	local dicKey = key .. "-" .. w .. "x" .. h
-	local img =  loadImage(diskImageCache[dicKey])
-	if diskImageCache[dicKey] == nil then
+	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey, " dcpath=", dcpath)
+	local img = loadImage(resizedImagesTable[dicKey])
+	if img == nil then
 		img = srcImg:resize(w, h)
-		local dcPath = cachedPath(dicKey)
-		saveImage(img, dcPath)
-		imCachePut(dicKey, img)
-	    srcImg:release()
+		local dcpath = resizedImagePath(dicKey)
+		saveImage(img, dicKey, dcpath)
+--		resizedImagesTable[dicKey] = dcpath
+		imCachePut(dcpath, img)
+		srcImg:release()
 	end
 	return img
 end
@@ -1365,7 +1392,7 @@ function resizeRequiredSpectrumMeter(tbl, name)
 				if spectrumImagesMap[name].src ~= nil then
 					-- have path to source image
 				   	for kr, vr in pairs(spectrumResolutions) do
-						if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
 							return true
 						end
 					end
@@ -1388,7 +1415,7 @@ function resizeRequiredVuMeter(tbl, name)
 			if v.vutype == "frame" then
 				-- resizable type
 				for kr, vr in pairs(vuMeterResolutions) do
-					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
+					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
 						return true
 					end
 				end
@@ -1396,10 +1423,10 @@ function resizeRequiredVuMeter(tbl, name)
 			if v.vutype == "25framesLR" then
 				-- create the cached image for skin resolutions 
 				for kr, vr in pairs(vuMeterResolutions) do
-					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':left'] == nil then
+					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':left'] == nil then
 						return true
 					end
-					if diskImageCache["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':right'] == nil then
+					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':right'] == nil then
 						return true
 					end
 				end
