@@ -279,6 +279,10 @@ function _predefinedKeyboards(self)
 				{ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' } ,
 				{ 'A', 'B', 'C', 'D', 'E', 'F', self:_arrow('left', 'bottom'), self:_arrow('right', 'bottom'), self:_go() },
 		},
+		['integer']     = { 
+				{ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' } ,
+				{ self:_arrow('left', 'bottom'), self:_arrow('right', 'bottom'), self:_go() },
+		},
 		['ip']     = { 
 				{ '1', '2', '3', '4', '5', '6', '7', '8', '9', '0' } ,
 				{ '.', self:_spacer(), self:_arrow('left', 'bottom'), self:_arrow('right', 'bottom'), self:_go(default.width_large) },

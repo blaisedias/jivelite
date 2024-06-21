@@ -1045,6 +1045,62 @@ function hexValue(default, min, max)
 	return obj
 end
 
+--[[
+
+=head2 jive.ui.Textinput.integerValue(default)
+
+Returns a value that can be used for entering an hexadecimal value.
+
+=cut
+--]]
+function integerValue(default, min, max)
+	local obj = {}
+	setmetatable(obj, {
+		__tostring = function(obj)
+			return obj.s
+		end,
+
+		__index = {
+			setValue = function(obj, str)
+				if max and #str > max then
+					return false
+				end
+
+				obj.s = str
+				return true
+			end,
+
+			getValue = function(obj)
+				return obj.s
+			end,
+
+			getChars = function(obj, cursor)
+				if max and cursor > max then
+					return ""
+				end
+				return "0123456789"
+			end,
+
+			reverseScrollPolarityOnUpDownInput = function()
+				return true
+			end,
+
+			isValid = function(obj, cursor)
+				if min and #obj.s < min then
+					return false
+				else
+					return true
+				end
+			end,
+		}
+	})
+
+	obj:setValue(default or "")
+
+	return obj
+end
+
+
 
 --[[
 
