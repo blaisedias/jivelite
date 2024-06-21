@@ -1437,3 +1437,13 @@ function resizeRequiredVuMeter(tbl, name)
 	-- vu meter not resizable : not found, not resizable
 	return false
 end
+
+function getVisualiserChangeOnTimerValue(tbl)
+	local value = visSettings.visuChangeOnTimer
+	if value == nil then
+		return 0
+	end
+	return value
+end
+
+

@@ -147,6 +147,17 @@ function registerApplet(self)
     node = { id = 'visualiserSpectrumSettings', iconStyle = 'hm_settings', node = 'visualiserSettings', text = 'Spectrum Meter Settings', windowStyle = 'text_only', weight=30  }
     jiveMain:addNode(node)
 
+    jiveMain:addItem(
+        self:menuItem(
+            'visualiserChangeOnTimer',
+            'visualiserSettings',
+            'CHANGE_VISUALISER_ON_TIMER',
+            function(applet, ...)
+                applet:inputVisualiserChangeOnTimer(...)
+            end,
+            50
+        )
+    )
 
     jiveMain:addItem(
         self:menuItem(

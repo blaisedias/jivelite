@@ -38,6 +38,39 @@ local jiveMain      = jiveMain
 module(..., Framework.constants)
 oo.class(_M, Applet)
 
+function inputVisualiserChangeOnTimer(self)
+    local window = Window("text_list", self:string("CHANGE_VISUALISER_ON_TIMER"))
+    local settings = self:getSettings()
+
+    currentValue = settings.visuChangeOnTimer 
+    if currentValue == nil then
+        currentValue = ''
+    else
+        currentValue = ''.. currentValue
+    end
+
+    local v = Textinput.integerValue(currentValue)
+    local input = Textinput("textinput", v,
+            function(_, value)
+                settings.visuChangeOnTimer = tonumber(value.s)
+                self:storeSettings()
+                window:hide()
+            end
+    )
+
+    local keyboard = Keyboard("keyboard", "integer", input)
+    local backspace = Keyboard.backspace()
+        local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+    window:addWidget(group)
+    window:addWidget(keyboard)
+    window:focusWidget(group)
+
+    self:tieAndShowWindow(window)
+    return window
+end
+
+
 
 function init(self)
     local settings = self:getSettings()
