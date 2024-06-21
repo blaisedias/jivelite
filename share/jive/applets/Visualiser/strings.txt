@@ -62,4 +62,6 @@ ON
 OFF
 	EN	Off
 
+CHANGE_VISUALISER_ON_TIMER
+	EN	Change Visualiser On Timer (Seconds)
 
