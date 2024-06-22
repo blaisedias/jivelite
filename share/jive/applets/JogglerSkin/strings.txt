@@ -223,6 +223,22 @@ NOW_PLAYING_BUTTON_VOLUP
 	PT	Aumentar
 	SV	Högre
 
+NOW_PLAYING_BUTTON_VOLDOWNUP
+	CS	Ztlumit / Zesílit
+	DA	Lavere / Højere
+	DE	Leiser / Lauter
+	EN	Softer / Louder
+	ES	Más bajo / Más alto
+	FI	Pehmeämpi / Kovempaa
+	FR	Moins fort / Plus fort
+	IT	Abbassa il volume / Alza il volume
+	NL	Zachter / Harder
+	NO	Lavere / Høyere
+	PL	Ciszej / Głośniej
+	PT	Reduzir / Aumentar
+	SV	Lägre / Högre
+
+
 NOW_PLAYING_BUTTON_TWIDDLE
 	EN	Next Visualiser
 
