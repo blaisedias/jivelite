@@ -75,18 +75,7 @@ local WH_FILL                = jive.ui.WH_FILL
 local jiveMain               = jiveMain
 local appletManager          = appletManager
 
-local gradientColours = {
-	0xe403ffff, 0xd800ffff, 0xcb00ffff, 0xbe00ffff, 0xb000ffff, 0xa100ffff, 0x9000ffff, 0x7e00ffff, 0x6a00ffff,
-	0x5003ffff, 0x003dffff, 0x0057ffff, 0x006bffff, 0x007bffff, 0x008affff, 0x0098ffff, 0x00a4ffff, 0x00b0ffff,
-	0x03bbffff, 0x03bbffff, 0x00c1ffff, 0x00c6ffff, 0x00ccffff, 0x00d1ffff, 0x00d6ffff, 0x00dbffff, 0x00e0f9ff,
-	0x00e4f0ff, 0x00e9e6ff, 0x00ecd9ff, 0x00f0cbff, 0x00f3bcff, 0x00f6abff, 0x00f998ff, 0x00fb84ff, 0x00fd6fff,
-	0x00fe57ff, 0x4dff3bff, 0x74ff03ff, 0x74ff03ff, 0x8df300ff, 0xa1e800ff, 0xb2db00ff, 0xc0cf00ff, 0xcdc100ff,
-	0xd8b400ff, 0xe2a500ff, 0xea9600ff, 0xf18600ff, 0xf77600ff, 0xfb6300ff, 0xfe4f00ff, 0xff3500ff, 0xff0303ff,
-	0xff0303ff,
-}
-
-
-local BLACK_BACKGROUND = false
+local BLACK_BACKGROUND       = false
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
@@ -96,6 +85,7 @@ oo.class(_M, Applet)
 local imgpath = "applets/JogglerSkin/images/"
 
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
+local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
 
 function init(self)
 	self.images = {}
@@ -338,6 +328,32 @@ local function _uses(parent, value)
 	return style
 end
 
+function layoutLargeArtControls(candidates, screenWidth, controlWidth, divWidth, volumeBarWidth)
+    local avail = screenWidth
+    local iDiv = 1
+    local fitted = true
+    local buttonOrder = {}
+    for k,v in ipairs(candidates) do
+        local cw = controlWidth
+        if v == 'volSlider' then
+            cw = volumeBarWidth
+        end
+        if k > 1 then
+            cw = cw + divWidth
+        end
+        if cw <= avail then
+            if k > 1 then
+                table.insert(buttonOrder, 'div' .. tostring(iDiv))
+                iDiv = iDiv + 1
+            end
+            table.insert(buttonOrder, v)
+            avail = avail - cw
+        else
+            fitted = false
+        end
+    end
+    return {fitted=fitted, order=buttonOrder}
+end
 
 -- skin
 -- The meta arranges for this to be called to skin the interface.
@@ -932,7 +948,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
         })
 
 --------- DEFAULT WIDGET STYLES ---------
-    --
+	--
 	-- These are the default styles for the widgets 
 
 	s.window = {
@@ -2963,14 +2979,27 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	
 	local maxArtwork = screenHeight - 180
 
-	local buttOrder = {}
-	local ii = 1
+	local buttonOrder = {}
+	local iDiv = 1
 	local settings = appletManager:callService("getNowPlayingScreenButtons")
+    local divVolSpacing = screenWidth
 	for k,v in ipairs(tbButtons) do
-		if settings[v] then
-				table.insert(buttOrder, v)
-				ii = ii + 1
-				table.insert(buttOrder, 'div' .. tostring(ii))
+		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
+            if k > 1 then
+                if v == 'volDown' then
+    			    table.insert(buttonOrder, 'divVolSpace')
+                else
+    			    table.insert(buttonOrder, 'div' .. tostring(iDiv))
+                end
+    			iDiv = iDiv + 1
+                divVolSpacing = divVolSpacing - _transportControlBorder.w
+            end
+			table.insert(buttonOrder, v)
+            if v ~= 'volSlider' then
+                divVolSpacing = divVolSpacing - controlWidth
+            else
+                divVolSpacing = divVolSpacing - volumeBarWidth
+            end
 		end
 	end
 
@@ -3072,7 +3101,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 --			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode', 
 --					'div5', 'twiddle',
 --					'div6', 'volDown', 'div7', 'volSlider', 'div8', 'volUp' },
-			order = buttOrder,
+			order = buttonOrder,
 			position = LAYOUT_SOUTH,
 			h = controlHeight,
 			w = WH_FILL,
@@ -3086,6 +3115,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			div6 = _uses(_transportControlBorder),
 			div7 = _uses(_transportControlBorder),
 			div8 = _uses(_transportControlBorder),
+			divVolSpace = _uses(_transportControlBorder),
 
 			rew   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_rew.png"),
@@ -3303,59 +3333,54 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled),
 	}
 
+    s.nowplaying.npcontrols.divVolSpace.w = divVolSpacing
+    s.nowplaying.npcontrols.divVolSpace.img = false
 
 --	local settings = appletManager:callService("getNowPlayingScreenButtons")
 	local largeArtButtonOrder = {}
 	local largeArtSmallTbButtons
-
-	local smallControlWidth = controlWidth - 14
-	-- setup buttons large art now playing views
-	local i = 1
-	local n_shrinkable = 0
-	local c_w_avail = screenWidth - screenHeight
+    local candidateButtons = {}
 	for k,v in ipairs(tbButtons) do
-		if settings[v] then
-			local c_w = 0
-			if v == 'volSlider' then
-				c_w = volumeBarWidth
-			else
-				c_w = controlWidth
-				if largeArtSmallTbButtons then
-					-- shrink is in effect
-					c_w = smallControlWidth
-				end
-			end
-
-			if c_w > c_w_avail  then
-				if not largeArtSmallTbButtons then
-					-- for now volSlider is considered a special case, unshrinkable and prime candidate to skip over
-					-- in favour of volUp. 
-					-- In sequence volDown precedes, volSlider which precedes volUp
-					-- it is preferrable to present volDown with volUp over volDown with volSlider
-					if v ~= 'volSlider' then
-						largeArtSmallTbButtons = true
-						-- controls are newly shrunk horizontally so more space is available 
-						-- adjust available space accordingly
-						c_w_avail = c_w_avail + (n_shrinkable * (controlWidth - smallControlWidth))
-						-- the control under consideration for addition is shrunk as well
-						c_w = smallControlWidth
-						log:info("largeArtSmallTbButtons: ", largeArtSmallTbButtons)
-					end
-				end
-			end
-			
-			if c_w < c_w_avail then
-				table.insert(largeArtButtonOrder, v)
-				i = i + 1
-				table.insert(largeArtButtonOrder, 'div' .. tostring(i))
-				c_w_avail = c_w_avail - c_w
-				-- count the number of shrinkable controls
-				if v ~= 'volSlider' then
-					n_shrinkable = n_shrinkable + 1
-				end
-			end
+		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
+			table.insert(candidateButtons, v)
 		end
 	end
+    
+	local smallControlWidth = controlWidth - 14
+
+    local layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
+
+    if not layout.fitted then
+        -- try with smallControlWidth
+        largeArtSmallTbButtons = true
+        layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
+    end
+
+    if not layout.fitted then
+        -- drop volSlider
+        candidateButtons = {}
+    	for k,v in ipairs(tbButtons) do
+            if v ~= 'volSlider' then
+    	    	if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
+        			table.insert(candidateButtons, v)
+        		end
+            end
+    	end
+    end
+
+    -- try with with full control width
+    if not layout.fitted then
+        largeArtSmallTbButtons = false
+        layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
+    end
+
+    -- try with with smallControlWidth
+    if not layout.fitted then
+        largeArtSmallTbButtons = true
+        layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
+    end
+
+    largeArtButtonOrder = layout.order
 
 	local npX = screenHeight + 15
 
@@ -3484,6 +3509,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
 		s.nowplaying_large_art.npcontrols.div7 = _uses(s.nowplaying_large_art.npcontrols.div1)
+		s.nowplaying_large_art.npcontrols.divVolSpace = _uses(s.nowplaying_large_art.npcontrols.div1)
 
 	s.nowplaying_large_art.npcontrols.pressed = {
 		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = keyMiddlePressed }),
@@ -3760,7 +3786,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				bg = { 0x00, 0x00, 0x00, 0x00 },
 
 				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+				capColor = { 0x74, 0x56, 0xa1, 0xff },
 
 				isMono = 0,				-- 0 / 1
 
@@ -3771,12 +3797,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				barWidth = { 1, 1 },			-- > 1
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
-				-- barsInBin = { 2, 2 },			-- > 1
-				-- barWidth = { 4, 4 },			-- > 1
-				-- barSpace = { 1, 1 },			-- >= 0
-				-- binSpace = { 1, 1 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
-				-- gradientColours = gradientColours,
 				useVisImage = true,
 			}
 		},
@@ -4349,7 +4370,7 @@ function npButtonSelectorShow(self)
 	local menu = SimpleMenu("menu")
 	local settings = self:getSettings()
 
-	for i, v in ipairs(tbButtons) do
+	for i, v in ipairs(tbButtonsUIList) do
 		menu:addItem( {
 			text = self:string("NOW_PLAYING_BUTTON_" .. string.upper(v)),
 			style = 'item_choice',
@@ -4373,7 +4394,11 @@ function setNowPlayingScreenButtons(self, button, isSelected)
 end
 
 function getNowPlayingScreenButtons(self)
-	return self:getSettings()
+	local settings = self:getSettings()
+    -- remove volUp and volDown superceded by volDownUp
+    settings['volUp'] = nil
+    settings['volDown'] = nil
+    return settings
 end
 
 function buttonSettingsMenuItem(self)
@@ -4461,11 +4486,6 @@ function skin(self, s, reload, useDefaultSize, skin_width, skin_height)
 		s.nowplaying_large_art.nptitle.nptrack.font = _boldfont(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
 		s.nowplaying_large_art.npartistgroup.npartist.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
 		s.nowplaying_large_art.npalbumgroup.npalbum.font = _font(c.NP_ARTISTALBUM_FONT_SIZE * 0.9) 
-	end
-
-	if skin_width > 800 then
-		s.nowplaying.npcontrols.div6.w = skin_width - 800
-		s.nowplaying.npcontrols.div6.img = false
 	end
 
 	if skin_width >= 1280 and skin_height >= 600  then

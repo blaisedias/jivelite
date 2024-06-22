@@ -37,6 +37,7 @@ local SpectrumMeter    = require("jive.vis.SpectrumMeter")
 
 local debug            = require("jive.utils.debug")
 local datetime         = require("jive.utils.datetime")
+
 local appletManager    = appletManager
 
 local jiveMain               = jiveMain
@@ -133,6 +134,7 @@ function init(self)
 	local settings      = self:getSettings()
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
+
 end
 
 -- style names are grabbed from the skin
@@ -223,6 +225,7 @@ function getNPStyles(self)
 		if not self.selectedStyle then
 			self.selectedStyle = auditedNPStyles[1] and auditedNPStyles[1].style
 		end
+
 		-- only update settings if they have changed
 		if settings.selectedStyle ~= self.selectedStyle then
 			settings.selectedStyle = self.selectedStyle
@@ -1750,12 +1753,11 @@ function _createUI(self)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
-		self.VISU = SpectrumMeter("spectrum", self.windowStyle)
+		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
 		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
---				visu = SpectrumMeter("spectrum", self.windowStyle),
-				visu = self.VISU,
+				visu = self.currentVisualiser,
 			}),
 			function()
 				visImage:spChange("visuChangeOnNpViewChange")
@@ -1768,12 +1770,11 @@ function _createUI(self)
 
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
-		self.VISU = VUMeter("vumeter_analog")
+		self.currentVisualiser = VUMeter("vumeter_analog")
 		self.resizeVUMeterPending = self:resizeVUMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
---				visu = VUMeter("vumeter_analog"),
-				visu = self.VISU
+				visu = self.currentVisualiser
 			}),
 			function()
 				visImage:vuChange("visuChangeOnNpViewChange")
@@ -1886,7 +1887,7 @@ function _createUI(self)
 	self.twiddleButton = Button(
 			Icon('fwd'),
 			function()
-				self.VISU:twiddle(self.VISU)
+				self.currentVisualiser:twiddle(self.currentVisualiser)
 				return EVENT_CONSUME
 			end
 	)
@@ -1917,6 +1918,7 @@ function _createUI(self)
 				div6 = Icon('div6'),
 				div7 = Icon('div7'),
 				div8 = Icon('div8'),
+				divVolSpace = Icon('divVolSpace'),
 	
 			  	rew  = self.rewButton,
 			  	play = playIcon,
@@ -2067,7 +2069,9 @@ function openScreensaver(self)
 	return false
 end
 
+
 function showNowPlaying(self, transition, direct)
+
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
 
@@ -2180,7 +2184,6 @@ function showNowPlaying(self, transition, direct)
 
 	-- Initialize with current data from Player
 	self.window:show(transitionOn)
-
 	self:_updateAll()
 	if self.resizeSpectrumMeterPending then
 		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
