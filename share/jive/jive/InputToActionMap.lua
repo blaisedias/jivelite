@@ -87,6 +87,7 @@ charActionMappings.press = {
 	["*"]  = "set_preset_8",
 	["("]  = "set_preset_9",
 	["?"]  = "help",
+	["\\"] = "go_twiddle_visualiser",
 
 	--development tools -- Later when modifier keys are supported, these could be obscured from everyday users
 	["R"]  = "reload_skin",
