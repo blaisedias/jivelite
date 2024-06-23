@@ -46,6 +46,7 @@ function registerApplet(self)
 
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")
+	self:registerService("twiddleVisualiser")
 
 end
 

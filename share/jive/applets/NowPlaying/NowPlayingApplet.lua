@@ -2047,6 +2047,13 @@ function hideNowPlaying(self)
 	end
 end
 
+--service method
+function twiddleVisualiser(self)
+	if self.currentVisualiser ~= nil then
+		self.currentVisualiser:twiddle(self.currentVisualiser)
+	end
+end
+
 function _playlistHasTracks(self)
 	if not self.player then
 		return false

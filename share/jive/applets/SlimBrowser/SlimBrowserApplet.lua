@@ -1764,6 +1764,11 @@ local _globalActionsNEW = {
 		appletManager:callService("disconnectPlayer")
 		return (bit.bor(EVENT_CONSUME, EVENT_QUIT))
 	end,
+
+	["go_twiddle_visualiser"] = function()
+		appletManager:callService("twiddleVisualiser")
+		return EVENT_CONSUME
+	end
 }
 
 
