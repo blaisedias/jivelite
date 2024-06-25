@@ -2982,24 +2982,26 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local buttonOrder = {}
 	local iDiv = 1
 	local settings = appletManager:callService("getNowPlayingScreenButtons")
-    local divVolSpacing = screenWidth
+	local divVolSpacing = screenWidth
+	local volSpacingInserted = false
 	for k,v in ipairs(tbButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
-            if k > 1 then
-                if v == 'volDown' then
-    			    table.insert(buttonOrder, 'divVolSpace')
-                else
-    			    table.insert(buttonOrder, 'div' .. tostring(iDiv))
-                end
-    			iDiv = iDiv + 1
-                divVolSpacing = divVolSpacing - _transportControlBorder.w
-            end
+			if k > 1 then
+				if (v == 'volDown' or v == 'volSlider' or v == 'volUp') and not volSpacingInserted then
+					table.insert(buttonOrder, 'divVolSpace')
+					volSpacingInserted = true
+				else
+					table.insert(buttonOrder, 'div' .. tostring(iDiv))
+				end
+				iDiv = iDiv + 1
+				divVolSpacing = divVolSpacing - _transportControlBorder.w
+			end
 			table.insert(buttonOrder, v)
-            if v ~= 'volSlider' then
-                divVolSpacing = divVolSpacing - controlWidth
-            else
-                divVolSpacing = divVolSpacing - volumeBarWidth
-            end
+			if v ~= 'volSlider' then
+				divVolSpacing = divVolSpacing - controlWidth
+			else
+				divVolSpacing = divVolSpacing - volumeBarWidth
+			end
 		end
 	end
 
