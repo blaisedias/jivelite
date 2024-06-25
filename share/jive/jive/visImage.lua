@@ -189,6 +189,14 @@ function loadImage(path)
 	return img
 end
 
+function loadResizedImage(key)
+    local path = resizedImagesTable[key]
+    if path ~= nil then
+        return loadImage(path)
+    end
+    return nil
+end
+
 -- when a resized image is saved
 --  update the table so that it can be found subsequently
 function saveImage(img, key, path)
@@ -706,23 +714,8 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey)
-
-	if resizedImagesTable[dicKey] ~= nil then 
-		log:debug("getFgImage: load ", dicKey, " ", resizedImagesTable[dicKey])
-		fgImage = loadImage(resizedImagesTable[dicKey])
----- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
---	else
---		-- this is required to create cached images when skin change, changes the resolution.
---		if spectrumImagesMap[spkey].src ~= nil then
---			_cacheSpectrumImage(spkey, spectrumImagesMap[spkey].src, w, h, spType)
---			if resizedImagesTable[dicKey] == nil then 
---				spectrumImagesMap[spkey].src = nil
---				return nil
---			end
---			fgImage = loadImage(resizedImagesTable[dicKey])
---		end
-	end
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey, " ", resizedImagesTable[dicKey])
+	fgImage = loadResizedImage(dicKey)
 	return fgImage
 end
 
@@ -761,6 +754,7 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 	return bgImage
 end
 
+local prevSpImageIndex = -1
 function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
@@ -775,9 +769,10 @@ function getSpectrum(tbl, w, h, spType)
 	log:debug("getSpectrum: spkey: ", spkey)
 	alpha = getBacklitAlpha()
 
-	if visSettings.cacheEnabled == false then
+	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
 	end
+	prevSpImageIndex = spImageIndex
 
 	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
@@ -1085,6 +1080,7 @@ function vuChange(tbl, name)
 	end
 end
 
+local prevVuImageIndex = -1
 function getVuImage(w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
 --	if vuImages[vuImageIndex].enabled == false then
@@ -1092,9 +1088,10 @@ function getVuImage(w,h)
 --	end
 	local entry = vuImages[vuImageIndex]
 
-	if visSettings.cacheEnabled == false then
+	if visSettings.cacheEnabled == false and vuImageIndex ~= prevVuImageIndex then
 		imCacheClear()
 	end
+	prevVuImageIndex = vuImageIndex
 
 	if entry.vutype == "vfd" then
 		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
@@ -1105,33 +1102,15 @@ function getVuImage(w,h)
 	if entry.vutype == "25framesLR" then
 		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
 		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
-		local leftImg = loadImage(resizedImagesTable[ldicKey])
-		local rightImg = loadImage(resizedImagesTable[rdicKey])
+		local leftImg = loadResizedImage(ldicKey)
+		local rightImg = loadResizedImage(rdicKey)
 		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	if resizedImagesTable[dicKey] ~= nil then 
-		-- image is in the cache load and return
-		log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
-		frameVU = loadImage(resizedImagesTable[dicKey])
----- if a resized image is not found then return nil, resizing implicitly yields a poor user experience
---	else
---		-- this is required to create cached images when skin change, changes the resolution.
---		if vuImagesMap[entry.name].src ~= nil then
---			log:debug("getVuImage: creating image for ", dicKey)
---			_cacheVUImage(entry.name, vuImagesMap[entry.name].src, w, h)
---			if resizedImagesTable[dicKey] == nil then
---				-- didn't work zap the src string so we don't do this repeatedly
---				log:debug("getVuImage: failed to create image for ", dicKey)
---				vumImagesMap[entry.name].src = nil
---			end
---			log:debug("getVuImage: load (new) ", dicKey, " ", resizedImagesTable[dicKey])
---			frameVU = loadImage(resizedImagesTable[dicKey])
---		else
---			log:debug("getVuImage: no image for ", dicKey)
---		end
-	end
+	-- image is in the cache load and return
+	log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
+	frameVU = loadResizedImage(dicKey)
 	return {vutype=entry.vutype, bgImg=frameVU}
 end
 
@@ -1180,7 +1159,7 @@ end
 function _resizedVFDElement(srcImg, key, w, h)
 	local dicKey = key .. "-" .. w .. "x" .. h
 	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey, " dcpath=", dcpath)
-	local img = loadImage(resizedImagesTable[dicKey])
+	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
 		local dcpath = resizedImagePath(dicKey)
