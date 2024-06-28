@@ -1,34 +1,34 @@
-local tostring          = tostring
+--local tostring          = tostring
 local tonumber          = tonumber
 local pairs             = pairs
 local ipairs            = ipairs
 
 local table             = require("table")
-local string            = require("string")
-local math              = require("math")
-local os                = require("os")
-local io                = require("io")
+--local string            = require("string")
+--local math              = require("math")
+--local os                = require("os")
+--local io                = require("io")
 local oo                = require("loop.simple")
-local Event             = require("jive.ui.Event")
-local Icon              = require("jive.ui.Icon")
+--local Event             = require("jive.ui.Event")
+--local Icon              = require("jive.ui.Icon")
 local Label             = require("jive.ui.Label")
 local Popup             = require("jive.ui.Popup")
 local SimpleMenu        = require("jive.ui.SimpleMenu")
 local Window            = require("jive.ui.Window")
-local Slider            = require("jive.ui.Slider")
-local Textarea          = require("jive.ui.Textarea")
+--local Slider            = require("jive.ui.Slider")
+--local Textarea          = require("jive.ui.Textarea")
 local Group             = require("jive.ui.Group")
 local Framework         = require("jive.ui.Framework")
 local Checkbox          = require("jive.ui.Checkbox")
 local RadioButton       = require("jive.ui.RadioButton")
 local RadioGroup        = require("jive.ui.RadioGroup")
-local Choice            = require("jive.ui.Choice")
+--local Choice            = require("jive.ui.Choice")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local visImage          = require("jive.visImage")
 local log               = require("jive.utils.log").logger("applet.Visualiser")
 
-local debug             = require("jive.utils.debug")
+--local debug             = require("jive.utils.debug")
 
 local Applet            = require("jive.Applet")
 
@@ -42,7 +42,7 @@ function inputVisualiserChangeOnTimer(self)
     local window = Window("text_list", self:string("CHANGE_VISUALISER_ON_TIMER"))
     local settings = self:getSettings()
 
-    currentValue = settings.visuChangeOnTimer 
+    local currentValue = settings.visuChangeOnTimer
     if currentValue == nil then
         currentValue = ''
     else
@@ -81,7 +81,8 @@ function init(self)
         text = self:string("VISUALISER_CACHE_IMAGE_RAM"),
         style = 'item_choice',
         weight = 50,
-        check = Checkbox("checkbox", function(applet, checked)
+--        check = Checkbox("checkbox", function(applet, checked)
+        check = Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.cacheEnabled = checked
             self:storeSettings()
@@ -95,7 +96,8 @@ function init(self)
         text = self:string("VISUALISER_RANDOMISE_SEQUENCE"),
         style = 'item_choice',
         weight = 40,
-        check =  Checkbox("checkbox", function(applet, checked)
+--        check =  Checkbox("checkbox", function(applet, checked)
+        check =  Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.randomSequence = checked
             self:storeSettings()
@@ -113,7 +115,8 @@ function init(self)
         text = self:string("VISU_CHANGE_ON_TRACK_CHANGE"),
         style = 'item_choice',
         weight = 41,
-        check =  Checkbox("checkbox", function(applet, checked)
+--        check =  Checkbox("checkbox", function(applet, checked)
+        check =  Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.visuChangeOnTrackChange = checked
             self:storeSettings()
@@ -131,7 +134,8 @@ function init(self)
         text = self:string("VISU_CHANGE_ON_NP_VIEW"),
         style = 'item_choice',
         weight = 42,
-        check =  Checkbox("checkbox", function(applet, checked)
+--        check =  Checkbox("checkbox", function(applet, checked)
+        check =  Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.visuChangeOnNpViewChange = checked
             self:storeSettings()
@@ -213,54 +217,62 @@ function init(self)
 
 end
 
-function imagesMenu(self, menuItem)
+--function imagesMenu(self, menuItem)
+function imagesMenu(self, _)
     local window = Window("text_list", self:string('RESIZE_IMAGES') )
     local menu = SimpleMenu("menu")
 
     menu:addItem({ text = "Resize Selected Visualiser Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(true, true, false)
         end,
         weight=10
     })
 
     menu:addItem({ text = "Resize Selected Spectrum Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(true, false, false)
         end,
         weight=20
     })
 
     menu:addItem({ text = "Resize Selected VU Meter Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(false, true, false)
         end,
         weight=30
     })
 
     menu:addItem({ text = "Resize ALL Spectrum Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(true, false, true)
         end,
         weight=40
     })
 
     menu:addItem({ text = "Resize ALL VU Meter Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(false, true, true)
         end,
         weight=50
     })
 
     menu:addItem({ text = "Resize ALL Visualiser Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             self:resizeImages(true, true, true)
         end,
         weight=60
     })
 
     menu:addItem({ text = "Delete Resized Images",
-        callback = function(event, menuItem)
+--        callback = function(event, menuItem)
+        callback = function(_, _)
             visImage:deleteResizedImages()
         end,
         weight=70
@@ -284,7 +296,7 @@ function selectSpectrumChannelFlip(self)
     }
 
     local current = settings.spectrum.channelFlip
-    for i, v in ipairs(channelFlips) do
+    for _, v in ipairs(channelFlips) do
         menu:addItem( {
             text = v.displayName,
             style = 'item_choice',
@@ -310,7 +322,7 @@ function selectSpectrumBarsFormat(self)
 
     local current = settings.spectrum.barsFormat
 
-    -- sort the bars format for display based on the number of bars that would be 
+    -- sort the bars format for display based on the number of bars that would be
     -- rendered
     local sorted_bf = {}
     for k, v in pairs(settings.spectrum.barFormats) do
@@ -319,7 +331,7 @@ function selectSpectrumBarsFormat(self)
     end
     table.sort(sorted_bf, function(left, right) return left.binWidth > right.binWidth end)
 
-    for i, v in ipairs(sorted_bf) do
+    for _, v in ipairs(sorted_bf) do
         menu:addItem( {
             text = v.name,
             style = 'item_choice',
@@ -344,14 +356,13 @@ end
 function selectVuMeters(self)
     local window = Window("text_list", self:string('SELECT_VUMETER') )
     local menu = SimpleMenu("menu")
-    local settings = self:getSettings()
+--    local settings = self:getSettings()
 
     -- use the vu meter list from the visImage module,
     -- it is sorted and has displayName values
     -- settings merely contains the list of
     -- VI meters and enable/disabled status
-    local i, v
-    for i, v in ipairs(visImage:getVuMeterList()) do
+    for _, v in ipairs(visImage:getVuMeterList()) do
         local nm = v.name
         local enabled = v.enabled
         local displayName = v.displayName
@@ -362,10 +373,11 @@ function selectVuMeters(self)
         menu:addItem( {
             text = displayName,
             style = 'item_choice',
-            check = Checkbox("checkbox", 
-                function(object, isSelected)
+            check = Checkbox("checkbox",
+--                function(object, isSelected)
+                function(_, isSelected)
                     local cb_settings = self:getSettings()
-                    selected = isSelected
+                    local selected = isSelected
                     if isSelected then
                         self:resizeVUMeter(nm)
                         visImage:selectVuImage(nm, true, false)
@@ -398,8 +410,7 @@ function selectSpectrumMeters(self)
     -- use the spectrum meter list from the visImage module,
     -- it is sorted, settings merely contains the list of
     -- spectrum meters and enable/disabled status
-    local i, v
-    for i, v in ipairs(visImage.getSpectrumMeterList()) do
+    for _, v in ipairs(visImage.getSpectrumMeterList()) do
         local enabled = v.enabled
         local nm = v.name
 --    local settings = self:getSettings()
@@ -408,10 +419,11 @@ function selectSpectrumMeters(self)
         menu:addItem( {
             text = nm,
             style = 'item_choice',
-            check = Checkbox("checkbox", 
-                function(object, isSelected)
+            check = Checkbox("checkbox",
+--                function(object, isSelected)
+                function(_, isSelected)
                     local cb_settings = self:getSettings()
-                    selected = isSelected
+                    local selected = isSelected
                     if isSelected then
                         self:resizeSpectrumMeter(nm)
                         visImage:selectSpectrum(nm, true, false)
@@ -438,7 +450,8 @@ function selectSpectrumMeters(self)
 end
 
 
-function resizeImages(self, bSpectrum, bVuMeters, all)
+--function resizeImages(self, bSpectrum, bVuMeters, all)
+function resizeImages(_, bSpectrum, bVuMeters, all)
         local popup = Popup("toast_popup_text")
 
         popup:setAllowScreensaver(false)
@@ -452,12 +465,11 @@ function resizeImages(self, bSpectrum, bVuMeters, all)
 
         popup:addWidget(text)
 
-        local tmp = {}
         local spectrum_names = {}
-        tmp = visImage:getSpectrumMeterList()
+        local tmp = visImage:getSpectrumMeterList()
         if bSpectrum then
-            for k, v in pairs(tmp) do
-                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == SPT_IMAGE) then
+            for _, v in pairs(tmp) do
+                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == visImage.SPT_IMAGE) then
                     table.insert(spectrum_names, v.name)
                 else
                     log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)
@@ -468,7 +480,7 @@ function resizeImages(self, bSpectrum, bVuMeters, all)
         tmp = visImage:getVuMeterList()
         local vumeter_names = {}
         if bVuMeters then
-            for k, v in pairs(tmp) do
+            for _, v in pairs(tmp) do
                 if (all or v.enabled) and (v.vutype == "frame" or v.vutype == "25framesLR") then
                     table.insert(vumeter_names, v.name)
                 else
@@ -529,7 +541,8 @@ function resizeImages(self, bSpectrum, bVuMeters, all)
         popup:show()
 end
 
-function resizeSpectrumMeter(self, spectrum_meter_name)
+--function resizeSpectrumMeter(self, spectrum_meter_name)
+function resizeSpectrumMeter(_, spectrum_meter_name)
     if not visImage:resizeRequiredSpectrumMeter(spectrum_meter_name) then
         return
     end
@@ -551,7 +564,7 @@ function resizeSpectrumMeter(self, spectrum_meter_name)
     popup:addTimer(100, function()
         if state == 1 then
             if spectrum_meter_name ~= nil then
-                log:info("resize ", spectrum_meter_name, " ", i_sp)
+                log:info("resize ", spectrum_meter_name)
                 visImage:resizeSpectrumMeter(spectrum_meter_name)
                 log:info("done ", spectrum_meter_name)
             end
@@ -567,7 +580,8 @@ function resizeSpectrumMeter(self, spectrum_meter_name)
     popup:show()
 end
 
-function resizeVUMeter(self, vu_meter_name)
+--function resizeVUMeter(self, vu_meter_name)
+function resizeVUMeter(_, vu_meter_name)
     if not visImage:resizeRequiredVuMeter(vu_meter_name) then
         return
     end
@@ -589,7 +603,7 @@ function resizeVUMeter(self, vu_meter_name)
     popup:addTimer(100, function()
         if state == 1 then
             if vu_meter_name ~= nil then
-                log:info("resize ", vu_meter_name, " ", i_vu)
+                log:info("resize ", vu_meter_name)
                 visImage:resizeVuMeter(vu_meter_name)
                 log:info("done ", vu_meter_name)
             end
