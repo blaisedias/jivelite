@@ -21,7 +21,7 @@ See L<jive.AppletMeta> for a description of standard applet meta functions.
 
 local oo            = require("loop.simple")
 local pairs         = pairs
-local table         = require("table")
+--local table         = require("table")
 
 local AppletMeta    = require("jive.AppletMeta")
 
@@ -39,12 +39,14 @@ module(...)
 oo.class(_M, AppletMeta)
 
 
-function jiveVersion(self)
+--function jiveVersion(self)
+function jiveVersion(_)
     return 1, 1
 end
 
 
-function defaultSettings(self)
+--function defaultSettings(self)
+function defaultSettings(_)
     return {
         cacheEnabled=false,
         randomSequence=false,
@@ -105,13 +107,12 @@ function registerApplet(self)
     local settings = self:getSettings()
     visImage:setVisSettings(settings)
     local tmp = visImage:getVuMeterList()
-    local k,v
 
-    for k, v in pairs(tmp) do
+    for _, v in pairs(tmp) do
         settings.vuMeterSelection[v.name] = v.enabled
     end
     tmp = visImage:getSpectrumMeterList()
-    for k, v in pairs(tmp) do
+    for _, v in pairs(tmp) do
         settings.spectrumMeterSelection[v.name] = v.enabled
     end
 
@@ -199,20 +200,22 @@ function registerApplet(self)
         strWMA = "yes"
     end
     local disp_w, disp_h = Framework:getDisplaySize()
-    
+
     jiveMain:addItem(
         self:menuItem(
             'appletVisualiserSettings',
             'screenSettings',
             "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
-            function(applet, ...)
+--            function(applet, ...)
+            function()
             end,
             1000
         )
     )
 end
 
-function configureApplet(self)
+--function configureApplet(self)
+function configureApplet(_)
     -- make resident applet
     appletManager:loadApplet("Visualiser")
 end
