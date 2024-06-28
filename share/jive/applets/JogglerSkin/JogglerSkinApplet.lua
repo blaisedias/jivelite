@@ -831,7 +831,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	local screenAR = screenWidth/screenHeight
 	local effectiveScreenWidth = screenWidth
-	mini_sp_type = visImage.SPT_GRADIENT
+
 	if screenAR > 3 then
 		effectiveScreenWidth = screenHeight + math.floor((screenWidth - screenHeight) / 2) - 90
 		mini_visu_X = effectiveScreenWidth + 10
@@ -841,7 +841,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		log:info("screenWidth=", screenWidth, " screenHeight=", screenHeight)
 		log:info("effectiveScreenWidth=", effectiveScreenWidth, " mvX=", mini_visu_X, " mvW=", mini_visu_W, " mvY=", mini_visu_Y, " mvH=", mini_visu_H)
 		log:info("x1=", mini_visu_X, " x2=", (mini_visu_X + mini_visu_W), " y1=", mini_visu_Y, " y2=", (mini_visu_Y + mini_visu_H))
-		mini_sp_type = nil
+
 	end
 
 -- front load for smoother experience when music is playing
@@ -3864,10 +3864,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
---				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=mini_sp_type,
---				spType=visImage.SPT_IMAGE,
 			}
 		},
 	})
@@ -3916,10 +3913,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
---				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=mini_sp_type,
---				spType=visImage.SPT_IMAGE,
 			}
 		},
 	})
@@ -3968,10 +3962,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
---				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=mini_sp_type,
---				spType=visImage.SPT_IMAGE,
 			}
 		},
 		-- Drawn over regular text between buttons
@@ -4041,10 +4032,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				barSpace = { 3, 3 },			-- >= 0
 				binSpace = { 6, 6 },			-- >= 0
 				clipSubbands = { 1, 1 },		-- 0 / 1
---				gradientColours = gradientColours,
 				useVisImage = true,
-				spType=mini_sp_type,
---				spType=visImage.SPT_IMAGE,
 			}
 		},
         nptitle = { hidden = 1 },
