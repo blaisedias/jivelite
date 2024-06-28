@@ -1,16 +1,16 @@
  --[[
  =head1 NAME
- 
+
  jive.visImage - visualiser support
- 
+
  =head1 DESCRIPTION
- 
- Implements visualiser support 
+
+ Implements visualiser support
   - menu selection support
   - resize for multiple resoultions
   - image caching
   - ....
- 
+
  (c) Blaise Dias, 2023
 
  =cut
@@ -23,25 +23,24 @@ local table	= require("table")
 local lfs	= require("lfs")
 local os	= require("os")
 
-local ipairs, pairs, pcall	= ipairs, pairs, pcall
+local ipairs, pairs = ipairs, pairs
 local coroutine, package	= coroutine, package
-local type	= type
 
 -- jive package imports
 local string		= require("jive.utils.string")
 local Surface		= require("jive.ui.Surface")
-local vis			= require("jive.vis")
-local debug		 	= require("jive.utils.debug")
+--local vis			= require("jive.vis")
+--local debug		 	= require("jive.utils.debug")
 local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
 
 module(...)
 
 -- Spectrum visualisation types
-SPT_DEFAULT = "default"
-SPT_BACKLIT = "backlit"
-SPT_IMAGE = "image"
-SPT_COLOUR = "colour"
+local SPT_DEFAULT = "default"
+local SPT_BACKLIT = "backlit"
+local SPT_IMAGE = "image"
+local SPT_COLOUR = "colour"
 
 local vuImages = {}
 local spectrumList = {}
@@ -72,7 +71,7 @@ local defResizedCachePath = workSpace .. "/cache/resized"
 local auxResizedCachePath = nil
 local auxResizedImagesTable = nil
 
-function _parseImagePath(imgpath)
+local function _parseImagePath(imgpath)
 	local parts = string.split("%.", imgpath)
 	local ix = #parts
 	if parts[ix] == 'png' or parts[ix] == 'jpg' or parts[ix] == 'bmp' then
@@ -82,7 +81,7 @@ function _parseImagePath(imgpath)
 	return nil
 end
 
-function boolOsEnv(envName, defaultValue)
+local function boolOsEnv(envName, defaultValue)
 	local tmp = os.getenv(envName)
 	log:info("boolOsEnv:", envName, " defaultValue:", defaultValue, " got:", tmp)
 	if tmp ~= nil then
@@ -111,18 +110,17 @@ local function ShuffleInPlace(t)
 	end
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- platform
--------------------------------------------------------- 
+--------------------------------------------------------
 -- at the moment the only distinction is pcp or desktop
-function platformDetect()
+local function platformDetect()
 	if PLATFORM ~= "" then
 		return PLATFORM
 	end
 	PLATFORM = "desktop"
-	local mode
-	pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
-	mode = lfs.attributes(pcp_version_file, "mode")
+	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
+	local mode = lfs.attributes(pcp_version_file, "mode")
 	log:info("mode ", pcp_version_file, " " , mode)
 	if mode == "file" then
 		PLATFORM = "piCorePlayer"
@@ -160,20 +158,20 @@ function platformDetect()
 	return PLATFORM
 end
 
--------------------------------------------------------- 
---- in memory image cache(s) 
--------------------------------------------------------- 
+--------------------------------------------------------
+--- in memory image cache(s)
+--------------------------------------------------------
 
 -- FIXME: vfdCache should go through imCache
-vfdCache = {}
+local vfdCache = {}
 local imCache = {}
 
-function imCachePut(key, img)
+local function imCachePut(key, img)
 	log:info("imCache <- ", key,  " ", img)
 	imCache[key] = img
 end
 
-function imCacheGet(key)
+local function imCacheGet(key)
 	local img = imCache[key]
 	if img ~= nil then
 		log:info("imCache -> ", key,  " ", img)
@@ -183,7 +181,7 @@ function imCacheGet(key)
 	return img
 end
 
-function imCacheClear()
+local function imCacheClear()
 	log:info("imCacheClear")
 	vfdCache = {}
 	for k,v in pairs(imCache) do
@@ -193,19 +191,19 @@ function imCacheClear()
 	imCache={}
 end
 
-function loadImage(path)
-	img = imCacheGet(path)
+local function loadImage(path)
+	local img = imCacheGet(path)
 	if img == nil  then
 		if path == nil then
 			return nil
 		end
 		img = Surface:altLoadImage(path)
-		imCachePut(path,img)
+		imCachePut(path, img)
 	end
 	return img
 end
 
-function loadResizedImage(key)
+local function loadResizedImage(key)
     local path = resizedImagesTable[key]
     if auxResizedImagesTable ~= nil then
         if auxResizedImagesTable[key] ~= nil then
@@ -214,7 +212,7 @@ function loadResizedImage(key)
         else
             local auxpath = auxResizedCachePath .. "/" .. key .. "." .. saveimage_type
             local ok = os.execute("cp " .. path .. " " .. auxpath)
-            if ok then 
+            if ok then
                 log:info("auxResizeCache: put ", auxpath)
                 auxResizedImagesTable[key] = auxpath
                 path = auxpath
@@ -229,7 +227,7 @@ end
 
 -- when a resized image is saved
 --  update the table so that it can be found subsequently
-function saveImage(img, key, path)
+local function saveImage(img, key, path)
 	if img == nil or key == nil or path == nil then
 		log:error("saveImage got nil parameter img=", img, " key=", key, " path=", path)
 		return
@@ -247,11 +245,11 @@ function saveImage(img, key, path)
 	end
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- resized images hashtable
--------------------------------------------------------- 
+--------------------------------------------------------
 -- debug function
-function dumpResizedImagesTable()
+local function dumpResizedImagesTable()
 	log:info("dumpResizedImagesTable")
 	for k,v in pairs(resizedImagesTable) do
 		log:info("    ", k, " -> ", v)
@@ -266,7 +264,7 @@ end
 -- 	return parts[1]
 -- end
 
-function pathIter(rpath)
+local function pathIter(rpath)
 	local hist = {}
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
 		if hist[dir] == nil then
@@ -282,44 +280,44 @@ function pathIter(rpath)
 	end
 end
 
-function findPaths(rpath)
+local function findPaths(rpath)
 	local co = coroutine.create(function() pathIter(rpath) end)
 	return function()
-		local code, res = coroutine.resume(co)
+		local _, res = coroutine.resume(co)
 		return res
 	end
 end
 
-function resizedImagePath(name)
-	-- we don't know/care whether it is a bmp, png or jpeg 
-	-- saving and loading the file just works 
+local function resizedImagePath(name)
+	-- we don't know/care whether it is a bmp, png or jpeg
+	-- saving and loading the file just works
 	local file = resizedCachePath .. "/" .. name .. "." .. saveimage_type
 	return file
 end
 
--- function cacheClear(tbl)
+-- function cacheClear(_)
 -- 	log:debug("cacheClear ")
 -- 	for k,v in pairs(resizedImagesTable) do
 -- 		log:debug("cacheClear ", k)
 -- 		resizedImagesTable[k] = nil
 -- 	end
 -- --	resizedImagesTable = {}
--- 	imCacheClear()	
+-- 	imCacheClear()
 -- end
 
-function deleteResizedImages(tbl)
+function deleteResizedImages(_)
 	log:info("deleteResizedImages ")
 	for k,v in pairs(resizedImagesTable) do
 		log:info("deleteResizedImages ", k, " ", v)
-		os.execute('rm  ' .. '"'.. v .. '"') 
+		os.execute('rm  ' .. '"'.. v .. '"')
 		resizedImagesTable[k] = nil
 	end
 --	resizedImagesTable = {}
-	imCacheClear()	
+	imCacheClear()
 end
 
 
-function _populateResizedImagesTable(search_root)
+local function _populateResizedImagesTable(search_root)
 	log:info("_populateResizedImagesTable", " ", search_root)
 
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
@@ -338,112 +336,11 @@ function _populateResizedImagesTable(search_root)
 	end
 end
 
--------------------------------------------------------- 
---- Initialisation and settings
--------------------------------------------------------- 
-function setVisSettings(tbl, settings)
-	visSettings = settings
-
-	platformDetect()
-	initialiseCache()
-
-	initSpectrumList()
-	local enabled_count = 0
-	local k,v 
-	for k, v in pairs(settings.spectrumMeterSelection) do
-		-- set flags but do not cache
-		selectSpectrum(nil, k, v, false)
-		if v then
-			enabled_count = enabled_count + 1
-		end
-	end
-	if enabled_count == 0 and #spectrumList > 0 then
-		-- try to select a default which does require a resize
-		-- 1: try white colour
-		for k, v in pairs(spectrumList) do
-			if v.name == "mc-White" and v.spType == "colour" then
-				v.enabled = true
-				enabled_count = 1
-			end
-		end
-		if enabled_count == 0 then
-			-- 2: try a colour
-			for k, v in pairs(spectrumList) do
-				if v.spType == "colour" then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
-			end
-		end
-		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
-			spectrumList[1].enabled = true
-		end
-	end
-
-	initVuMeterList()
-	enabled_count = 0
-	for k, v in pairs(settings.vuMeterSelection) do
-		-- set flags but do not cache
-		selectVuImage(nil, k, v , false)
-		if v then
-			enabled_count = enabled_count + 1
-		end
-	end
-	if enabled_count == 0 and #vuImages > 0 then
-		-- select a default try to find a vfd (no resize required)
-		-- 1: try "RS-M250"
-		for k, v in pairs(vuImages) do
-			if v.name == "RS-M250" and v.vutype=="vfd" then
-				v.enabled = true
-				enabled_count = 1
-			end
-		end
-		if enabled_count == 0 then
-			-- 2: try any VFD
-			for k, v in pairs(vuImages) do
-				if v.vutype=="vfd" then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
-			end
-		end
-		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
-			vuImage[1].enabled = true
-		end
-	end
-end
-
-function initialiseCache()
-	imCacheClear()
-	local search_root
-	-- find and use artwork resized ahead of time offline 
-	for search_root in findPaths("../../assets/resized") do
-		_populateResizedImagesTable(search_root)
-	end
-	-- find and use artwork resized ahead of time offline 
-	for search_root in findPaths("assets/resized") do
-		_populateResizedImagesTable(search_root)
-	end
-
-	_populateResizedImagesTable(resizedCachePath)
-end
-
-function initialise()
-	__spBump()
-	__vuBump()
-end
-
--------------------------------------------------------- 
---- image scaling 
--------------------------------------------------------- 
+--------------------------------------------------------
+--- image scaling
+--------------------------------------------------------
 -- scale an image to fit a height - maintaining aspect ratio if required
-function _scaleSpectrumImage(imgPath, w, h, retainAR)
+local function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
 	local img = Surface:altLoadImage(imgPath)
 	log:debug("scaleSpectrumImage: got img")
@@ -457,30 +354,27 @@ function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	if retainAR == false then
 		log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
 		img:release()
-		img = nil
 		return retImg
 	end
-	
+
 	-- scale + centered crop
 	local scaleF = math.max(w/srcW, h/srcH)
 	local scaledW = math.floor(srcW*scaleF)
 	local scaledH = math.floor(srcH*scaleF)
 	scaledImg = img:resize(scaledW, scaledH)
 	img:release()
-	img = nil
 	log:info("scaleSpectrumImage: scale factor: ", scaleF)
 	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
 	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
 	scaledImg:release()
-	scaledImg = nil
 	return retImg
 end
 
--- scale an image to fit a width - maintaining aspect ratio 
-function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
+-- scale an image to fit a width - maintaining aspect ratio
+local function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	local w = w_in
 	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " START" )
-	-- FIXME hack for screenwidth > 1280 
+	-- FIXME hack for screenwidth > 1280
 	-- resizing too large segfaults so VUMeter resize is capped at 1280
 	if w > 1280 then
 		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
@@ -504,22 +398,21 @@ function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 		wSeq = math.floor((srcW * (h/srcH))/seq) * seq
 		log:debug("_scaleAnalogVuMeter adjusted for height srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	end
-	scaledImg = img:resize(wSeq, scaledH)
+	local scaledImg = img:resize(wSeq, scaledH)
 	img:release()
-	img = nil
 	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
 	return scaledImg
 end
 
 
--------------------------------------------------------- 
---- Spectrum 
--------------------------------------------------------- 
+--------------------------------------------------------
+--- Spectrum
+--------------------------------------------------------
 local spImageIndex = 1
 local spectrumImagesMap = {}
 local spectrumResolutions = {}
 
-function registerSpectrumResolution(tbl, w,h)
+function registerSpectrumResolution(_, w,h)
 	log:debug("registerSpectrumResolution", w, " x ", h)
 	table.insert(spectrumResolutions, {w=w, h=h})
 end
@@ -530,8 +423,8 @@ function getSpectrumMeterList()
 end
 
 function getSpectrumSettings()
-	settings = {}
-	for k,v in ipairs(spectrumList) do
+	local settings = {}
+	for _,v in ipairs(spectrumList) do
 		settings[v.name]={enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor}
 	end
 	return settings
@@ -540,7 +433,7 @@ end
 -- Workaround for mono-colour spectrums
 -- if not present in settings add them
 -- if present in settings then use those settings
-function initColourSpectrums()
+local function initColourSpectrums()
 	local csp ={
 		{name="mc-White", enabled=false, spType=SPT_COLOUR,		barColor=0xd0d0d0ff, capColor=0xffffffff},
 		{name="mc-White translucent", enabled=false, spType=SPT_COLOUR,	barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
@@ -559,13 +452,13 @@ function initColourSpectrums()
 		{name="mc-Red", enabled=false, spType=SPT_COLOUR,		  barColor=0xd00000ff, capColor=0xff0000ff},
 		{name="mc-Red translucent", enabled=false, spType=SPT_COLOUR,	  barColor=0xd00000a0, capColor=0xff0000ff},
 	}
-	for x,c in pairs(csp) do
+	for _,c in pairs(csp) do
 		table.insert(spectrumList, c)
 	end
 end
 
 --FIXME make idempotent
-function _populateSpectrumBacklitList(search_root)
+local function _populateSpectrumBacklitList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -587,15 +480,14 @@ function _populateSpectrumBacklitList(search_root)
 	end
 end
 
-function _scanSpectrumBacklitList(rpath)
-	local search_root
+local function _scanSpectrumBacklitList(rpath)
 	for search_root in findPaths(rpath) do
 		_populateSpectrumBacklitList(search_root)
 	end
 end
 
 --FIXME make idempotent
-function _populateSpectrumImageList(search_root)
+local function _populateSpectrumImageList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -616,14 +508,13 @@ function _populateSpectrumImageList(search_root)
 	end
 end
 
-function _scanSpectrumImageList(rpath)
-	local search_root
+local function _scanSpectrumImageList(rpath)
 	for search_root in findPaths(rpath) do
 		_populateSpectrumImageList(search_root)
 	end
 end
 
-function initSpectrumList()
+local function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {}
 
@@ -645,25 +536,22 @@ function initSpectrumList()
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
-function _cacheSpectrumImage(imgName, path, w, h, spType)
+local function _cacheSpectrumImage(imgName, path, w, h, spType)
 	if path == nil then
 		return
 	end
 	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
-	local bgImgName = nil
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
 	local dcpath = resizedImagesTable[dicKey]
-	local bgDicKey = nil
-	local bg_dcpath = nil
 
 	-- for backlit we synthesize the backgorund
 	-- image from the foreground image, and render the foreground
 	-- on top of the background image
-	if spType == SPT_BACKLIT then
-		local bgImgName = "bg-" .. imgName
-		bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
-		bg_dcpath = resizedImagePath(bgDicKey)
-	end
+--	if spType == SPT_BACKLIT then
+--		local bgImgName = "bg-" .. imgName
+--		local bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
+--		local bg_dcpath = resizedImagePath(bgDicKey)
+--	end
 	if dcpath == nil then
 		local img = _scaleSpectrumImage(path, w, h, spType == SPT_BACKLIT)
 		local fgimg = Surface:newRGB(w, h)
@@ -672,9 +560,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 		-- resizedImagesTable[dicKey] = img
 		saveImage(fgimg, dicKey, dcpath)
 		fgimg:release()
-		fgimg = nil
 		img:release()
-		img = nil
 --		resizedImagesTable[dicKey] = dcpath
 		log:debug("cacheSpectrumImage cached ", dicKey)
 	else
@@ -682,7 +568,7 @@ function _cacheSpectrumImage(imgName, path, w, h, spType)
 	end
 end
 
-function populateSpSeq()
+local function populateSpSeq()
 	local indx = 1
 	for i = 1, #spectrumList do
 		if spectrumList[i].enabled == true then
@@ -693,7 +579,7 @@ function populateSpSeq()
 end
 
 local spSeqIndex = 1
-function __spBump(tbl, spType)
+local function __spBump(_, _)
 	if #spSeq == 0 then
 		populateSpSeq()
 		ShuffleInPlace(spSeq)
@@ -710,7 +596,7 @@ function __spBump(tbl, spType)
 	return true
 end
 
-function spChange(tbl, name)
+function spChange(_, name)
 	if name == "visuChangeOnTrackChange" and visSettings.visuChangeOnTrackChange then
 		__spBump()
 	end
@@ -722,19 +608,19 @@ function spChange(tbl, name)
 	end
 end
 
-function spFindSpectrumByType(spType)
-	for i = 1, #spectrumList do
-		if spType == nil or spectrumList[i].spType == spType then 
-			log:debug("spFindSpectrumByType is ", i, " of ", #spectrumList, ", ", spectrumList[i].name)
-			return spectrumList[i].name
-		end
-	end
-	-- type is not available - return type
-	return spectrumList[1].name
-end
+--local function spFindSpectrumByType(spType)
+--	for i = 1, #spectrumList do
+--		if spType == nil or spectrumList[i].spType == spType then
+--			log:debug("spFindSpectrumByType is ", i, " of ", #spectrumList, ", ", spectrumList[i].name)
+--			return spectrumList[i].name
+--		end
+--	end
+--	-- type is not available - return type
+--	return spectrumList[1].name
+--end
 
-function _getFgSpectrumImage(spkey, w, h, spType)
-	local fgImage = nil
+local function _getFgSpectrumImage(spkey, w, h, _)
+	local fgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil
 	end
@@ -749,8 +635,8 @@ function _getFgSpectrumImage(spkey, w, h, spType)
 	return fgImage
 end
 
-function _getBgSpectrumImage(spkey, w, h, spType) 
-	local bgImage = nil
+local function _getBgSpectrumImage(spkey, w, h, spType)
+	local bgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil
 	end
@@ -777,7 +663,6 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 			bgImage = Surface:newRGB(w,h)
 			tmp:blitAlpha(bgImage, 0, 0, getBacklitAlpha())
 			tmp:release()
-			tmp = nil
 			imCachePut(dicKey, bgImage)
 		end
 	end
@@ -785,7 +670,7 @@ function _getBgSpectrumImage(spkey, w, h, spType)
 end
 
 local prevSpImageIndex = -1
-function getSpectrum(tbl, w, h, spType)
+function getSpectrum(_, w, h, _)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
 --	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
@@ -797,28 +682,28 @@ function getSpectrum(tbl, w, h, spType)
 --		__spBump(nil, nil)
 --	end
 	log:debug("getSpectrum: spkey: ", spkey)
-	alpha = getBacklitAlpha()
+	local alpha = getBacklitAlpha()
 
 	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
 	end
 	prevSpImageIndex = spImageIndex
 
-	fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	return fg, bg, alpha, spectrumList[spImageIndex].barColor, spectrumList[spImageIndex].capColor
 end
 
-function selectSpectrum(tbl, name, selected, allowCaching)
-	n_enabled = 0
+function selectSpectrum(_, name, selected, allowCaching)
+	local n_enabled = 0
 	log:debug("selectSpectrum", " ", name, " ", selected)
 
-	for k, v in pairs(spectrumList) do
+	for _, v in pairs(spectrumList) do
 		if v.name == name then
 			if (allowCaching and selected) then
 					if spectrumImagesMap[name] ~= nil then
-						-- create the cached image for skin resolutions 
-						for kr, vr in pairs(spectrumResolutions) do
+						-- create the cached image for skin resolutions
+						for _, vr in pairs(spectrumResolutions) do
 							if spectrumImagesMap[name].src ~= nil then
 								_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
 							end
@@ -851,43 +736,43 @@ function getBacklitAlpha()
 	return visSettings.spectrum.backlitAlpha
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- Spectrum bars format
--------------------------------------------------------- 
+--------------------------------------------------------
 function getBarsFormat()
 	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat)
 	return visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat]
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- Spectrum caps
--------------------------------------------------------- 
-function getCapsValues(tbl, capsHeight, capsSpace)
+--------------------------------------------------------
+function getCapsValues(_, capsHeight, capsSpace)
 	if not visSettings.spectrum.capsOn then
 		return {0,0}, {0,0}
 	end
 	return capsHeight, capsSpace
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- Spectrum baseline
--------------------------------------------------------- 
-function getBaselineValues(tbl)
+--------------------------------------------------------
+function getBaselineValues(_)
 	return visSettings.spectrum.baselineAlways, visSettings.spectrum.baselineOn
 end
 
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- Spectrum turbine
--------------------------------------------------------- 
-function getSpectrumTurbine(tbl)
+--------------------------------------------------------
+function getSpectrumTurbine(_)
 	log:debug("getSpectrumTurbine", " ", visSettings.spectrum.turbine)
 	return visSettings.spectrum.turbine
 end
 
---------------------------------------------------------- 
+---------------------------------------------------------
 --- Spectrum channel flip
--------------------------------------------------------- 
+--------------------------------------------------------
 local channelFlips  = {
 		LHHL={0,1},
 		HLHL={1,1},
@@ -900,15 +785,15 @@ function getChannelFlipValues()
 	return channelFlips[visSettings.spectrum.channelFlip]
 end
 
--------------------------------------------------------- 
+--------------------------------------------------------
 --- VU meter
--------------------------------------------------------- 
+--------------------------------------------------------
 local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
 local vfdImageSources = {}
 
-function registerVUMeterResolution(tbl, w,h)
+function registerVUMeterResolution(_, w,h)
 	log:debug("registerVUMeterResolution ", w, " x ", h)
 	table.insert(vuMeterResolutions, {w=w, h=h})
 end
@@ -917,7 +802,7 @@ function getVuMeterList()
 	return vuImages
 end
 
-function _cacheVUImage(imgName, path, w, h)
+local function _cacheVUImage(imgName, path, w, h)
 	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
 	local dcpath = resizedImagesTable[dicKey]
@@ -927,14 +812,13 @@ function _cacheVUImage(imgName, path, w, h)
 		--resizedImagesTable[dicKey] = img
 		saveImage(img, dicKey, dcpath)
 		img:release()
-		img = nil
 --		resizedImagesTable[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
 	end
 end
 
-function _populateVfdVuMeterList(search_root)
+local function _populateVfdVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -943,7 +827,7 @@ function _populateVfdVuMeterList(search_root)
 		if entry ~= "." and entry ~= ".." then
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "directory" then
-				path = search_root .. "/" .. entry
+				local path = search_root .. "/" .. entry
 				for f in lfs.dir(path) do
 					mode = lfs.attributes(path .. "/" .. f, "mode")
 					if mode == "file" then
@@ -960,14 +844,13 @@ function _populateVfdVuMeterList(search_root)
 	end
 end
 
-function _initVfdVuMeterList(rpath)
-	local search_root
+local function _initVfdVuMeterList(rpath)
 	for search_root in findPaths(rpath) do
 		_populateVfdVuMeterList(search_root)
 	end
 end
 
-function _populateAnalogueVuMeterList(search_root)
+local function _populateAnalogueVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -995,14 +878,13 @@ function _populateAnalogueVuMeterList(search_root)
 	end
 end
 
-function _initAnalogueVuMeterList(rpath)
-	local search_root
+local function _initAnalogueVuMeterList(rpath)
 	for search_root in findPaths(rpath) do
 		_populateAnalogueVuMeterList(search_root)
 	end
 end
 
-function _populate25fLRVuMeterList(search_root)
+local function _populate25fLRVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -1011,7 +893,7 @@ function _populate25fLRVuMeterList(search_root)
 		if entry ~= "." and entry ~= ".." then
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "directory" then
-				path = search_root .. "/" .. entry
+				local path = search_root .. "/" .. entry
 				local found = 0
 				for f in lfs.dir(path) do
 					mode = lfs.attributes(path .. "/" .. f, "mode")
@@ -1039,15 +921,14 @@ function _populate25fLRVuMeterList(search_root)
 	end
 end
 
-function _init25fLRVuMeterList(rpath)
-	local search_root
+local function _init25fLRVuMeterList(rpath)
 	for search_root in findPaths(rpath) do
 		_populate25fLRVuMeterList(search_root)
 	end
 end
 
 
-function initVuMeterList()
+local function initVuMeterList()
 	vuImages = {}
 	vuImagesMap = {}
 
@@ -1072,7 +953,7 @@ function initVuMeterList()
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
-function populateVuSeq()
+local function populateVuSeq()
 	local indx = 1
 	for i = 1, #vuImages do
 		if vuImages[i].enabled == true then
@@ -1083,7 +964,7 @@ function populateVuSeq()
 end
 
 local vuSeqIndex = 1
-function __vuBump()
+local function __vuBump()
 	if #vuSeq == 0 then
 		populateVuSeq()
 		ShuffleInPlace(vuSeq)
@@ -1098,7 +979,7 @@ function __vuBump()
 	vuSeqIndex = vuSeqIndex + 1
 end
 
-function vuChange(tbl, name)
+function vuChange(_, name)
 	if name == "visuChangeOnTrackChange" and visSettings.visuChangeOnTrackChange then
 		__vuBump()
 	end
@@ -1110,85 +991,9 @@ function vuChange(tbl, name)
 	end
 end
 
-local prevVuImageIndex = -1
-function getVuImage(w,h)
-	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
---	if vuImages[vuImageIndex].enabled == false then
---		__vuBump()
---	end
-	local entry = vuImages[vuImageIndex]
-
-	if visSettings.cacheEnabled == false and vuImageIndex ~= prevVuImageIndex then
-		imCacheClear()
-	end
-	prevVuImageIndex = vuImageIndex
-
-	if entry.vutype == "vfd" then
-		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
-	end
-
-	local frameVU = nil
-
-	if entry.vutype == "25framesLR" then
-		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
-		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
-		local leftImg = loadResizedImage(ldicKey)
-		local rightImg = loadResizedImage(rdicKey)
-		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
-	end
-
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	-- image is in the cache load and return
-	log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
-	frameVU = loadResizedImage(dicKey)
-	return {vutype=entry.vutype, bgImg=frameVU}
-end
-
-
-function selectVuImage(tbl, name, selected, allowCaching)
-	n_enabled = 0
-	log:debug("selectVuImage", " ", name, " ", selected)
-	for k, v in pairs(vuImages) do
-		if v.name == name then
-			if (allowCaching and selected) then
-				if v.vutype == "frame" then
-					-- create the cached image for skin resolutions 
-					for kr, vr in pairs(vuMeterResolutions) do
-						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
-					end
-				end
-				if v.vutype == "25framesLR" then
-					-- create the cached image for skin resolutions 
-					for kr, vr in pairs(vuMeterResolutions) do
-						_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
-						_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
-					end
-				end
-			end
-			if not selected and v.enabled then
-				v.enabled = selected
-				-- deselected so re-sequence in 
-				vuSeq = {}
-				__vuBump()
-			end
-			v.enabled = selected
-		end
-		if v.enabled then
-			n_enabled = n_enabled + 1
-		end
-	end
-	log:debug("selectVuImage", " enabled count: ", n_enabled)
-	return n_enabled
-end
-
-function isCurrentVUMeterEnabled()
-	return vuImages[vuImageIndex].enabled
-end
-
-
-function _resizedVFDElement(srcImg, key, w, h)
+local function _resizedVFDElement(srcImg, key, w, h)
 	local dicKey = key .. "-" .. w .. "x" .. h
-	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey, " dcpath=", dcpath)
+	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey)
 	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
@@ -1202,9 +1007,9 @@ function _resizedVFDElement(srcImg, key, w, h)
 end
 
 -- FIXME: vfdCache should go through imCache
-function getVFDVUmeter(name, w, h)
+local function getVFDVUmeter(name, w, h)
 	local key = name .. w .. "x" .. h
-	vfd = vfdCache[key]
+	local vfd = vfdCache[key]
 	if vfd ~= nil then
 		log:info("vfdCache -> ", key, vfd)
 		return vfd
@@ -1236,7 +1041,6 @@ function getVFDVUmeter(name, w, h)
 	local right = name .. ":right"
 	local left_trail = name .. ":left-trail"
 	local right_trail = name .. ":right-trail"
-	local right = name .. ":right"
 	local center = name .. ":center"
 	vfd = {}
 	vfd.left={}
@@ -1289,7 +1093,7 @@ function getVFDVUmeter(name, w, h)
 		lh = math.floor(lh * sf)
 		tw = math.floor(tw * sf)
 		-- Due to rounding errors, scaling the calibration part like so
-		cw = math.floor((cw * sf))
+		-- cw = math.floor((cw * sf))
 		-- scales at odds with the smaller bits.
 --	  	log:debug("delta calc vs sf ", (calcbw *49) + lw + tw - cw)
 		cw = (calcbw *49) + lw + tw
@@ -1319,15 +1123,93 @@ function getVFDVUmeter(name, w, h)
 	vfd.cw = cw
 	vfd.ch = ch
 --	log:debug("####  vfd.w:", vfd.w, " vfd.h:", vfd.h)
---	log:debug("####  vfd.bw:", vfd.bw, " vfd.bh:", vfd.bh, " vfd.lw:", vfd.lw, " vfd.lh", vfd.lh, " vfd.cw:", vfd.cw, " vfd.ch", vfd.ch)
+--	log:debug("####  vfd.bw:", vfd.bw, " vfd.bh:", vfd.bh, " vfd.lw:", vfd.lw, " vfd.lh", vfd.lh)
+--	log:debug("####  vfd.cw:", vfd.cw, " vfd.ch", vfd.ch)
 	log:info("vfdCache <- ", key, vfd)
 	vfdCache[key] = vfd
 	return vfd
 end
 
-------------------------------------------------------- 
+
+local prevVuImageIndex = -1
+function getVuImage(w,h)
+	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
+--	if vuImages[vuImageIndex].enabled == false then
+--		__vuBump()
+--	end
+	local entry = vuImages[vuImageIndex]
+
+	if visSettings.cacheEnabled == false and vuImageIndex ~= prevVuImageIndex then
+		imCacheClear()
+	end
+	prevVuImageIndex = vuImageIndex
+
+	if entry.vutype == "vfd" then
+		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
+	end
+
+	local frameVU
+
+	if entry.vutype == "25framesLR" then
+		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
+		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
+		local leftImg = loadResizedImage(ldicKey)
+		local rightImg = loadResizedImage(rdicKey)
+		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
+	end
+
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
+	-- image is in the cache load and return
+	log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
+	frameVU = loadResizedImage(dicKey)
+	return {vutype=entry.vutype, bgImg=frameVU}
+end
+
+
+function selectVuImage(_, name, selected, allowCaching)
+	local n_enabled = 0
+	log:debug("selectVuImage", " ", name, " ", selected)
+	for _, v in pairs(vuImages) do
+		if v.name == name then
+			if (allowCaching and selected) then
+				if v.vutype == "frame" then
+					-- create the cached image for skin resolutions
+					for _, vr in pairs(vuMeterResolutions) do
+						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
+					end
+				end
+				if v.vutype == "25framesLR" then
+					-- create the cached image for skin resolutions
+					for _, vr in pairs(vuMeterResolutions) do
+						_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
+						_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
+					end
+				end
+			end
+			if not selected and v.enabled then
+				v.enabled = selected
+				-- deselected so re-sequence in
+				vuSeq = {}
+				__vuBump()
+			end
+			v.enabled = selected
+		end
+		if v.enabled then
+			n_enabled = n_enabled + 1
+		end
+	end
+	log:debug("selectVuImage", " enabled count: ", n_enabled)
+	return n_enabled
+end
+
+function isCurrentVUMeterEnabled()
+	return vuImages[vuImageIndex].enabled
+end
+
+
+-------------------------------------------------------
 --- Misc
--------------------------------------------------------- 
+--------------------------------------------------------
 
 --function sync()
 --	if not vuImages[vuImageIndex].enabled then
@@ -1341,14 +1223,14 @@ end
 -------------------------------------------------------
 --- Resize
 -------------------------------------------------------
-function resizeSpectrumMeter(tbl, name)
+function resizeSpectrumMeter(_, name)
 	log:info("resizeSpectrums ", name)
 
-	for k, v in pairs(spectrumList) do
+	for _, v in pairs(spectrumList) do
 --		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
-			-- create the resized images for skin resolutions 
-			for kr, vr in pairs(spectrumResolutions) do
+			-- create the resized images for skin resolutions
+			for _, vr in pairs(spectrumResolutions) do
 				if spectrumImagesMap[v.name].src ~= nil then
 				 log:info("resizing spectrum ", v.name, " -> ", vr.w, "x", vr.h)
 					_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, vr.w, vr.h, v.spType)
@@ -1359,22 +1241,22 @@ function resizeSpectrumMeter(tbl, name)
 	end
 end
 
-function resizeVuMeter(tbl, name)
+function resizeVuMeter(_, name)
 	log:info("resizeVuMeters ", name)
 
-	for k, v in pairs(vuImages) do
+	for _, v in pairs(vuImages) do
 --		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
 			if v.vutype == "frame" then
-				-- create the resized images for skin resolutions 
-				for kr, vr in pairs(vuMeterResolutions) do
+				-- create the resized images for skin resolutions
+				for _, vr in pairs(vuMeterResolutions) do
 					log:info("resizing Vu Meter", v.name, " -> ", vr.w, "x", vr.h)
 					_cacheVUImage(v.name, vuImagesMap[v.name].src, vr.w, vr.h)
 				end
 			end
 			if v.vutype == "25framesLR" then
-				-- create the cached image for skin resolutions 
-				for kr, vr in pairs(vuMeterResolutions) do
+				-- create the cached image for skin resolutions
+				for _, vr in pairs(vuMeterResolutions) do
 					_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
 					_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
 				end
@@ -1391,16 +1273,15 @@ function getCurrentSpectrumMeterName()
 	return '' .. spectrumList[spImageIndex].name
 end
 
-function resizeRequiredSpectrumMeter(tbl, name)
-	local kr,vr, k,v
-	for k, v in pairs(spectrumList) do
+function resizeRequiredSpectrumMeter(_, name)
+	for _, v in pairs(spectrumList) do
 		if v.name == name then
 			-- spectrum meter found
 			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
 				-- of type that does require resize
 				if spectrumImagesMap[name].src ~= nil then
 					-- have path to source image
-				   	for kr, vr in pairs(spectrumResolutions) do
+					for _, vr in pairs(spectrumResolutions) do
 						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
 							return true
 						end
@@ -1415,23 +1296,22 @@ function resizeRequiredSpectrumMeter(tbl, name)
 	return false
 end
 
-function resizeRequiredVuMeter(tbl, name)
-	local kr, vr, k, v
+function resizeRequiredVuMeter(_, name)
 
-	for k, v in pairs(vuImages) do
+	for _, v in pairs(vuImages) do
 		if v.name == name then
 			-- found vu meter
 			if v.vutype == "frame" then
 				-- resizable type
-				for kr, vr in pairs(vuMeterResolutions) do
+				for _, vr in pairs(vuMeterResolutions) do
 					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
 						return true
 					end
 				end
 			end
 			if v.vutype == "25framesLR" then
-				-- create the cached image for skin resolutions 
-				for kr, vr in pairs(vuMeterResolutions) do
+				-- create the cached image for skin resolutions
+				for _, vr in pairs(vuMeterResolutions) do
 					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':left'] == nil then
 						return true
 					end
@@ -1447,12 +1327,113 @@ function resizeRequiredVuMeter(tbl, name)
 	return false
 end
 
-function getVisualiserChangeOnTimerValue(tbl)
+function getVisualiserChangeOnTimerValue(_)
 	local value = visSettings.visuChangeOnTimer
 	if value == nil then
 		return 0
 	end
 	return value
+end
+
+--------------------------------------------------------
+--- Initialisation and settings
+--------------------------------------------------------
+function setVisSettings(_, settings)
+	visSettings = settings
+
+	platformDetect()
+	initialiseCache()
+
+	initSpectrumList()
+	local enabled_count = 0
+
+	for k, v in pairs(settings.spectrumMeterSelection) do
+		-- set flags but do not cache
+		selectSpectrum(nil, k, v, false)
+		if v then
+			enabled_count = enabled_count + 1
+		end
+	end
+	if enabled_count == 0 and #spectrumList > 0 then
+		-- try to select a default which does require a resize
+		-- 1: try white colour
+		for _, v in pairs(spectrumList) do
+			if v.name == "mc-White" and v.spType == "colour" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try a colour
+			for _, v in pairs(spectrumList) do
+				if v.spType == "colour" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			spectrumList[1].enabled = true
+		end
+	end
+
+	initVuMeterList()
+	enabled_count = 0
+	for k, v in pairs(settings.vuMeterSelection) do
+		-- set flags but do not cache
+		selectVuImage(nil, k, v , false)
+		if v then
+			enabled_count = enabled_count + 1
+		end
+	end
+	if enabled_count == 0 and #vuImages > 0 then
+		-- select a default try to find a vfd (no resize required)
+		-- 1: try "RS-M250"
+		for _, v in pairs(vuImages) do
+			if v.name == "RS-M250" and v.vutype=="vfd" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try any VFD
+			for _, v in pairs(vuImages) do
+				if v.vutype=="vfd" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			vuImages[1].enabled = true
+		end
+	end
+end
+
+function initialiseCache()
+	imCacheClear()
+
+	-- find and use artwork resized ahead of time offline
+	for search_root in findPaths("../../assets/resized") do
+		_populateResizedImagesTable(search_root)
+	end
+	-- find and use artwork resized ahead of time offline
+	for search_root in findPaths("assets/resized") do
+		_populateResizedImagesTable(search_root)
+	end
+
+	_populateResizedImagesTable(resizedCachePath)
+end
+
+function initialise()
+--	__spBump()
+--	__vuBump()
 end
 
 
