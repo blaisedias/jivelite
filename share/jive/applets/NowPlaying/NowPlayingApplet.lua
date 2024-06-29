@@ -1,4 +1,6 @@
-local _assert, pairs, ipairs, tostring, type, setmetatable, tonumber = _assert, pairs, ipairs, tostring, type, setmetatable, tonumber
+--local setmetatable, = setmetatable
+local _assert = _assert
+local pairs, ipairs, tostring, type, tonumber = pairs, ipairs, tostring, type, tonumber
 
 local math             = require("math")
 local table            = require("jive.utils.table")
@@ -7,15 +9,15 @@ local string	       = require("jive.utils.string")
 local oo               = require("loop.simple")
 
 local Applet           = require("jive.Applet")
-local Font             = require("jive.ui.Font")
+--local Font             = require("jive.ui.Font")
 local Event            = require("jive.ui.Event")
 local Framework        = require("jive.ui.Framework")
 local System           = require("jive.System")
 local Icon             = require("jive.ui.Icon")
 local Button           = require("jive.ui.Button")
-local Choice           = require("jive.ui.Choice")
+--local Choice           = require("jive.ui.Choice")
 local Label            = require("jive.ui.Label")
-local Textarea         = require("jive.ui.Textarea")
+--local Textarea         = require("jive.ui.Textarea")
 local Group            = require("jive.ui.Group")
 local Slider	       = require("jive.ui.Slider")
 local Checkbox         = require("jive.ui.Checkbox")
@@ -26,7 +28,7 @@ local Surface          = require("jive.ui.Surface")
 local Window           = require("jive.ui.Window")
 local Widget           = require("jive.ui.Widget")
 local SnapshotWindow   = require("jive.ui.SnapshotWindow")
-local Tile             = require("jive.ui.Tile")
+--local Tile             = require("jive.ui.Tile")
 local Timer            = require("jive.ui.Timer")
 local Player           = require("jive.slim.Player")
 local Popup            = require("jive.ui.Popup")
@@ -36,12 +38,22 @@ local VUMeter          = require("jive.vis.VUMeter")
 local SpectrumMeter    = require("jive.vis.SpectrumMeter")
 
 local debug            = require("jive.utils.debug")
-local datetime         = require("jive.utils.datetime")
+--local datetime         = require("jive.utils.datetime")
+local log			   = require("jive.utils.log").logger("applet.NowPlaying")
 
 local appletManager    = appletManager
 
 local jiveMain               = jiveMain
 local jnt                    = jnt
+
+local EVENT_CONSUME         = jive.ui.EVENT_CONSUME
+local EVENT_WINDOW_ACTIVE   = jive.ui.EVENT_WINDOW_ACTIVE
+local EVENT_SCROLL          = jive.ui.EVENT_SCROLL
+local EVENT_UNUSED          = jive.ui.EVENT_UNUSED
+local LAYER_ALL             = jive.ui.LAYER_ALL
+local EVENT_KEY_PRESS       = jive.ui.EVENT_KEY_PRESS
+local KEY_LEFT              = jive.ui.KEY_LEFT
+local KEY_RIGHT             = jive.ui.KEY_RIGHT
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
@@ -67,27 +79,27 @@ local shuffleModes = {
 }
 
 local SCROLL_TIMEOUT = 750
-	
+
 ----------------------------------------------------------------------------------------
 -- Helper Functions
 --
 
 -- defines a new style that inherits from an existing style
-local function _uses(parent, value)
-        local style = {}
-        setmetatable(style, { __index = parent })
-
-        for k,v in pairs(value or {}) do
-                if type(v) == "table" and type(parent[k]) == "table" then
-                        -- recursively inherit from parent style
-                        style[k] = _uses(parent[k], v)
-                else
-                        style[k] = v
-                end
-        end
-
-        return style
-end
+--local function _uses(parent, value)
+--        local style = {}
+ --       setmetatable(style, { __index = parent })
+--
+--        for k,v in pairs(value or {}) do
+--                if type(v) == "table" and type(parent[k]) == "table" then
+--                        -- recursively inherit from parent style
+--                        style[k] = _uses(parent[k], v)
+--                else
+--                        style[k] = v
+--                end
+--        end
+--
+--        return style
+--end
 
 local function _secondsToString(seconds)
 	local hrs = math.floor(seconds / 3600)
@@ -101,11 +113,12 @@ local function _secondsToString(seconds)
 	end
 end
 
-local function _getIcon(self, item, icon, remote)
+--local function _getIcon(self, item, icon, remote)
+local function _getIcon(self, item, icon, _)
 	local server = self.player:getSlimServer()
 
 	local ARTWORK_SIZE = self:getSelectedStyleParam('artworkSize')
-	
+
 	local iconId
 	if item then
 		iconId = item["icon-id"] or item["icon"]
@@ -114,10 +127,10 @@ local function _getIcon(self, item, icon, remote)
 	if iconId then
 		log:debug(":_getIcon ",iconId,",", icon,",", ARTWORK_SIZE )
 		-- Fetch an image from SlimServer
-		server:fetchArtwork(iconId, icon, ARTWORK_SIZE) 
+		server:fetchArtwork(iconId, icon, ARTWORK_SIZE)
 	elseif item and item["params"] and item["params"]["track_id"] then
 		-- this is for placeholder artwork, either for local tracks or radio streams with no art
-		server:fetchArtwork(item["params"]["track_id"], icon, ARTWORK_SIZE, 'png') 
+		server:fetchArtwork(item["params"]["track_id"], icon, ARTWORK_SIZE, 'png')
 	elseif icon then
 		icon:setValue(nil)
 	end
@@ -147,17 +160,17 @@ function getNPStyles(self)
 	local auditedNPStyles = {}
 	if not self.player then
 		-- don't give any options if not connected to a player
-
+        log:info("self.player == false")
 	else
 		local settings = self:getSettings()
-		local playerId = self.player:getId()
-		
+--		local playerId = self.player:getId()
+
 		-- restore selected style from settings
 		if not self.selectedStyle and settings.selectedStyle then
 			self.selectedStyle = settings.selectedStyle or 'nowplaying'
 		end
-		
-		for i, v in pairs(npSkinStyles) do
+
+		for _, v in pairs(npSkinStyles) do
 			if settings and settings.views and settings.views[v.style] == false then
 				v.enabled = false
 			else
@@ -183,14 +196,14 @@ function getNPStyles(self)
 		-- verify whether the selected style is available at all
 		if self.selectedStyle then
 			local selectedStyleAvailable = false
-			
-			for i, v in pairs (auditedNPStyles) do
+
+			for _, v in pairs (auditedNPStyles) do
 				if (v.enabled and v.style == self.selectedStyle) then
 					selectedStyleAvailable = true
 					break
 				end
-			end 
-			
+			end
+
 			if not selectedStyleAvailable then
 				self.selectedStyle = false
 			end
@@ -198,10 +211,11 @@ function getNPStyles(self)
 
 		-- corner case: auditedNPStyles is an empty set or nothing in it is enabled.
 		-- That may happen if the only configured styles are visualizers and this player is non local
-		-- or it may happen if the skin has changed and the list of styles is non-overlapping to the configured settings from the old skin
+		-- or it may happen if the skin has changed and the list of styles is non-overlapping to the configured settings
+        -- from the old skin
 		-- In this case, go through again and enable everything possible
 		local oneEnabledStyle = false
-		for i, v in pairs(auditedNPStyles) do
+		for _, v in pairs(auditedNPStyles) do
 			if v.enabled then
 				oneEnabledStyle = true
 				break
@@ -210,7 +224,7 @@ function getNPStyles(self)
 		if not oneEnabledStyle then
 			log:warn('No enabled view styles found, enabling all possible styles ')
 			auditedNPStyles = {}
-			for i, v in pairs(npSkinStyles) do
+			for _, v in pairs(npSkinStyles) do
 				v.enabled = true
 				if not self.player:isLocal() and v.localPlayerOnly then
 					-- never enable localPlayerOnly styles for non local players (e.g., visualizers)
@@ -230,7 +244,7 @@ function getNPStyles(self)
 		if settings.selectedStyle ~= self.selectedStyle then
 			settings.selectedStyle = self.selectedStyle
 			self:storeSettings()
-		end		
+		end
 	end
 
 	if self.window and self.window:getStyle() then
@@ -251,7 +265,7 @@ function invalidateWindow(self)
     self.window = nil
 end
 
-function npStyleHasVuMeter(npstyle)
+local function npStyleHasVuMeter(npstyle)
 	if npstyle == "nowplaying_vuanalog_text" then
 		return true
 	elseif npstyle == "nowplaying_vumeter_text" then
@@ -273,7 +287,7 @@ function npStyleHasVuMeter(npstyle)
 end
 
 
-function npStyleHasSpectrum(npstyle)
+local function npStyleHasSpectrum(npstyle)
 	if npstyle == "nowplaying_spectrum_text" then
 		return true
 	elseif npstyle == "nowplaying_minispectrum_text" then
@@ -295,7 +309,7 @@ end
 
 function npviewsSettingsShow(self)
 	local window = Window("text_list", self:string('NOW_PLAYING_VIEWS') )
-	local group = RadioGroup()
+--	local group = RadioGroup()
 
 	local menu = SimpleMenu("menu")
 
@@ -305,7 +319,7 @@ function npviewsSettingsShow(self)
 	-- if settings[playerId] isn't present, go ahead and create and save the settings for this player
 	-- this gets around dealing with logical insanity with initial conditions and the checkbox menu callbacks
 	local settings = self:getSettings()
-	local playerId = self.player:getId()
+--	local playerId = self.player:getId()
 	local savedSettings = true
 
 	if not settings.views then
@@ -313,7 +327,7 @@ function npviewsSettingsShow(self)
 	end
 
 	local settingsViews = 0
-	for k, v in pairs(settings.views) do
+	for _, _ in pairs(settings.views) do
 		settingsViews = settingsViews + 1
 	end
 	if settingsViews == 0 then
@@ -323,12 +337,13 @@ function npviewsSettingsShow(self)
 		end
 		self:storeSettings()
 	end
-	
+
 	-- if we've switched to a local player and there are localPlayerOnly styles, they may not be saved in settings.views
 	-- add them here
-	for i, v in pairs(npscreenViews) do
+	for _, v in pairs(npscreenViews) do
 		if settings.views[v.style] or settings.views[v.style] == false then
 			-- style is stored in table, even if value is false
+            log:info("??? settings.views[v.style]", settings.views[v.style], " v.style=", v.style)
 		else
 			log:warn('add v.style')
 			settings.views[v.style] = true
@@ -336,40 +351,40 @@ function npviewsSettingsShow(self)
 	end
 
 
-	for i, v in ipairs(npscreenViews) do
+	for _, v in ipairs(npscreenViews) do
 		local selected = true
 		if v.enabled == false then
 			selected = false
 		end
-		
+
 		menu:addItem( {
 			text = v.text,
 			style = 'item_choice',
-			check = Checkbox("checkbox", 
+			check = Checkbox("checkbox",
 				function(object, isSelected)
-					local settings = self:getSettings()
-					local playerId = self.player:getId()
+					local cbSettings = self:getSettings()
+--					local playerId = self.player:getId()
 
 					if isSelected then
 						-- turn it on
-						settings.views[v.style] = true 
+						cbSettings.views[v.style] = true
 					else
 						-- turn it off
 						-- there needs to be at least one style turned on
 						local enabledViews = 0
-						for k, v in pairs(settings.views) do
-							if v then
+						for _, cbVal in pairs(cbSettings.views) do
+							if cbVal then
 								enabledViews = enabledViews + 1
 							end
 						end
 						if enabledViews > 1 or not savedSettings then
-							-- if we're turning off the selected style, 
+							-- if we're turning off the selected style,
 							-- dump self.window as well so it gets redrawn
 							if self.selectedStyle == v.style then
 								self.selectedStyle = nil
 								self.window = nil
 							end
-							settings.views[v.style] = false 
+							cbSettings.views[v.style] = false
 						else
 							log:warn('A minimum of one selected NP view per player is required')
 							-- we need at least one enabled Now Playing view. Don't allow this.
@@ -400,9 +415,10 @@ function scrollSettingsShow(self)
 		{
 			text = self:string("SCREENSAVER_SCROLLMODE_DEFAULT"),
 			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
+			check = RadioButton("radio",
+				group,
+--				function(event)
+				function(_)
 					self:setScrollBehavior("always")
 				end,
 				self.scrollText and not self.scrollTextOnce
@@ -411,9 +427,10 @@ function scrollSettingsShow(self)
 		{
 			text = self:string("SCREENSAVER_SCROLLMODE_SCROLLONCE"),
 			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
+			check = RadioButton("radio",
+				group,
+				-- function(event)
+				function(_)
 					self:setScrollBehavior("once")
 				end,
 				self.scrollText and self.scrollTextOnce
@@ -422,9 +439,10 @@ function scrollSettingsShow(self)
 		{
 			text = self:string("SCREENSAVER_SCROLLMODE_NOSCROLL"),
 			style = 'item_choice',
-			check = RadioButton("radio", 
-				group, 
-				function(event)
+			check = RadioButton("radio",
+				group,
+				-- function(event)
+				function(_)
 					self:setScrollBehavior("never")
 				end,
 				not self.scrollText
@@ -441,7 +459,7 @@ function setScrollBehavior(self, setting)
 	if setting == 'once' then
 		self.scrollText     = true
 		self.scrollTextOnce = true
-		self:_addScrollSwitchTimer()	
+		self:_addScrollSwitchTimer()
 	elseif setting == 'never' then
 		self.scrollText     = false
 		self.scrollTextOnce = false
@@ -449,7 +467,7 @@ function setScrollBehavior(self, setting)
 	else
 		self.scrollText     = true
 		self.scrollTextOnce = false
-		self:_addScrollSwitchTimer()	
+		self:_addScrollSwitchTimer()
 	end
 
 	local settings = self:getSettings()
@@ -546,8 +564,8 @@ function _setTitleStatus(self, text, duration)
 				self.titleGroup:setWidgetValue("text", msgs[1], duration)
 			end
 			self.trackTitle:setValue(msgs[2], duration)
-			self.artistTitle:setValue('', duration) 
-			self.albumTitle:setValue('', duration) 
+			self.artistTitle:setValue('', duration)
+			self.albumTitle:setValue('', duration)
 			self.trackartistalbum = ''
 
 		end
@@ -651,14 +669,15 @@ function _nowPlayingTrackTransition(oldWindow, newWindow)
 	--single frame fade
 	local frames = 2
 	local scale = 255/frames
-	local animationCount = 0
+--	local animationCount = 0
 
 	local sw, sh = Framework:getScreenSize()
 	local srf = Surface:newRGB(sw, sh)
 
 	oldWindow:draw(srf, LAYER_ALL)
 
-	return function(widget, surface)
+---	return function(widget, surface)
+	return function(_, surface)
 		local x = tonumber(math.floor(((frames  - 1 ) * scale) + .5))
 
 		newWindow:draw(surface, LAYER_ALL)
@@ -671,7 +690,8 @@ function _nowPlayingTrackTransition(oldWindow, newWindow)
 	end
 end
 
-function notify_playerModeChange(self, player, mode)
+-- function notify_playerModeChange(self, player, mode)
+function notify_playerModeChange(self, _, mode)
 
 	if not self.player then
 		return
@@ -714,7 +734,7 @@ function notify_playerCurrent(self, player)
 end
 
 function getSelectedStyleParam(self, param)
-	for i, v in pairs(self.nowPlayingScreenStyles) do
+	for _, v in pairs(self.nowPlayingScreenStyles) do
 		if v.style == self.selectedStyle then
 			return v[param]
 		end
@@ -736,7 +756,8 @@ function addNowPlayingItem(self)
 		text = self:string('SCREENSAVER_NOWPLAYING'),
 		sound = 'WINDOWSHOW',
 		weight = 1,
-		callback = function(event, menuItem)
+		-- callback = function(event, menuItem)
+		callback = function(_, _)
 			self:goNowPlaying(Window.transitionPushLeft)
 			end
 	})
@@ -762,11 +783,12 @@ function _titleText(self, token)
 		return self.mainTitle
 	end
 	local y = self.player and self.player:getPlaylistSize()
+	local title = self:string(modeTokens[token])
 	if token == 'play' and y > 1 then
 		local x = self.player:getPlaylistCurrentIndex()
 		if x >= 1 and y > 1 and not self:getSelectedStyleParam('suppressXofY') then
 			local xofy = tostring(self:string('SCREENSAVER_NOWPLAYING_OF', x, y))
-			
+
 			if self:getSelectedStyleParam('titleXofYonly') then
 				title = xofy
 			else
@@ -775,8 +797,6 @@ function _titleText(self, token)
 		else
 			title = tostring(self:string(modeTokens[token]))
 		end
-	else
-		title = self:string(modeTokens[token])
 	end
 	self.mainTitle = tostring(title)
 	return self.mainTitle
@@ -796,7 +816,7 @@ function _isThisPlayer(self, player)
 	else
 		return true
 	end
-	
+
 end
 
 function _updateAll(self)
@@ -805,17 +825,17 @@ function _updateAll(self)
 
 	if playerStatus.item_loop then
 		local trackInfo = self:_extractTrackInfo(playerStatus.item_loop[1])
-		local showProgressBar = true
+--		local showProgressBar = true
 		-- XXX: current_title of null is a function value??
-		if playerStatus.remote == 1 and type(playerStatus.current_title) == 'string' and type(trackInfo) == 'string' then 
+		if playerStatus.remote == 1 and type(playerStatus.current_title) == 'string' and type(trackInfo) == 'string' then
 			trackInfo = trackInfo .. "\n" .. playerStatus.current_title
 		end
-		if playerStatus.time == 0 then
-			showProgressBar = false
-		end
+--		if playerStatus.time == 0 then
+--			showProgressBar = false
+--		end
 
 		local item = playerStatus.item_loop[1]
-	
+
 		if self.window then
 			_getIcon(self, item, self.artwork, playerStatus.remote)
 
@@ -825,7 +845,7 @@ function _updateAll(self)
 			self:_refreshRightButton()
 			self:_updatePlaylist()
 			self:_updateMode(playerStatus.mode)
-		
+
 			-- preload artwork for next track
 			if playerStatus.item_loop[2] then
 				_getIcon(self, playerStatus.item_loop[2], Icon("artwork"), playerStatus.remote)
@@ -896,12 +916,13 @@ function _updateButtons(self, playerStatus)
 	else
 		local playlistSize = self.player and self.player:getPlaylistSize()
 		-- bug 15085, gray out buttons under certain circumstances
-		-- bug 15164, don't remove rew and fwd for remote tracks, because a single track playlist 
+		-- bug 15164, don't remove rew and fwd for remote tracks, because a single track playlist
 		-- is not an indication that fwd and rwd are invalid actions
 		if playlistSize == 1 and not self.player:isRemote() then
 			log:debug('set buttons for single track playlist')
 			-- single track playlist. if this track has no duration, disable rew button
-			local elapsed, duration = self.player:getTrackElapsed()
+--			local elapsed, duration = self.player:getTrackElapsed()
+			local _, duration = self.player:getTrackElapsed()
 			if duration then
 				self.controlsGroup:setWidget('rew', self.rewButton)
 			else
@@ -910,7 +931,7 @@ function _updateButtons(self, playerStatus)
 			self:_remapButton('fwd', 'fwdDisabled', function() return EVENT_CONSUME end)
 			self:_remapButton('shuffleMode', 'shuffleDisabled', function() return EVENT_CONSUME end)
 			self.controlsGroup:setWidget('repeatMode', self.repeatButton)
-			
+
 			-- fwd and shuffle have little-to-no utility in single track playlists, disable them
 		else
 			log:debug('reset buttons to defaults')
@@ -947,7 +968,7 @@ function _refreshRightButton(self)
 		self.rbutton = 'playlist'
 	end
 end
-	
+
 
 function _remapButton(self, key, newStyle, newCallback)
 	if not self.controlsGroup then
@@ -989,7 +1010,8 @@ function _updatePlaylist(self)
 	self.XofY:animate(true)
 end
 
-function _updateTrack(self, trackinfo, pos, length)
+--function _updateTrack(self, trackinfo, pos, length)
+function _updateTrack(self, trackinfo, _, _)
 	if self.trackTitle then
 		local trackTable
 		-- SC is sending separate track/album/artist blocks
@@ -1003,7 +1025,7 @@ function _updateTrack(self, trackinfo, pos, length)
 		local track     = trackTable[1]
 		local artist    = trackTable[2]
 		local album     = trackTable[3]
-		
+
 		local artistalbum = ''
 		if artist ~= '' and album ~= '' then
 			artistalbum = artist ..  ' • ' .. album
@@ -1016,7 +1038,7 @@ function _updateTrack(self, trackinfo, pos, length)
 		if self.scrollSwitchTimer and self.scrollSwitchTimer:isRunning() then
 			self.scrollSwitchTimer:stop()
 		end
-		
+
 		if self:getSelectedStyleParam('trackartistalbum') then
 			self.trackartistalbum = track
 			if self.trackartistalbum ~= '' then
@@ -1050,7 +1072,8 @@ function _updateTrack(self, trackinfo, pos, length)
 	end
 end
 
-function _updateProgress(self, data)
+-- function _updateProgress(self, data)
+function _updateProgress(self, _)
 
 	if not self.player then
 		return
@@ -1060,7 +1083,7 @@ function _updateProgress(self, data)
 
 	if duration and tonumber(duration) > 0 then
 		self.progressSlider:setRange(0, tonumber(duration), tonumber(elapsed))
-	else 
+	else
 	-- If 0 just set it to 100
 		self.progressSlider:setRange(0, 100, 0)
 	end
@@ -1112,7 +1135,7 @@ function _updatePosition(self)
 
 	local strElapsed = ""
 	local strRemain = ""
-	local pos = 0
+--	local pos = 0
 
 	-- Bug 15814: do not update position if track isn't actually playing
 	if self.player:isWaitingToPlay() then
@@ -1187,9 +1210,9 @@ function _updateShuffle(self, mode)
 	-- don't update this if SC/SN has remapped shuffle button
 	if self.player then
 		local playerStatus = self.player:getPlayerStatus()
-		if playerStatus and 
-			playerStatus.remoteMeta and 
-			playerStatus.remoteMeta.buttons and 
+		if playerStatus and
+			playerStatus.remoteMeta and
+			playerStatus.remoteMeta.buttons and
 			playerStatus.remoteMeta.shuffle then
 			return
 		end
@@ -1211,9 +1234,9 @@ function _updateRepeat(self, mode)
 	-- don't update this if SC/SN has remapped repeat button
 	if self.player then
 		local playerStatus = self.player:getPlayerStatus()
-		if playerStatus and 
-			playerStatus.remoteMeta and 
-			playerStatus.remoteMeta.buttons and 
+		if playerStatus and
+			playerStatus.remoteMeta and
+			playerStatus.remoteMeta.buttons and
 			playerStatus.remoteMeta['repeat'] then
 			return
 		end
@@ -1232,7 +1255,7 @@ end
 
 function _updateMode(self, mode)
 	local token = mode
-	-- sometimes there is a race condition here between updating player mode and power, 
+	-- sometimes there is a race condition here between updating player mode and power,
 	-- so only set the title to 'off' if the mode is also not 'play'
 	if token ~= 'play' and not self.player:isPowerOn() then
 		token = 'off'
@@ -1256,7 +1279,8 @@ end
 -- Settings
 --
 
-function _goHomeAction(self)
+--function _goHomeAction(self)
+function _goHomeAction(_)
 	appletManager:callService("goHome")
 	return EVENT_CONSUME
 end
@@ -1265,15 +1289,16 @@ end
 function _installListeners(self, window)
 
 	window:addListener(EVENT_WINDOW_ACTIVE,
-		function(event)
+		-- function(event)
+		function(_)
 			self:_updateAll()
 			return EVENT_UNUSED
 		end
 	)
 
-	local showPlaylistAction = function (self)
+	local showPlaylistAction = function(self)
 		window:playSound("WINDOWSHOW")
-	
+
 		local playlistSize = self.player and self.player:getPlaylistSize()
 		if playlistSize == 1 then
 			-- use special showTrackOne method from SlimBrowser
@@ -1282,9 +1307,9 @@ function _installListeners(self, window)
 			-- show playlist
 			appletManager:callService("showPlaylist")
 		end
-		
+
 		return EVENT_CONSUME
-	
+
 	end
 
 	-- FIXME: hack to deal with removing actions from left/right - fix this in more generic way?
@@ -1309,7 +1334,7 @@ function _installListeners(self, window)
 	window:addActionListener("go_now_playing_or_playlist", self, showPlaylistAction)
 
 	--also, no longer listening for hold in this situation, Ben and I felt that was a bug
-	
+
 	-- half a spin of the wheel on baby or controller takes you to the next NP style as well
 	-- this is the function to do that
 	window:addListener(EVENT_SCROLL,
@@ -1340,7 +1365,7 @@ function _installListeners(self, window)
 
 			-- threshhold reached?
 			if self.cumulativeScrollTicks >= 8 then
-				Framework:pushAction('go_now_playing') 
+				Framework:pushAction('go_now_playing')
 				self.cumulativeScrollTicks = 0
 				self.lastScrollDirection  = nil
 				self.lastScrollTime = nil
@@ -1397,18 +1422,18 @@ function _createTitleGroup(self, window, buttonStyle)
 	local titleGroup = Group('title', {
 		lbutton = window:createDefaultLeftButton(),
 
-		text = Button(Label("text", self.mainTitle), 
+		text = Button(Label("text", self.mainTitle),
 			function()
-				Framework:pushAction('go_current_track_info') 
+				Framework:pushAction('go_current_track_info')
 				return EVENT_CONSUME
 			end
 		),
 
 		rbutton = Button(
-				Group(buttonStyle, { Icon("icon") }), 
-				function() 
-					Framework:pushAction("go") -- go action must work (as ir right and controller go must work also) 
-					return EVENT_CONSUME 
+				Group(buttonStyle, { Icon("icon") }),
+				function()
+					Framework:pushAction("go") -- go action must work (as ir right and controller go must work also)
+					return EVENT_CONSUME
 				end,
 				function()
 					Framework:pushAction("title_right_hold")
@@ -1429,12 +1454,12 @@ function toggleNPScreenStyle(self)
 
 	log:debug('change window style')
 	local enabledNPScreenStyles = {}
-	for i, v in ipairs(self.nowPlayingScreenStyles) do
+	for _, v in ipairs(self.nowPlayingScreenStyles) do
 		if v.enabled then
 			table.insert(enabledNPScreenStyles, v)
 		end
 	end
-	
+
 	for i, v in ipairs(enabledNPScreenStyles) do
 		if self.selectedStyle == v.style and v.enabled then
 			if i == #enabledNPScreenStyles then
@@ -1454,7 +1479,7 @@ function toggleNPScreenStyle(self)
 		log:debug('the style of self.window matches self.selectedStyle. No need to do anything')
 		-- blaise dias: this shouldn't be required but things go awry, when rendering VUMeters
 		-- but not SpectrumMeters.
-		-- Can also be reproduced by changing wallpapers and transitioning back to Now Playing 
+		-- Can also be reproduced by changing wallpapers and transitioning back to Now Playing
 		self:replaceNPWindow()
 	else
 		local settings = self:getSettings()
@@ -1487,7 +1512,7 @@ end
 --- Resize VU meter images with UI cues that resize is in progess
 --- returns true if resize is required and is pending,
 --- false otherwise
-function resizeSpectrumMeter(self)
+function npResizeSpectrumMeter(self)
     local spectrum_meter_name = visImage:getCurrentSpectrumMeterName()
 
     if not visImage:resizeRequiredSpectrumMeter(spectrum_meter_name) then
@@ -1516,7 +1541,7 @@ function resizeSpectrumMeter(self)
     popup:addTimer(10, function()
         if state == 1 then
             if spectrum_meter_name ~= nil then
-                log:info("resize ", spectrum_meter_name, " ", i_sp)
+                log:info("resize ", spectrum_meter_name)
                 visImage:resizeSpectrumMeter(spectrum_meter_name)
                 log:info("done ", spectrum_meter_name)
             end
@@ -1526,8 +1551,8 @@ function resizeSpectrumMeter(self)
             state = state +1
         else
             popup:hide(Window.transitionFadeOut)
-            -- the popup UI is asynchronous, to use the currently selected 
-            -- resized resource, replace the NP window 
+            -- the popup UI is asynchronous, to use the currently selected
+            -- resized resource, replace the NP window
             self:replaceNPWindow()
         end
     end)
@@ -1539,7 +1564,7 @@ end
 --- Resize spectrum meter images with UI cues that resize is in progess
 --- returns true if resize is required and is pending,
 --- false otherwise
-function resizeVUMeter(self)
+function npResizeVUMeter(self)
     local vu_meter_name = visImage:getCurrentVuMeterName()
 
     if not visImage:resizeRequiredVuMeter(vu_meter_name) then
@@ -1568,7 +1593,7 @@ function resizeVUMeter(self)
     popup:addTimer(10, function()
         if state == 1 then
             if vu_meter_name ~= nil then
-                log:info("resize ", vu_meter_name, " ", i_vu)
+                log:info("resize ", vu_meter_name)
                 visImage:resizeVuMeter(vu_meter_name)
                 log:info("done ", vu_meter_name)
             end
@@ -1578,8 +1603,8 @@ function resizeVUMeter(self)
             state = state + 1
         else
             popup:hide(Window.transitionFadeOut)
-            -- the popup UI is asynchronous, to use the currently selected 
-            -- resized resource, replace the NP window 
+            -- the popup UI is asynchronous, to use the currently selected
+            -- resized resource, replace the NP window
             self:replaceNPWindow()
         end
     end)
@@ -1589,7 +1614,7 @@ function resizeVUMeter(self)
 end
 
 ----------------------------------------------------------------------------------------
--- Screen Saver Display 
+-- Screen Saver Display
 --
 
 function _createUI(self)
@@ -1614,7 +1639,7 @@ function _createUI(self)
 	self.titleGroup = self:_createTitleGroup(window, 'button_playlist')
 
 	self.rbutton = 'playlist'
-	
+
 
 	self.trackTitle  = Label('nptrack', "")
 	self.XofY        = Label('xofy', "")
@@ -1622,10 +1647,10 @@ function _createUI(self)
 	self.artistTitle = Label('npartist', "")
 	self.artistalbumTitle = Label('npartistalbum', "")
 
-	local launchContextMenu = 
-		function() 
-			Framework:pushAction('go_now_playing') 
-			return EVENT_CONSUME 
+	local launchContextMenu =
+		function()
+			Framework:pushAction('go_now_playing')
+			return EVENT_CONSUME
 		end
 
 	self.trackTitleButton  = Button(self.trackTitle, launchContextMenu)
@@ -1652,11 +1677,12 @@ function _createUI(self)
 						self.artistTitle:animate(false)
 						self.albumTitle:animate(false)
 					end, true)
-		
+
 	end
 
-	self.trackTitle.textStopCallback = 
-		function(label) 
+	self.trackTitle.textStopCallback =
+		-- function(label)
+		function(_)
 			if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() then
 				log:debug('trackTitle animation done, animate artistalbum/artistTitle')
 				self.artistalbumTitle:animate(true)
@@ -1668,11 +1694,12 @@ function _createUI(self)
 	local hasArtistAlbum = jiveMain:getSkinParam("NOWPLAYING_TRACKINFO_LINES") == 2
 
 	if hasArtistAlbum then
-		self.artistalbumTitle.textStopCallback = 
-			function(label)
+		self.artistalbumTitle.textStopCallback =
+			-- function(label)
+			function(_)
 				self.artistalbumTitle:animate(false)
 				self.trackTitle:animate(false)
-				if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() and 
+				if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() and
 					not self.scrollTextOnce then
 						log:debug('artistAlbum animation done, restarting timer')
 						self.scrollSwitchTimer:restart()
@@ -1681,7 +1708,8 @@ function _createUI(self)
 
 	else
 		self.artistTitle.textStopCallback =
-			function(label)
+			-- function(label)
+			function(_)
 				if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() then
 					log:debug('artist animation done, animate album text')
 					self.trackTitle:animate(false)
@@ -1689,21 +1717,22 @@ function _createUI(self)
 					self.albumTitle:animate(true)
 				end
 			end
-	
+
 		self.albumTitle.textStopCallback =
-			function(label)
+			-- function(label)
+			function(_)
 				log:debug('in albumTitle textStop callback')
 				self.artistTitle:animate(false)
 				self.albumTitle:animate(false)
 				self.trackTitle:animate(false)
-				if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() and 
+				if self.scrollSwitchTimer and not self.scrollSwitchTimer:isRunning() and
 					not self.scrollTextOnce then
 						log:debug('album animation done, restarting timer')
 						self.scrollSwitchTimer:restart()
 				end
 			end
 	end
-	
+
 	if not self.gotoTimer then
 		self.gotoTimer = Timer(400,
 			function()
@@ -1714,9 +1743,10 @@ function _createUI(self)
 			end,
 			true)
 	end
-	
+
 	self.progressSlider = Slider('npprogressB', 0, 100, 0,
-		function(slider, value, done)
+		-- function(slider, value, done)
+		function(_, value, _)
 			self.player:setWaitingToPlay(1)
 			self.gotoElapsed = value
 			self.gotoTimer:restart()
@@ -1754,7 +1784,7 @@ function _createUI(self)
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
 		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
-		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
+		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = self.currentVisualiser,
@@ -1771,7 +1801,7 @@ function _createUI(self)
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
 		self.currentVisualiser = VUMeter("vumeter_analog")
-		self.resizeVUMeterPending = self:resizeVUMeter()
+		self.resizeVUMeterPending = self:npResizeVUMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = self.currentVisualiser
@@ -1785,7 +1815,7 @@ function _createUI(self)
 	end
 
 	local playIcon = Button(Icon('play'),
-				function() 
+				function()
 					Framework:pushAction("pause")
 					return EVENT_CONSUME
 				end,
@@ -1799,21 +1829,22 @@ function _createUI(self)
 	end
 
 	self.repeatButton = Button(Icon('repeatMode'),
-				function() 
+				function()
 					Framework:pushAction("repeat_toggle")
-				return EVENT_CONSUME 
+				return EVENT_CONSUME
 			end
 			)
 	self.shuffleButton = Button(Icon('shuffleMode'),
-				function() 
+				function()
 					Framework:pushAction("shuffle_toggle")
-				return EVENT_CONSUME 
+				return EVENT_CONSUME
 			end
 			)
 
 	if self.player:getDigitalVolumeControl() ~= 0 then
 		self.volSlider = Slider('npvolumeB', 0, 100, 0,
-				function(slider, value, done)
+				--function(slider, value, done)
+				function(_, value, _)
 					if self.fixedVolumeSet then
 						log:info('FIXED VOLUME. DO NOTHING')
 					else
@@ -1822,13 +1853,14 @@ function _createUI(self)
 						self.volumeSliderDragInProgress = true
 					end
 				end,
-				function(slider, value, done)
+				-- function(slider, value, done)
+				function(_, value, _)
 					if self.fixedVolumeSet then
 						log:info('FIXED VOLUME. DO NOTHING')
 					else
 						--called after a drag completes to insure final value not missed by rate limiting
 						self.volumeSliderDragInProgress = false
-	
+
 						adjustVolume(self, value, false)
 					end
 				end)
@@ -1874,12 +1906,12 @@ function _createUI(self)
 			Icon('rew'),
 			function()
 				Framework:pushAction("jump_rew")
-				return EVENT_CONSUME 
+				return EVENT_CONSUME
 			end
 	)
 	self.fwdButton = Button(
 			Icon('fwd'),
-			function() 
+			function()
 				Framework:pushAction("jump_fwd")
 				return EVENT_CONSUME
 			end
@@ -1899,11 +1931,11 @@ function _createUI(self)
 				div3 = Icon('div3'),
 				div4 = Icon('div4'),
 				div5 = Icon('div5'),
-	
-			  	rew  = self.rewButton,
-			  	play = playIcon,
+
+				rew  = self.rewButton,
+				play = playIcon,
 				fwd  = self.fwdButton,
-	
+
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
 				twiddle  = self.twiddleButton,
@@ -1919,16 +1951,16 @@ function _createUI(self)
 				div7 = Icon('div7'),
 				div8 = Icon('div8'),
 				divVolSpace = Icon('divVolSpace'),
-	
-			  	rew  = self.rewButton,
-			  	play = playIcon,
+
+				rew  = self.rewButton,
+				play = playIcon,
 				fwd  = self.fwdButton,
-	
+
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
 				twiddle  = self.twiddleButton,
-	
-			  	volDown  = Button(
+
+				volDown  = Button(
 					Icon('volDown'),
 					function()
 						-- Bug 15826: Allow volume events to be sent even if volume is fixed
@@ -1938,15 +1970,15 @@ function _createUI(self)
 							-- Send command directly to server w/o updating local volume
 							Player.volume(self.player, 99, true)
 						end
-	
+
 						local e = Event:new(EVENT_SCROLL, -3)
 						Framework:dispatchEvent(self.volSlider, e)
 						return EVENT_CONSUME
 					end
 				),
-	 		  	volUp  = Button(
+				volUp  = Button(
 					Icon('volUp'),
-					function() 
+					function()
 						-- Bug 15826: Allow volume events to be sent even if volume is fixed
 						--  at 100% to allow IR Blaster (a server side extra) to work properly.
 						-- Catch volume up button in NP screen on Fab4
@@ -1954,13 +1986,13 @@ function _createUI(self)
 							-- Send command directly to server w/o updating local volume
 							Player.volume(self.player, 101, true);
 						end
-	
+
 						local e = Event:new(EVENT_SCROLL, 3)
 						Framework:dispatchEvent(self.volSlider, e)
 						return EVENT_CONSUME
 					end
 				),
-	 			volSlider = self.volSlider,
+				volSlider = self.volSlider,
 		})
 	end
 
@@ -2000,7 +2032,7 @@ function _createUI(self)
 	return window
 end
 
--- wrapper method to allow showNowPlaying to remain as named so the "screensaver" 
+-- wrapper method to allow showNowPlaying to remain as named so the "screensaver"
 -- can be found by the Screensaver applet correctly,
 -- while allowing the method to be called via the service API
 function goNowPlaying(self, transition, direct)
@@ -2058,8 +2090,8 @@ function _playlistHasTracks(self)
 	if not self.player then
 		return false
 	end
-	
-	if self.player:getPlaylistSize() and self.player:getPlaylistSize() > 0 then 
+
+	if self.player:getPlaylistSize() and self.player:getPlaylistSize() > 0 then
 		return true
 	else
 		return false
@@ -2086,7 +2118,7 @@ function showNowPlaying(self, transition, direct)
 		local settings = self:getSettings()
 		self.selectedStyle = settings.selectedStyle or 'nowplaying'
 	end
-	
+
 	local npWindow = self.window
 
 	local lineInActive = appletManager:callService("isLineInActive")
@@ -2113,7 +2145,7 @@ function showNowPlaying(self, transition, direct)
 		npWindow:show()
 		return
 	end
-	
+
 	-- if we're opening this after freeing the applet, grab the player again
 	if not self.player then
 		self.player = appletManager:callService("getCurrentPlayer")
@@ -2130,7 +2162,7 @@ function showNowPlaying(self, transition, direct)
 	end
 
 
-	-- this is to show the window to be opened in one of three modes: 
+	-- this is to show the window to be opened in one of three modes:
 	-- browse, ss, and large (i.e., small med & large)
 
 	--convenience
@@ -2178,7 +2210,7 @@ function showNowPlaying(self, transition, direct)
 	-- otherwise punt
 	else
 		-- FIXME: we should probably exit the window when there's no track to display
-		_getIcon(self, nil, playerStatus.artwork, nil) 
+		_getIcon(self, nil, playerStatus.artwork, nil)
 		self:_updateTrack("\n\n\n")
 		self:_updateMode(playerStatus.mode)
 		self:_updatePlaylist()
@@ -2193,10 +2225,10 @@ function showNowPlaying(self, transition, direct)
 	self.window:show(transitionOn)
 	self:_updateAll()
 	if self.resizeSpectrumMeterPending then
-		self.resizeSpectrumMeterPending = self:resizeSpectrumMeter()
+		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
 	end
 	if self.resizeVUMeterPending then
-		self.resizeVUMeterPending = self:resizeVUMeter()
+		self.resizeVUMeterPending = self:npResizeVUMeter()
 	end
 
 end
@@ -2204,26 +2236,28 @@ end
 
 function _addScrollSwitchTimer(self)
 	if not self.scrollSwitchTimer then
-		log:debug('Adding scrollSwitchTimer for scrolling text, self.scrollText: ', self.scrollText, ' self.scrollTextOnce: ', self.scrollTextOnce)
+		log:debug('Adding scrollSwitchTimer for scrolling text, self.scrollText: ',
+					self.scrollText, ' self.scrollTextOnce: ', self.scrollTextOnce)
 		self.scrollSwitchTimer = Timer(3000,
 			function()
 				self.trackTitle:animate(true)
 				self.artistalbumTitle:animate(false)
 				self.artistTitle:animate(false)
 				self.albumTitle:animate(false)
-			end, 
+			end,
 			true
 		)
 	else
 		log:debug('_addScrollSwitchTimer() called but Timer object already exists: ', self.scrollSwitchTimer)
 	end
 end
-	
+
 
 -- internal method to decide if track information is from the 'text' field or from 'track', 'artist', and 'album'
 -- if it has the three fields, return a table
 -- otherwise return a string
-function _extractTrackInfo(self, _track)
+--function _extractTrackInfo(self, _track)
+function _extractTrackInfo(_, _track)
 	if _track.track then
 		local returnTable = {}
 		table.insert(returnTable, _track.track)
