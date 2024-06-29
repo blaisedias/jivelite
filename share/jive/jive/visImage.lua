@@ -23,7 +23,8 @@ local table	= require("table")
 local lfs	= require("lfs")
 local os	= require("os")
 
-local ipairs, pairs = ipairs, pairs
+--local ipairs, pairs = ipairs, pairs
+local pairs = pairs
 local coroutine, package	= coroutine, package
 
 -- jive package imports
@@ -37,7 +38,7 @@ local System		= require("jive.System")
 module(...)
 
 -- Spectrum visualisation types
-local SPT_DEFAULT = "default"
+--local SPT_DEFAULT = "default"
 local SPT_BACKLIT = "backlit"
 local SPT_IMAGE = "image"
 local SPT_COLOUR = "colour"
@@ -219,7 +220,7 @@ end
 --- resized images hashtable
 --------------------------------------------------------
 -- debug function
-local function dumpResizedImagesTable()
+function dumpResizedImagesTable()
 	log:info("dumpResizedImagesTable")
 	for k,v in pairs(resizedImagesTable) do
 		log:info("    ", k, " -> ", v)
@@ -334,7 +335,8 @@ local function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	scaledImg = img:resize(scaledW, scaledH)
 	img:release()
 	log:info("scaleSpectrumImage: scale factor: ", scaleF)
-	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2), ",", w, ", ", h, " -> ", 0, ",", 0)
+	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2),
+				",", w, ", ", h, " -> ", 0, ",", 0)
 	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
 	scaledImg:release()
 	return retImg
@@ -366,7 +368,8 @@ local function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 	-- scale to fit height - typically this means more visible empty space horizontally
 		scaledH = h
 		wSeq = math.floor((srcW * (h/srcH))/seq) * seq
-		log:debug("_scaleAnalogVuMeter adjusted for height srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
+		log:debug("_scaleAnalogVuMeter adjusted for height srcW:", srcW, " srcH:", srcH,
+					" -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	end
 	local scaledImg = img:resize(wSeq, scaledH)
 	img:release()
@@ -392,13 +395,13 @@ function getSpectrumMeterList()
 	return spectrumList
 end
 
-function getSpectrumSettings()
-	local settings = {}
-	for _,v in ipairs(spectrumList) do
-		settings[v.name]={enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor}
-	end
-	return settings
-end
+--function getSpectrumSettings()
+--	local settings = {}
+--	for _,v in ipairs(spectrumList) do
+--		settings[v.name]={enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor}
+--	end
+--	return settings
+--end
 
 -- Workaround for mono-colour spectrums
 -- if not present in settings add them
@@ -600,7 +603,8 @@ local function _getFgSpectrumImage(spkey, w, h, _)
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg, " ", dicKey, " ", resizedImagesTable[dicKey])
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg,
+				" ", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
 	return fgImage
 end
@@ -631,7 +635,7 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 			tmp:filledRectangle(0,0,w,h,0)
 			fgimg:blit(tmp, 0, 0)
 			bgImage = Surface:newRGB(w,h)
-			tmp:blitAlpha(bgImage, 0, 0, getBacklitAlpha())
+			tmp:blitAlpha(bgImage, 0, 0, visSettings.spectrum.backlitAlpha)
 			tmp:release()
 			imCachePut(dicKey, bgImage)
 		end
@@ -640,7 +644,7 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 end
 
 local prevSpImageIndex = -1
-function getSpectrum(_, w, h, _)
+function getSpectrum(_, w, h, barColorIn, capColorIn)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
 --	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
@@ -652,7 +656,7 @@ function getSpectrum(_, w, h, _)
 --		__spBump(nil, nil)
 --	end
 	log:debug("getSpectrum: spkey: ", spkey)
-	local alpha = getBacklitAlpha()
+	local alpha = visSettings.spectrum.backlitAlpha
 
 	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
@@ -661,7 +665,9 @@ function getSpectrum(_, w, h, _)
 
 	local fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	local bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	return fg, bg, alpha, spectrumList[spImageIndex].barColor, spectrumList[spImageIndex].capColor
+	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
+	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
+	return fg, bg, alpha, barColor, capColor
 end
 
 function selectSpectrum(_, name, selected, allowCaching)
@@ -702,43 +708,39 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
-function getBacklitAlpha()
-	return visSettings.spectrum.backlitAlpha
-end
-
 --------------------------------------------------------
 --- Spectrum bars format
 --------------------------------------------------------
-function getBarsFormat()
-	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat)
-	return visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat]
-end
-
+--function getBarsFormat()
+--	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat)
+--	return visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat]
+--end
+--
 --------------------------------------------------------
 --- Spectrum caps
 --------------------------------------------------------
-function getCapsValues(_, capsHeight, capsSpace)
-	if not visSettings.spectrum.capsOn then
-		return {0,0}, {0,0}
-	end
-	return capsHeight, capsSpace
-end
-
+--function getCapsValues(_, capsHeight, capsSpace)
+--	if not visSettings.spectrum.capsOn then
+--		return {0,0}, {0,0}
+--	end
+--	return capsHeight, capsSpace
+--end
+--
 --------------------------------------------------------
 --- Spectrum baseline
 --------------------------------------------------------
-function getBaselineValues(_)
-	return visSettings.spectrum.baselineAlways, visSettings.spectrum.baselineOn
-end
-
-
+--function getBaselineValues(_)
+--	return visSettings.spectrum.baselineAlways, visSettings.spectrum.baselineOn
+--end
+--
+--
 --------------------------------------------------------
 --- Spectrum turbine
 --------------------------------------------------------
-function getSpectrumTurbine(_)
-	log:debug("getSpectrumTurbine", " ", visSettings.spectrum.turbine)
-	return visSettings.spectrum.turbine
-end
+--function getSpectrumTurbine(_)
+--	log:debug("getSpectrumTurbine", " ", visSettings.spectrum.turbine)
+--	return visSettings.spectrum.turbine
+--end
 
 ---------------------------------------------------------
 --- Spectrum channel flip
@@ -750,11 +752,29 @@ local channelFlips  = {
 		LHLH={0,0},
 }
 
-function getChannelFlipValues()
-	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip, " ", channelFlips[visSettings.spectrum.channelFlip])
-	return channelFlips[visSettings.spectrum.channelFlip]
-end
+--function getChannelFlipValues()
+--	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip,
+--	            " ", channelFlips[visSettings.spectrum.channelFlip])
+--	return channelFlips[visSettings.spectrum.channelFlip]
+--end
 
+function getSpectrumMeterSettings(_, capHeightIn, capSpaceIn)
+	local capHeight = capHeightIn
+	local capSpace = capSpaceIn
+	if not visSettings.spectrum.capsOn then
+		capHeight = {0,0}
+		capSpace = {0,0}
+	end
+	return {
+		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
+		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
+		capHeight=capHeight,
+		capSpace=capSpace,
+		turbine=visSettings.spectrum.turbine,
+		baselineAlways=visSettings.spectrum.baselineAlways,
+		baselineOn=visSettings.spectrum.baselineOn,
+	}
+end
 --------------------------------------------------------
 --- VU meter
 --------------------------------------------------------
