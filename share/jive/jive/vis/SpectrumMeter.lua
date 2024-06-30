@@ -12,6 +12,7 @@ local visImage      = require("jive.visImage")
 
 --local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
+local table         = require("jive.utils.table")
 
 local FRAME_RATE    = jive.ui.FRAME_RATE
 --local type	= type
@@ -26,9 +27,9 @@ function __init(self, style, windowStyle)
 	local obj = oo.rawnew(self, Icon(style))
 
 	obj.val = { 0, 0 }
-	obj.nplarge = false
+	obj.np_large_spectrum = false
 	if windowStyle == "nowplaying_large_spectrum" then
-		obj.nplarge = true
+		obj.np_large_spectrum = true
 	end
 
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
@@ -60,10 +61,6 @@ function _layout(self)
 	end
 
 	self.channelWidth = {}
-	self.barsInBin = {}
-	self.barWidth = {}
-	self.barSpace = {}
-	self.binSpace = {}
 	self.clipSubbands = {}
 	self.counter = FRAME_RATE * visImage.getVisualiserChangeOnTimerValue()
 	self.countDown = self.counter ~= 0
@@ -73,35 +70,28 @@ function _layout(self)
 	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor = visImage:getSpectrum(w, h, self.barColor, self.capColor)
 	log:info('** barColor=', string.format("0x%x", self.barColor), " capColor=", string.format("0x%x",self.capColor))
 	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
+	if self.settings.barsFormat.barsInBin < 1 then
+		self.settings.barsFormat.barsInBin = 1
+	end
+	if self.settings.barsFormat.barWidth < 1 then
+		self.settings.barsFormat.barWidth = 1
+	end
 
 	self.clipSubbands = self:styleValue("clipSubbands")
-	self.barsInBin = {self.settings.barsFormat.barsInBin, self.settings.barsFormat.barsInBin}
-	self.barWidth = {self.settings.barsFormat.barWidth, self.settings.barsFormat.barWidth}
-	self.barSpace = {self.settings.barsFormat.barSpace, self.settings.barsFormat.barSpace}
-	self.binSpace = {self.settings.barsFormat.binSpace, self.settings.barsFormat.binSpace}
-
 	self.backgroundDrawn = false;
 
-	if self.barsInBin[1] < 1 then
-		self.barsInBin[1] = 1
-	end
-	if self.barsInBin[2] < 1 then
-		self.barsInBin[2] = 1
-	end
-	if self.barWidth[1] < 1 then
-		self.barWidth[1] = 1
-	end
-	if self.barWidth[2] < 1 then
-		self.barWidth[2] = 1
-	end
+	local barsInBin = self.settings.barsFormat.barsInBin
+	local barWidth = self.settings.barsFormat.barWidth
+	local barSpace = self.settings.barsFormat.barSpace
+    local binSpace = self.settings.barsFormat.binSpace
 
 	local barSize = {}
 
-	barSize[1] = self.barWidth[1] * self.barsInBin[1] + self.barSpace[1] * (self.barsInBin[1] - 1) + self.binSpace[1]
-	barSize[2] = self.barWidth[2] * self.barsInBin[2] + self.barSpace[2] * (self.barsInBin[2] - 1) + self.binSpace[2]
+	barSize[1] = barWidth * barsInBin + barSpace * (barsInBin - 1) + binSpace
+	barSize[2] = barWidth * barsInBin + barSpace * (barsInBin - 1) + binSpace
 
-	self.channelWidth[1] = ((w - l - r) / 2) - (sep - self.binSpace[1])
-	self.channelWidth[2] = ((w - l - r) / 2) - (sep - self.binSpace[2])
+	self.channelWidth[1] = ((w - l - r) / 2) - (sep - binSpace)
+	self.channelWidth[2] = ((w - l - r) / 2) - (sep - binSpace)
 
 	local numBars = vis:spectrum_init(
 		self.isMono,
@@ -120,58 +110,122 @@ function _layout(self)
 	log:debug("-----------------------------------------------------")
 	log:debug("** 1: " .. numBars[1] .. " 2: " .. numBars[2])
 
-	local barHeight = {}
-
-	barHeight[1] = h - t - b - self.settings.capHeight[1] - self.settings.capSpace[1]
-	barHeight[2] = h - t - b - self.settings.capHeight[2] - self.settings.capSpace[2]
+--	local barHeight = {}
+--
+--	barHeight[1] = h - t - b - self.settings.capHeight[1] - self.settings.capSpace[1]
+--	barHeight[2] = h - t - b - self.settings.capHeight[2] - self.settings.capSpace[2]
+    local barHeight = h - t - b - self.settings.capHeight - self.settings.capSpace
 
 	-- max bin value from C code is 31
-	self.barHeightMulti = {}
-	self.barHeightMulti[1] = barHeight[1] / 31
-	self.barHeightMulti[2] = barHeight[2] / 31
+--	self.barHeightMulti = {}
+--	self.barHeightMulti[1] = barHeight[1] / 31
+--	self.barHeightMulti[2] = barHeight[2] / 31
 
 	self.xshift = x + l
 	self.x1 = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2
-	self.x2 = x + l + self.channelWidth[2] + self.binSpace[2] + (sep - self.binSpace[1]) + (sep - self.binSpace[2])
-	self.xSpan =  numBars[1] * barSize[1] - self.binSpace[1] - 1
+	self.x2 = x + l + self.channelWidth[2] + binSpace + (sep - binSpace) + (sep - binSpace)
+	self.xSpan =  numBars[1] * barSize[1] - binSpace - 1
 
-	-- pre calculate base line height
-	self.blH = math.min(math.ceil(self.barHeightMulti[1] * 0.2), 2)
-	self.halfblH = math.ceil(self.blH / 2)
+	-- pre calculate base line height - 20% of a bar
+	self.baseLineHeight = math.min(math.ceil((barHeight/31) * 0.2), 2)
 
 	log:debug("** x: " .. x .. " l: " .. l)
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
+	log:info("** b: " .. b .. " t: " .. t, " xshift: ", self.xshift)
 
 	self.y = y + h - b
 	self.h = h
-	self.yCT = self.y - (self.h/2)
-	self.fgimg_yoffset = 0
-	if self.nplarge then
+	self.yCentre = self.y - (self.h/2)
+	self.yoffset_controls = 0
+	if self.np_large_spectrum then
+        -- Adjust for large spectrum - where the visualiser background image
+        -- occupies the whole screen and controls are overlaid on the background image
 		self.y = y + h
-		self.yCT = self.y - (self.h/2)
-		self.fgimg_yoffset = t
+		self.yCentre = self.y - (self.h/2)
+        -- bar rendering must not spill over the controls area
+        -- FIXME: b works but it should really be height of the controls bar
+		self.yoffset_controls = b
 	end
 
-	self.cap = { {}, {} }
+--	self.cap = { {}, {} }
+--	for i = 1, numBars[1] do
+--		self.cap[1][i] = 0
+--	end
+--
+--	for i = 1, numBars[2] do
+--		self.cap[2][i] = 0
+--	end
+
+	self.left = table.clone(self.settings.barsFormat)
+	self.left.fgImg = self.fgImg
+	self.left.xshift = self.xshift
+	self.left.y = self.y
+	self.left.h = self.h
+	self.left.yCentre = self.yCentre
+	self.left.yoffset_controls = self.yoffset_controls
+	self.left.fgimg = self.fgimg
+	self.left.barColor = self.barColor
+	self.left.capColor = self.capColor
+	self.left.turbine = self.settings.turbine
+	self.left.barSize = self.left.barWidth + self.left.barSpace
+	self.left.xStep = self.left.barWidth * self.left.barsInBin + self.left.barSpace * (self.left.barsInBin - 1) + self.left.binSpace
+	self.left.barStep = self.left.barWidth - 1
+	self.left.halfHeight = self.left.h/2
+	self.left.adjustedHeight = self.left.h - self.left.yoffset_controls
+	self.left.adjustedY = self.left.y - self.left.yoffset_controls
+	self.left.barHeightMulti = barHeight / 31
+	self.left.cap = {}
 	for i = 1, numBars[1] do
-		self.cap[1][i] = 0
+		self.left.cap[i] = 0
 	end
+	self.left.capHeight = self.settings.capHeight
+	self.left.capSpace = self.settings.capSpace
+    self.left.totalCapHeight = self.left.capHeight + self.left.capSpace
 
-	for i = 1, numBars[2] do
-		self.cap[2][i] = 0
-	end
+	self.right = table.clone(self.left)
 
+	self.left.x = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2
+
+	self.right.x = x + l + self.channelWidth[2] + binSpace + (sep - binSpace) + (sep - binSpace)
+
+--	log:info("**** left:", table.stringify(self.left))
+--	log:info("**** right:", table.stringify(self.right))
 end
 
-local function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, barSpace, binSpace, barHeightMulti, capHeight, capSpace)
-	local bch = bins[ch]
-	local cch = self.cap[ch]
-	local barSize = barWidth + barSpace
-	local hh = self.h
-	local xshift = self.xshift
-	local y = y_in - self.fgimg_yoffset
+local function _drawBins(surface, bch, params)
+    --	mutating
+	local cch = params.cap
+	local x = params.x
 	local nz = false
+
+    --	non-mutating
+    local xshift = params.xshift
+    local xStep = params.xStep
+
+    local y = params.adjustedY
+    local yCentre = params.yCentre
+    local adjustedHeight = params.adjustedHeight
+    local halfHeight = params.halfHeight
+
+    local barHeightMulti = params.barHeightMulti
+    local barsInBin = params.barsInBin
+    local barSize = params.barSize
+    local barWidth = params.barWidth
+    local barStep = params.barStep
+    local barColor = params.barColor
+
+    local capColor = params.capColor
+    local totalCapHeight = params.totalCapHeight
+    local capHeight = params.capHeight
+    local capSpace = params.capSpace
+
+    local fgImg = params.fgImg
+    local turbine = params.turbine
+
+    local xLeft
+    local yTop
+    local imgXLeft
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -189,52 +243,60 @@ local function _drawBins(self, surface, bins, ch, x, y_in, barsInBin, barWidth, 
 		if bch[i] > 0 then
 			nz = true
 			for k = 0, barsInBin - 1 do
-				if self.fgImg ~= nil then
-					local xLeft = x + (k * barSize)
-					if self.settings.turbine then
-						local yTop = self.yCT - (bch[i]/2)
-						self.fgImg:blitClip(xLeft - xshift, (hh/2) - (bch[i]/2), barWidth, bch[i], surface, xLeft, yTop)
+				xLeft = x + (k * barSize)
+				if fgImg ~= nil then
+                    imgXLeft = xLeft - xshift
+					if turbine then
+						yTop = yCentre - (bch[i]/2)
+						fgImg:blitClip(imgXLeft, halfHeight - (bch[i]/2),
+												barWidth, bch[i],
+												surface,
+												xLeft, yTop)
 					else
-						local yTop = y - bch[i] + 1
-						self.fgImg:blitClip(xLeft - xshift, hh - self.fgimg_yoffset - bch[i] + 1, barWidth, bch[i], surface, xLeft, yTop)
+						yTop = y - bch[i] + 1
+						fgImg:blitClip(imgXLeft, adjustedHeight - bch[i] + 1,
+												barWidth, bch[i],
+												surface,
+												xLeft, yTop)
 
 						if capHeight > 0 and cch[i] > 0 then
-							yTop = y - cch[i] - capHeight - capSpace
-							self.fgImg:blitClip(xLeft - xshift, hh - self.fgimg_yoffset - cch[i] - capHeight - capSpace ,
-												barWidth, capHeight, surface,
+							yTop = y - cch[i] - totalCapHeight
+							fgImg:blitClip(imgXLeft, adjustedHeight - cch[i] - totalCapHeight,
+												barWidth, capHeight,
+												surface,
 												xLeft, yTop)
 						end
 					end
 				else
-					if self.settings.turbine then
+					if turbine then
 						surface:filledRectangle(
-						x + (k * barSize),
-						self.yCT - (bch[i]/2),
-						x + (barWidth - 1) + (k * barSize),
-						self.yCT + (bch[i]/2),
-						self.barColor
+						xLeft,
+						yCentre - (bch[i]/2),
+						xLeft + barStep,
+						yCentre + (bch[i]/2),
+						barColor
 						)
 					else
 						surface:filledRectangle(
-						x + (k * barSize),
+						xLeft,
 						y,
-						x + (barWidth - 1) + (k * barSize),
+						xLeft + barStep,
 						y - bch[i] + 1,
-						self.barColor
+						barColor
 						)
 						if capHeight > 0 and cch[i] > 0 then
 							surface:filledRectangle(
-								x + (k * barSize),
-								y - cch[i] - capHeight - capSpace,
-								x + (barWidth - 1) + (k * barSize),
+								xLeft,
+								y - cch[i] - totalCapHeight,
+								xLeft + barStep,
 								y - cch[i] - capSpace,
-								self.capColor)
+								capColor)
 						end
 					end
 				end
 			end
 		end
-		x = x + barWidth * barsInBin + barSpace * (barsInBin - 1) + binSpace
+		x = x + xStep
 	end
 	return nz
 end
@@ -260,48 +322,43 @@ function draw(self, surface)
 
 	bins[1], bins[2] = vis:spectrum()
 
-	local nz1 = _drawBins(
-		self, surface, bins, 1, self.x1, self.y, self.barsInBin[1],
-		self.barWidth[1], self.barSpace[1], self.binSpace[1],
-		self.barHeightMulti[1], self.settings.capHeight[1], self.settings.capSpace[1]
-	)
-	local nz2 = _drawBins(
-		self, surface, bins, 2, self.x2, self.y, self.barsInBin[2],
-		self.barWidth[2], self.barSpace[2], self.binSpace[2],
-		self.barHeightMulti[2], self.settings.capHeight[2], self.settings.capSpace[2]
-	)
+	local nz1 = _drawBins( surface, bins[1], self.left)
+	local nz2 = _drawBins( surface, bins[2], self.right)
 
 	-- simulate draw analyzer baseline only if playing,
 	-- by not drawing baseline if volume is 0
 	-- good enough
 	if self.settings.baselineAlways or ((nz1 or nz2) and self.settings.baselineOn) then
+        local baseLineHeight = self.baseLineHeight
+        local halfBaseLineHeight = baseLineHeight/2
+        local xSpan = self.xSpan
 		if self.fgImg ~= nil then
 			if self.settings.turbine then
-				self.fgImg:blitClip(self.x1 - x, (h/2) - self.halfblH, self.xSpan, self.blH,
+				self.fgImg:blitClip(self.x1 - x, (h/2) - halfBaseLineHeight, xSpan, baseLineHeight,
 									surface,
-									self.x1, self.yCT - self.halfblH)
-				self.fgImg:blitClip(self.x2 - x, (h/2) - self.halfblH, self.xSpan, self.blH,
+									self.x1, self.yCentre - halfBaseLineHeight)
+				self.fgImg:blitClip(self.x2 - x, (h/2) - halfBaseLineHeight, xSpan, baseLineHeight,
 									surface,
-									self.x2, self.yCT - self.halfblH)
+									self.x2, self.yCentre - halfBaseLineHeight)
 			else
-				self.fgImg:blitClip(self.x1 - x, h - self.fgimg_yoffset - self.blH, self.xSpan, self.blH,
+				self.fgImg:blitClip(self.x1 - x, h - self.yoffset_controls - baseLineHeight, xSpan, baseLineHeight,
 									surface,
-									self.x1, self.y - self.fgimg_yoffset - self.blH)
-				self.fgImg:blitClip(self.x2 - x, h - self.fgimg_yoffset - self.blH, self.xSpan, self.blH,
+									self.x1, self.y - self.yoffset_controls - baseLineHeight)
+				self.fgImg:blitClip(self.x2 - x, h - self.yoffset_controls - baseLineHeight, xSpan, baseLineHeight,
 									surface,
-									self.x2, self.y - self.fgimg_yoffset - self.blH)
+									self.x2, self.y - self.yoffset_controls - baseLineHeight)
 			end
 		else
 			if self.settings.turbine then
-				surface:filledRectangle(self.x1, self.yCT - self.halfblH, self.x1 + self.xSpan ,
-										self.yCT + self.blH - self.halfblH, self.barColor)
-				surface:filledRectangle(self.x2, self.yCT - self.halfblH, self.x2 + self.xSpan ,
-										self.yCT + self.blH - self.halfblH, self.barColor)
+				surface:filledRectangle(self.x1, self.yCentre - halfBaseLineHeight, self.x1 + xSpan ,
+										self.yCentre + baseLineHeight - halfBaseLineHeight, self.barColor)
+				surface:filledRectangle(self.x2, self.yCentre - halfBaseLineHeight, self.x2 + xSpan ,
+										self.yCentre + baseLineHeight - halfBaseLineHeight, self.barColor)
 			else
-				surface:filledRectangle(self.x1, self.y - self.blH - self.fgimg_yoffset,
-										self.x1 + self.xSpan, self.y - self.fgimg_yoffset, self.barColor)
-				surface:filledRectangle(self.x2, self.y - self.blH - self.fgimg_yoffset,
-										self.x2 + self.xSpan, self.y - self.fgimg_yoffset, self.barColor)
+				surface:filledRectangle(self.x1, self.y - baseLineHeight - self.yoffset_controls,
+										self.x1 + xSpan, self.y - self.yoffset_controls, self.barColor)
+				surface:filledRectangle(self.x2, self.y - baseLineHeight - self.yoffset_controls,
+										self.x2 + xSpan, self.y - self.yoffset_controls, self.barColor)
 			end
 		end
 	end
