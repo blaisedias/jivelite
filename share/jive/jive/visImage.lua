@@ -768,8 +768,8 @@ function getSpectrumMeterSettings(_, capHeightIn, capSpaceIn)
 	return {
 		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
 		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
-		capHeight=capHeight,
-		capSpace=capSpace,
+		capHeight=(capHeight[1]+capHeight[2])/2,
+		capSpace=(capSpace[1]+capSpace[2])/2,
 		turbine=visSettings.spectrum.turbine,
 		baselineAlways=visSettings.spectrum.baselineAlways,
 		baselineOn=visSettings.spectrum.baselineOn,

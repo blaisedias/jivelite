@@ -73,24 +73,26 @@ local function drawVuMeter(params, surface, vol)
 	end
 
 	local y = params.y
+	local x = params.x
+    local th = params.th
+    local tw = params.tw
+    local cap = params.cap
 
 	for i = 1, params.bars do
-		if i == math.floor(params.cap / 2) then
-			params.tickCap:blit(surface, params.x, y, params.tw, params.th)
+		if i == math.floor(cap / 2) then
+			params.tickCap:blit(surface, x, y, tw, th)
 		elseif i < val then
-			params.tickOn:blit(surface, params.x, y, params.tw, params.th)
+			params.tickOn:blit(surface, x, y, tw, th)
 		else
-			params.tickOff:blit(surface, params.x, y, params.tw, params.th)
+			params.tickOff:blit(surface, x, y, tw, th)
 		end
 
---		y = y - th
+		y = y - params.th
 	end
 end
 
 local function drawVFD(params, surface, vol)
 	-- add vfd bar render x offset here
-	local x = params.x + params.vfd.bar_rxo
-	local y = params.y
 	if vol >= params.cap then
 		params.cap = vol
 		params.peak_hold_counter = math.floor(FRAME_RATE/2)
@@ -100,19 +102,27 @@ local function drawVFD(params, surface, vol)
 			params.cap = 0
 		end
 	end
+
+	local x = params.x + params.vfd.bar_rxo
+	local y = params.y
+    local cap = params.cap
+    local bw = params.vfd.bw
+    local bh = params.vfd.bh
+    local h = params.vfd.h
+
 	for i = 2, 37 do
-		if i <= vol or i == params.cap then
-			params.vfd.on:blit(surface, x, y, params.vfd.bw, params.vfd.bh)
+		if i <= vol or i == cap then
+			params.vfd.on:blit(surface, x, y, bw, bh)
 		else
-			params.vfd.off:blit(surface, x, y, params.vfd.bw, params.vfd.bh)
+			params.vfd.off:blit(surface, x, y, bw, bh)
 		end
 		x = x + params.vfd.barwidth
 	end
 	for i = 38, 50 do
-		if i <= vol or i == params.cap then
-			params.vfd.peakon:blit(surface, x, y, params.vfd.bw, params.vfd.h)
+		if i <= vol or i == cap then
+			params.vfd.peakon:blit(surface, x, y, bw, h)
 		else
-			params.vfd.peakoff:blit(surface, x, y, params.vfd.bw, params.vfd.h)
+			params.vfd.peakoff:blit(surface, x, y, bw, h)
 		end
 		x = x + params.vfd.barwidth
 	end

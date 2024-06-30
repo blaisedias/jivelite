@@ -27,6 +27,7 @@ the lua built-in table.* functions.
 
 
 local ipairs, pairs, setmetatable = ipairs, pairs, setmetatable
+local tostring = tostring
 
 local ltable = require("table")
 
@@ -91,13 +92,48 @@ Returns true if the table contains the value, otherwise returns false
 =cut
 --]]
 function contains(table, value)
-	for i, v in ipairs(table) do
+	for _, v in ipairs(table) do
 		if v == value then
 			return true
 		end
 	end
 
 	return false
+end
+
+
+--[[
+
+=head2 table.copy(table)
+
+Returns a shallow copy of the table
+
+=cut
+--]]
+function clone(table)
+    local cloned = {}
+	for k, v in pairs(table) do
+        cloned[k] =v
+	end
+
+	return cloned
+end
+
+--[[
+
+=head2 table.stringify(table)
+
+Returns a string of table contents
+
+=cut
+--]]
+function stringify(tbl)
+    local dumped = ""
+	for k, v in pairs(tbl) do
+        dumped = dumped .. "\n" .. tostring(k) .. "=" .. tostring(v)
+	end
+
+	return dumped
 end
 
 --[[
