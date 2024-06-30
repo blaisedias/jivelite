@@ -64,13 +64,6 @@ local PLATFORM = ""
 -- on desktop OSes userPath is persistent
 local workSpace = System.getUserDir()
 local resizedCachePath = workSpace .. "/cache/resized"
-local defResizedCachePath = workSpace .. "/cache/resized"
--- on piCorePlayer  system user dir is in RAM FS and thus quicker
--- images selected can be copied there for smoother transitions,
--- quicker that using SD card and stored compressed files so
--- lower ram usage.
-local auxResizedCachePath = nil
-local auxResizedImagesTable = nil
 
 local function _parseImagePath(imgpath)
 	local parts = string.split("%.", imgpath)
@@ -145,17 +138,8 @@ local function platformDetect()
 		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
 	end
 	os.execute("mkdir -p " .. resizedCachePath)
-	os.execute("mkdir -p " .. defResizedCachePath)
-	if PLATFORM == "piCorePlayer" and resizedCachePath ~= defResizedCachePath then
-		auxResizedCachePath = defResizedCachePath .. '/' .. 'aux'
-		os.execute("mkdir -p " .. auxResizedCachePath)
-		auxResizedImagesTable = {}
-	end
---	auxResizedCachePath="/tmp/jlcache"
---	auxResizedImagesTable = {}
 
-	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath,
-			" auxResizedCachePath:", auxResizedCachePath)
+	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
 	log:info("saveResizedImages:", saveResizedImages, " save image type:" , saveimage_type)
 	return PLATFORM
 end
@@ -207,20 +191,6 @@ end
 
 local function loadResizedImage(key)
 	local path = resizedImagesTable[key]
-	if auxResizedImagesTable ~= nil then
-		if auxResizedImagesTable[key] ~= nil then
-			path = auxResizedImagesTable[key]
-			log:info("auxResizeCache: got ", path)
-		else
-			local auxpath = auxResizedCachePath .. "/" .. key .. "." .. saveimage_type
-			local ok = os.execute("cp " .. path .. " " .. auxpath)
-			if ok then
-				log:info("auxResizeCache: put ", auxpath)
-				auxResizedImagesTable[key] = auxpath
-				path = auxpath
-			end
-		end
-	end
 	if path ~= nil then
 		return loadImage(path)
 	end
