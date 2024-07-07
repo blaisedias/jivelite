@@ -1405,6 +1405,8 @@ function setVisSettings(_, settings)
 			vuImages[1].enabled = true
 		end
 	end
+	__spBump()
+	__vuBump()
 end
 
 function initialiseCache()
@@ -1423,8 +1425,6 @@ function initialiseCache()
 end
 
 function initialise()
---	__spBump()
---	__vuBump()
 end
 
 
