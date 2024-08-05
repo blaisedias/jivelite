@@ -134,7 +134,9 @@ local function platformDetect()
 		resizedCachePath = workSpace .. "/cache/resized"
 		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
 		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
+--		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frames")
+		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frameslr")
 		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
 	end
 	os.execute("mkdir -p " .. resizedCachePath)
@@ -840,39 +842,77 @@ local function _initVfdVuMeterList(rpath)
 	end
 end
 
-local function _populateAnalogueVuMeterList(search_root)
+--local function _populateAnalogueVuMeterList(search_root)
+--	if (lfs.attributes(search_root, "mode") ~= "directory") then
+--		return
+--	end
+--
+--	for entry in lfs.dir(search_root) do
+--		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+--		if mode == "file" then
+--			local parts = _parseImagePath(entry)
+--			if parts ~= nil then
+--				local imgName = parts[1]
+--				local displayName = imgName
+--				local ixSub = string.find(imgName, "25seq")
+--				if ixSub ~= nil then
+--					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
+--						displayName = '25f-' .. string.sub(imgName, ixSub + 6)
+--					else
+--						displayName = '25f-' .. string.sub(imgName, ixSub + 5)
+--					end
+--				end
+--				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
+--				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
+--				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
+--			end
+--		end
+--	end
+--end
+--
+--local function _initAnalogueVuMeterList(rpath)
+--	for search_root in findPaths(rpath) do
+--		_populateAnalogueVuMeterList(search_root)
+--	end
+--end
+
+local function _populate25fVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
 
 	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = _parseImagePath(entry)
-			if parts ~= nil then
-				local imgName = parts[1]
-				local displayName = imgName
-				local ixSub = string.find(imgName, "25seq")
-				if ixSub ~= nil then
-					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
-						displayName = '25f-' .. string.sub(imgName, ixSub + 6)
-					else
-						displayName = '25f-' .. string.sub(imgName, ixSub + 5)
+		if entry ~= "." and entry ~= ".." then
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "directory" then
+				local path = search_root .. "/" .. entry
+				local found = 0
+				for f in lfs.dir(path) do
+					mode = lfs.attributes(path .. "/" .. f, "mode")
+					if mode == "file" then
+						local parts = _parseImagePath(f)
+						if parts ~= nil then
+							log:debug("25frames ", path .. "/" .. f)
+							vuImagesMap[entry] = {src= path .. "/" .. f}
+							found = found + 1
+						end
 					end
 				end
-				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
-				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
-				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
+				if found == 1 then
+					log:debug("25frames ", entry)
+					table.insert(vuImages, {name=entry, enabled=false, displayName='25f-' .. entry, vutype="frame"})
+				end
 			end
 		end
 	end
 end
 
-local function _initAnalogueVuMeterList(rpath)
+local function _init25fVuMeterList(rpath)
 	for search_root in findPaths(rpath) do
-		_populateAnalogueVuMeterList(search_root)
+		_populate25fVuMeterList(search_root)
 	end
 end
+
 
 local function _populate25fLRVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
@@ -928,11 +968,17 @@ local function initVuMeterList()
 	if workSpace ~= System.getUserDir() then
 		_populateVfdVuMeterList(workSpace .. "/" .. relativePath)
 	end
-	relativePath = "assets/visualisers/vumeters/analogue"
-	_initAnalogueVuMeterList("../../" .. relativePath)
-	_initAnalogueVuMeterList(relativePath)
+--	relativePath = "assets/visualisers/vumeters/analogue"
+--	_initAnalogueVuMeterList("../../" .. relativePath)
+--	_initAnalogueVuMeterList(relativePath)
+--	if workSpace ~= System.getUserDir() then
+--		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
+--	end
+	relativePath = "assets/visualisers/vumeters/25frames"
+	_init25fVuMeterList("../../" .. relativePath)
+	_init25fVuMeterList(relativePath)
 	if workSpace ~= System.getUserDir() then
-		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
+		_populate25fVuMeterList(workSpace .. "/" .. relativePath)
 	end
 	relativePath = "assets/visualisers/vumeters/25framesLR"
 	_init25fLRVuMeterList("../../" .. relativePath)
