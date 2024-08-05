@@ -562,6 +562,9 @@ local function _eventHandler(self, event)
 				if self.closeable then
 					self:playSound("WINDOWHIDE")
 					self:hide()
+					if self.closeAction then
+    					Framework:pushAction(self.closeAction)
+					end
 					return EVENT_CONSUME
 				else
 					self:playSound("BUMP")
