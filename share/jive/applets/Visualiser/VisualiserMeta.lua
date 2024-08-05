@@ -212,6 +212,8 @@ function registerApplet(self)
             1000
         )
     )
+
+    self:registerService("resizeSelectedVisualisers")
 end
 
 --function configureApplet(self)

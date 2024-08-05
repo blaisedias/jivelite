@@ -356,6 +356,7 @@ end
 function selectVuMeters(self)
     local window = Window("text_list", self:string('SELECT_VUMETER') )
     local menu = SimpleMenu("menu")
+    menu.closeAction = "go_resize_visu"
 --    local settings = self:getSettings()
 
     -- use the vu meter list from the visImage module,
@@ -379,7 +380,7 @@ function selectVuMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
-                        self:resizeVUMeter(nm)
+--                        self:resizeVUMeter(nm)
                         visImage:selectVuImage(nm, true, false)
                     else
                         if visImage:selectVuImage(nm, false, false) <= 0 then
@@ -406,11 +407,12 @@ end
 function selectSpectrumMeters(self)
     local window = Window("text_list", self:string('SELECT_SPECTRUM') )
     local menu = SimpleMenu("menu")
+    menu.closeAction = "go_resize_visu"
 
     -- use the spectrum meter list from the visImage module,
     -- it is sorted, settings merely contains the list of
     -- spectrum meters and enable/disabled status
-    for _, v in ipairs(visImage.getSpectrumMeterList()) do
+    for _, v in ipairs(visImage:getSpectrumMeterList()) do
         local enabled = v.enabled
         local nm = v.name
 --    local settings = self:getSettings()
@@ -425,7 +427,7 @@ function selectSpectrumMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
-                        self:resizeSpectrumMeter(nm)
+--                        self:resizeSpectrumMeter(nm)
                         visImage:selectSpectrum(nm, true, false)
                     else
                         if visImage:selectSpectrum(nm, false, false) <= 0 then
@@ -466,10 +468,10 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
         popup:addWidget(text)
 
         local spectrum_names = {}
-        local tmp = visImage:getSpectrumMeterList()
         if bSpectrum then
-            for _, v in pairs(tmp) do
-                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == visImage.SPT_IMAGE) then
+            for _, v in ipairs(visImage:getSpectrumMeterList()) do
+--                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == visImage.SPT_IMAGE) then
+                if (all or v.enabled) and visImage:resizeRequiredSpectrumMeter(v.name) then
                     table.insert(spectrum_names, v.name)
                 else
                     log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)
@@ -477,11 +479,11 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
             end
         end
 
-        tmp = visImage:getVuMeterList()
         local vumeter_names = {}
         if bVuMeters then
-            for _, v in pairs(tmp) do
-                if (all or v.enabled) and (v.vutype == "frame" or v.vutype == "25framesLR") then
+            for _, v in pairs(visImage:getVuMeterList()) do
+--                if (all or v.enabled) and (v.vutype == "frame" or v.vutype == "25framesLR") then
+                if (all or v.enabled) and visImage:resizeRequiredVuMeter(v.name) then
                     table.insert(vumeter_names, v.name)
                 else
                     log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)
@@ -617,4 +619,8 @@ function resizeVUMeter(_, vu_meter_name)
     end)
 
     popup:show()
+end
+
+function resizeSelectedVisualisers(self)
+    self:resizeImages(true, true, false)
 end
