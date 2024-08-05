@@ -1768,7 +1768,13 @@ local _globalActionsNEW = {
 	["go_twiddle_visualiser"] = function()
 		appletManager:callService("twiddleVisualiser")
 		return EVENT_CONSUME
+	end,
+
+	["go_resize_visu"] = function()
+		appletManager:callService("resizeSelectedVisualisers")
+		return EVENT_CONSUME
 	end
+
 }
 
 
