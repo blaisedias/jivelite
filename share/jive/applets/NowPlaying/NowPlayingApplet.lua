@@ -32,6 +32,8 @@ local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 local Timer            = require("jive.ui.Timer")
 local Player           = require("jive.slim.Player")
 local Popup            = require("jive.ui.Popup")
+local Textinput        = require("jive.ui.Textinput")
+local Keyboard         = require("jive.ui.Keyboard")
 
 local visImage         = require("jive.visImage")
 local VUMeter          = require("jive.vis.VUMeter")
@@ -54,6 +56,7 @@ local LAYER_ALL             = jive.ui.LAYER_ALL
 local EVENT_KEY_PRESS       = jive.ui.EVENT_KEY_PRESS
 local KEY_LEFT              = jive.ui.KEY_LEFT
 local KEY_RIGHT             = jive.ui.KEY_RIGHT
+local FRAME_RATE            = jive.ui.FRAME_RATE
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
@@ -136,6 +139,21 @@ local function _getIcon(self, item, icon, _)
 	end
 end
 
+local function _setScrollParameters(settings)
+	local scroll_step_minimum = 0
+	local scroll_fps = 0
+	local font_scroll_factor = 0
+	if settings.scroll_step_minimum ~= nil then
+		scroll_step_minimum = settings.scroll_step_minimum
+	end
+	if settings.scroll_fps ~= nil then
+		scroll_fps = settings.scroll_fps
+	end
+	if settings.font_scroll_factor ~= nil then
+		font_scroll_factor = settings.font_scroll_factor
+	end
+	Label:setScrollParameters(scroll_step_minimum, scroll_fps, font_scroll_factor)
+end
 
 function init(self)
 
@@ -147,6 +165,7 @@ function init(self)
 	local settings      = self:getSettings()
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
+	_setScrollParameters(settings)
 
 end
 
@@ -2288,4 +2307,105 @@ function free(self)
 	end
 
 	return true
+end
+
+function inputScrollStepMinimum(self)
+	local window = Window("text_list", self:string("SCROLL_STEP_MINIMUM"))
+	local settings = self:getSettings()
+
+	local currentValue = settings.scroll_step_minimum
+	if currentValue == nil then
+		currentValue = ''
+	else
+		currentValue = ''.. currentValue
+	end
+
+	local v = Textinput.integerValue(currentValue)
+	local input = Textinput("textinput", v,
+			function(_, value)
+				settings.scroll_step_minimum = tonumber(value.s)
+				self:storeSettings()
+				_setScrollParameters(settings)
+				window:hide()
+			end
+	)
+
+	local keyboard = Keyboard("keyboard", "integer", input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+
+	self:tieAndShowWindow(window)
+	return window
+end
+
+function inputScrollFPS(self)
+	local window = Window("text_list", self:string("SCROLL_FPS"))
+	local settings = self:getSettings()
+
+	local currentValue = settings.scroll_fps
+	if currentValue == nil then
+		currentValue = ''
+	else
+		currentValue = ''.. currentValue
+	end
+
+	local v = Textinput.integerValue(currentValue)
+	local input = Textinput("textinput", v,
+			function(_, value)
+				local scroll_fps = tonumber(value.s)
+				if scroll_fps > FRAME_RATE then
+					scroll_fps = FRAME_RATE
+				end
+				settings.scroll_fps = tonumber(scroll_fps)
+				self:storeSettings()
+				_setScrollParameters(settings)
+				window:hide()
+			end
+	)
+
+	local keyboard = Keyboard("keyboard", "integer", input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+	self:tieAndShowWindow(window)
+	return window
+end
+
+function inputFontScrollFactor(self)
+	local window = Window("text_list", self:string("FONT_SCROLL_FACTOR"))
+	local settings = self:getSettings()
+
+	local currentValue = settings.font_scroll_factor
+	if currentValue == nil then
+		currentValue = ''
+	else
+		currentValue = ''.. currentValue
+	end
+
+	local v = Textinput.integerValue(currentValue)
+	local input = Textinput("textinput", v,
+			function(_, value)
+				settings.font_scroll_factor = tonumber(value.s)
+				self:storeSettings()
+				_setScrollParameters(settings)
+				window:hide()
+			end
+	)
+
+	local keyboard = Keyboard("keyboard", "integer", input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+	self:tieAndShowWindow(window)
+	return window
 end
