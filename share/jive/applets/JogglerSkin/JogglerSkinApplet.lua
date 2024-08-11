@@ -4398,6 +4398,7 @@ function buttonSettingsMenuItem(self)
 		node = "screenSettingsNowPlaying",
 		text = self:string("NOW_PLAYING_BUTTONS"),
 		sound = "WINDOWSHOW",
+		weight = 20,
 		callback = function(event, menuItem)
 			return self:npButtonSelectorShow() 
 		end
