@@ -20,6 +20,13 @@
 #define MAX_CHARS 1000  // max number or characters before spliting text in a label
                         // this gets round SDLs limitation on max surface width
 
+// Scrolling global parameters {
+int scroll_offset_step_minimum = SCROLL_OFFSET_STEP_MINIMUM;
+int font_scroll_factor = FONT_SCROLL_FACTOR;
+// set to 0 => use SCROLL_FPS
+int scroll_fps = 0;
+// } Scrolling global parameters
+
 typedef struct label_line {
 	JiveSurface *text_sh;
 	JiveSurface *text_fg;
@@ -92,10 +99,10 @@ int jiveL_label_skin(lua_State *L) {
 	peer->base.font = jive_font_ref(jive_style_font(L, 1, "font"));
 	
 	//scroll_offset_step is font size dependent
-	if ( peer->base.font->size && peer->base.font->size > SCROLL_OFFSET_STEP_MINIMUM * FONT_SCROLL_FACTOR ) {
-		peer->scroll_offset_step = peer->base.font->size / FONT_SCROLL_FACTOR; 
+	if ( peer->base.font->size && peer->base.font->size > scroll_offset_step_minimum * font_scroll_factor ) {
+		peer->scroll_offset_step = peer->base.font->size / font_scroll_factor;
 	} else {
-		peer->scroll_offset_step = SCROLL_OFFSET_STEP_MINIMUM; 
+		peer->scroll_offset_step = scroll_offset_step_minimum; 
 	}
 	
 	peer->base.lineHeight = jive_style_int(L, 1, "lineHeight", jive_font_capheight(peer->base.font));
@@ -113,9 +120,9 @@ int jiveL_label_skin(lua_State *L) {
 		if (peer->format[i].font) {
 			peer->format[i].lineHeight = jive_style_array_int(L, 1, "line", i+1, "height", jive_font_capheight(peer->format[i].font));
 			peer->format[i].textOffset = jive_font_offset(peer->base.font);
-			if (peer->format[i].font->size > peer->scroll_offset_step * FONT_SCROLL_FACTOR) {
+			if (peer->format[i].font->size > peer->scroll_offset_step * font_scroll_factor) {
 				//use large font found for scroll_offset
-				peer->scroll_offset_step = peer->format[i].font->size / FONT_SCROLL_FACTOR; 
+				peer->scroll_offset_step = peer->format[i].font->size / font_scroll_factor; 
 			}
 		}
 		peer->format[i].fg = jive_style_array_color(L, 1, "line", i+1, "fg", JIVE_COLOR_BLACK, &(peer->format[i].is_fg));
@@ -350,6 +357,14 @@ int jiveL_label_animate(lua_State *L) {
 	 */
 
 	LabelWidget *peer = jive_getpeer(L, 1, &labelPeerMeta);
+	int scroll_frame_rate = scroll_fps;
+
+	if (scroll_frame_rate == 0) {
+	    scroll_frame_rate = SCROLL_FPS;
+	}
+	if (scroll_frame_rate > JIVE_FRAME_RATE) {
+	    scroll_frame_rate = JIVE_FRAME_RATE;
+	}
 	if (lua_toboolean(L, 2)) {
 		peer->scroll_offset = SCROLL_PAD_START;
 
@@ -362,7 +377,7 @@ int jiveL_label_animate(lua_State *L) {
 		jive_getmethod(L, 1, "addAnimation");
 		lua_pushvalue(L, 1);
 		lua_pushcfunction(L, &jiveL_label_do_animate);
-		lua_pushinteger(L, SCROLL_FPS);
+		lua_pushinteger(L, scroll_frame_rate);
 		lua_call(L, 3, 1);
 		lua_setfield(L, 1, "_animationHandle");
 	}
@@ -550,5 +565,26 @@ int jiveL_label_gc(lua_State *L) {
 		peer->bg_tile = NULL;
 	}
 
+	return 0;
+}
+
+int jiveL_label_set_scroll_parameters(lua_State *L) {
+	/* stack is:
+	 * 1: scroll step minimum
+	 * 2: scroll fps
+	 * 3: font scroll factor
+	 */
+
+	int step = luaL_checkint(L, 2);
+	int fps= luaL_checkint(L, 3);
+	int fsf= luaL_checkint(L, 4);
+
+	if (step < 1) step = SCROLL_OFFSET_STEP_MINIMUM;
+	if (fps < 1) fps = SCROLL_FPS;
+	if (fsf < 1) fsf = FONT_SCROLL_FACTOR;
+
+	scroll_offset_step_minimum = step;
+	scroll_fps = fps;
+	font_scroll_factor = fsf;
 	return 0;
 }

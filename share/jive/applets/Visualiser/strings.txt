@@ -47,6 +47,9 @@ VISU_CHANGE_ON_TIMER
 RESIZE_IMAGES
 	EN	Resize Images
 
+VISUALISER
+	EN	Visualiser
+
 LHHL
 	EN	Low Freq > High Freq, High Freq > Low Freq
 HLHL

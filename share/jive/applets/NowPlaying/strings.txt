@@ -245,6 +245,18 @@ ON
 OFF
 	EN	Off
 
+SCROLL_STEP_MINIMUM
+	EN	Scroll step minimum pixels
+
+SCROLL_FPS
+	EN	Scroll Frame Rate
+
+FONT_SCROLL_FACTOR
+	EN	Font scroll factor
+
+SCROLL_SETTINGS
+	EN	Scroll Settings
+
 NOW_PLAYING_VIEWS_HELP
 	CS	Na obrazovce Právě hraje je k dispozici několik různých konfigurací, neboli "zobrazení", mezi kterými můžete přepínat. Zde si můžete zvolit požadovaná zobrazení přehrávače.
 	DA	Vinduet Nu spiller kan vises på forskellige måder som du kan skifte mellem. Her kan du vælge hvordan vinduet skal se ud.
