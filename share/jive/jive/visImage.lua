@@ -132,14 +132,16 @@ local function platformDetect()
 	if tmp ~= nil and string.len(tmp) ~= 0 then
 		workSpace = tmp
 		resizedCachePath = workSpace .. "/cache/resized"
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
---		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frames")
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frameslr")
-		os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
-	end
+    end
 	os.execute("mkdir -p " .. resizedCachePath)
+
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
+--	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frames")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25framesLR")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
+
 	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
 	log:info("saveResizedImages:", saveResizedImages, " save image type:" , saveimage_type)
 	return PLATFORM
@@ -432,6 +434,23 @@ local function initColourSpectrums()
 	end
 end
 
+
+local function __addSpectrumBacklit(path, entry)
+		local mode = lfs.attributes(path .. "/" .. entry, "mode")
+		if mode == "file" then
+			local parts = _parseImagePath(entry)
+			if parts ~= nil then
+				local imgName = 'bl-' .. parts[1]
+				local bgImgName = "bg-" .. imgName
+				if spectrumImagesMap[imgName] == nil then
+					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
+				end
+				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", path .. "/" .. entry)
+				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path .. "/" .. entry}
+			end
+		end
+end
+
 --FIXME make idempotent
 local function _populateSpectrumBacklitList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
@@ -441,23 +460,38 @@ local function _populateSpectrumBacklitList(search_root)
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
-			local parts = _parseImagePath(entry)
-			if parts ~= nil then
-				local imgName = 'bl-' .. parts[1]
-				local bgImgName = "bg-" .. imgName
-				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
-				end
-				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", search_root .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=search_root .. "/" .. entry}
-			end
+			__addSpectrumBacklit(search_root, entry)
 		end
+		if mode == "directory" then
+			local path = search_root .. "/" .. entry
+			for f in lfs.dir(path) do
+				mode = lfs.attributes(path .. "/" .. f, "mode")
+				if mode == "file" then
+					__addSpectrumBacklit(path, f)
+                end
+            end
+        end
 	end
 end
 
 local function _scanSpectrumBacklitList(rpath)
 	for search_root in findPaths(rpath) do
 		_populateSpectrumBacklitList(search_root)
+	end
+end
+
+local function __addSpectrumImage(path, entry)
+	local mode = lfs.attributes(path .. "/" .. entry, "mode")
+	if mode == "file" then
+		local parts = _parseImagePath(entry)
+		if parts ~= nil then
+			local imgName = 'im-' .. parts[1]
+			if spectrumImagesMap[imgName] == nil then
+				table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_IMAGE})
+			end
+			log:debug(" SpectrumImage :", imgName, ", ", path .. "/" .. entry)
+			spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path .. "/" .. entry}
+		end
 	end
 end
 
@@ -470,16 +504,17 @@ local function _populateSpectrumImageList(search_root)
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
-			local parts = _parseImagePath(entry)
-			if parts ~= nil then
-				local imgName = 'im-' .. parts[1]
-				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_IMAGE})
-				end
-				log:debug(" SpectrumImage :", imgName, ", ", search_root .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=search_root .. "/" .. entry}
-			end
+            __addSpectrumImage(search_root, entry)
 		end
+		if mode == "directory" then
+			local path = search_root .. "/" .. entry
+			for f in lfs.dir(path) do
+				mode = lfs.attributes(path .. "/" .. f, "mode")
+				if mode == "file" then
+					__addSpectrumImage(path, f)
+                end
+            end
+        end
 	end
 end
 
