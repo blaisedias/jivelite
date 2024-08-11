@@ -23,24 +23,66 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
+	local node = { id = 'nowPlayingScrollSettings', iconStyle = 'hm_settings', node = 'screenSettingsNowPlaying',
+					text = self:string('SCROLL_SETTINGS'), windowStyle = 'text_only', weight=30  }
+	jiveMain:addNode(node)
+
 	jiveMain:addItem(
 		self:menuItem(
-			'appletNowPlayingScrollMode', 
-			'screenSettingsNowPlaying', 
-			'SCREENSAVER_SCROLLMODE', 
-			function(applet, ...) 
-				applet:scrollSettingsShow(...) 
-			end
+			'appletNowPlayingScrollMode',
+			'nowPlayingScrollSettings',
+			'SCREENSAVER_SCROLLMODE',
+			function(applet, ...)
+				applet:scrollSettingsShow(...)
+			end,
+			40
 		)
 	)
+
 	jiveMain:addItem(
 		self:menuItem(
-			'appletNowPlayingViewsSettings', 
-			'screenSettingsNowPlaying', 
-			'NOW_PLAYING_VIEWS', 
-			function(applet, ...) 
-				applet:npviewsSettingsShow(...) 
-			end
+			'appletNowPlayingViewsSettings',
+			'screenSettingsNowPlaying',
+			'NOW_PLAYING_VIEWS',
+			function(applet, ...)
+				applet:npviewsSettingsShow(...)
+			end, 10
+		)
+	)
+
+	jiveMain:addItem(
+		self:menuItem(
+			'scrollStep',
+			'nowPlayingScrollSettings',
+			'SCROLL_STEP_MINIMUM',
+			function(applet, ...)
+				applet:inputScrollStepMinimum(...)
+			end,
+			50
+		)
+	)
+
+	jiveMain:addItem(
+		self:menuItem(
+			'scrollFPS',
+			'nowPlayingScrollSettings',
+			'SCROLL_FPS',
+			function(applet, ...)
+				applet:inputScrollFPS(...)
+			end,
+			50
+		)
+	)
+
+	jiveMain:addItem(
+		self:menuItem(
+			'fontScrollFactor',
+			'nowPlayingScrollSettings',
+			'FONT_SCROLL_FACTOR',
+			function(applet, ...)
+				applet:inputFontScrollFactor(...)
+			end,
+			50
 		)
 	)
 
@@ -54,9 +96,9 @@ end
 function configureApplet(self)
 
 	appletManager:callService("addScreenSaver",
-		self:string("SCREENSAVER_NOWPLAYING"), 
-		"NowPlaying", 
-		"openScreensaver", 
+		self:string("SCREENSAVER_NOWPLAYING"),
+		"NowPlaying",
+		"openScreensaver",
 		_,
 		_,
 		10,

@@ -523,6 +523,7 @@ int jiveL_label_layout(lua_State *L);
 int jiveL_label_animate(lua_State *L);
 int jiveL_label_draw(lua_State *L);
 int jiveL_label_gc(lua_State *L);
+int jiveL_label_set_scroll_parameters(lua_State *L);
 
 int jiveL_group_get_preferred_bounds(lua_State *L);
 int jiveL_group_skin(lua_State *L);
