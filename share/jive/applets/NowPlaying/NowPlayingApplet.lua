@@ -1534,6 +1534,9 @@ end
 function npResizeSpectrumMeter(self)
     local spectrum_meter_name = visImage:getCurrentSpectrumMeterName()
 
+    if spectrum_meter_name == nil then
+        return false
+    end
     if not visImage:resizeRequiredSpectrumMeter(spectrum_meter_name) then
         return false
     end
@@ -1585,6 +1588,10 @@ end
 --- false otherwise
 function npResizeVUMeter(self)
     local vu_meter_name = visImage:getCurrentVuMeterName()
+
+    if vu_meter_name == nil then
+        return
+    end
 
     if not visImage:resizeRequiredVuMeter(vu_meter_name) then
         return false
