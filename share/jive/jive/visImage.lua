@@ -132,7 +132,7 @@ local function platformDetect()
 	if tmp ~= nil and string.len(tmp) ~= 0 then
 		workSpace = tmp
 		resizedCachePath = workSpace .. "/cache/resized"
-    end
+	end
 	os.execute("mkdir -p " .. resizedCachePath)
 
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
@@ -193,11 +193,11 @@ local function loadImage(path)
 end
 
 local function loadResizedImage(key)
-    local path = resizedImagesTable[key]
-    if path ~= nil then
-        return loadImage(path)
-    end
-    return nil
+	local path = resizedImagesTable[key]
+	if path ~= nil then
+		return loadImage(path)
+	end
+	return nil
 end
 
 -- when a resized image is saved
@@ -468,9 +468,9 @@ local function _populateSpectrumBacklitList(search_root)
 				mode = lfs.attributes(path .. "/" .. f, "mode")
 				if mode == "file" then
 					__addSpectrumBacklit(path, f)
-                end
-            end
-        end
+				end
+			end
+		end
 	end
 end
 
@@ -504,7 +504,7 @@ local function _populateSpectrumImageList(search_root)
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
-            __addSpectrumImage(search_root, entry)
+			__addSpectrumImage(search_root, entry)
 		end
 		if mode == "directory" then
 			local path = search_root .. "/" .. entry
@@ -512,9 +512,9 @@ local function _populateSpectrumImageList(search_root)
 				mode = lfs.attributes(path .. "/" .. f, "mode")
 				if mode == "file" then
 					__addSpectrumImage(path, f)
-                end
-            end
-        end
+				end
+			end
+		end
 	end
 end
 
@@ -578,13 +578,45 @@ local function _cacheSpectrumImage(imgName, path, w, h, spType)
 	end
 end
 
+local function enableOneSpectrumMeter()
+		local enabled_count = 0
+		-- try to select a meter which does not require a resize
+		-- 1: try white colour
+		for _, v in pairs(spectrumList) do
+			if v.name == "mc-White" and v.spType == "colour" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try a colour
+			for _, v in pairs(spectrumList) do
+				if v.spType == "colour" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			spectrumList[1].enabled = true
+		end
+end
+
 local function populateSpSeq()
 	local indx = 1
+	spSeq = {}
 	for i = 1, #spectrumList do
 		if spectrumList[i].enabled == true then
 		 spSeq[indx] = i
 			indx = indx + 1
 		end
+	end
+	if #spSeq == 0 then
+		enableOneSpectrumMeter()
+		populateSpSeq()
 	end
 end
 
@@ -602,6 +634,9 @@ local function __spBump(_, _)
 		ShuffleInPlace(spSeq)
 	end
 	spImageIndex = spSeq[spSeqIndex]
+	if #spSeq == 0 then
+		log:error("No spectrum meters enabled")
+	end
 	spSeqIndex = spSeqIndex + 1
 	return true
 end
@@ -791,7 +826,7 @@ local channelFlips  = {
 
 --function getChannelFlipValues()
 --	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip,
---	            " ", channelFlips[visSettings.spectrum.channelFlip])
+--				" ", channelFlips[visSettings.spectrum.channelFlip])
 --	return channelFlips[visSettings.spectrum.channelFlip]
 --end
 
@@ -1024,13 +1059,46 @@ local function initVuMeterList()
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
+-- Enable at least one valid VU Meter
+local function enableOneVUMeter()
+		local enabled_count = 0
+		-- select a default try to find a vfd (no resize required)
+		-- 1: try "RS-M250"
+		for _, v in pairs(vuImages) do
+			if v.name == "RS-M250" and v.vutype=="vfd" then
+				v.enabled = true
+				enabled_count = 1
+			end
+		end
+		if enabled_count == 0 then
+			-- 2: try any VFD
+			for _, v in pairs(vuImages) do
+				if v.vutype=="vfd" then
+					v.enabled = true
+					enabled_count = 1
+					break
+				end
+			end
+		end
+		if enabled_count == 0 then
+			-- 3: finally just use whatever is first in the list
+			-- a resize may be involved at a later stage
+			vuImages[1].enabled = true
+		end
+end
+
 local function populateVuSeq()
 	local indx = 1
+	vuSeq = {}
 	for i = 1, #vuImages do
 		if vuImages[i].enabled == true then
 			vuSeq[indx] = i
 			indx = indx + 1
 		end
+	end
+	if #vuSeq == 0 then
+		enableOneVUMeter()
+		populateVuSeq()
 	end
 end
 
@@ -1047,6 +1115,9 @@ local function __vuBump()
 		ShuffleInPlace(vuSeq)
 	end
 	vuImageIndex = vuSeq[vuSeqIndex]
+	if #vuSeq == 0 then
+		log:error("No VU meters enabled")
+	end
 	vuSeqIndex = vuSeqIndex + 1
 end
 
@@ -1337,11 +1408,11 @@ function resizeVuMeter(_, name)
 end
 
 function getCurrentVuMeterName()
-	return '' .. vuImages[vuImageIndex].name
+	return vuImages[vuImageIndex].name
 end
 
 function getCurrentSpectrumMeterName()
-	return '' .. spectrumList[spImageIndex].name
+	return spectrumList[spImageIndex].name
 end
 
 function resizeRequiredSpectrumMeter(_, name)
@@ -1426,29 +1497,7 @@ function setVisSettings(_, settings)
 		end
 	end
 	if enabled_count == 0 and #spectrumList > 0 then
-		-- try to select a default which does require a resize
-		-- 1: try white colour
-		for _, v in pairs(spectrumList) do
-			if v.name == "mc-White" and v.spType == "colour" then
-				v.enabled = true
-				enabled_count = 1
-			end
-		end
-		if enabled_count == 0 then
-			-- 2: try a colour
-			for _, v in pairs(spectrumList) do
-				if v.spType == "colour" then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
-			end
-		end
-		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
-			spectrumList[1].enabled = true
-		end
+		enableOneSpectrumMeter()
 	end
 
 	initVuMeterList()
@@ -1461,29 +1510,7 @@ function setVisSettings(_, settings)
 		end
 	end
 	if enabled_count == 0 and #vuImages > 0 then
-		-- select a default try to find a vfd (no resize required)
-		-- 1: try "RS-M250"
-		for _, v in pairs(vuImages) do
-			if v.name == "RS-M250" and v.vutype=="vfd" then
-				v.enabled = true
-				enabled_count = 1
-			end
-		end
-		if enabled_count == 0 then
-			-- 2: try any VFD
-			for _, v in pairs(vuImages) do
-				if v.vutype=="vfd" then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
-			end
-		end
-		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
-			vuImages[1].enabled = true
-		end
+		enableOneVUMeter()
 	end
 	__spBump()
 	__vuBump()
