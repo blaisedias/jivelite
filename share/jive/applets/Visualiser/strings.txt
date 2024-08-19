@@ -45,7 +45,7 @@ VISU_CHANGE_ON_TIMER
 	EN	Change Visualiser On Timer
 
 RESIZE_IMAGES
-	EN	Resize Images
+	EN	Image Resize
 
 VISUALISER
 	EN	Visualiser
@@ -67,4 +67,14 @@ OFF
 
 CHANGE_VISUALISER_ON_TIMER
 	EN	Change Visualiser On Timer (Seconds)
+
+WORKSPACE
+	EN	Workspace path
+
+SAVE_RESIZED
+	EN	Save resized images
+
+SAVE_AS_PNG
+	EN	Save as PNG
+
 

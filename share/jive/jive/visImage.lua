@@ -22,6 +22,7 @@ local math	= require("math")
 local table	= require("table")
 local lfs	= require("lfs")
 local os	= require("os")
+local io	= require("io")
 
 --local ipairs, pairs = ipairs, pairs
 local pairs = pairs
@@ -60,6 +61,8 @@ local saveimage_type = "png"
 local resizedImagesTable = {}
 
 local PLATFORM = ""
+-- PCP only
+local persistent_storage_root = nil
 
 -- on desktop OSes userPath is persistent
 local workSpace = System.getUserDir()
@@ -113,31 +116,51 @@ local function platformDetect()
 		return PLATFORM
 	end
 	PLATFORM = "desktop"
-	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
-	local mode = lfs.attributes(pcp_version_file, "mode")
-	log:info("mode ", pcp_version_file, " " , mode)
-	if mode == "file" then
-		PLATFORM = "piCorePlayer"
-		saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
-		-- save as png is the exception - it must be explicitly disabled
-		local saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
-		if not saveAsPng then
-			saveimage_type = 'bmp'
-		end
-	end
-	-- To support saving resized visualiser images
+
+    -- if setting is absent fall back to legacy behaviour
+    if visSettings.saveAsPng == nil then
+        visSettings.saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+    end
+    if visSettings.saveAsPng == false then
+        saveimage_type = 'bmp'
+    end
+
+    -- if setting is absent fall back to legacy behaviour
+    if visSettings.saveResizedImages == nil then
+        visSettings.saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
+    end
+    saveResizedImages = visSettings.saveResizedImages
+
+	-- Support saving resized visualiser images
 	-- in locations other then the home directory
 	-- defining a path to a workspace is supported
-	local tmp = os.getenv("JL_WORKSPACE") or nil
-	if tmp ~= nil and string.len(tmp) ~= 0 then
-		workSpace = tmp
+	local wkSpace = visSettings.workSpace
+
+    -- legacy compatability:
+    -- if workspace is absent from settings and environment variable is set
+    -- use the environment variable
+	if wkSpace == nil or string.len(wkSpace) == 0 then
+        wkSpace = os.getenv("JL_WORKSPACE")
+    end
+
+    -- workspace on PCP has additional requirements, 
+    -- must be under persistent storage root
+	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
+	local mode = lfs.attributes(pcp_version_file, "mode")
+	if mode == "file" then
+		PLATFORM = "piCorePlayer"
+        persistent_storage_root = io.popen('readlink /etc/sysconfig/tcedir'):read()
+        visSettings.persisentStorageRoot =  persistent_storage_root
+	end
+
+	if wkSpace ~= nil and string.len(wkSpace) ~= 0 then
+		workSpace = wkSpace
 		resizedCachePath = workSpace .. "/cache/resized"
 	end
-	os.execute("mkdir -p " .. resizedCachePath)
 
+	os.execute("mkdir -p " .. resizedCachePath)
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
---	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/analogue")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frames")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25framesLR")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
