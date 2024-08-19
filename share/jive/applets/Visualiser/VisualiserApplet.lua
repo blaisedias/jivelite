@@ -4,7 +4,7 @@ local pairs             = pairs
 local ipairs            = ipairs
 
 local table             = require("table")
---local string            = require("string")
+local string            = require("string")
 --local math              = require("math")
 --local os                = require("os")
 --local io                = require("io")
@@ -217,6 +217,49 @@ function init(self)
 
 end
 
+local function inputWorkSpace(self)
+    local window = Window("text_list", self:string("WORKSPACE"))
+    local settings = self:getSettings()
+
+    local currentValue = settings.workSpace
+    if currentValue == nil then
+        currentValue = ''
+    else
+        currentValue = ''.. currentValue
+    end
+
+    if string.len(currentValue) == 0 and settings.persisentStorageRoot ~= nil then
+        -- TODO popup user message here indicating that text shown is not the current
+        -- value.
+        currentValue = settings.persisentStorageRoot
+    end
+
+    local v = Textinput.textValue(currentValue)
+    local input = Textinput("textinput", v,
+            function(_, value)
+                -- reject the path if it is identical to settings.persistenStorageRoot
+                -- as this might be an indication that the user has not set it.
+                if value.s == settings.persisentStorageRoot ~= nil then
+                    settings.workSpace = value.s
+                    self:storeSettings()
+                end
+                window:hide()
+            end
+    )
+
+    local keyboard = Keyboard("keyboard", "qwerty", input)
+    local backspace = Keyboard.backspace()
+        local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+    window:addWidget(group)
+    window:addWidget(keyboard)
+    window:focusWidget(group)
+
+    self:tieAndShowWindow(window)
+    return window
+end
+
+
 --function imagesMenu(self, menuItem)
 function imagesMenu(self, _)
     local window = Window("text_list", self:string('RESIZE_IMAGES') )
@@ -277,6 +320,41 @@ function imagesMenu(self, _)
         end,
         weight=70
     })
+
+    local settings = self:getSettings()
+    menu:addItem({
+        id = "saveresized",
+        text = self:string("SAVE_RESIZED"),
+        style = 'item_choice',
+        weight = 80,
+        check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.saveResizedImages = checked
+            self:storeSettings()
+            end,
+            settings.saveResizedImages)
+    })
+    menu:addItem({
+        id = "saveaspng",
+        text = self:string("SAVE_AS_PNG"),
+        style = 'item_choice',
+        weight = 90,
+        check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.saveAsPng = checked
+            self:storeSettings()
+            end,
+            settings.saveAsPng)
+    })
+    menu:addItem({ text = "Workspace",
+--        callback = function(event, menuItem)
+        callback = function(_, _)
+            inputWorkSpace(self)
+        end,
+        weight=70
+    })
+
+
 
     window:addWidget(menu)
     window:show()
