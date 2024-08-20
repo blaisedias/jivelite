@@ -65,7 +65,8 @@ local PLATFORM = ""
 local persistent_storage_root = nil
 
 -- on desktop OSes userPath is persistent
-local workSpace = System.getUserDir()
+local defaultWorkspace = System.getUserDir()
+local workSpace = defaultWorkspace
 local resizedCachePath = workSpace .. "/cache/resized"
 
 local function _parseImagePath(imgpath)
@@ -1503,6 +1504,10 @@ end
 
 function getWorkspacePath(_)
 	return "" .. workSpace
+end
+
+function getDefaultWorkspacePath(_)
+	return "" .. defaultWorkspace
 end
 
 
