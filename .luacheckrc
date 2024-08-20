@@ -10,6 +10,7 @@ files["share/jive/jive/visImage.lua"] = {
        "resizeVuMeter", "getCurrentVuMeterName",
        "resizeRequiredSpectrumMeter", "resizeRequiredVuMeter",
        "getVisualiserChangeOnTimerValue",
+       "getWorkspacePath",
        "setVisSettings",
    }
 }

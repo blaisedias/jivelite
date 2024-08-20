@@ -150,8 +150,9 @@ local function platformDetect()
 	if mode == "file" then
 		PLATFORM = "piCorePlayer"
         persistent_storage_root = io.popen('readlink /etc/sysconfig/tcedir'):read()
-        visSettings.persisentStorageRoot =  persistent_storage_root
 	end
+
+    visSettings.persisentStorageRoot =  persistent_storage_root
 
 	if wkSpace ~= nil and string.len(wkSpace) ~= 0 then
 		workSpace = wkSpace
@@ -1499,6 +1500,11 @@ function getVisualiserChangeOnTimerValue(_)
 	end
 	return value
 end
+
+function getWorkspacePath(_)
+	return "" .. workSpace
+end
+
 
 --------------------------------------------------------
 --- Initialisation and settings
