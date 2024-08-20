@@ -229,8 +229,8 @@ local function inputWorkSpace(self)
     end
 
     if string.len(currentValue) == 0 and settings.persisentStorageRoot ~= nil then
-        -- TODO popup user message here indicating that text shown is not the current
-        -- value.
+        -- unset - pre-fill with recommended value if a persistent storage path 
+        -- is defined
         currentValue = settings.persisentStorageRoot .. '/jivelite-workspace'
     end
 
@@ -348,27 +348,22 @@ function imagesMenu(self, _)
             settings.saveAsPng)
     })
 
-    local wk_space_info = 'Current workspace path: ' .. visImage:getWorkspacePath()
-    if settings.workSpace == nil or string.len(settings.workSpace) == 0 then
-        wk_space_info = wk_space_info .. ' (default)'
-        menu:addItem({ text = wk_space_info,
+    -- workspace UI is complicated
+    -- present information to the user and the ability to change it
+    -- show default, and current values
+    menu:addItem({ text =  'Default workspace path: ' .. visImage:getDefaultWorkspacePath(),
             style = 'text',
             weight=100
-        })
-        if settings.persisentStorageRoot ~= nil then
-            menu:addItem({ text = 'Persistent storage path: ' .. settings.persisentStorageRoot,
-                style = 'text',
-                weight=110
-            })
-            menu:addItem({ text = 'Recommended workspace path: ' .. settings.persisentStorageRoot .. '/jivelite-workspace',
-                style = 'text',
-                weight=120
-            })
-        end
-    else
-        menu:addItem({ text = wk_space_info,
+    })
+    menu:addItem({ text =  'Current workspace path: ' .. visImage:getWorkspacePath(),
             style = 'text',
-            weight=100
+            weight=110
+    })
+    -- if persistent storage path is defined then offer recommended values
+    if settings.persisentStorageRoot ~= nil then
+        menu:addItem({ text = 'Recommended workspace path: ' .. settings.persisentStorageRoot .. '/jivelite-workspace',
+            style = 'text',
+            weight=120
         })
     end
     menu:addItem({ text = self:string("WORKSPACE"),
@@ -378,7 +373,6 @@ function imagesMenu(self, _)
         end,
         weight=130
     })
-
 
 
     window:addWidget(menu)
