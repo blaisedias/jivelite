@@ -231,7 +231,7 @@ local function inputWorkSpace(self)
     if string.len(currentValue) == 0 and settings.persisentStorageRoot ~= nil then
         -- TODO popup user message here indicating that text shown is not the current
         -- value.
-        currentValue = settings.persisentStorageRoot
+        currentValue = settings.persisentStorageRoot .. '/jivelite-workspace'
     end
 
     local v = Textinput.textValue(currentValue)
@@ -264,6 +264,7 @@ end
 function imagesMenu(self, _)
     local window = Window("text_list", self:string('RESIZE_IMAGES') )
     local menu = SimpleMenu("menu")
+    local settings = self:getSettings()
 
     menu:addItem({ text = "Resize Selected Visualiser Images",
 --        callback = function(event, menuItem)
@@ -346,12 +347,36 @@ function imagesMenu(self, _)
             end,
             settings.saveAsPng)
     })
-    menu:addItem({ text = "Workspace",
+
+    local wk_space_info = 'Current workspace path: ' .. visImage:getWorkspacePath()
+    if settings.workSpace == nil or string.len(settings.workSpace) == 0 then
+        wk_space_info = wk_space_info .. ' (default)'
+        menu:addItem({ text = wk_space_info,
+            style = 'text',
+            weight=100
+        })
+        if settings.persisentStorageRoot ~= nil then
+            menu:addItem({ text = 'Persistent storage path: ' .. settings.persisentStorageRoot,
+                style = 'text',
+                weight=110
+            })
+            menu:addItem({ text = 'Recommended workspace path: ' .. settings.persisentStorageRoot .. '/jivelite-workspace',
+                style = 'text',
+                weight=120
+            })
+        end
+    else
+        menu:addItem({ text = wk_space_info,
+            style = 'text',
+            weight=100
+        })
+    end
+    menu:addItem({ text = self:string("WORKSPACE"),
 --        callback = function(event, menuItem)
         callback = function(_, _)
             inputWorkSpace(self)
         end,
-        weight=70
+        weight=130
     })
 
 
