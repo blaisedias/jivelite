@@ -59,6 +59,7 @@ local saveimage_type = "png"
 -- so that unnecessary expensive resize operations are not repeated.
 -- In that sense it is a bit like a cache.
 local resizedImagesTable = {}
+local displayResizingParameters = {}
 
 local PLATFORM = ""
 -- PCP only
@@ -118,42 +119,42 @@ local function platformDetect()
 	end
 	PLATFORM = "desktop"
 
-    -- if setting is absent fall back to legacy behaviour
-    if visSettings.saveAsPng == nil then
-        visSettings.saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
-    end
-    if visSettings.saveAsPng == false then
-        saveimage_type = 'bmp'
-    end
+	-- if setting is absent fall back to legacy behaviour
+	if visSettings.saveAsPng == nil then
+		visSettings.saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+	end
+	if visSettings.saveAsPng == false then
+		saveimage_type = 'bmp'
+	end
 
-    -- if setting is absent fall back to legacy behaviour
-    if visSettings.saveResizedImages == nil then
-        visSettings.saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
-    end
-    saveResizedImages = visSettings.saveResizedImages
+	-- if setting is absent fall back to legacy behaviour
+	if visSettings.saveResizedImages == nil then
+		visSettings.saveResizedImages = boolOsEnv("JL_SAVE_RESIZED_IMAGES", true)
+	end
+	saveResizedImages = visSettings.saveResizedImages
 
 	-- Support saving resized visualiser images
 	-- in locations other then the home directory
 	-- defining a path to a workspace is supported
 	local wkSpace = visSettings.workSpace
 
-    -- legacy compatability:
-    -- if workspace is absent from settings and environment variable is set
-    -- use the environment variable
+	-- legacy compatability:
+	-- if workspace is absent from settings and environment variable is set
+	-- use the environment variable
 	if wkSpace == nil or string.len(wkSpace) == 0 then
-        wkSpace = os.getenv("JL_WORKSPACE")
-    end
+		wkSpace = os.getenv("JL_WORKSPACE")
+	end
 
-    -- workspace on PCP has additional requirements, 
-    -- must be under persistent storage root
+	-- workspace on PCP has additional requirements, 
+	-- must be under persistent storage root
 	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
 	local mode = lfs.attributes(pcp_version_file, "mode")
 	if mode == "file" then
 		PLATFORM = "piCorePlayer"
-        persistent_storage_root = io.popen('readlink /etc/sysconfig/tcedir'):read()
+		persistent_storage_root = io.popen('readlink /etc/sysconfig/tcedir'):read()
 	end
 
-    visSettings.persisentStorageRoot =  persistent_storage_root
+	visSettings.persisentStorageRoot =  persistent_storage_root
 
 	if wkSpace ~= nil and string.len(wkSpace) ~= 0 then
 		workSpace = wkSpace
@@ -334,6 +335,18 @@ local function _populateResizedImagesTable(search_root)
 			end
 		end
 	end
+end
+
+-- return a shallow copy of displayResizingParameters if resize is required
+local function makeResizingParams(resizeIsRequired)
+	if displayResizingParameters ~= nil and resizeIsRequired then
+		return {
+			img = displayResizingParameters.img,
+			w = displayResizingParameters.w,
+			h = displayResizingParameters.h,
+		}
+	end
+	return nil
 end
 
 --------------------------------------------------------
@@ -692,36 +705,38 @@ end
 local function _getFgSpectrumImage(spkey, w, h, _)
 	local fgImage
 	if spectrumImagesMap[spkey] == nil then
-		return nil
+		return nil, false
 	end
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
 	if spectrumImagesMap[spkey].fg == nil then
-		return nil
+		return nil, false
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg,
 				" ", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
-	return fgImage
+	return fgImage, fgImage == nil
 end
 
 local function _getBgSpectrumImage(spkey, w, h, spType)
 	local bgImage
 	if spectrumImagesMap[spkey] == nil then
-		return nil
+		return nil, false
 	end
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
 	if spectrumImagesMap[spkey].bg == nil then
-		return nil
+		return nil, false
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
 
+	local resizeRequired = false
 	bgImage = imCacheGet(dicKey)
 	if bgImage == nil then
-		local fgimg = _getFgSpectrumImage(spkey, w, h, spType)
+		local fgimg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spType)
+		resizeRequired = fgResizeRequired
 		if fgimg ~= nil then
 			-- FIXME:
 			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
@@ -737,7 +752,7 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 			imCachePut(dicKey, bgImage)
 		end
 	end
-	return bgImage
+	return bgImage, resizeRequired
 end
 
 local prevSpImageIndex = -1
@@ -760,11 +775,13 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 	end
 	prevSpImageIndex = spImageIndex
 
-	local fg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local bg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local fg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local bg, bgResizeRequired = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
-	return fg, bg, alpha, barColor, capColor
+	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired)
+
+	return fg, bg, alpha, barColor, capColor, displayResizing
 end
 
 function selectSpectrum(_, name, selected, allowCaching)
@@ -1299,7 +1316,7 @@ end
 
 
 local prevVuImageIndex = -1
-function getVuImage(w,h)
+function getVuImage(_,w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
 --	if vuImages[vuImageIndex].enabled == false then
 --		__vuBump()
@@ -1322,14 +1339,14 @@ function getVuImage(w,h)
 		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
 		local leftImg = loadResizedImage(ldicKey)
 		local rightImg = loadResizedImage(rdicKey)
-		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg}
+		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg, displayResizing=makeResizingParams(leftImg==nil or  rightImg==nil)}
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
 	-- image is in the cache load and return
 	log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
 	frameVU = loadResizedImage(dicKey)
-	return {vutype=entry.vutype, bgImg=frameVU}
+	return {vutype=entry.vutype, bgImg=frameVU, displayResizing=makeResizingParams(frameVU==nil)}
 end
 
 
@@ -1392,14 +1409,12 @@ end
 -------------------------------------------------------
 function resizeSpectrumMeter(_, name)
 	log:info("resizeSpectrums ", name)
-
 	for _, v in pairs(spectrumList) do
---		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
 			-- create the resized images for skin resolutions
 			for _, vr in pairs(spectrumResolutions) do
 				if spectrumImagesMap[v.name].src ~= nil then
-				 log:info("resizing spectrum ", v.name, " -> ", vr.w, "x", vr.h)
+					log:info("resizing spectrum ", v.name, " -> ", vr.w, "x", vr.h)
 					_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, vr.w, vr.h, v.spType)
 					log:info("resizing done ", v.name, " -> ", vr.w, "x", vr.h)
 				end
@@ -1408,11 +1423,25 @@ function resizeSpectrumMeter(_, name)
 	end
 end
 
+function resizeSingleSpectrumMeter(_, name, w, h)
+	log:info("resizeSingleSpectrumMeter ", name, ", ", w, ", ", h)
+	for _, v in pairs(spectrumList) do
+		if name == v.name then
+			-- create the resized images for skin resolutions
+			if spectrumImagesMap[v.name].src ~= nil then
+				log:info("resizing single spectrum ", v.name, " -> ", w, "x", h)
+				_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, w, h, v.spType)
+				log:info("resizing done ", v.name, " -> ", w, "x", h)
+			end
+		end
+	end
+end
+
+
 function resizeVuMeter(_, name)
 	log:info("resizeVuMeters ", name)
 
 	for _, v in pairs(vuImages) do
---		if v.enabled and (name == nil or name == v.name) then
 		if name == v.name then
 			if v.vutype == "frame" then
 				-- create the resized images for skin resolutions
@@ -1427,6 +1456,25 @@ function resizeVuMeter(_, name)
 					_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
 					_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
 				end
+			end
+		end
+	end
+end
+
+function resizeSingleVuMeter(_, name, w, h)
+	log:info("resizeSingleVuMeter ", name, ", ", w, ", ", h)
+	for _, v in pairs(vuImages) do
+		if name == v.name then
+			if v.vutype == "frame" then
+				-- create the resized images for skin resolutions
+				log:info("resizing single Vu Meter", v.name, " -> ", w, "x", h)
+				_cacheVUImage(v.name, vuImagesMap[v.name].src, w, h)
+			end
+			if v.vutype == "25framesLR" then
+				-- create the cached image for skin resolutions
+				log:info("resizing single Vu Meter", v.name, " -> ", w, "x", h)
+				_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, w, h)
+				_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, w, h)
 			end
 		end
 	end
@@ -1510,7 +1558,6 @@ function getDefaultWorkspacePath(_)
 	return "" .. defaultWorkspace
 end
 
-
 --------------------------------------------------------
 --- Initialisation and settings
 --------------------------------------------------------
@@ -1519,6 +1566,22 @@ function setVisSettings(_, settings)
 
 	platformDetect()
 	initialiseCache()
+
+	-- try persistent load of resizing image
+	for search_root in findPaths("../../assets/images") do
+		for entry in lfs.dir(search_root) do
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "file" then
+			 local parts = _parseImagePath(entry)
+				if parts ~= nil and parts[1] == "resizing" then
+					local resizingImg = Surface:altLoadImage(search_root .. "/" .. entry )
+					local w,h = resizingImg:getSize()
+					displayResizingParameters = { img=resizingImg, w=w, h=h }
+					log:info("found resizing image", resizingImg)
+				end
+			end
+		end
+	end
 
 	initSpectrumList()
 	local enabled_count = 0
