@@ -1810,7 +1810,7 @@ function _createUI(self)
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	if npStyleHasSpectrum(self.windowStyle) then
 		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
-		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
+--		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = self.currentVisualiser,
@@ -1827,7 +1827,7 @@ function _createUI(self)
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
 		self.currentVisualiser = VUMeter("vumeter_analog")
-		self.resizeVUMeterPending = self:npResizeVUMeter()
+--		self.resizeVUMeterPending = self:npResizeVUMeter()
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = self.currentVisualiser
@@ -2250,12 +2250,12 @@ function showNowPlaying(self, transition, direct)
 	-- Initialize with current data from Player
 	self.window:show(transitionOn)
 	self:_updateAll()
-	if self.resizeSpectrumMeterPending then
-		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
-	end
-	if self.resizeVUMeterPending then
-		self.resizeVUMeterPending = self:npResizeVUMeter()
-	end
+--	if self.resizeSpectrumMeterPending then
+--		self.resizeSpectrumMeterPending = self:npResizeSpectrumMeter()
+--	end
+--	if self.resizeVUMeterPending then
+--		self.resizeVUMeterPending = self:npResizeVUMeter()
+--	end
 
 end
 

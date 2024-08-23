@@ -145,7 +145,7 @@ local function draw25FrameVuMeter(params, surface, vol)
 	params.img:blitClip(params.cap * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
 end
 
-local function nullDraw(_, _)
+local function nullDraw(_, _, _)
 end
 
 
@@ -153,7 +153,7 @@ function _layout(self)
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
-	self.counter = FRAME_RATE * visImage.getVisualiserChangeOnTimerValue()
+	self.counter = FRAME_RATE * visImage:getVisualiserChangeOnTimerValue()
 	self.countDown = self.counter ~= 0
 
 	self.player = appletManager:callService("getCurrentPlayer")
@@ -216,7 +216,11 @@ function _layout(self)
 	elseif self.style == "vumeter_v2" then
 		self.drawMeter = nullDraw
 		log:debug("-----------------------------------------------------------------------")
-		self.vutbl = visImage.getVuImage(w,h)
+		self.vutbl = visImage:getVuImage(w,h)
+		if self.vutbl.displayResizing ~= nil then
+			self.counter = FRAME_RATE/2
+			return
+		end
 		if self.vutbl.vutype == "frame"  then
 			self.bgImg = self.vutbl.bgImg
 			if self.bgImg ~= nil then
@@ -324,6 +328,20 @@ end
 function draw(self, surface)
 	if self.bgParams ~= nil then
 		self.drawBackground(self.bgParams, surface)
+	end
+
+	if self.vutbl ~= nil and  self.vutbl.displayResizing ~= nil then
+		local x, y, w, h = self:getBounds()
+		local d = self.vutbl.displayResizing
+		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			local vuname = visImage:getCurrentVuMeterName()
+			log:info("resizing vumeter ", vuname, " ",w , " ", h)
+			visImage:resizeSingleVuMeter(vuname, w, h)
+			self:_layout(self)
+		end
+		return
 	end
 
 	local sampleAcc = vis:vumeter()
