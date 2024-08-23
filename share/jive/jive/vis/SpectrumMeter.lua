@@ -67,7 +67,12 @@ function _layout(self)
 
 	self.isMono =  self:styleValue("isMono")
 
-	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor = visImage:getSpectrum(w, h, self.barColor, self.capColor)
+	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
+
+	if self.displayResizing ~= nil then
+		self.counter = FRAME_RATE/2
+	end
+
 	log:info('** barColor=', string.format("0x%x", self.barColor), " capColor=", string.format("0x%x",self.capColor))
 	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
 	if self.settings.barsFormat.barsInBin < 1 then
@@ -83,7 +88,7 @@ function _layout(self)
 	local barsInBin = self.settings.barsFormat.barsInBin
 	local barWidth = self.settings.barsFormat.barWidth
 	local barSpace = self.settings.barsFormat.barSpace
-    local binSpace = self.settings.barsFormat.binSpace
+	local binSpace = self.settings.barsFormat.binSpace
 
 	local barSize = {}
 
@@ -114,7 +119,7 @@ function _layout(self)
 --
 --	barHeight[1] = h - t - b - self.settings.capHeight[1] - self.settings.capSpace[1]
 --	barHeight[2] = h - t - b - self.settings.capHeight[2] - self.settings.capSpace[2]
-    local barHeight = h - t - b - self.settings.capHeight - self.settings.capSpace
+	local barHeight = h - t - b - self.settings.capHeight - self.settings.capSpace
 
 	-- max bin value from C code is 31
 --	self.barHeightMulti = {}
@@ -139,12 +144,12 @@ function _layout(self)
 	self.yCentre = self.y - (self.h/2)
 	self.yoffset_controls = 0
 	if self.np_large_spectrum then
-        -- Adjust for large spectrum - where the visualiser background image
-        -- occupies the whole screen and controls are overlaid on the background image
+		-- Adjust for large spectrum - where the visualiser background image
+		-- occupies the whole screen and controls are overlaid on the background image
 		self.y = y + h
 		self.yCentre = self.y - (self.h/2)
-        -- bar rendering must not spill over the controls area
-        -- FIXME: b works but it should really be height of the controls bar
+		-- bar rendering must not spill over the controls area
+		-- FIXME: b works but it should really be height of the controls bar
 		self.yoffset_controls = b
 	end
 
@@ -181,7 +186,7 @@ function _layout(self)
 	end
 	self.left.capHeight = self.settings.capHeight
 	self.left.capSpace = self.settings.capSpace
-    self.left.totalCapHeight = self.left.capHeight + self.left.capSpace
+	self.left.totalCapHeight = self.left.capHeight + self.left.capSpace
 
 	self.right = table.clone(self.left)
 
@@ -194,38 +199,38 @@ function _layout(self)
 end
 
 local function _drawBins(surface, bch, params)
-    --	mutating
+	--	mutating
 	local cch = params.cap
 	local x = params.x
 	local nz = false
 
-    --	non-mutating
-    local xshift = params.xshift
-    local xStep = params.xStep
+	--	non-mutating
+	local xshift = params.xshift
+	local xStep = params.xStep
 
-    local y = params.adjustedY
-    local yCentre = params.yCentre
-    local adjustedHeight = params.adjustedHeight
-    local halfHeight = params.halfHeight
+	local y = params.adjustedY
+	local yCentre = params.yCentre
+	local adjustedHeight = params.adjustedHeight
+	local halfHeight = params.halfHeight
 
-    local barHeightMulti = params.barHeightMulti
-    local barsInBin = params.barsInBin
-    local barSize = params.barSize
-    local barWidth = params.barWidth
-    local barStep = params.barStep
-    local barColor = params.barColor
+	local barHeightMulti = params.barHeightMulti
+	local barsInBin = params.barsInBin
+	local barSize = params.barSize
+	local barWidth = params.barWidth
+	local barStep = params.barStep
+	local barColor = params.barColor
 
-    local capColor = params.capColor
-    local totalCapHeight = params.totalCapHeight
-    local capHeight = params.capHeight
-    local capSpace = params.capSpace
+	local capColor = params.capColor
+	local totalCapHeight = params.totalCapHeight
+	local capHeight = params.capHeight
+	local capSpace = params.capSpace
 
-    local fgImg = params.fgImg
-    local turbine = params.turbine
+	local fgImg = params.fgImg
+	local turbine = params.turbine
 
-    local xLeft
-    local yTop
-    local imgXLeft
+	local xLeft
+	local yTop
+	local imgXLeft
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
@@ -245,7 +250,7 @@ local function _drawBins(surface, bch, params)
 			for k = 0, barsInBin - 1 do
 				xLeft = x + (k * barSize)
 				if fgImg ~= nil then
-                    imgXLeft = xLeft - xshift
+					imgXLeft = xLeft - xshift
 					if turbine then
 						yTop = yCentre - (bch[i]/2)
 						fgImg:blitClip(imgXLeft, halfHeight - (bch[i]/2),
@@ -306,6 +311,18 @@ function draw(self, surface)
 --	self.bgImg:blit(surface, self:getBounds())
 	local x, y, w, h = self:getBounds()
 
+	if self.displayResizing ~= nil then
+		local d = self.displayResizing
+		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			local spname = visImage:getCurrentSpectrumMeterName()
+			visImage:resizeSingleSpectrumMeter(spname, w, h)
+			self:_layout(self)
+		end
+		return
+	end
+
 	-- Avoid calling this more than once as it's not necessary
 	if not self.backgroundDrawn then
 		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
@@ -329,9 +346,9 @@ function draw(self, surface)
 	-- by not drawing baseline if volume is 0
 	-- good enough
 	if self.settings.baselineAlways or ((nz1 or nz2) and self.settings.baselineOn) then
-        local baseLineHeight = self.baseLineHeight
-        local halfBaseLineHeight = baseLineHeight/2
-        local xSpan = self.xSpan
+		local baseLineHeight = self.baseLineHeight
+		local halfBaseLineHeight = baseLineHeight/2
+		local xSpan = self.xSpan
 		if self.fgImg ~= nil then
 			if self.settings.turbine then
 				self.fgImg:blitClip(self.x1 - x, (h/2) - halfBaseLineHeight, xSpan, baseLineHeight,

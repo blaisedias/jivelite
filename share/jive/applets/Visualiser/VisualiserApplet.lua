@@ -453,7 +453,9 @@ end
 function selectVuMeters(self)
     local window = Window("text_list", self:string('SELECT_VUMETER') )
     local menu = SimpleMenu("menu")
-    menu.closeAction = "go_resize_visu"
+--  uncomment to trigger resize on exit from the menu
+--    menu.closeAction = "go_resize_visu"
+
 --    local settings = self:getSettings()
 
     -- use the vu meter list from the visImage module,
@@ -504,7 +506,8 @@ end
 function selectSpectrumMeters(self)
     local window = Window("text_list", self:string('SELECT_SPECTRUM') )
     local menu = SimpleMenu("menu")
-    menu.closeAction = "go_resize_visu"
+--  uncomment to trigger resize on exit from the ment   
+--    menu.closeAction = "go_resize_visu"
 
     -- use the spectrum meter list from the visImage module,
     -- it is sorted, settings merely contains the list of
