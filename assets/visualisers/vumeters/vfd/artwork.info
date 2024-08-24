@@ -4,51 +4,60 @@ Author:		blaisedias
 Original-site:	https://github.com/blaisedias/jivelite
 Copying-policy:	Public Domain
 
-Cyan Orange Chevrons/bar-off.png
-Cyan Orange Chevrons/bar-on.png
-Cyan Orange Chevrons/bar-peak-off.png
-Cyan Orange Chevrons/bar-peak-on.png
-Cyan Orange Chevrons/center.png
-Cyan Orange Chevrons/left-trail.png
-Cyan Orange Chevrons/left.png
-Cyan Orange Chevrons/right-trail.png
-Cyan Orange Chevrons/right.png
-Green Red Bars/bar-off.png
-Green Red Bars/bar-on.png
-Green Red Bars/bar-peak-off.png
-Green Red Bars/bar-peak-on.png
-Green Red Bars/center.png
-Green Red Bars/left-trail.png
-Green Red Bars/left.png
-Green Red Bars/right-trail.png
-Green Red Bars/right.png
-Green Red Chevrons/bar-off.png
-Green Red Chevrons/bar-on.png
-Green Red Chevrons/bar-peak-off.png
-Green Red Chevrons/bar-peak-on.png
-Green Red Chevrons/center.png
-Green Red Chevrons/left-trail.png
-Green Red Chevrons/left.png
-Green Red Chevrons/right-trail.png
-Green Red Chevrons/right.png
-Pastel Green Red Bars/bar-off.png
-Pastel Green Red Bars/bar-on.png
-Pastel Green Red Bars/bar-peak-off.png
-Pastel Green Red Bars/bar-peak-on.png
-Pastel Green Red Bars/center.png
-Pastel Green Red Bars/left-trail.png
-Pastel Green Red Bars/left.png
-Pastel Green Red Bars/right-trail.png
-Pastel Green Red Bars/right.png
-Pastel Green Red Chevrons/bar-off.png
-Pastel Green Red Chevrons/bar-on.png
-Pastel Green Red Chevrons/bar-peak-off.png
-Pastel Green Red Chevrons/bar-peak-on.png
-Pastel Green Red Chevrons/center.png
-Pastel Green Red Chevrons/left-trail.png
-Pastel Green Red Chevrons/left.png
-Pastel Green Red Chevrons/right-trail.png
-Pastel Green Red Chevrons/right.png
+Bars Green Red/bar-off.png
+Bars Green Red/bar-on.png
+Bars Green Red/bar-peak-off.png
+Bars Green Red/bar-peak-on.png
+Bars Green Red/center.png
+Bars Green Red/left-trail.png
+Bars Green Red/left.png
+Bars Green Red/right-trail.png
+Bars Green Red/right.png
+Bars Pastel Green Red/bar-off.png
+Bars Pastel Green Red/bar-on.png
+Bars Pastel Green Red/bar-peak-off.png
+Bars Pastel Green Red/bar-peak-on.png
+Bars Pastel Green Red/center.png
+Bars Pastel Green Red/left-trail.png
+Bars Pastel Green Red/left.png
+Bars Pastel Green Red/right-trail.png
+Bars Pastel Green Red/right.png
+Chevrons Cyan Orange/bar-off.png
+Chevrons Cyan Orange/bar-on.png
+Chevrons Cyan Orange/bar-peak-off.png
+Chevrons Cyan Orange/bar-peak-on.png
+Chevrons Cyan Orange/center.png
+Chevrons Cyan Orange/left-trail.png
+Chevrons Cyan Orange/left.png
+Chevrons Cyan Orange/right-trail.png
+Chevrons Cyan Orange/right.png
+Chevrons Green Red/bar-off.png
+Chevrons Green Red/bar-on.png
+Chevrons Green Red/bar-peak-off.png
+Chevrons Green Red/bar-peak-on.png
+Chevrons Green Red/center.png
+Chevrons Green Red/left-trail.png
+Chevrons Green Red/left.png
+Chevrons Green Red/right-trail.png
+Chevrons Green Red/right.png
+Chevrons Pastel Green Red/bar-off.png
+Chevrons Pastel Green Red/bar-on.png
+Chevrons Pastel Green Red/bar-peak-off.png
+Chevrons Pastel Green Red/bar-peak-on.png
+Chevrons Pastel Green Red/center.png
+Chevrons Pastel Green Red/left-trail.png
+Chevrons Pastel Green Red/left.png
+Chevrons Pastel Green Red/right-trail.png
+Chevrons Pastel Green Red/right.png
+Chevrons White Orange/bar-off.png
+Chevrons White Orange/bar-on.png
+Chevrons White Orange/bar-peak-off.png
+Chevrons White Orange/bar-peak-on.png
+Chevrons White Orange/center.png
+Chevrons White Orange/left-trail.png
+Chevrons White Orange/left.png
+Chevrons White Orange/right-trail.png
+Chevrons White Orange/right.png
 RS-M250/bar-off.png
 RS-M250/bar-on.png
 RS-M250/bar-peak-off.png
@@ -67,12 +76,29 @@ RS-M250 Cyan/left-trail.png
 RS-M250 Cyan/left.png
 RS-M250 Cyan/right-trail.png
 RS-M250 Cyan/right.png
-White Orange Chevrons/bar-off.png
-White Orange Chevrons/bar-on.png
-White Orange Chevrons/bar-peak-off.png
-White Orange Chevrons/bar-peak-on.png
-White Orange Chevrons/center.png
-White Orange Chevrons/left-trail.png
-White Orange Chevrons/left.png
-White Orange Chevrons/right-trail.png
-White Orange Chevrons/right.png
+Wings Cyan Orange/bar-off.png
+Wings Cyan Orange/bar-on.png
+Wings Cyan Orange/bar-peak-off.png
+Wings Cyan Orange/bar-peak-on.png
+Wings Cyan Orange/center.png
+Wings Cyan Orange/left-trail.png
+Wings Cyan Orange/left.png
+Wings Cyan Orange/r-bar-off.png
+Wings Cyan Orange/r-bar-on.png
+Wings Cyan Orange/r-bar-peak-off.png
+Wings Cyan Orange/r-bar-peak-on.png
+Wings Cyan Orange/right-trail.png
+Wings Cyan Orange/right.png
+Wings Pastel Green Red/bar-off.png
+Wings Pastel Green Red/bar-on.png
+Wings Pastel Green Red/bar-peak-off.png
+Wings Pastel Green Red/bar-peak-on.png
+Wings Pastel Green Red/center.png
+Wings Pastel Green Red/left-trail.png
+Wings Pastel Green Red/left.png
+Wings Pastel Green Red/r-bar-off.png
+Wings Pastel Green Red/r-bar-on.png
+Wings Pastel Green Red/r-bar-peak-off.png
+Wings Pastel Green Red/r-bar-peak-on.png
+Wings Pastel Green Red/right-trail.png
+Wings Pastel Green Red/right.png
