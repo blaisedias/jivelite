@@ -278,13 +278,13 @@ static int jiveL_initSDL(lua_State *L) {
 
 	screen_bpp = video_info->vfmt->BitsPerPixel;
 	fprintf(stderr, "display:\n\tresolution: %dx%d\n\tBitsPerPixel:%d,\n\tBytesPerPixel:%d\n\tWindow manager:%d,\n\tHardware Acceleration:%d\n\tvideo memory:%u KiB\n",
-            (int)screen_w, (int)screen_h,
-            (int)screen_bpp,
-            (int)video_info->vfmt->BytesPerPixel,
-            (int)video_info->wm_available,
-            (int)video_info->hw_available,
-            video_info->video_mem
-            );
+			(int)screen_w, (int)screen_h,
+			(int)screen_bpp,
+			(int)video_info->vfmt->BytesPerPixel,
+			(int)video_info->wm_available,
+			(int)video_info->hw_available,
+			video_info->video_mem
+			);
 	fprintf(stderr, "\tjivelite frame rate:%d fps\n", jive_frame_rate());
 
 	splash = NULL;
@@ -1627,6 +1627,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "drawText", jiveL_surface_draw_text },
 	{ "free", jiveL_surface_free },
 	{ "release", jiveL_surface_release },
+	{ "altRelease", jiveL_surface_alt_release },
 	{ "saveBMP", jiveL_surface_save_bmp },
 	{ "compare", jiveL_surface_cmp },
 	{ "setOffset", jiveL_surface_set_offset },
@@ -1660,6 +1661,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "aatrigon", jiveL_surface_aatrigonColor },
 	{ "filledTrigon", jiveL_surface_filledTrigonColor },
 	{ "savePNG", jiveL_surface_save_png },
+	{ "requestResize", jiveL_surface_request_resize },
 	{ NULL, NULL }
 };
 
