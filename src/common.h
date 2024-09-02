@@ -69,6 +69,7 @@ typedef _W64 int   ssize_t;
 
 /* utilities */
 extern int jive_find_file(const char *path, char *fullpath);
+extern void start_concurrent_resizer(void);
 
 /* watchdog */
 int watchdog_get();

@@ -8,6 +8,9 @@
 #include "jive.h"
 #include "savepng.h"
 
+#include <pthread.h>
+#include <stdio.h>
+
 /*
  * This file combines both JiveSurface and JiveTile into a single implementation.
  * The separate typdefs, JiveSurface and JiveTile, are still kept so that the
@@ -854,7 +857,7 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 	if (!sdl) {
 		/* create new surface */
 		LOG_INFO(log_ui_draw, "set_video_mode: setting: WxH=%dx%d, bpp=%d, flags=%x",
-                (int)w, (int)h, (int)bpp, flags);
+				(int)w, (int)h, (int)bpp, flags);
 
 		sdl = SDL_SetVideoMode(w, h, bpp, flags);
 		if (!sdl) {
@@ -898,9 +901,7 @@ JiveSurface *jive_surface_newRGB(Uint16 w, Uint16 h) {
 	return srf;
 }
 
-
-JiveSurface *jive_surface_newRGBA(Uint16 w, Uint16 h) {
-	JiveSurface *srf;
+SDL_Surface *surface_newRGBA(Uint16 w, Uint16 h) {
 	SDL_Surface *sdl;
 
 	/*
@@ -920,7 +921,14 @@ JiveSurface *jive_surface_newRGBA(Uint16 w, Uint16 h) {
 
 	/* alpha channel, paint transparency */
 	SDL_SetAlpha(sdl, SDL_SRCALPHA, SDL_ALPHA_OPAQUE);
+	return sdl;
+}
 
+
+JiveSurface *jive_surface_newRGBA(Uint16 w, Uint16 h) {
+	JiveSurface *srf;
+
+	SDL_Surface *sdl = surface_newRGBA(w,h);
 	srf = calloc(sizeof(JiveSurface), 1);
 	srf->refcount = 1;
 	srf->sdl = sdl;
@@ -1009,21 +1017,25 @@ int jive_surface_save_bmp(JiveSurface *srf, const char *file) {
 	return SDL_SaveBMP(srf->sdl, file);
 }
 
+int save_png(SDL_Surface * sdl, const char* file) {
+	if (sdl->format->BitsPerPixel <= 24 || sdl->format->Amask) {
+		LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha not required");
+		return SDL_SavePNG(sdl, file);
+	} else {
+		LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha");
+		SDL_Surface *spfa = SDL_PNGFormatAlpha(sdl);
+		int rv = SDL_SavePNG(spfa, file);
+		SDL_FreeSurface(spfa);
+		return rv;
+	}
+}
+
 int jive_surface_save_png(JiveSurface *srf, const char *file) {
 	if (!srf->sdl) {
 		LOG_ERROR(log_ui, "Underlying sdl surface already freed, possibly with release()");
 		return 0;
 	}
-    if (srf->sdl->format->BitsPerPixel <= 24 || srf->sdl->format->Amask) {
-	    LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha not required");
-	    return SDL_SavePNG(srf->sdl, file);
-    } else {
-	    LOG_INFO(log_ui_draw, "SavePng: PNG Format Alpha");
-        SDL_Surface *spfa = SDL_PNGFormatAlpha(srf->sdl);
-        int rv = SDL_SavePNG(spfa, file);
-        SDL_FreeSurface(spfa);
-        return rv;
-    }
+	return save_png(srf->sdl, file);
 }
 
 
@@ -1785,6 +1797,20 @@ int jiveL_surface_free(lua_State *L) {
 	JiveSurface *srf = *(JiveSurface **)lua_touserdata(L, 1);
 	if (srf) {
 		jive_surface_free(srf);
+	}
+	return 0;
+}
+
+int jiveL_surface_alt_release(lua_State *L) {
+	JiveSurface *srf = *(JiveSurface **)lua_touserdata(L, 1);
+
+	if (srf) {
+		if (srf->sdl) {
+			LOG_INFO(log_ui, "jive_surface_release OK");
+			SDL_FreeSurface (srf->sdl);
+			srf->sdl = NULL;
+		}
+//		free(srf);
 	}
 	return 0;
 }
@@ -2615,4 +2641,263 @@ int jiveL_surfacetile_gc(lua_State *L) {
 		jive_tile_free(tile);
 	}
 	return 0;
+}
+
+// concurrent resizer
+#define  RESIZE_PENDING  0
+#define  RESIZE_COMPLETE 1
+#define  RESIZE_ERROR -1
+
+//static pthread_t thread_resizer;
+//static pthread_mutex_t resizer_lock; 
+static SDL_Thread* resizer_thread = NULL;
+static SDL_mutex* resizer_lock = NULL;
+
+
+typedef struct resize_request {
+	struct resize_request* perma_next;
+	struct resize_request* next;
+	char * src_path;
+	char * dest_path;
+	int   width;
+	int   height;
+	int   status;
+	int   seq;
+	int   op;
+	SDL_Surface* src_sdl;
+	SDL_Surface* dst_sdl;
+} resize_request, *resize_request_ptr;
+
+static resize_request_ptr resize_pending;
+static resize_request_ptr resize_perma;
+
+void vu_resize(resize_request_ptr req) {
+	if (req->src_sdl != NULL) {
+		int src_w = req->src_sdl->w;
+		int src_h = req->src_sdl->h;
+		int dst_w = (req->width/2) * req->seq;
+		int dst_h = (src_h * dst_w)/src_w;
+fprintf(stderr, "1) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
+		if (req->width > 1280) {
+			dst_w = (1280/2) * req->seq;
+fprintf(stderr, "2) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
+		}
+		dst_h = (src_h * dst_w)/ src_w;
+		if (dst_h > req->height) {
+			dst_h = req->height;
+			dst_w = (((src_w * req->height)/src_h)/req->seq) * req->seq;
+fprintf(stderr, "3) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
+		}
+fprintf(stderr, "F) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
+		req->dst_sdl = surface_newRGBA((Uint16)dst_w, (Uint16)dst_h);
+	}
+	if (req->src_sdl != NULL && req->dst_sdl != NULL) {
+		copyResampled(req->dst_sdl, req->src_sdl, 0, 0, 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h);
+	}
+}
+
+void sp_resize(resize_request_ptr req) {
+	if (req->src_sdl != NULL) {
+		req->dst_sdl = surface_newRGBA((Uint16)req->width, (Uint16)req->height);
+		if (req->dst_sdl != NULL) {
+			fprintf(stderr, "WxH ox: %d oy: %d dw: %d dh: %d sw: %d sh: %d\n", 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h); fflush(stderr);
+			copyResampled(req->dst_sdl, req->src_sdl, 0, 0, 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h);
+		}
+	}
+}
+
+// scale the src image so that either width or height matches the destination
+// and the other exceeds the destination.
+// Then crop around the center.
+void sp_scale_centered_crop(resize_request_ptr req) {
+	sp_resize(req);
+	if (req->src_sdl != NULL) {
+		// Choose the largest scaling factor horizontal or vertical
+		float f = ((float)req->width)/req->src_sdl->w;
+		if (f < ((float)req->height)/req->src_sdl->h) {
+			f = ((float)req->height)/req->src_sdl->h;
+		}
+		// Create an intermediate surface to hold the source image scaled by the scaling factor
+fprintf(stderr, "### sr %d,%d -->>-- %d,%d\n", req->src_sdl->w, req->src_sdl->h, (Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h)); fflush(stderr);
+		SDL_Surface* tmp_sdl = surface_newRGBA((Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h));
+		if (tmp_sdl != NULL) {
+			// Resize the source image to the new surface.
+			copyResampled(tmp_sdl, req->src_sdl, 0, 0, 0, 0, tmp_sdl->w, tmp_sdl->h, req->src_sdl->w, req->src_sdl->h);
+			// Create the destination surface
+			// req->dst_sdl = surface_newRGBA((Uint16)req->width, (Uint16)req->height);
+			if (req->dst_sdl != NULL) {
+				// Centered blit clip - crops the surface to the destination surface
+				SDL_Rect sr, dr;
+				sr.x = (tmp_sdl->w - req->dst_sdl->w)/2;
+				sr.y = (tmp_sdl->h - req->dst_sdl->h)/2;
+				sr.w = req->dst_sdl->w; sr.h = req->dst_sdl->h;
+				dr.x = 0; dr.y = 0;
+				dr.w = 0; dr.h = 0;
+				if (SDL_BlitSurface(tmp_sdl, &sr, req->dst_sdl, &dr) < 0) {
+fprintf(stderr, "SSCC ########################## blit failed\n"); fflush(stderr);
+				}
+			}
+			// Release the intermediate surface
+//			SDL_FreeSurface(tmp_sdl);
+		}
+	}
+}
+
+void do_resize(resize_request_ptr req) {
+		if (req != NULL) {
+fprintf(stderr, "%s %s %dx%d\n", req->src_path, req->dest_path, req->width, req->height); fflush(stderr);
+			int status = RESIZE_ERROR;
+			req->src_sdl = IMG_Load(req->src_path);
+			if (req->src_sdl->format->Amask) {
+					req->src_sdl = SDL_DisplayFormatAlpha(req->src_sdl);
+			} else {
+					req->src_sdl = SDL_DisplayFormat(req->src_sdl);
+			}
+			switch(req->op) {
+				case 1:
+					vu_resize(req);
+					break;
+				case 2:
+					sp_resize(req);
+					break;
+				case 3:
+					sp_scale_centered_crop(req);
+					break;
+			}
+			if (req->dst_sdl != NULL) {
+//				if (SDL_SaveBMP(req->dst_sdl, req->dest_path) == 0) {
+				if (save_png(req->dst_sdl, req->dest_path) == 0) {
+fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
+					status = RESIZE_COMPLETE;
+				}
+				SDL_FreeSurface(req->dst_sdl);
+				req->dst_sdl = NULL;
+			}
+			if (req->src_sdl != NULL) {
+				SDL_FreeSurface(req->src_sdl);
+				req->src_sdl = NULL;
+			}
+			req->status = status;
+fprintf(stderr, "resize done resize %d\n", req->status);
+		}
+}
+
+// resizer thread - runs as daemon - polling every second
+int fn_thread_resizer(void *ptr)
+{
+	resize_request_ptr req;
+	while(1) {
+		if (resize_pending != NULL) {
+			if (SDL_LockMutex(resizer_lock) < 0) {
+				fprintf(stderr, "mutex lock failed\n"); fflush(stderr);
+				continue;
+			}
+
+			req = resize_pending;
+			if (req != NULL) {
+				resize_pending = req->next;
+//	            req->next = NULL;
+			}
+			if (SDL_UnlockMutex(resizer_lock) < 0) {
+				fprintf(stderr, "mutex unlock failed\n"); fflush(stderr);
+				return -1;
+			}
+
+			do_resize(req);
+        } else {
+			sleep(1);
+		}
+	}
+	return  0;
+}
+
+void start_concurrent_resizer(void) {
+	resizer_lock = SDL_CreateMutex();
+	if (resizer_lock != NULL) {
+		resizer_thread = SDL_CreateThread(fn_thread_resizer, NULL);
+		if (resizer_thread != NULL) {
+			fprintf(stderr,"started resizer thread\n");
+		} else {
+			fprintf(stderr,"failed to initialise lock\n");
+		}
+	} else {
+		fprintf(stderr,"failed to initialise lock\n");
+	}
+	fflush(stderr);
+}
+
+int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op) {
+	resize_request_ptr req = resize_perma;
+	while(req != NULL) {
+		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
+			return req->status;
+		}
+		req = req->next;
+	}
+    // allocation a single chunk of memory for the request + source and destination paths 
+	size_t src_size = ((strlen(src_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
+	size_t dst_size = ((strlen(dest_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
+	size_t req_len = sizeof(*req) + src_size + dst_size;
+	fprintf(stderr, "### calloc %ld\n", req_len); fflush(stderr);
+	req = calloc(1, req_len);
+	if (req != NULL) {
+		req->width = width;
+		req->height = height;
+		req->seq = seq;
+		req->op = op;
+		req->src_path = (char *)(req + 1);
+		strcpy(req->src_path, src_path);
+		req->dest_path = req->src_path + src_size;
+		strcpy(req->dest_path, dest_path);
+
+		if (SDL_LockMutex(resizer_lock) < 0) {
+			return RESIZE_ERROR;
+		}
+
+		req->next = resize_pending;
+		resize_pending = req;
+		req->perma_next = resize_perma;
+		resize_perma = req;
+
+		if (SDL_UnlockMutex(resizer_lock) < 0) {
+			fprintf(stderr, "mutex unlock failed\n"); fflush(stderr);
+			return RESIZE_ERROR;
+		}
+
+		return RESIZE_PENDING;
+	}
+	return RESIZE_ERROR;
+}
+
+// int is_resize_complete(const char* src_path, const char* dest_path, int width, int height) {
+// 	resize_request_ptr req = resize_perma;
+// 	while(req != NULL) {
+// 		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
+// 			return req->status == 1;
+// 		}
+// 	}
+// 	return RESIZE_ERROR;
+// }
+
+int jiveL_surface_request_resize(lua_State *L) {
+	/*
+	  class
+	  src_imagepath
+	  dest_imagepath
+	  width
+	  height
+	  sequence count
+	  operation  vu-meter 
+	*/
+	const char* src_path = luaL_checklstring(L, 2, NULL);
+	const char* dest_path = luaL_checklstring(L, 3, NULL);
+	int width = luaL_checkint(L, 4);
+	int height= luaL_checkint(L, 5);
+	int seq = luaL_checkint(L, 6);
+	int op = luaL_checkint(L, 7);
+
+	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op);
+//fprintf(stderr, "####### %d %s\n->\n%s %dx%d\n", rsz, src_path, dest_path, width, height); fflush(stderr);
+	lua_pushinteger(L, rsz);
+	return 1;
 }
