@@ -559,6 +559,8 @@ int main (int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	
+	start_concurrent_resizer();
+
 	// call our main in protected mode
 	s.argc = argc;
 	s.argv = argv;
