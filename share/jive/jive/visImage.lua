@@ -1426,8 +1426,8 @@ function resizeSpectrumMeter(_, name)
 	end
 end
 
-function resizeSingleSpectrumMeter(_, name, w, h)
---	log:info("resizeSingleSpectrumMeter ", name, ", ", w, ", ", h)
+function concurrentResizeSpectrumMeter(_, name, w, h)
+--	log:info("concurrentResizeSpectrumMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(spectrumList) do
 		if name == v.name then
 			-- create the resized images for skin resolutions
@@ -1437,9 +1437,9 @@ function resizeSingleSpectrumMeter(_, name, w, h)
 				local dcpath = resizedImagePath(dicKey)
 				local ok
 				if v.spType == SPT_BACKLIT then
-					ok = Surface:requestResize(path, dcpath, w, h, 0, 3) == 1
+					ok = Surface:requestResize(path, dcpath, w, h, 0, 3, saveimage_type) == 1
 				else
-					ok = Surface:requestResize(path, dcpath, w, h, 0, 2) == 1
+					ok = Surface:requestResize(path, dcpath, w, h, 0, 2, saveimage_type) == 1
 				end
 				if ok then
 					resizedImagesTable[dicKey] = dcpath
@@ -1480,7 +1480,7 @@ local function requestVuResize(name, w , h)
 	local path = vuImagesMap[name].src
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 	local dcpath = resizedImagePath(dicKey)
-	local ok = Surface:requestResize(path, dcpath, w, h, 25, 1) == 1
+	local ok = Surface:requestResize(path, dcpath, w, h, 25, 1, saveimage_type) == 1
 	if ok then
 		resizedImagesTable[dicKey] = dcpath
 		return true
@@ -1488,8 +1488,8 @@ local function requestVuResize(name, w , h)
 	return false
 end
 
-function resizeSingleVuMeter(_, name, w, h)
---	log:info("resizeSingleVuMeter ", name, ", ", w, ", ", h)
+function concurrentResizeVuMeter(_, name, w, h)
+--	log:info("concurrentResizeVuMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(vuImages) do
 		if name == v.name then
 			if v.vutype == "frame" then
