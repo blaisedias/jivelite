@@ -2664,7 +2664,7 @@ typedef struct resize_request {
 	int   status;
 	int   seq;
 	int   op;
-	int   save_as_bmp;
+	int   save_as_png;
 	SDL_Surface* src_sdl;
 	SDL_Surface* dst_sdl;
 } resize_request, *resize_request_ptr;
@@ -2767,10 +2767,10 @@ fprintf(stderr, "%s %s %dx%d\n", req->src_path, req->dest_path, req->width, req-
 			}
 			if (req->dst_sdl != NULL) {
 				int saved;
-				if (req->save_as_bmp) {
-					saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
-				} else {
+				if (req->save_as_png) {
 					saved = save_png(req->dst_sdl, req->dest_path);
+				} else {
+					saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
 				}
 				if (saved == 0) {
 fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
@@ -2832,7 +2832,7 @@ void start_concurrent_resizer(void) {
 	fflush(stderr);
 }
 
-int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_bmp) {
+int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
 	resize_request_ptr req = resize_perma;
 	while(req != NULL) {
 		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
@@ -2851,7 +2851,7 @@ int submit_resize_request(const char* src_path, const char* dest_path, int width
 		req->height = height;
 		req->seq = seq;
 		req->op = op;
-		req->save_as_bmp = save_as_bmp;
+		req->save_as_png = save_as_png;
 		req->src_path = (char *)(req + 1);
 		strcpy(req->src_path, src_path);
 		req->dest_path = req->src_path + src_size;
