@@ -105,10 +105,10 @@ local function drawVFD(params, surface, vol)
 
 	local x = params.x + params.vfd.bar_rxo
 	local y = params.y
-    local cap = params.cap
-    local bw = params.vfd.bw
-    local bh = params.vfd.bh
-    local h = params.vfd.h
+	local cap = params.cap
+	local bw = params.vfd.bw
+	local bh = params.vfd.bh
+	local h = params.vfd.h
 
 	for i = 2, 37 do
 		if i <= vol or i == cap then
@@ -170,7 +170,7 @@ function _layout(self)
 		return
 	end
 
-    self.bgParams = nil
+	self.bgParams = nil
 
 	if self.style == "vumeter" then
 		local vu_w = w - l - r
@@ -218,7 +218,7 @@ function _layout(self)
 		log:debug("-----------------------------------------------------------------------")
 		self.vutbl = visImage:getVuImage(w,h)
 		if self.vutbl.displayResizing ~= nil then
-			self.counter = FRAME_RATE/2
+--			self.counter = FRAME_RATE/2
 			return
 		end
 		if self.vutbl.vutype == "frame"  then
@@ -326,6 +326,14 @@ local function samplAcc2Vol(sampleAcc)
 end
 
 function draw(self, surface)
+	if self.countDown then
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			visImage:vuChange('force', 'force')
+			self:_layout(self)
+		end
+	end
+
 	if self.bgParams ~= nil then
 		self.drawBackground(self.bgParams, surface)
 	end
@@ -333,15 +341,17 @@ function draw(self, surface)
 	if self.vutbl ~= nil and  self.vutbl.displayResizing ~= nil then
 		local x, y, w, h = self:getBounds()
 		local d = self.vutbl.displayResizing
-		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
-		self.counter = self.counter - 1
-		if self.counter < 1 then
-			local vuname = visImage:getCurrentVuMeterName()
-			log:info("resizing vumeter ", vuname, " ",w , " ", h)
-			visImage:resizeSingleVuMeter(vuname, w, h)
+--		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		d.c = d.c + 1
+		if d.c >= d.f then
+			d.c = 0
+		end
+		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
+		local vuname = visImage:getCurrentVuMeterName()
+		local resized = visImage:resizeSingleVuMeter(vuname, w, h)
+		if resized == true then
 			self:_layout(self)
 		end
-		return
 	end
 
 	local sampleAcc = vis:vumeter()
@@ -351,13 +361,6 @@ function draw(self, surface)
 
 	self.drawMeter(self.left, surface, vol[1])
 	self.drawMeter(self.right, surface, vol[2])
-	if self.countDown then
-		self.counter = self.counter - 1
-		if self.counter < 1 then
-			visImage:vuChange('force', 'force')
-			self:_layout(self)
-		end
-	end
 end
 
 function twiddle(self)

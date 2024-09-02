@@ -201,7 +201,7 @@ local function imCacheClear()
 	vfdCache = {}
 	for k,v in pairs(imCache) do
 		log:info("releasing ", k)
-		v:release()
+		v:altRelease()
 	end
 	imCache={}
 end
@@ -342,8 +342,11 @@ local function makeResizingParams(resizeIsRequired)
 	if displayResizingParameters ~= nil and resizeIsRequired then
 		return {
 			img = displayResizingParameters.img,
-			w = displayResizingParameters.w,
 			h = displayResizingParameters.h,
+-- hard coded to 8 frames
+			w = displayResizingParameters.w/8,
+			f = 8,
+			c = 0,
 		}
 	end
 	return nil
@@ -366,7 +369,7 @@ local function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	local retImg = img:resize(w, h)
 	if retainAR == false then
 		log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
-		img:release()
+		img:altRelease()
 		return retImg
 	end
 
@@ -375,12 +378,12 @@ local function _scaleSpectrumImage(imgPath, w, h, retainAR)
 	local scaledW = math.floor(srcW*scaleF)
 	local scaledH = math.floor(srcH*scaleF)
 	scaledImg = img:resize(scaledW, scaledH)
-	img:release()
+	img:altRelease()
 	log:info("scaleSpectrumImage: scale factor: ", scaleF)
-	log:info("scaleSpectrumImage:blitClip",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2),
+	log:info("scaleSpectrumImage:blitClip ",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2),
 				",", w, ", ", h, " -> ", 0, ",", 0)
 	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
-	scaledImg:release()
+	scaledImg:altRelease()
 	return retImg
 end
 
@@ -414,7 +417,7 @@ local function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
 					" -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
 	end
 	local scaledImg = img:resize(wSeq, scaledH)
-	img:release()
+	img:altRelease()
 	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
 	return scaledImg
 end
@@ -607,8 +610,8 @@ local function _cacheSpectrumImage(imgName, path, w, h, spType)
 		dcpath = resizedImagePath(dicKey)
 		-- resizedImagesTable[dicKey] = img
 		saveImage(fgimg, dicKey, dcpath)
-		fgimg:release()
-		img:release()
+		fgimg:altRelease()
+		img:altRelease()
 --		resizedImagesTable[dicKey] = dcpath
 		log:debug("cacheSpectrumImage cached ", dicKey)
 	else
@@ -748,7 +751,7 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 			fgimg:blit(tmp, 0, 0)
 			bgImage = Surface:newRGB(w,h)
 			tmp:blitAlpha(bgImage, 0, 0, visSettings.spectrum.backlitAlpha)
-			tmp:release()
+			tmp:altRelease()
 			imCachePut(dicKey, bgImage)
 		end
 	end
@@ -915,7 +918,7 @@ local function _cacheVUImage(imgName, path, w, h)
 		dcpath = resizedImagePath(dicKey)
 		--resizedImagesTable[dicKey] = img
 		saveImage(img, dicKey, dcpath)
-		img:release()
+		img:altRelease()
 --		resizedImagesTable[dicKey] = dcpath
 	else
 		log:debug("_cacheVuImage found cached ", dcpath)
@@ -1185,7 +1188,7 @@ local function _resizedVFDElement(srcImg, key, w, h)
 		saveImage(img, dicKey, dcpath)
 --		resizedImagesTable[dicKey] = dcpath
 		imCachePut(dcpath, img)
-		srcImg:release()
+		srcImg:altRelease()
 	end
 	return img
 end
@@ -1424,17 +1427,28 @@ function resizeSpectrumMeter(_, name)
 end
 
 function resizeSingleSpectrumMeter(_, name, w, h)
-	log:info("resizeSingleSpectrumMeter ", name, ", ", w, ", ", h)
+--	log:info("resizeSingleSpectrumMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(spectrumList) do
 		if name == v.name then
 			-- create the resized images for skin resolutions
 			if spectrumImagesMap[v.name].src ~= nil then
-				log:info("resizing single spectrum ", v.name, " -> ", w, "x", h)
-				_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, w, h, v.spType)
-				log:info("resizing done ", v.name, " -> ", w, "x", h)
+				local path = spectrumImagesMap[v.name].src
+				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+				local dcpath = resizedImagePath(dicKey)
+				local ok
+				if v.spType == SPT_BACKLIT then
+					ok = Surface:requestResize(path, dcpath, w, h, 0, 3) == 1
+				else
+					ok = Surface:requestResize(path, dcpath, w, h, 0, 2) == 1
+				end
+				if ok then
+					resizedImagesTable[dicKey] = dcpath
+					return true
+				end
 			end
 		end
 	end
+	return false
 end
 
 
@@ -1461,23 +1475,35 @@ function resizeVuMeter(_, name)
 	end
 end
 
+local function requestVuResize(name, w , h)
+--	log:info("requestVuResize ", name, ", ", w, ", ", h)
+	local path = vuImagesMap[name].src
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+	local dcpath = resizedImagePath(dicKey)
+	local ok = Surface:requestResize(path, dcpath, w, h, 25, 1) == 1
+	if ok then
+		resizedImagesTable[dicKey] = dcpath
+		return true
+	end
+	return false
+end
+
 function resizeSingleVuMeter(_, name, w, h)
-	log:info("resizeSingleVuMeter ", name, ", ", w, ", ", h)
+--	log:info("resizeSingleVuMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(vuImages) do
 		if name == v.name then
 			if v.vutype == "frame" then
-				-- create the resized images for skin resolutions
-				log:info("resizing single Vu Meter", v.name, " -> ", w, "x", h)
-				_cacheVUImage(v.name, vuImagesMap[v.name].src, w, h)
+				return requestVuResize(name, w, h)
 			end
+
 			if v.vutype == "25framesLR" then
-				-- create the cached image for skin resolutions
-				log:info("resizing single Vu Meter", v.name, " -> ", w, "x", h)
-				_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, w, h)
-				_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, w, h)
+				local l =  requestVuResize(name .. ':left', w, h)
+				local r =  requestVuResize(name .. ':right', w, h)
+				return l and r
 			end
 		end
 	end
+	return false
 end
 
 function getCurrentVuMeterName()
@@ -1573,7 +1599,7 @@ function setVisSettings(_, settings)
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "file" then
 			 local parts = _parseImagePath(entry)
-				if parts ~= nil and parts[1] == "resizing" then
+				if parts ~= nil and parts[1] == "animated_resizing" then
 					local resizingImg = Surface:altLoadImage(search_root .. "/" .. entry )
 					local w,h = resizingImg:getSize()
 					displayResizingParameters = { img=resizingImg, w=w, h=h }
