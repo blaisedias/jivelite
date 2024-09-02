@@ -328,7 +328,7 @@ function draw(self, surface)
 		end
 		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		local spname = visImage:getCurrentSpectrumMeterName()
-		local resized = visImage:resizeSingleSpectrumMeter(spname, w, h)
+		local resized = visImage:concurrentResizeSpectrumMeter(spname, w, h)
 		if resized == true then
 			self:_layout(self)
 		end
