@@ -592,6 +592,7 @@ int jiveL_surface_load_image_data(lua_State *L);
 int jiveL_surface_draw_text(lua_State *L);
 int jiveL_surface_free(lua_State *L);
 int jiveL_surface_release(lua_State *L);
+int jiveL_surface_alt_release(lua_State *L);
 int jiveL_surface_save_bmp(lua_State *L);
 int jiveL_surface_save_png(lua_State *L);
 int jiveL_surface_cmp(lua_State *L);
@@ -626,6 +627,7 @@ int jiveL_surface_trigonColor(lua_State *L);
 int jiveL_surface_aatrigonColor(lua_State *L);
 int jiveL_surface_filledTrigonColor(lua_State *L);
 int jiveL_tile_fill_color(lua_State *L);
+int jiveL_surface_request_resize(lua_State *L);
 
 int jiveL_tile_load_image(lua_State *L);
 int jiveL_tile_load_tiles(lua_State *L);

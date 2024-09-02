@@ -69,9 +69,9 @@ function _layout(self)
 
 	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
 
-	if self.displayResizing ~= nil then
-		self.counter = FRAME_RATE/2
-	end
+--	if self.displayResizing ~= nil then
+--		self.counter = FRAME_RATE/2
+--	end
 
 	log:info('** barColor=', string.format("0x%x", self.barColor), " capColor=", string.format("0x%x",self.capColor))
 	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
@@ -307,17 +307,29 @@ local function _drawBins(surface, bch, params)
 end
 
 function draw(self, surface)
+	if self.countDown then
+		self.counter = self.counter - 1
+		if self.counter < 1 then
+			visImage:spChange('force', 'force')
+			self:_layout()
+		end
+	end
+
 -- Black background instead of image
 --	self.bgImg:blit(surface, self:getBounds())
 	local x, y, w, h = self:getBounds()
 
 	if self.displayResizing ~= nil then
 		local d = self.displayResizing
-		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
-		self.counter = self.counter - 1
-		if self.counter < 1 then
-			local spname = visImage:getCurrentSpectrumMeterName()
-			visImage:resizeSingleSpectrumMeter(spname, w, h)
+--		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		d.c = d.c + 1
+		if d.c >= d.f then
+			d.c = 0
+		end
+		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
+		local spname = visImage:getCurrentSpectrumMeterName()
+		local resized = visImage:resizeSingleSpectrumMeter(spname, w, h)
+		if resized == true then
 			self:_layout(self)
 		end
 		return
@@ -328,6 +340,7 @@ function draw(self, surface)
 		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
 		self.backgroundDrawn = true
 	end
+
 	if self.bgImg ~= nil then
 --		self.bgImg:blit(surface, x, y, w, h, 0, 0)
 --		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
@@ -377,13 +390,6 @@ function draw(self, surface)
 				surface:filledRectangle(self.x2, self.y - baseLineHeight - self.yoffset_controls,
 										self.x2 + xSpan, self.y - self.yoffset_controls, self.barColor)
 			end
-		end
-	end
-	if self.countDown then
-		self.counter = self.counter - 1
-		if self.counter < 1 then
-			visImage:spChange('force', 'force')
-			self:_layout()
 		end
 	end
 end
