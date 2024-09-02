@@ -348,7 +348,7 @@ function draw(self, surface)
 		end
 		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		local vuname = visImage:getCurrentVuMeterName()
-		local resized = visImage:resizeSingleVuMeter(vuname, w, h)
+		local resized = visImage:concurrentResizeVuMeter(vuname, w, h)
 		if resized == true then
 			self:_layout(self)
 		end

@@ -824,10 +824,10 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 
 	LOG_INFO(log_ui_draw, "set_video_mode: WxH=%dx%d, bpp=%d, fullscreen=%d", (int)w, (int)h, (int)bpp, (int)fullscreen);
 	if (fullscreen) {
-	    flags = SDL_FULLSCREEN;
+		flags = SDL_FULLSCREEN;
 	}
 	else {
-	    flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE;
+		flags = SDL_HWSURFACE | SDL_DOUBLEBUF | SDL_RESIZABLE;
 	}
 
 	sdl = SDL_GetVideoSurface();
@@ -847,9 +847,9 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 		}
 
 		if ((sdl->w != w) || (sdl->h != h)
-		    || (bpp && sdl->format->BitsPerPixel != bpp)
-		    || ((sdl->flags & mask) != (flags & mask))) {
-		    LOG_INFO(log_ui_draw, "set_video_mode: reconfiguring");
+			|| (bpp && sdl->format->BitsPerPixel != bpp)
+			|| ((sdl->flags & mask) != (flags & mask))) {
+			LOG_INFO(log_ui_draw, "set_video_mode: reconfiguring");
 			sdl = NULL;
 		}
 	}
@@ -2664,6 +2664,7 @@ typedef struct resize_request {
 	int   status;
 	int   seq;
 	int   op;
+	int   save_as_bmp;
 	SDL_Surface* src_sdl;
 	SDL_Surface* dst_sdl;
 } resize_request, *resize_request_ptr;
@@ -2765,8 +2766,13 @@ fprintf(stderr, "%s %s %dx%d\n", req->src_path, req->dest_path, req->width, req-
 					break;
 			}
 			if (req->dst_sdl != NULL) {
-//				if (SDL_SaveBMP(req->dst_sdl, req->dest_path) == 0) {
-				if (save_png(req->dst_sdl, req->dest_path) == 0) {
+				int saved;
+				if (req->save_as_bmp) {
+					saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
+				} else {
+					saved = save_png(req->dst_sdl, req->dest_path);
+				}
+				if (saved == 0) {
 fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
 					status = RESIZE_COMPLETE;
 				}
@@ -2796,7 +2802,7 @@ int fn_thread_resizer(void *ptr)
 			req = resize_pending;
 			if (req != NULL) {
 				resize_pending = req->next;
-//	            req->next = NULL;
+//				req->next = NULL;
 			}
 			if (SDL_UnlockMutex(resizer_lock) < 0) {
 				fprintf(stderr, "mutex unlock failed\n"); fflush(stderr);
@@ -2804,7 +2810,7 @@ int fn_thread_resizer(void *ptr)
 			}
 
 			do_resize(req);
-        } else {
+		} else {
 			sleep(1);
 		}
 	}
@@ -2826,7 +2832,7 @@ void start_concurrent_resizer(void) {
 	fflush(stderr);
 }
 
-int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op) {
+int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_bmp) {
 	resize_request_ptr req = resize_perma;
 	while(req != NULL) {
 		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
@@ -2834,7 +2840,7 @@ int submit_resize_request(const char* src_path, const char* dest_path, int width
 		}
 		req = req->next;
 	}
-    // allocation a single chunk of memory for the request + source and destination paths 
+	// allocation a single chunk of memory for the request + source and destination paths 
 	size_t src_size = ((strlen(src_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t dst_size = ((strlen(dest_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t req_len = sizeof(*req) + src_size + dst_size;
@@ -2845,6 +2851,7 @@ int submit_resize_request(const char* src_path, const char* dest_path, int width
 		req->height = height;
 		req->seq = seq;
 		req->op = op;
+		req->save_as_bmp = save_as_bmp;
 		req->src_path = (char *)(req + 1);
 		strcpy(req->src_path, src_path);
 		req->dest_path = req->src_path + src_size;
@@ -2895,9 +2902,10 @@ int jiveL_surface_request_resize(lua_State *L) {
 	int height= luaL_checkint(L, 5);
 	int seq = luaL_checkint(L, 6);
 	int op = luaL_checkint(L, 7);
+	const char* image_type = luaL_checklstring(L, 8, NULL);
 
-	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op);
-//fprintf(stderr, "####### %d %s\n->\n%s %dx%d\n", rsz, src_path, dest_path, width, height); fflush(stderr);
+	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op, strcmp(image_type, "bmp"));
+
 	lua_pushinteger(L, rsz);
 	return 1;
 }
