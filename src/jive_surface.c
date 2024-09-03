@@ -2748,41 +2748,56 @@ void do_resize(resize_request_ptr req) {
 		if (req != NULL) {
 fprintf(stderr, "%s %s %dx%d\n", req->src_path, req->dest_path, req->width, req->height); fflush(stderr);
 			int status = RESIZE_ERROR;
-			req->src_sdl = IMG_Load(req->src_path);
-			if (req->src_sdl->format->Amask) {
-					req->src_sdl = SDL_DisplayFormatAlpha(req->src_sdl);
-			} else {
-					req->src_sdl = SDL_DisplayFormat(req->src_sdl);
-			}
-			switch(req->op) {
-				case 1:
-					vu_resize(req);
-					break;
-				case 2:
-					sp_resize(req);
-					break;
-				case 3:
-					sp_scale_centered_crop(req);
-					break;
-			}
-			if (req->dst_sdl != NULL) {
-				int saved;
-				if (req->save_as_png) {
-					saved = save_png(req->dst_sdl, req->dest_path);
-				} else {
-					saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
-				}
-				if (saved == 0) {
-fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
-					status = RESIZE_COMPLETE;
-				}
-				SDL_FreeSurface(req->dst_sdl);
-				req->dst_sdl = NULL;
-			}
+			SDL_Surface* loaded_image = req->src_sdl = IMG_Load(req->src_path);
+
 			if (req->src_sdl != NULL) {
-				SDL_FreeSurface(req->src_sdl);
-				req->src_sdl = NULL;
+fprintf(stderr, "+++ loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
+				if (req->src_sdl->format->Amask) {
+					req->src_sdl = SDL_DisplayFormatAlpha(req->src_sdl);
+				} else {
+					req->src_sdl = SDL_DisplayFormat(req->src_sdl);
+				}
+
+				if (req->src_sdl != NULL) {
+fprintf(stderr, "+++ src_sdl %p\n", req->src_sdl); fflush(stderr);
+					switch(req->op) {
+						case 1:
+							vu_resize(req);
+							break;
+						case 2:
+							sp_resize(req);
+							break;
+						case 3:
+							sp_scale_centered_crop(req);
+							break;
+					}
+fprintf(stderr, "+++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
+
+					if (req->dst_sdl != NULL) {
+						int saved;
+						if (req->save_as_png) {
+							saved = save_png(req->dst_sdl, req->dest_path);
+						} else {
+							saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
+						}
+						if (saved == 0) {
+fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
+							status = RESIZE_COMPLETE;
+						}
+fprintf(stderr, "--- dst_sdl %p\n", req->dst_sdl); fflush(stderr);
+						SDL_FreeSurface(req->dst_sdl);
+						req->dst_sdl = NULL;
+					}
+
+fprintf(stderr, "--- src_sdl %p\n", req->src_sdl); fflush(stderr);
+					SDL_FreeSurface(req->src_sdl);
+					req->src_sdl = NULL;
+				}
+
+fprintf(stderr, "--- loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
+				SDL_FreeSurface(loaded_image);
 			}
+
 			req->status = status;
 fprintf(stderr, "resize done resize %d\n", req->status);
 		}
