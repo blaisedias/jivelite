@@ -10,7 +10,7 @@ local string            = require("string")
 --local io                = require("io")
 local oo                = require("loop.simple")
 --local Event             = require("jive.ui.Event")
---local Icon              = require("jive.ui.Icon")
+local Icon              = require("jive.ui.Icon")
 local Label             = require("jive.ui.Label")
 local Popup             = require("jive.ui.Popup")
 local SimpleMenu        = require("jive.ui.SimpleMenu")
@@ -479,7 +479,6 @@ function selectVuMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
---                        self:resizeVUMeter(nm)
                         visImage:selectVuImage(nm, true, false)
                     else
                         if visImage:selectVuImage(nm, false, false) <= 0 then
@@ -527,7 +526,6 @@ function selectSpectrumMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
---                        self:resizeSpectrumMeter(nm)
                         visImage:selectSpectrum(nm, true, false)
                     else
                         if visImage:selectSpectrum(nm, false, false) <= 0 then
@@ -554,81 +552,52 @@ end
 
 --function resizeImages(self, bSpectrum, bVuMeters, all)
 function resizeImages(_, bSpectrum, bVuMeters, all)
-        local popup = Popup("toast_popup_text")
+        local popup = Popup("toast_popup_mixed")
 
         popup:setAllowScreensaver(false)
+        popup:setAlwaysOnTop(true)
         popup:setAutoHide(false)
 
-        -- don't allow any keypress/touch command so user cannot interrupt the resizing command
-        -- popup will hide when resizing is done
-        -- popup:ignoreAllInputExcept({""})
-
+        local icon = Icon("icon_connecting")
         local text = Label("text", "Resizing...")
 
+        popup:addWidget(icon)
         popup:addWidget(text)
 
-        local spectrum_names = {}
+        local spectrumMeters = {}
         if bSpectrum then
-            for _, v in ipairs(visImage:getSpectrumMeterList()) do
---                if (all or v.enabled) and (v.spType == visImage.SPT_BACKLIT or v.spType == visImage.SPT_IMAGE) then
-                if (all or v.enabled) and visImage:resizeRequiredSpectrumMeter(v.name) then
-                    table.insert(spectrum_names, v.name)
-                else
-                    log:info("skipping ",v.name, " ", v.spType, " ", (all or v.enabled), " ", all, " ", v.enabled)
-                end
-            end
+            spectrumMeters = visImage:enumerateResizableSpectrumMeters(all)
         end
 
-        local vumeter_names = {}
+        local vuMeters = {}
         if bVuMeters then
-            for _, v in pairs(visImage:getVuMeterList()) do
---                if (all or v.enabled) and (v.vutype == "frame" or v.vutype == "25framesLR") then
-                if (all or v.enabled) and visImage:resizeRequiredVuMeter(v.name) then
-                    table.insert(vumeter_names, v.name)
-                else
-                    log:info("skipping ",v.name, " ", v.vutype, " ", (all or v.enabled), " ", all, " ", v.enabled)
-                end
-            end
+            vuMeters = visImage:enumerateResizableVuMeters(all)
         end
 
         local state = "resize_sp"
         local i_vu = 1
         local i_sp = 1
-        local spectrum_meter_name = spectrum_names[i_sp]
-        local vu_meter_name =  vumeter_names[i_vu]
         popup:addTimer(50, function()
                 if state == "resize_sp" then
-                    if i_sp <= #spectrum_names then
-                        spectrum_meter_name = spectrum_names[i_sp]
-                        -- this odd-ball pre-increment because we do not want to keep on repeating
-                        -- if the resize op failed
-                        i_sp = i_sp + 1
-                        text:setValue("Resizing spectrum meter " .. spectrum_meter_name)
-                        state = "resize_sp_exec"
+                    if i_sp <= #spectrumMeters then
+                        local entry = spectrumMeters[i_sp]
+                        text:setValue("Resizing spectrum meter " .. entry.name .. " " .. entry.w .. "x" .. entry.h)
+                        if visImage:concurrentResizeSpectrumMeter(entry.name, entry.w, entry.h) then
+                            i_sp = i_sp + 1
+                        end
                     else
                         state = "resize_vu"
                     end
-                elseif state == "resize_sp_exec" then
-                    log:info("resize ", spectrum_meter_name)
-                    visImage:resizeSpectrumMeter(spectrum_meter_name)
-                    log:info("done ", spectrum_meter_name)
-                    state = "resize_sp"
                 elseif state == "resize_vu" then
-                    if i_vu <= #vumeter_names then
-                        vu_meter_name =  vumeter_names[i_vu]
-                        -- this odd-ball pre-increment because we do not want to keep on repeating
-                        -- if the resize op failed
-                        i_vu = i_vu + 1
-                        text:setValue("Resizing VU meter " .. vu_meter_name)
-                        state = "resize_vu_exec"
+                    if i_vu <= #vuMeters then
+                        local entry = vuMeters[i_vu]
+                        text:setValue("Resizing VU meter " .. entry.name .. " " .. entry.w .. "x" .. entry.h)
+                        if visImage:concurrentResizeVuMeter(entry.name, entry.w, entry.h) then
+                            i_vu = i_vu + 1
+                        end
                     else
                         state = "resized"
                     end
-                elseif state == "resize_vu_exec" then
-                    log:info("resize ", vu_meter_name)
-                    visImage:resizeVuMeter(vu_meter_name)
-                    log:info("done ", vu_meter_name)
-                    state = "resize_vu"
                 elseif state == "resized" then
                     text:setValue("Resize of visualisation complete.")
                     state = "done"
@@ -641,84 +610,6 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
             end)
 
         popup:show()
-end
-
---function resizeSpectrumMeter(self, spectrum_meter_name)
-function resizeSpectrumMeter(_, spectrum_meter_name)
-    if not visImage:resizeRequiredSpectrumMeter(spectrum_meter_name) then
-        return
-    end
-
-    local popup = Popup("toast_popup_text")
-
-    popup:setAllowScreensaver(false)
-    popup:setAutoHide(false)
-
-    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
-    -- popup will hide when resizing is done
-    popup:ignoreAllInputExcept({""})
-
-    local text = Label("text", "Resizing spectrum meter " .. spectrum_meter_name)
-
-    popup:addWidget(text)
-
-    local state = 1
-    popup:addTimer(100, function()
-        if state == 1 then
-            if spectrum_meter_name ~= nil then
-                log:info("resize ", spectrum_meter_name)
-                visImage:resizeSpectrumMeter(spectrum_meter_name)
-                log:info("done ", spectrum_meter_name)
-            end
-            state = state + 1
-        elseif state == 2 then
-            text:setValue("Resized spectrum meter " .. spectrum_meter_name)
-            state = state +1
-        else
-            popup:hide(Window.transitionFadeOut)
-        end
-    end)
-
-    popup:show()
-end
-
---function resizeVUMeter(self, vu_meter_name)
-function resizeVUMeter(_, vu_meter_name)
-    if not visImage:resizeRequiredVuMeter(vu_meter_name) then
-        return
-    end
-
-    local popup = Popup("toast_popup_text")
-
-    popup:setAllowScreensaver(false)
-    popup:setAutoHide(false)
-
-    -- don't allow any keypress/touch command so user cannot interrupt the resizing command
-    -- popup will hide when resizing is done
-    popup:ignoreAllInputExcept({""})
-
-    local text = Label("text", "Resizing vu meter " .. vu_meter_name)
-
-    popup:addWidget(text)
-
-    local state = 1
-    popup:addTimer(100, function()
-        if state == 1 then
-            if vu_meter_name ~= nil then
-                log:info("resize ", vu_meter_name)
-                visImage:resizeVuMeter(vu_meter_name)
-                log:info("done ", vu_meter_name)
-            end
-            state = state + 1
-        elseif state == 2 then
-            text:setValue("Resized vu meter " .. vu_meter_name)
-            state = state + 1
-        else
-            popup:hide(Window.transitionFadeOut)
-        end
-    end)
-
-    popup:show()
 end
 
 function resizeSelectedVisualisers(self)
