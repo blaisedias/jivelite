@@ -1410,20 +1410,18 @@ end
 -------------------------------------------------------
 --- Resize
 -------------------------------------------------------
-function resizeSpectrumMeter(_, name)
-	log:info("resizeSpectrums ", name)
+function enumerateResizableSpectrumMeters(_, all)
+    local spMeters = {}
 	for _, v in pairs(spectrumList) do
-		if name == v.name then
-			-- create the resized images for skin resolutions
+		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
 				if spectrumImagesMap[v.name].src ~= nil then
-					log:info("resizing spectrum ", v.name, " -> ", vr.w, "x", vr.h)
-					_cacheSpectrumImage(v.name, spectrumImagesMap[v.name].src, vr.w, vr.h, v.spType)
-					log:info("resizing done ", v.name, " -> ", vr.w, "x", vr.h)
+					table.insert(spMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
 		end
 	end
+    return spMeters
 end
 
 function concurrentResizeSpectrumMeter(_, name, w, h)
@@ -1435,11 +1433,16 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 				local path = spectrumImagesMap[v.name].src
 				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 				local dcpath = resizedImagePath(dicKey)
+                if resizedImagesTable[dicKey] ~= nil then
+                    return true
+                end
 				local ok
 				if v.spType == SPT_BACKLIT then
 					ok = Surface:requestResize(path, dcpath, w, h, 0, 3, saveimage_type) == 1
-				else
+                elseif v.spType == SPT_IMAGE then
 					ok = Surface:requestResize(path, dcpath, w, h, 0, 2, saveimage_type) == 1
+                else
+                    ok = true
 				end
 				if ok then
 					resizedImagesTable[dicKey] = dcpath
@@ -1451,28 +1454,23 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 	return false
 end
 
-
-function resizeVuMeter(_, name)
-	log:info("resizeVuMeters ", name)
-
+function enumerateResizableVuMeters(_, all)
+    local vMeters = {}
 	for _, v in pairs(vuImages) do
-		if name == v.name then
+		if all or v.enabled then
 			if v.vutype == "frame" then
-				-- create the resized images for skin resolutions
 				for _, vr in pairs(vuMeterResolutions) do
-					log:info("resizing Vu Meter", v.name, " -> ", vr.w, "x", vr.h)
-					_cacheVUImage(v.name, vuImagesMap[v.name].src, vr.w, vr.h)
+					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
 			if v.vutype == "25framesLR" then
-				-- create the cached image for skin resolutions
 				for _, vr in pairs(vuMeterResolutions) do
-					_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
-					_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
+					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
 		end
 	end
+    return vMeters
 end
 
 local function requestVuResize(name, w , h)
@@ -1480,6 +1478,9 @@ local function requestVuResize(name, w , h)
 	local path = vuImagesMap[name].src
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 	local dcpath = resizedImagePath(dicKey)
+	if resizedImagesTable[dicKey] ~= nil then
+		return true
+	end
 	local ok = Surface:requestResize(path, dcpath, w, h, 25, 1, saveimage_type) == 1
 	if ok then
 		resizedImagesTable[dicKey] = dcpath
