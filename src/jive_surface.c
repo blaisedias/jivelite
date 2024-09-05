@@ -2657,6 +2657,7 @@ static SDL_mutex* resizer_lock = NULL;
 typedef struct resize_request {
 	struct resize_request* perma_next;
 	struct resize_request* next;
+    size_t size;
 	char * src_path;
 	char * dest_path;
 	int   width;
@@ -2678,18 +2679,15 @@ void vu_resize(resize_request_ptr req) {
 		int src_h = req->src_sdl->h;
 		int dst_w = (req->width/2) * req->seq;
 		int dst_h = (src_h * dst_w)/src_w;
-fprintf(stderr, "1) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
 		if (req->width > 1280) {
 			dst_w = (1280/2) * req->seq;
-fprintf(stderr, "2) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
+//fprintf(stderr,"VU resize: capping %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h);fflush(stderr);
 		}
 		dst_h = (src_h * dst_w)/ src_w;
 		if (dst_h > req->height) {
 			dst_h = req->height;
 			dst_w = (((src_w * req->height)/src_h)/req->seq) * req->seq;
-fprintf(stderr, "3) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
 		}
-fprintf(stderr, "F) %d %d -> %d %d\n", src_w, src_h, dst_w, dst_h); fflush(stderr);
 		req->dst_sdl = surface_newRGBA((Uint16)dst_w, (Uint16)dst_h);
 	}
 	if (req->src_sdl != NULL && req->dst_sdl != NULL) {
@@ -2701,7 +2699,7 @@ void sp_resize(resize_request_ptr req) {
 	if (req->src_sdl != NULL) {
 		req->dst_sdl = surface_newRGBA((Uint16)req->width, (Uint16)req->height);
 		if (req->dst_sdl != NULL) {
-			fprintf(stderr, "WxH ox: %d oy: %d dw: %d dh: %d sw: %d sh: %d\n", 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h); fflush(stderr);
+//fprintf(stderr, "sp_resize: WxH ox: %d oy: %d dw: %d dh: %d sw: %d sh: %d\n", 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h); fflush(stderr);
 			copyResampled(req->dst_sdl, req->src_sdl, 0, 0, 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h);
 		}
 	}
@@ -2719,7 +2717,7 @@ void sp_scale_centered_crop(resize_request_ptr req) {
 			f = ((float)req->height)/req->src_sdl->h;
 		}
 		// Create an intermediate surface to hold the source image scaled by the scaling factor
-fprintf(stderr, "### sr %d,%d -->>-- %d,%d\n", req->src_sdl->w, req->src_sdl->h, (Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h)); fflush(stderr);
+//fprintf(stderr, "sp_scale_centered_crop: %d,%d -->>-- %d,%d\n", req->src_sdl->w, req->src_sdl->h, (Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h)); fflush(stderr);
 		SDL_Surface* tmp_sdl = surface_newRGBA((Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h));
 		if (tmp_sdl != NULL) {
 			// Resize the source image to the new surface.
@@ -2735,7 +2733,7 @@ fprintf(stderr, "### sr %d,%d -->>-- %d,%d\n", req->src_sdl->w, req->src_sdl->h,
 				dr.x = 0; dr.y = 0;
 				dr.w = 0; dr.h = 0;
 				if (SDL_BlitSurface(tmp_sdl, &sr, req->dst_sdl, &dr) < 0) {
-fprintf(stderr, "SSCC ########################## blit failed\n"); fflush(stderr);
+//fprintf(stderr, "sp_scale_centered_crop: blit failed\n"); fflush(stderr);
 				}
 			}
 			// Release the intermediate surface
@@ -2746,12 +2744,12 @@ fprintf(stderr, "SSCC ########################## blit failed\n"); fflush(stderr)
 
 void do_resize(resize_request_ptr req) {
 		if (req != NULL) {
-fprintf(stderr, "%s %s %dx%d\n", req->src_path, req->dest_path, req->width, req->height); fflush(stderr);
+//fprintf(stderr, "do_resize: %s %s %dx%d\n", req->src_path, req->dest_path, req->width, req->height); fflush(stderr);
 			int status = RESIZE_ERROR;
 			SDL_Surface* loaded_image = req->src_sdl = IMG_Load(req->src_path);
 
 			if (req->src_sdl != NULL) {
-fprintf(stderr, "+++ loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: +++ loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
 				if (req->src_sdl->format->Amask) {
 					req->src_sdl = SDL_DisplayFormatAlpha(req->src_sdl);
 				} else {
@@ -2759,7 +2757,7 @@ fprintf(stderr, "+++ loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); 
 				}
 
 				if (req->src_sdl != NULL) {
-fprintf(stderr, "+++ src_sdl %p\n", req->src_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: +++ src_sdl %p\n", req->src_sdl); fflush(stderr);
 					switch(req->op) {
 						case 1:
 							vu_resize(req);
@@ -2771,7 +2769,7 @@ fprintf(stderr, "+++ src_sdl %p\n", req->src_sdl); fflush(stderr);
 							sp_scale_centered_crop(req);
 							break;
 					}
-fprintf(stderr, "+++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: +++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
 
 					if (req->dst_sdl != NULL) {
 						int saved;
@@ -2781,25 +2779,25 @@ fprintf(stderr, "+++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
 							saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
 						}
 						if (saved == 0) {
-fprintf(stderr, "### saved %s\n", req->dest_path); fflush(stderr);
+//fprintf(stderr, "do_resize: saved %s\n", req->dest_path); fflush(stderr);
 							status = RESIZE_COMPLETE;
 						}
-fprintf(stderr, "--- dst_sdl %p\n", req->dst_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: --- dst_sdl %p\n", req->dst_sdl); fflush(stderr);
 						SDL_FreeSurface(req->dst_sdl);
 						req->dst_sdl = NULL;
 					}
 
-fprintf(stderr, "--- src_sdl %p\n", req->src_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: --- src_sdl %p\n", req->src_sdl); fflush(stderr);
 					SDL_FreeSurface(req->src_sdl);
 					req->src_sdl = NULL;
 				}
 
-fprintf(stderr, "--- loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
+//fprintf(stderr, "do_resize: --- loaded_image %p src_dl %p\n", loaded_image, req->src_sdl); fflush(stderr);
 				SDL_FreeSurface(loaded_image);
 			}
 
 			req->status = status;
-fprintf(stderr, "resize done resize %d\n", req->status);
+//fprintf(stderr, "do_resize: resize done%d\n", req->status);
 		}
 }
 
@@ -2849,19 +2847,26 @@ void start_concurrent_resizer(void) {
 
 int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
 	resize_request_ptr req = resize_perma;
+    size_t qmem = 0;
 	while(req != NULL) {
 		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
 			return req->status;
 		}
-		req = req->next;
+		req = req->perma_next;
 	}
+	req = resize_perma;
+	while(req != NULL) {
+        qmem += req->size;
+		req = req->perma_next;
+    }
 	// allocation a single chunk of memory for the request + source and destination paths 
 	size_t src_size = ((strlen(src_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t dst_size = ((strlen(dest_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t req_len = sizeof(*req) + src_size + dst_size;
-	fprintf(stderr, "### calloc %ld\n", req_len); fflush(stderr);
 	req = calloc(1, req_len);
 	if (req != NULL) {
+fprintf(stderr, "resize queue memory = %ld bytes, including %ld\n", qmem+req_len, req_len); fflush(stderr);
+        req->size = req_len;
 		req->width = width;
 		req->height = height;
 		req->seq = seq;
