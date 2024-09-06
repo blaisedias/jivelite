@@ -145,7 +145,7 @@ local function platformDetect()
 		wkSpace = os.getenv("JL_WORKSPACE")
 	end
 
-	-- workspace on PCP has additional requirements, 
+	-- workspace on PCP has additional requirements,
 	-- must be under persistent storage root
 	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
 	local mode = lfs.attributes(pcp_version_file, "mode")
@@ -355,73 +355,6 @@ end
 --------------------------------------------------------
 --- image scaling
 --------------------------------------------------------
--- scale an image to fit a height - maintaining aspect ratio if required
-local function _scaleSpectrumImage(imgPath, w, h, retainAR)
-	log:debug("scaleSpectrumImage imagePath:", imgPath, " w:", w, " h:", h)
-	local img = Surface:altLoadImage(imgPath)
-	log:debug("scaleSpectrumImage: got img")
-	local scaledImg
-	local srcW, srcH = img:getSize()
-	if srcW == w and h == srcH then
-		log:debug("scaleSpectrumImage no scaling", img)
-		return img
-	end
-	local retImg = img:resize(w, h)
-	if retainAR == false then
-		log:info("scaleSpectrumImage:", srcW, "x", srcH, " to ", w, "x", h)
-		img:altRelease()
-		return retImg
-	end
-
-	-- scale + centered crop
-	local scaleF = math.max(w/srcW, h/srcH)
-	local scaledW = math.floor(srcW*scaleF)
-	local scaledH = math.floor(srcH*scaleF)
-	scaledImg = img:resize(scaledW, scaledH)
-	img:altRelease()
-	log:info("scaleSpectrumImage: scale factor: ", scaleF)
-	log:info("scaleSpectrumImage:blitClip ",math.floor((scaledW-w)/2),", ",math.floor((scaledH-h)/2),
-				",", w, ", ", h, " -> ", 0, ",", 0)
-	scaledImg:blitClip(math.floor((scaledW-w)/2), math.floor((scaledH-h)/2), w, h, retImg, 0, 0)
-	scaledImg:altRelease()
-	return retImg
-end
-
--- scale an image to fit a width - maintaining aspect ratio
-local function _scaleAnalogVuMeter(imgPath, w_in, h, seq)
-	local w = w_in
-	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " START" )
-	-- FIXME hack for screenwidth > 1280
-	-- resizing too large segfaults so VUMeter resize is capped at 1280
-	if w > 1280 then
-		log:debug("_scaleAnalogVuMeter !!!!! w > 1280 reducing to 1280 !!!!! ", imgPath )
-		w = 1280
-	end
-	local img = Surface:altLoadImage(imgPath)
-	log:debug("_scaleAnalogVuMeter loaded:", imgPath)
-	local srcW, srcH = img:getSize()
-	local wSeq = math.floor((w/2))*seq
-	-- try scaling to fit width
-	local scaledH = math.floor(srcH * (wSeq/srcW))
-	log:debug("_scaleAnalogVuMeter srcW:", srcW, " srcH:", srcH, " -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
-	if wSeq == srcW and h == srcH then
-		log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
-		return img
-	-- after scaling:
-	elseif scaledH > h then
-	-- doesn't fit height-wise, so ...
-	-- scale to fit height - typically this means more visible empty space horizontally
-		scaledH = h
-		wSeq = math.floor((srcW * (h/srcH))/seq) * seq
-		log:debug("_scaleAnalogVuMeter adjusted for height srcW:", srcW, " srcH:", srcH,
-					" -> wSeq:", wSeq, " h:", h, " scaledH:", scaledH)
-	end
-	local scaledImg = img:resize(wSeq, scaledH)
-	img:altRelease()
-	log:debug("_scaleAnalogVuMeter imgPath:", imgPath, " DONE" )
-	return scaledImg
-end
-
 
 --------------------------------------------------------
 --- Spectrum
@@ -585,38 +518,6 @@ local function initSpectrumList()
 		_populateSpectrumImageList(workSpace .. "/" .. relativePath)
 	end
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
-end
-
-local function _cacheSpectrumImage(imgName, path, w, h, spType)
-	if path == nil then
-		return
-	end
-	log:debug("cacheSpectrumImage ", imgName, ", ", path, ", ", w, ", ", h, " spType ", spType)
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = resizedImagesTable[dicKey]
-
-	-- for backlit we synthesize the backgorund
-	-- image from the foreground image, and render the foreground
-	-- on top of the background image
---	if spType == SPT_BACKLIT then
---		local bgImgName = "bg-" .. imgName
---		local bgDicKey = "for-" .. w .. "x" .. h .. "-" .. bgImgName
---		local bg_dcpath = resizedImagePath(bgDicKey)
---	end
-	if dcpath == nil then
-		local img = _scaleSpectrumImage(path, w, h, spType == SPT_BACKLIT)
-		local fgimg = Surface:newRGB(w, h)
-		img:blit(fgimg, 0, 0, 0)
-		dcpath = resizedImagePath(dicKey)
-		-- resizedImagesTable[dicKey] = img
-		saveImage(fgimg, dicKey, dcpath)
-		fgimg:altRelease()
-		img:altRelease()
---		resizedImagesTable[dicKey] = dcpath
-		log:debug("cacheSpectrumImage cached ", dicKey)
-	else
-		log:debug("cacheSpectrumImage found cached ", dcpath)
-	end
 end
 
 local function enableOneSpectrumMeter()
@@ -787,22 +688,12 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 	return fg, bg, alpha, barColor, capColor, displayResizing
 end
 
-function selectSpectrum(_, name, selected, allowCaching)
+function selectSpectrum(_, name, selected)
 	local n_enabled = 0
 	log:debug("selectSpectrum", " ", name, " ", selected)
 
 	for _, v in pairs(spectrumList) do
 		if v.name == name then
-			if (allowCaching and selected) then
-					if spectrumImagesMap[name] ~= nil then
-						-- create the cached image for skin resolutions
-						for _, vr in pairs(spectrumResolutions) do
-							if spectrumImagesMap[name].src ~= nil then
-								_cacheSpectrumImage(name, spectrumImagesMap[name].src, vr.w, vr.h, v.spType)
-							end
-						end
-					end
-			end
 			if not selected and v.enabled then
 				v.enabled = selected
 				-- deselected so re-sequence
@@ -907,22 +798,6 @@ end
 
 function getVuMeterList()
 	return vuImages
-end
-
-local function _cacheVUImage(imgName, path, w, h)
-	log:debug("cacheVuImage ",  imgName, ", ", path, ", ", w, ", ", h)
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. imgName
-	local dcpath = resizedImagesTable[dicKey]
-	if dcpath == nil then
-		local img = _scaleAnalogVuMeter(path, w, h, 25)
-		dcpath = resizedImagePath(dicKey)
-		--resizedImagesTable[dicKey] = img
-		saveImage(img, dicKey, dcpath)
-		img:altRelease()
---		resizedImagesTable[dicKey] = dcpath
-	else
-		log:debug("_cacheVuImage found cached ", dcpath)
-	end
 end
 
 local function _populateVfdVuMeterList(search_root)
@@ -1255,6 +1130,7 @@ local function getVFDVUmeter(name, w, h)
 	if vfd.lefttrail ~= nil then
 		tw, th = vfd.lefttrail:getSize()
 	end
+
 	local cw, ch = vfd.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
@@ -1353,26 +1229,11 @@ function getVuImage(_,w,h)
 end
 
 
-function selectVuImage(_, name, selected, allowCaching)
+function selectVuImage(_, name, selected)
 	local n_enabled = 0
 	log:debug("selectVuImage", " ", name, " ", selected)
 	for _, v in pairs(vuImages) do
 		if v.name == name then
-			if (allowCaching and selected) then
-				if v.vutype == "frame" then
-					-- create the cached image for skin resolutions
-					for _, vr in pairs(vuMeterResolutions) do
-						_cacheVUImage(name, vuImagesMap[name].src, vr.w, vr.h)
-					end
-				end
-				if v.vutype == "25framesLR" then
-					-- create the cached image for skin resolutions
-					for _, vr in pairs(vuMeterResolutions) do
-						_cacheVUImage(name .. ':left', vuImagesMap[name .. ':left'].src, vr.w, vr.h)
-						_cacheVUImage(name .. ':right', vuImagesMap[name .. ':right'].src, vr.w, vr.h)
-					end
-				end
-			end
 			if not selected and v.enabled then
 				v.enabled = selected
 				-- deselected so re-sequence in
