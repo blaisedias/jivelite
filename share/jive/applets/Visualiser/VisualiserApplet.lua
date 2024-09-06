@@ -229,7 +229,7 @@ local function inputWorkSpace(self)
     end
 
     if string.len(currentValue) == 0 and settings.persisentStorageRoot ~= nil then
-        -- unset - pre-fill with recommended value if a persistent storage path 
+        -- unset - pre-fill with recommended value if a persistent storage path
         -- is defined
         currentValue = settings.persisentStorageRoot .. '/jivelite-workspace'
     end
@@ -322,7 +322,6 @@ function imagesMenu(self, _)
         weight=70
     })
 
-    local settings = self:getSettings()
     menu:addItem({
         id = "saveresized",
         text = self:string("SAVE_RESIZED"),
@@ -335,6 +334,7 @@ function imagesMenu(self, _)
             end,
             settings.saveResizedImages)
     })
+
     menu:addItem({
         id = "saveaspng",
         text = self:string("SAVE_AS_PNG"),
@@ -479,10 +479,10 @@ function selectVuMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
-                        visImage:selectVuImage(nm, true, false)
+                        visImage:selectVuImage(nm, true)
                     else
-                        if visImage:selectVuImage(nm, false, false) <= 0 then
-                            visImage:selectVuImage(nm, true, false)
+                        if visImage:selectVuImage(nm, false) <= 0 then
+                            visImage:selectVuImage(nm, true)
                             selected = true
                         else
                             local np = appletManager:getAppletInstance("NowPlaying")
@@ -505,7 +505,7 @@ end
 function selectSpectrumMeters(self)
     local window = Window("text_list", self:string('SELECT_SPECTRUM') )
     local menu = SimpleMenu("menu")
---  uncomment to trigger resize on exit from the ment   
+--  uncomment to trigger resize on exit from the menu
 --    menu.closeAction = "go_resize_visu"
 
     -- use the spectrum meter list from the visImage module,
@@ -526,10 +526,10 @@ function selectSpectrumMeters(self)
                     local cb_settings = self:getSettings()
                     local selected = isSelected
                     if isSelected then
-                        visImage:selectSpectrum(nm, true, false)
+                        visImage:selectSpectrum(nm, true)
                     else
-                        if visImage:selectSpectrum(nm, false, false) <= 0 then
-                            visImage:selectSpectrum(nm, true, false)
+                        if visImage:selectSpectrum(nm, false) <= 0 then
+                            visImage:selectSpectrum(nm, true)
                             selected = true
                         else
                             local np = appletManager:getAppletInstance("NowPlaying")
