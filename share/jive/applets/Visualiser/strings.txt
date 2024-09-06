@@ -69,6 +69,9 @@ CHANGE_VISUALISER_ON_TIMER
 	EN	Change Visualiser On Timer (Seconds)
 
 WORKSPACE
+	EN	Workspace
+
+WORKSPACE_PATH
 	EN	Workspace path
 
 SAVE_RESIZED
