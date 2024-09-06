@@ -218,7 +218,7 @@ function init(self)
 end
 
 local function inputWorkSpace(self)
-    local window = Window("text_list", self:string("WORKSPACE"))
+    local window = Window("text_list", self:string("WORKSPACE_PATH"))
     local settings = self:getSettings()
 
     local currentValue = settings.workSpace
@@ -348,25 +348,35 @@ function imagesMenu(self, _)
             settings.saveAsPng)
     })
 
+    window:addWidget(menu)
+    window:show()
+end
+
+--function workspaceMenu(self, menuItem)
+function workspaceMenu(self, _)
+    local window = Window("text_list", self:string('WORKSPACE') )
+    local menu = SimpleMenu("menu")
+    local settings = self:getSettings()
+
     -- workspace UI is complicated
     -- present information to the user and the ability to change it
     -- show default, and current values
     menu:addItem({ text =  'Default workspace path: ' .. visImage:getDefaultWorkspacePath(),
-            style = 'text',
+            style = 'item_no_arrow',
             weight=100
     })
     menu:addItem({ text =  'Current workspace path: ' .. visImage:getWorkspacePath(),
-            style = 'text',
+            style = 'item_no_arrow',
             weight=110
     })
     -- if persistent storage path is defined then offer recommended values
     if settings.persisentStorageRoot ~= nil then
         menu:addItem({ text = 'Recommended workspace path: ' .. settings.persisentStorageRoot .. '/jivelite-workspace',
-            style = 'text',
+            style = 'item_no_arrow',
             weight=120
         })
     end
-    menu:addItem({ text = self:string("WORKSPACE"),
+    menu:addItem({ text = self:string("WORKSPACE_PATH"),
 --        callback = function(event, menuItem)
         callback = function(_, _)
             inputWorkSpace(self)
