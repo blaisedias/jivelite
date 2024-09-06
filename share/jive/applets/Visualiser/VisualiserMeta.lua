@@ -175,6 +175,18 @@ function registerApplet(self)
 
     jiveMain:addItem(
         self:menuItem(
+            'workSpace',
+            'visualiserSettings',
+            'WORKSPACE',
+            function(applet, ...)
+                applet:workspaceMenu(...)
+            end,
+            110
+        )
+    )
+
+    jiveMain:addItem(
+        self:menuItem(
             'appletSpectrumBarSettings',
             'visualiserSpectrumSettings',
             'SPECTRUM_BARS_FORMAT',
@@ -203,15 +215,13 @@ function registerApplet(self)
     local disp_w, disp_h = Framework:getDisplaySize()
 
     jiveMain:addItem(
-        self:menuItem(
-            'appletVisualiserSettings',
-            'screenSettings',
-            "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
---            function(applet, ...)
-            function()
-            end,
-            1000
-        )
+        {
+            id = 'ScreenResolution',
+            node = 'screenSettings',
+            style = 'item_no_arrow',
+            text = "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
+            weight = 1000,
+        }
     )
 
     self:registerService("resizeSelectedVisualisers")
