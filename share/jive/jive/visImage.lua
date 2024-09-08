@@ -35,6 +35,7 @@ local Surface		= require("jive.ui.Surface")
 --local debug		 	= require("jive.utils.debug")
 local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
+local FRAME_RATE    = jive.ui.FRAME_RATE
 
 module(...)
 
@@ -340,13 +341,19 @@ end
 -- return a shallow copy of displayResizingParameters if resize is required
 local function makeResizingParams(resizeIsRequired)
 	if displayResizingParameters ~= nil and resizeIsRequired then
+		local w, _ = displayResizingParameters.img:getSize()
+-- hard coded to width of 150
+		local f = math.floor(w/150)
 		return {
 			img = displayResizingParameters.img,
 			h = displayResizingParameters.h,
--- hard coded to 8 frames
-			w = displayResizingParameters.w/8,
-			f = 8,
+			w = displayResizingParameters.w/f,
+			-- rendered frame counter
 			c = 0,
+			-- rendered frame counter divisior
+			d = math.floor(FRAME_RATE/f),
+			-- rendered frame counter maximum
+			m = math.floor(FRAME_RATE/f) * f,
 		}
 	end
 	return nil
