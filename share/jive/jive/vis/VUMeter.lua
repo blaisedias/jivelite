@@ -74,9 +74,9 @@ local function drawVuMeter(params, surface, vol)
 
 	local y = params.y
 	local x = params.x
-    local th = params.th
-    local tw = params.tw
-    local cap = params.cap
+	local th = params.th
+	local tw = params.tw
+	local cap = params.cap
 
 	for i = 1, params.bars do
 		if i == math.floor(cap / 2) then
@@ -218,7 +218,6 @@ function _layout(self)
 		log:debug("-----------------------------------------------------------------------")
 		self.vutbl = visImage:getVuImage(w,h)
 		if self.vutbl.displayResizing ~= nil then
---			self.counter = FRAME_RATE/2
 			return
 		end
 		if self.vutbl.vutype == "frame"  then
@@ -341,12 +340,8 @@ function draw(self, surface)
 	if self.vutbl ~= nil and  self.vutbl.displayResizing ~= nil then
 		local x, y, w, h = self:getBounds()
 		local d = self.vutbl.displayResizing
---		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		d.img:blitClip(math.floor((d.c % d.m) /d.d) * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		d.c = d.c + 1
-		if d.c >= d.f then
-			d.c = 0
-		end
-		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		local vuname = visImage:getCurrentVuMeterName()
 		local resized = visImage:concurrentResizeVuMeter(vuname, w, h)
 		if resized == true then
