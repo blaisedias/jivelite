@@ -69,10 +69,6 @@ function _layout(self)
 
 	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
 
---	if self.displayResizing ~= nil then
---		self.counter = FRAME_RATE/2
---	end
-
 	log:info('** barColor=', string.format("0x%x", self.barColor), " capColor=", string.format("0x%x",self.capColor))
 	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
 	if self.settings.barsFormat.barsInBin < 1 then
@@ -321,12 +317,8 @@ function draw(self, surface)
 
 	if self.displayResizing ~= nil then
 		local d = self.displayResizing
---		d.img:blit(surface, (x + (w-d.w)/2), (y + (h-d.h)/2), d.w, d.h)
+		d.img:blitClip(math.floor((d.c % d.m)/d.d) * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		d.c = d.c + 1
-		if d.c >= d.f then
-			d.c = 0
-		end
-		d.img:blitClip(d.c * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		local spname = visImage:getCurrentSpectrumMeterName()
 		local resized = visImage:concurrentResizeSpectrumMeter(spname, w, h)
 		if resized == true then
