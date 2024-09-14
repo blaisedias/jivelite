@@ -1349,7 +1349,12 @@ local function requestVuResize(name, w , h)
 	if resizedImagesTable[dicKey] ~= nil then
 		return true
 	end
-	local ok = Surface:requestResize(path, dcpath, w, h, 25, 1, saveimage_type) == 1
+    -- When VU meters are rendered there are 3 "bars" of spacing,
+    -- left, between and right.
+    -- resize to 90% of the display window, and all the bars
+    -- will visually be the same size.
+    -- Note: this only works if the VU Meters do not have any borders along the horizontal axis
+	local ok = Surface:requestResize(path, dcpath, math.floor(w*9/10), h, 25, 1, saveimage_type) == 1
 	if ok then
 		resizedImagesTable[dicKey] = dcpath
 		return true
