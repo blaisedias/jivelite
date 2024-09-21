@@ -316,6 +316,12 @@ function deleteResizedImages(_)
 	end
 --	resizedImagesTable = {}
 	imCacheClear()
+	-- The resize queue is not cleared after a resize op is completed,
+	-- this prevents repeating the same resize op if requested again.
+	-- However now those images that were resized have been deleted,
+	-- so the queue should be cleared.
+	local cleared = Surface:clearResizeQueue()
+	log:info("clearResizeQueue  returned: ", cleared)
 end
 
 
