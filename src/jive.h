@@ -628,6 +628,7 @@ int jiveL_surface_aatrigonColor(lua_State *L);
 int jiveL_surface_filledTrigonColor(lua_State *L);
 int jiveL_tile_fill_color(lua_State *L);
 int jiveL_surface_request_resize(lua_State *L);
+int jiveL_surface_clear_resize_queue(lua_State *L);
 
 int jiveL_tile_load_image(lua_State *L);
 int jiveL_tile_load_tiles(lua_State *L);
