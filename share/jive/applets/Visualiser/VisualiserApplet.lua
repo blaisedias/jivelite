@@ -318,6 +318,10 @@ function imagesMenu(self, _)
 --        callback = function(event, menuItem)
         callback = function(_, _)
             visImage:deleteResizedImages()
+            local np = appletManager:getAppletInstance("NowPlaying")
+            if np ~= nil then
+                np:invalidateWindow(nil)
+            end
         end,
         weight=70
     })

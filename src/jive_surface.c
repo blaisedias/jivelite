@@ -2847,7 +2847,7 @@ void start_concurrent_resizer(void) {
 
 int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
 	resize_request_ptr req = resize_perma;
-    size_t qmem = 0;
+	size_t qmem = 0;
 	while(req != NULL) {
 		if (req->width == width && req->height == height && strcmp(req->src_path, src_path)==0 && strcmp(req->dest_path, dest_path)==0) {
 			return req->status;
@@ -2856,17 +2856,19 @@ int submit_resize_request(const char* src_path, const char* dest_path, int width
 	}
 	req = resize_perma;
 	while(req != NULL) {
-        qmem += req->size;
+		qmem += req->size;
 		req = req->perma_next;
-    }
+	}
 	// allocation a single chunk of memory for the request + source and destination paths 
 	size_t src_size = ((strlen(src_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t dst_size = ((strlen(dest_path) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
 	size_t req_len = sizeof(*req) + src_size + dst_size;
 	req = calloc(1, req_len);
 	if (req != NULL) {
-fprintf(stderr, "resize queue memory = %ld bytes, including %ld\n", qmem+req_len, req_len); fflush(stderr);
-        req->size = req_len;
+fprintf(stderr, "resize queue memory = %ld bytes, including %ld\n", qmem+req_len, req_len);
+		req->size = req_len;
+fprintf(stderr, "RESIZE: allocated %p %ld\n", req, req->size);
+fflush(stderr);
 		req->width = width;
 		req->height = height;
 		req->seq = seq;
@@ -2927,5 +2929,46 @@ int jiveL_surface_request_resize(lua_State *L) {
 	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op, strcmp(image_type, "bmp"));
 
 	lua_pushinteger(L, rsz);
+	return 1;
+}
+
+
+int clear_resize_queue() {
+
+	if (resize_pending != NULL) {
+		return RESIZE_PENDING;
+	}
+
+	if (SDL_LockMutex(resizer_lock) < 0) {
+		return RESIZE_ERROR;
+	}
+
+	{
+		resize_request_ptr req = resize_perma;
+		resize_request_ptr next;
+		while(req != NULL) {
+			next = req->perma_next;
+fprintf(stderr, "RESIZE: freeing   %p %ld\n", req, req->size); fflush(stderr);
+			free(req);
+			req = next;
+		}
+		resize_perma = NULL;
+	}
+
+	if (SDL_UnlockMutex(resizer_lock) <0) {
+		fprintf(stderr, "jiveL_surface_reset_resize unlock resizer mutex failed\n"); fflush(stderr);
+		return RESIZE_ERROR;
+	}
+
+	return RESIZE_COMPLETE;
+}
+
+int jiveL_surface_clear_resize_queue(lua_State *L) {
+	/*
+	  class
+	*/
+	
+	int rv = clear_resize_queue();
+	lua_pushinteger(L, rv);
 	return 1;
 }
