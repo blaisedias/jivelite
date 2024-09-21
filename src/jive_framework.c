@@ -1662,6 +1662,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "filledTrigon", jiveL_surface_filledTrigonColor },
 	{ "savePNG", jiveL_surface_save_png },
 	{ "requestResize", jiveL_surface_request_resize },
+	{ "clearResizeQueue", jiveL_surface_clear_resize_queue },
 	{ NULL, NULL }
 };
 
