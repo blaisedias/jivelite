@@ -71,6 +71,13 @@ function inputVisualiserChangeOnTimer(self)
 end
 
 
+local function refreshNowPlaying()
+    local np = appletManager:getAppletInstance("NowPlaying")
+    if np ~= nil then
+        np:invalidateWindow(nil)
+    end
+end
+
 
 function init(self)
     local settings = self:getSettings()
@@ -101,10 +108,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.randomSequence = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.randomSequence)
     })
@@ -120,10 +124,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.visuChangeOnTrackChange = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.visuChangeOnTrackChange)
     })
@@ -139,10 +140,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.visuChangeOnNpViewChange = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.visuChangeOnNpViewChange)
     })
@@ -156,10 +154,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.capsOn = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.spectrum.capsOn)
     })
@@ -173,10 +168,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.turbine = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.spectrum.turbine)
     })
@@ -190,10 +182,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.baselineOn = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.spectrum.baselineOn)
     })
@@ -207,10 +196,7 @@ function init(self)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.baselineAlways = checked
             self:storeSettings()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         settings.spectrum.baselineAlways)
     })
@@ -318,10 +304,7 @@ function imagesMenu(self, _)
 --        callback = function(event, menuItem)
         callback = function(_, _)
             visImage:deleteResizedImages()
-            local np = appletManager:getAppletInstance("NowPlaying")
-            if np ~= nil then
-                np:invalidateWindow(nil)
-            end
+            refreshNowPlaying()
         end,
         weight=70
     })
@@ -416,6 +399,7 @@ function selectSpectrumChannelFlip(self)
                     local rb_settings = self:getSettings()
                     rb_settings.spectrum.channelFlip=v.name
                     self:storeSettings()
+                    refreshNowPlaying()
                 end,
             v.name == current),
         } )
@@ -451,10 +435,7 @@ function selectSpectrumBarsFormat(self)
                     local rb_settings = self:getSettings()
                     rb_settings.spectrum.barsFormat=v.name
                     self:storeSettings()
-                    local np = appletManager:getAppletInstance("NowPlaying")
-                    if np ~= nil then
-                        np:invalidateWindow(nil)
-                    end
+                    refreshNowPlaying()
                 end,
             v.name == current),
         })
@@ -499,10 +480,7 @@ function selectVuMeters(self)
                             visImage:selectVuImage(nm, true)
                             selected = true
                         else
-                            local np = appletManager:getAppletInstance("NowPlaying")
-                            if np ~= nil then
-                                np:invalidateWindow(nil)
-                            end
+                            refreshNowPlaying()
                         end
                     end
                     cb_settings.vuMeterSelection[nm] = selected
@@ -546,11 +524,8 @@ function selectSpectrumMeters(self)
                             visImage:selectSpectrum(nm, true)
                             selected = true
                         else
-                            local np = appletManager:getAppletInstance("NowPlaying")
-                            if np ~= nil then
-                                np:invalidateWindow(nil)
-                            end
-                         end
+                            refreshNowPlaying()
+                        end
                     end
                     cb_settings.spectrumMeterSelection[nm] = selected
                     self:storeSettings()
@@ -564,8 +539,7 @@ function selectSpectrumMeters(self)
 end
 
 
---function resizeImages(self, bSpectrum, bVuMeters, all)
-function resizeImages(_, bSpectrum, bVuMeters, all)
+local function localResizeImages(bSpectrum, bVuMeters, all)
         local popup = Popup("toast_popup_mixed")
 
         popup:setAllowScreensaver(false)
@@ -595,7 +569,7 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
                 if state == "resize_sp" then
                     if i_sp <= #spectrumMeters then
                         local entry = spectrumMeters[i_sp]
-                        text:setValue("Resizing spectrum meter " .. entry.name .. " " .. entry.w .. "x" .. entry.h)
+                        text:setValue("Resizing spectrum meter " .. i_sp .. " of ".. #spectrumMeters .."\n"  .. entry.name .. "\n" .. entry.w .. "x" .. entry.h)
                         if visImage:concurrentResizeSpectrumMeter(entry.name, entry.w, entry.h) then
                             i_sp = i_sp + 1
                         end
@@ -605,7 +579,7 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
                 elseif state == "resize_vu" then
                     if i_vu <= #vuMeters then
                         local entry = vuMeters[i_vu]
-                        text:setValue("Resizing VU meter " .. entry.name .. " " .. entry.w .. "x" .. entry.h)
+                        text:setValue( "Resizing VU meter " .. i_vu .. " of " .. #vuMeters .."\n" .. entry.name .. "\n" .. entry.w .. "x" .. entry.h)
                         if visImage:concurrentResizeVuMeter(entry.name, entry.w, entry.h) then
                             i_vu = i_vu + 1
                         end
@@ -624,6 +598,11 @@ function resizeImages(_, bSpectrum, bVuMeters, all)
             end)
 
         popup:show()
+end
+
+function resizeImages(_, bSpectrum, bVuMeters, all)
+    localResizeImages(bSpectrum, bVuMeters, all)
+    refreshNowPlaying()
 end
 
 function resizeSelectedVisualisers(self)
