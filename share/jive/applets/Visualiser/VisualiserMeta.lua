@@ -118,8 +118,13 @@ function registerApplet(self)
 
     self:storeSettings()
 
-    local node = { id = 'visualiserSettings', iconStyle = 'hm_settings', node = 'screenSettingsNowPlaying',
-                    text = self:string('Visualiser'), windowStyle = 'text_only'  }
+    local node = {
+        id = 'visualiserSettings',
+        iconStyle = 'hm_settings',
+        node = 'screenSettingsNowPlaying',
+        text = self:string('Visualiser'),
+        windowStyle = 'text_only',
+    }
     jiveMain:addNode(node)
 
     jiveMain:addItem(
@@ -146,7 +151,14 @@ function registerApplet(self)
         )
     )
 
-    node = { id = 'visualiserSpectrumSettings', iconStyle = 'hm_settings', node = 'visualiserSettings', text = 'Spectrum Meter Settings', windowStyle = 'text_only', weight=30  }
+    node = {
+        id = 'visualiserSpectrumSettings',
+        iconStyle = 'hm_settings',
+        node = 'visualiserSettings',
+        text = 'Spectrum Meter Settings',
+        windowStyle = 'text_only',
+        weight=30,
+    }
     jiveMain:addNode(node)
 
     jiveMain:addItem(
