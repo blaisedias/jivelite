@@ -65,4 +65,24 @@ files["share/jive/applets/NowPlaying/NowPlayingApplet.lua"] = {
        "_M", "jive", "appletManager", "jiveMain", "jnt",
    }
 }
+files["share/jive/applets/Visualiser/VisualiserApplet.lua"] = {
+   globals = {
+       "init",
+       "imagesMenu", "workspaceMenu",
+       "selectSpectrumChannelFlip", "selectSpectrumBarsFormat", "selectVuMeters", "selectSpectrumMeters",
+       "inputVisualiserChangeOnTimer",
+       "resizeImages", "resizeSelectedVisualisers"
+   },
+   read_globals = {
+       "_M", "jive", "appletManager", "jiveMain", "jnt",
+   }
+}
+files["share/jive/applets/Visualiser/VisualiserMeta.lua"] = {
+   globals = {
+       "jiveVersion", "defaultSettings", "registerApplet", "configureApplet"
+   },
+   read_globals = {
+       "_M", "jive", "appletManager", "jiveMain", "jnt",
+   }
+}
 
