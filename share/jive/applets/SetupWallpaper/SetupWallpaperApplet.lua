@@ -88,6 +88,14 @@ function notify_playerCurrent(self, player)
 end
 
 
+local function refreshNowPlaying()
+	local np = appletManager:getAppletInstance("NowPlaying")
+	if np ~= nil then
+		np:invalidateWindow(nil)
+	end
+end
+
+
 function settingsShow(self)
 	local window = Window("text_list", self:string('WALLPAPER'), 'settingstitle')
 
@@ -140,6 +148,7 @@ function settingsShow(self)
 			self.group, 
 			function()
 				self:setBackground('black', self.currentPlayerId)
+				refreshNowPlaying()
 			end,
 			wallpaper == 'black'
 		),
@@ -167,6 +176,7 @@ function settingsShow(self)
 				self.group, 
 				function()
 					self:setBackground(details.fullpath, self.currentPlayerId)
+					refreshNowPlaying()
 				end,
 				wallpaper == details.fullpath or wallpaper == name
 			),
