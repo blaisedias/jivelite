@@ -1,6 +1,5 @@
 # Overview
-The Visualiser Applet adds the Visualiser settings to the Now Playing menu,
-with the following menu items:
+The Visualiser Applet adds the Visualiser settings with the following menu items:
 * **Spectrum Analyzer Settings:**
   * **Bar Format:** Select bar width and spacing between bars.
    Smaller values for bar width and spacing will increase the number of bars - but also increase the load.
@@ -13,11 +12,15 @@ with the following menu items:
 * **Randomise Visualiser Image Sequence:**
     When multiple spectrum analyzers and VU meters are enabled, the visualiser image selected for display changes when the track changes.
     Selecting this option randomises the sequence in which images are selected.
+* **Change Visualiser On Track Change**
+    Change visualiser graphics when the track changes. This only has an effect when multiple visualiser have been selected. 
 * **Cache Visualiser Images in RAM:**
     Cache visualiser images in RAM for quick retrieval when changing the visualiser image for display.
- *WARNING* turning this on may result in significant increase memory usage by JiveLite.
- The recommended (and default) setting is OFF.
-* **Resize Images:** Manually resize visualiser images so that resized images are available immediately for display in the NowPlaying views.
+ *WARNING* turning this ON can result in significant increase memory usage by JiveLite, which adversely affect operation of the target device.
+ The default setting is OFF, this guarantees stability on resource constrained targets.
+* **Change Visualiser On Timer (Seconds)**
+    Change visualiser graphics after a fixed period of time. This only has an effect when multiple visualiser have been selected. A value of 0 or none diables this feature.
+* **Image Resize:** Manually resize visualiser images so that resized images are available immediately for display in the NowPlaying views.
 *Note:* Resize operations are not quick especially for analog VU meters.
 Be prepared for significant delays when selecting any of the resize actions below.
   * **Resize Selected Visualiser Images:** Resize all visualiser images (spectrum analyzer and VU meter) the have been selected.
@@ -27,7 +30,11 @@ Be prepared for significant delays when selecting any of the resize actions belo
   * **Resize ALL Spectrum Images:** Resize all spectrum analyzer images that have been found.
   * **Resize ALL VU Meter Images:** Resize all VU meter images that have been found.
   * **Resize ALL Visualiser Images:** Resize all Spectrum analyzer and VU meter images that have been found.  
-  * **Clear Resized Image Cache:** Clear the cache of discovered resized images. Do this to force resizing of images which have been resized before. Useful if the source image has changed.
+  * **Delete Resized Images:** Clear the cache of discovered resized images. Do this to force resizing of images which have been resized before. Useful if the source image has changed.
+  * **Save Resized Images:** Save resized images to disk (default ON)
+  * **Save as PNG:** Save resized images as PNGs (default ON)
+* **Workspace:** Customise the location where resized images are stored and custom artwork can be added.
+See https://github.com/blaisedias/tcz-jivelite/blob/visu-4/README.visu-4.md#persistent-resized-image-cache-on-a-partition
 ## Bar formats
 The bars rendered in the spectrum meter now have limited configurability -
 i.e select one from 18 presets.
