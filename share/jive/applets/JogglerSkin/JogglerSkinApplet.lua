@@ -4368,6 +4368,10 @@ function npButtonSelectorShow(self)
 				function(object, isSelected)
 					appletManager:callService("setNowPlayingScreenButtons", v, isSelected)
 					jiveMain:reloadSkin()
+                    local np = appletManager:getAppletInstance("NowPlaying")
+                    if np ~= nil then
+                        np:invalidateWindow(nil)
+                    end
 				end,
 			settings[v]),
 		} )
