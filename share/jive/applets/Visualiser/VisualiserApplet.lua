@@ -146,24 +146,11 @@ function init(self)
     })
 
     jiveMain:addItem({
-        id = "caps_on",
-        node = "visualiserSpectrumSettings",
-        text = self:string('SPECTRUM_CAPS'),
-        style = 'item_choice',
-        check = Checkbox("checkbox", function(_, checked)
-            local cb_settings = self:getSettings()
-            cb_settings.spectrum.capsOn = checked
-            self:storeSettings()
-            refreshNowPlaying()
-        end,
-        settings.spectrum.capsOn)
-    })
-
-    jiveMain:addItem({
         id = "turbine",
         node = "visualiserSpectrumSettings",
         text = self:string('SPECTRUM_TURBINE'),
         style = 'item_choice',
+        weight = 90,
         check = Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.turbine = checked
@@ -174,10 +161,76 @@ function init(self)
     })
 
     jiveMain:addItem({
+        id = "caps_on",
+        node = "visualiserSpectrumSettings",
+        text = self:string('SPECTRUM_CAPS'),
+        style = 'item_choice',
+        weight = 50,
+        check = Checkbox("checkbox", function(_, checked)
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.capsOn = checked
+            self:storeSettings()
+            refreshNowPlaying()
+        end,
+        settings.spectrum.capsOn)
+    })
+
+    local group = RadioGroup()
+
+    jiveMain:addItem({
+        id = "nofillpeaks",
+        node = "visualiserSpectrumSettings",
+        text = self:string('SPECTRUM_FILL_TO_CAPS_NONE'),
+        style = 'item_choice',
+        weight = 60,
+        check = RadioButton("radio", group,
+            function()
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.fill = 0
+            self:storeSettings()
+            refreshNowPlaying()
+        end,
+        settings.spectrum.fill==0)
+    })
+
+    jiveMain:addItem({
+        id = "semifillpeaks",
+        node = "visualiserSpectrumSettings",
+        text = self:string('SPECTRUM_FILL_TO_CAPS_SEMI'),
+        style = 'item_choice',
+        weight = 70,
+        check = RadioButton("radio", group,
+            function()
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.fill = 1
+            self:storeSettings()
+            refreshNowPlaying()
+        end,
+        settings.spectrum.fill==1)
+    })
+
+    jiveMain:addItem({
+        id = "fillpeaks",
+        node = "visualiserSpectrumSettings",
+        text = self:string('SPECTRUM_FILL_TO_CAPS'),
+        style = 'item_choice',
+        weight = 80,
+        check = RadioButton("radio", group,
+            function()
+            local cb_settings = self:getSettings()
+            cb_settings.spectrum.fill = 2
+            self:storeSettings()
+            refreshNowPlaying()
+        end,
+        settings.spectrum.fill==2)
+    })
+
+    jiveMain:addItem({
         id = "baselineOn",
         node = "visualiserSpectrumSettings",
         text = self:string('SPECTRUM_BASELINEON'),
         style = 'item_choice',
+        weight = 30,
         check = Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.baselineOn = checked
@@ -192,6 +245,7 @@ function init(self)
         node = "visualiserSpectrumSettings",
         text = self:string('SPECTRUM_BASELINEALWAYS'),
         style = 'item_choice',
+        weight = 40,
         check = Checkbox("checkbox", function(_, checked)
             local cb_settings = self:getSettings()
             cb_settings.spectrum.baselineAlways = checked
