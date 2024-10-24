@@ -399,22 +399,39 @@ end
 -- if present in settings then use those settings
 local function initColourSpectrums()
 	local csp ={
-		{name="mc-White", enabled=false, spType=SPT_COLOUR,		barColor=0xd0d0d0ff, capColor=0xffffffff},
-		{name="mc-White translucent", enabled=false, spType=SPT_COLOUR,	barColor=0xd0d0d0a0, capColor=0xd0d0d0ff},
-		{name="mc-Yellow", enabled=false, spType=SPT_COLOUR,	   barColor=0xd0d000ff, capColor=0xffff00ff},
-		{name="mc-Yellow translucent", enabled=false, spType=SPT_COLOUR,   barColor=0xd0d000a0, capColor=0xd0d000ff},
-		{name="mc-Cyan", enabled=false, spType=SPT_COLOUR,		 barColor=0x00d0d0ff, capColor=0x00ffffff},
-		{name="mc-Cyan translucent", enabled=false, spType=SPT_COLOUR,	 barColor=0x00d0d0a0, capColor=0x00d0d0ff},
-		{name="mc-Magenta", enabled=false, spType=SPT_COLOUR,	  barColor=0xd000d0ff, capColor=0xff00ffff},
-		{name="mc-Magenta translucent", enabled=false, spType=SPT_COLOUR,  barColor=0xd000d0a0, capColor=0xd000d0ff},
-		{name="mc-Black", enabled=false, spType=SPT_COLOUR,		barColor=0x101010ff, capColor=0x000000ff},
-		{name="mc-Black translucent", enabled=false, spType=SPT_COLOUR,	barColor=0x000000a0, capColor=0x000000ff},
-		{name="mc-Green", enabled=false, spType=SPT_COLOUR,		barColor=0x00d000ff, capColor=0x00d000ff},
-		{name="mc-Green translucent", enabled=false, spType=SPT_COLOUR,	barColor=0x00d000a0, capColor=0x00ff00ff},
-		{name="mc-Blue", enabled=false, spType=SPT_COLOUR,		 barColor=0x0000d0ff, capColor=0x0000ffff},
-		{name="mc-Blue translucent", enabled=false, spType=SPT_COLOUR,	 barColor=0x0000d0a0, capColor=0x0000ffff},
-		{name="mc-Red", enabled=false, spType=SPT_COLOUR,		  barColor=0xd00000ff, capColor=0xff0000ff},
-		{name="mc-Red translucent", enabled=false, spType=SPT_COLOUR,	  barColor=0xd00000a0, capColor=0xff0000ff},
+		{
+			name="mc-White",   enabled=false, spType=SPT_COLOUR,
+			barColor=0xf0f0f0ff, capColor=0xffffffff, decapColor=0xc0c0c0e0
+		},
+		{
+		 name="mc-Yellow",  enabled=false, spType=SPT_COLOUR,
+			barColor=0xffff00ff, capColor=0xffff00ff, decapColor=0xd0d000e0
+		},
+		{
+			name="mc-Cyan",	enabled=false, spType=SPT_COLOUR,
+			barColor=0x00ffffff, capColor=0x00ffffff, decapColor=0x00d0d0e0
+		},
+--		{
+--			name="mc-Magenta", enabled=false, spType=SPT_COLOUR,
+--			barColor=0xf000f0ff, capColor=0xff00ffff, decapColor=0xd000d0ff
+--		},
+--		{
+--			name="mc-Black",   enabled=false, spType=SPT_COLOUR,
+--			barColor=0x101010ff, capColor=0x000000ff, decapColor=0x101010ff
+--		},
+		{
+			name="mc-Green",   enabled=false, spType=SPT_COLOUR,
+--			barColor=0x00d000ff, capColor=0x00d000ff, decapColor=0x00d000a0
+			barColor=0x00ff00ff, capColor=0x00ff00ff, decapColor=0x00d000e0
+		},
+--		{
+--			name="mc-Blue",	enabled=false, spType=SPT_COLOUR,
+--			barColor=0x0000f0ff, capColor=0x0000ffff, decapColor=0x0000d0ff
+--		},
+--		{
+--			name="mc-Red",	 enabled=false, spType=SPT_COLOUR,
+--			barColor=0xf00000ff, capColor=0xff0000ff, decapColor=0xd00000ff
+--		},
 	}
 	for _,c in pairs(csp) do
 		table.insert(spectrumList, c)
@@ -433,7 +450,7 @@ local function __addSpectrumBacklit(path, entry)
 					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
 				end
 				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", path .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path .. "/" .. entry}
+				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path .. "/" .. entry, dc="dc-" .. imgName}
 			end
 		end
 end
@@ -477,7 +494,7 @@ local function __addSpectrumImage(path, entry)
 				table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_IMAGE})
 			end
 			log:debug(" SpectrumImage :", imgName, ", ", path .. "/" .. entry)
-			spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path .. "/" .. entry}
+			spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path .. "/" .. entry, dc="dc-" .. imgName}
 		end
 	end
 end
@@ -672,6 +689,44 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 	return bgImage, resizeRequired
 end
 
+
+local function _getDcSpectrumImage(spkey, w, h, spType)
+	local dcImage
+	if spectrumImagesMap[spkey] == nil then
+		return nil, false
+	end
+	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc)
+	if spectrumImagesMap[spkey].dc == nil then
+		return nil, false
+	end
+
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].dc
+	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc, " ", dicKey)
+
+	local resizeRequired = false
+	dcImage = imCacheGet(dicKey)
+	if dcImage == nil then
+		local fgimg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spType)
+		resizeRequired = fgResizeRequired
+		if fgimg ~= nil then
+			-- FIXME:
+			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
+			-- the foreground image is affected by the alpha value.
+			-- For now work around by isolating, blit foreground to a temporary image and then blitAlpha
+			-- from the temporary image to the background image
+			local tmp = Surface:newRGB(w,h)
+			tmp:filledRectangle(0,0,w,h,0)
+			fgimg:blit(tmp, 0, 0)
+			dcImage = Surface:newRGB(w,h)
+			tmp:blitAlpha(dcImage, 0, 0, visSettings.spectrum.decayAlpha)
+			tmp:altRelease()
+			imCachePut(dicKey, dcImage)
+		end
+	end
+	return dcImage, resizeRequired
+end
+
+
 local prevSpImageIndex = -1
 function getSpectrum(_, w, h, barColorIn, capColorIn)
 	log:debug("getSpectrum: ", w, " ", h)
@@ -685,7 +740,6 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 --		__spBump(nil, nil)
 --	end
 	log:debug("getSpectrum: spkey: ", spkey)
-	local alpha = visSettings.spectrum.backlitAlpha
 
 	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
@@ -694,11 +748,17 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 
 	local fg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	local bg, bgResizeRequired = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local dc, dcResizeRequired = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
-	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired)
+	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
+--	local decapColor = spectrumList[spImageIndex].decapColor and spectrumList[spImageIndex].decapColor or 0xffffff30
+	local decapColor = 0xffffff30
+	if spectrumList[spImageIndex].decapColor ~= nil then
+		decapColor = spectrumList[spImageIndex].decapColor
+	end
 
-	return fg, bg, alpha, barColor, capColor, displayResizing
+	return fg, bg, dc, barColor, capColor, decapColor, displayResizing
 end
 
 function selectSpectrum(_, name, selected)
@@ -789,11 +849,12 @@ function getSpectrumMeterSettings(_, capHeightIn, capSpaceIn)
 	return {
 		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
 		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
-		capHeight=(capHeight[1]+capHeight[2])/2,
-		capSpace=(capSpace[1]+capSpace[2])/2,
+		capHeight=((capHeight[1]+capHeight[2])*2)/4,
+		capSpace=((capSpace[1]+capSpace[2])*2)/4,
 		turbine=visSettings.spectrum.turbine,
 		baselineAlways=visSettings.spectrum.baselineAlways,
 		baselineOn=visSettings.spectrum.baselineOn,
+		fill=visSettings.spectrum.fill,
 	}
 end
 --------------------------------------------------------
@@ -1285,7 +1346,7 @@ end
 --- Resize
 -------------------------------------------------------
 function enumerateResizableSpectrumMeters(_, all)
-    local spMeters = {}
+	local spMeters = {}
 	for _, v in pairs(spectrumList) do
 		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
@@ -1295,7 +1356,7 @@ function enumerateResizableSpectrumMeters(_, all)
 			end
 		end
 	end
-    return spMeters
+	return spMeters
 end
 
 function concurrentResizeSpectrumMeter(_, name, w, h)
@@ -1307,16 +1368,16 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 				local path = spectrumImagesMap[v.name].src
 				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 				local dcpath = resizedImagePath(dicKey)
-                if resizedImagesTable[dicKey] ~= nil then
-                    return true
-                end
+				if resizedImagesTable[dicKey] ~= nil then
+					return true
+				end
 				local ok
 				if v.spType == SPT_BACKLIT then
 					ok = Surface:requestResize(path, dcpath, w, h, 0, 3, saveimage_type) == 1
-                elseif v.spType == SPT_IMAGE then
+				elseif v.spType == SPT_IMAGE then
 					ok = Surface:requestResize(path, dcpath, w, h, 0, 2, saveimage_type) == 1
-                else
-                    ok = true
+				else
+					ok = true
 				end
 				if ok then
 					resizedImagesTable[dicKey] = dcpath
@@ -1329,7 +1390,7 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 end
 
 function enumerateResizableVuMeters(_, all)
-    local vMeters = {}
+	local vMeters = {}
 	for _, v in pairs(vuImages) do
 		if all or v.enabled then
 			if v.vutype == "frame" then
@@ -1344,7 +1405,7 @@ function enumerateResizableVuMeters(_, all)
 			end
 		end
 	end
-    return vMeters
+	return vMeters
 end
 
 local function requestVuResize(name, w , h)
@@ -1355,11 +1416,11 @@ local function requestVuResize(name, w , h)
 	if resizedImagesTable[dicKey] ~= nil then
 		return true
 	end
-    -- When VU meters are rendered there are 3 "bars" of spacing,
-    -- left, between and right.
-    -- resize to 90% of the display window, and all the bars
-    -- will visually be the same size.
-    -- Note: this only works if the VU Meters do not have any borders along the horizontal axis
+	-- When VU meters are rendered there are 3 "bars" of spacing,
+	-- left, between and right.
+	-- resize to 90% of the display window, and all the bars
+	-- will visually be the same size.
+	-- Note: this only works if the VU Meters do not have any borders along the horizontal axis
 	local ok = Surface:requestResize(path, dcpath, math.floor(w*9/10), h, 25, 1, saveimage_type) == 1
 	if ok then
 		resizedImagesTable[dicKey] = dcpath
