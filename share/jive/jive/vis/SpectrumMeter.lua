@@ -48,6 +48,8 @@ function _skin(self)
 	self.barColor = self:styleColor("barColor", { 0xff, 0xff, 0xff, 0xff })
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
+
+	self.decapColor = self:styleColor("decapColor", { 0xff, 0xff, 0xff, 0x20 })
 end
 
 
@@ -67,9 +69,11 @@ function _layout(self)
 
 	self.isMono =  self:styleValue("isMono")
 
-	self.fgImg, self.bgImg, self.bgAlpha, self.barColor, self.capColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
+	self.fgImg, self.bgImg, self.dcImg, self.barColor, self.capColor, self.decapColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
 
 	log:info('** barColor=', string.format("0x%x", self.barColor), " capColor=", string.format("0x%x",self.capColor))
+	log:info("** decapColor=", string.format("0x%x", self.decapColor))
+	log:info("** dcImg=", self.dcImg)
 	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
 	if self.settings.barsFormat.barsInBin < 1 then
 		self.settings.barsFormat.barsInBin = 1
@@ -160,6 +164,8 @@ function _layout(self)
 
 	self.left = table.clone(self.settings.barsFormat)
 	self.left.fgImg = self.fgImg
+	self.left.bgImg = self.bgImg
+	self.left.dcImg = self.dcImg
 	self.left.xshift = self.xshift
 	self.left.y = self.y
 	self.left.h = self.h
@@ -168,7 +174,9 @@ function _layout(self)
 	self.left.fgimg = self.fgimg
 	self.left.barColor = self.barColor
 	self.left.capColor = self.capColor
+	self.left.decapColor = self.decapColor
 	self.left.turbine = self.settings.turbine
+	self.left.fill = self.settings.fill
 	self.left.barSize = self.left.barWidth + self.left.barSpace
 	self.left.xStep = self.left.barWidth * self.left.barsInBin + self.left.barSpace * (self.left.barsInBin - 1) + self.left.binSpace
 	self.left.barStep = self.left.barWidth - 1
@@ -220,9 +228,11 @@ local function _drawBins(surface, bch, params)
 	local totalCapHeight = params.totalCapHeight
 	local capHeight = params.capHeight
 	local capSpace = params.capSpace
+	local decapColor = params.decapColor
 
 	local fgImg = params.fgImg
 	local turbine = params.turbine
+	local fill = params.fill
 
 	local xLeft
 	local yTop
@@ -239,6 +249,111 @@ local function _drawBins(surface, bch, params)
 				cch[i] = 0
 			end
 		end
+		if fill == 2 then
+			bch[i] = cch[i]
+		end
+
+		if cch[i] > 0 then
+			nz = true
+			for k = 0, barsInBin - 1 do
+				xLeft = x + (k * barSize)
+				if turbine then
+					if fgImg ~= nil then
+						imgXLeft = xLeft - xshift
+						local y1 = (cch[i] + totalCapHeight)/2
+						fgImg:blitClip(imgXLeft, halfHeight - y1,
+										barWidth, (capHeight/2),
+										surface,
+										xLeft, yCentre - y1)
+						y1 = (cch[i] + capSpace)/2
+						fgImg:blitClip(imgXLeft, halfHeight + y1,
+										barWidth, (capHeight/2),
+										surface,
+										xLeft, yCentre + y1)
+						if fill == 1 and params.dcImg ~= nil then
+							yTop = yCentre - (cch[i]/2)
+							params.dcImg:blitClip(imgXLeft, halfHeight - (cch[i]/2),
+										barWidth, cch[i],
+										surface,
+										xLeft, yTop)
+							if params.bgImg == nil then
+								surface:filledRectangle(
+									xLeft,
+									yCentre - ((cch[i] - totalCapHeight)/2),
+									xLeft + barStep,
+									yCentre + ((cch[i] - totalCapHeight)/2),
+									decapColor)
+							end
+						end
+					else
+						if fill == 1 then
+							surface:filledRectangle(
+								xLeft,
+								yCentre - ((cch[i] - totalCapHeight)/2),
+								xLeft + barStep,
+								yCentre + ((cch[i] - totalCapHeight)/2),
+								decapColor)
+						end
+						surface:filledRectangle(
+							xLeft,
+							yCentre - ((cch[i] + totalCapHeight)/2),
+							xLeft + barStep,
+							yCentre - ((cch[i] + capHeight)/2),
+							capColor)
+						surface:filledRectangle(
+							xLeft,
+							yCentre + ((cch[i] + totalCapHeight)/2),
+							xLeft + barStep,
+							yCentre + ((cch[i] + capHeight)/2),
+							capColor)
+					end
+				else
+					if fgImg ~= nil then
+						imgXLeft = xLeft - xshift
+						yTop = y - (cch[i] + totalCapHeight)
+						fgImg:blitClip(imgXLeft, adjustedHeight - (cch[i] + totalCapHeight),
+										barWidth, capHeight,
+										surface,
+										xLeft, yTop)
+						if fill == 1 and params.dcImg ~= nil then
+							yTop = y - cch[i] + 1
+							if params.bgImg == nil then
+								params.dcImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
+											barWidth, cch[i],
+											surface,
+											xLeft, yTop)
+--								surface:filledRectangle(
+--									xLeft,
+--									y - cch[i],
+--									xLeft + barStep,
+--									y,
+--									decapColor)
+							else
+								params.dcImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
+											barWidth, cch[i],
+											surface,
+											xLeft, yTop)
+							end
+						end
+					else
+						if fill == 1 then
+							surface:filledRectangle(
+								xLeft,
+								y - cch[i],
+								xLeft + barStep,
+								y,
+								decapColor)
+						end
+						surface:filledRectangle(
+							xLeft,
+							y - (cch[i] + totalCapHeight),
+							xLeft + barStep,
+							y - (cch[i] + capSpace),
+							capColor)
+					end
+				end
+			end
+		end
 
 		-- bar
 		if bch[i] > 0 then
@@ -250,23 +365,15 @@ local function _drawBins(surface, bch, params)
 					if turbine then
 						yTop = yCentre - (bch[i]/2)
 						fgImg:blitClip(imgXLeft, halfHeight - (bch[i]/2),
-												barWidth, bch[i],
-												surface,
-												xLeft, yTop)
+										barWidth, bch[i],
+										surface,
+										xLeft, yTop)
 					else
 						yTop = y - bch[i] + 1
 						fgImg:blitClip(imgXLeft, adjustedHeight - bch[i] + 1,
-												barWidth, bch[i],
-												surface,
-												xLeft, yTop)
-
-						if capHeight > 0 and cch[i] > 0 then
-							yTop = y - cch[i] - totalCapHeight
-							fgImg:blitClip(imgXLeft, adjustedHeight - cch[i] - totalCapHeight,
-												barWidth, capHeight,
-												surface,
-												xLeft, yTop)
-						end
+										barWidth, bch[i],
+										surface,
+										xLeft, yTop)
 					end
 				else
 					if turbine then
@@ -285,18 +392,11 @@ local function _drawBins(surface, bch, params)
 						y - bch[i] + 1,
 						barColor
 						)
-						if capHeight > 0 and cch[i] > 0 then
-							surface:filledRectangle(
-								xLeft,
-								y - cch[i] - totalCapHeight,
-								xLeft + barStep,
-								y - cch[i] - capSpace,
-								capColor)
-						end
 					end
 				end
 			end
 		end
+
 		x = x + xStep
 	end
 	return nz
@@ -334,9 +434,6 @@ function draw(self, surface)
 	end
 
 	if self.bgImg ~= nil then
---		self.bgImg:blit(surface, x, y, w, h, 0, 0)
---		self.bgImg:blitClip(0, 0, w, h, surface, x, y)
---		self.bgImg:blitAlpha(surface, x, y, self.bgAlpha)
 		self.bgImg:blit(surface, x, y)
 	end
 

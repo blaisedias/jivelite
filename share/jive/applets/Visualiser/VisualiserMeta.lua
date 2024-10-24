@@ -59,8 +59,10 @@ function defaultSettings(_)
             baselineOn=false,
             baselineAlways=true,
             turbine=false,
+            fill=1,
             channelFlip="LHHL",
             backlitAlpha=80,
+            decayAlpha=160,
             capsOn=true,
             barsFormat="2-1-3-6",
             barFormats  = {
@@ -204,7 +206,8 @@ function registerApplet(self)
             'SPECTRUM_BARS_FORMAT',
             function(applet, ...)
                 applet:selectSpectrumBarsFormat(...)
-            end
+            end,
+            10
         )
     )
 
@@ -215,7 +218,8 @@ function registerApplet(self)
             'SPECTRUM_CHANNEL_FLIP',
             function(applet, ...)
                 applet:selectSpectrumChannelFlip(...)
-            end
+            end,
+            20
         )
     )
 
