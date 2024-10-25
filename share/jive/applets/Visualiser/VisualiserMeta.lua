@@ -108,6 +108,9 @@ function registerApplet(self)
     -- early setup of visualiser image module settings
     local settings = self:getSettings()
     visImage:setVisSettings(settings)
+    if settings.decayAlpha == nil then
+        settings.decayAlpha = 160
+    end
     local tmp = visImage:getVuMeterList()
 
     for _, v in pairs(tmp) do
