@@ -154,8 +154,3 @@ int watchdog_keepalive(int watchdog_id, int count) {
 void platform_init(lua_State *L) {
 	jive_sdlfilter_pump = windows_filter_pump;
 }
-
-int platform_get_memory_usage(ptr_mem_usage pmu) {
-    return 0;
-}
-
