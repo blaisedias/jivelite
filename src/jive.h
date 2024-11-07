@@ -340,16 +340,6 @@ char *platform_get_ip_address(void);
 char *platform_get_home_dir();
 char *platform_get_arch();
 
-typedef struct mem_usage{
-    int MemTotal;
-    int MemFree;
-    int MemAvailable;
-    int SwapCached;
-    int SwapTotal;
-    int SwapFree;
-}struct_mem_usage, *ptr_mem_usage;
-int  platform_get_memory_usage(ptr_mem_usage);
-
 /* global counter used to invalidate widget */
 extern Uint32 jive_origin;
 
