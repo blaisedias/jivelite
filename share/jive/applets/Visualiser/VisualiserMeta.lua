@@ -64,7 +64,7 @@ function defaultSettings(_)
             backlitAlpha=80,
             decayAlpha=160,
             capsOn=true,
-            barsFormat="2-1-3-6",
+            barsFormat="1-15-0-5",
             barFormats  = {
                 ["2-1-3-6"]= {barsInBin=2, barWidth=1, barSpace=3, binSpace=6},
                 ["2-2-3-4"]= {barsInBin=2, barWidth=2, barSpace=3, binSpace=4},

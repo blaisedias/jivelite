@@ -1057,9 +1057,9 @@ end
 local function enableOneVUMeter()
 		local enabled_count = 0
 		-- select a default try to find a vfd (no resize required)
-		-- 1: try "RS-M250"
+		-- 1: try "Chevrons White Orange"
 		for _, v in pairs(vuImages) do
-			if v.name == "RS-M250" and v.vutype=="vfd" then
+			if v.name == "Chevrons White Orange" and v.vutype=="vfd" then
 				v.enabled = true
 				enabled_count = 1
 			end
