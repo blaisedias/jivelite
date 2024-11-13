@@ -9,6 +9,9 @@
 #include "jive.h"
 #include "version.h"
 
+#ifndef USERPATH
+#define USERPATH "userpath"
+#endif
 
 static char *mac_address;
 static char *uuid;
@@ -120,7 +123,7 @@ static int system_get_uptime(lua_State *L) {
 
 
 static int system_get_user_dir(lua_State *L) {
-	lua_pushfstring(L, "%s/userpath", homedir);
+	lua_pushfstring(L, "%s/%s", homedir, USERPATH);
 	return 1;
 }
 
@@ -440,7 +443,7 @@ int jive_system_init(lua_State *L) {
 
 		/* add homedir */
 		luaL_addstring(&b, homedir);
-		luaL_addstring(&b, DIR_SEPARATOR_STR "userpath" DIR_SEPARATOR_STR "?.lua;");
+		luaL_addstring(&b, DIR_SEPARATOR_STR USERPATH DIR_SEPARATOR_STR "?.lua;");
 		
 		/* existing lua path */
 		lua_getfield(L, -1, "path");
