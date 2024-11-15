@@ -9,7 +9,7 @@ EXE = ../bin/jivelite
 
 include custom.mk
 
-DEPS    = jive.h common.h log.h version.h
+DEPS    = jive.h common.h log.h version.h build_info.h
 
 SOURCES += jive.c jive_event.c jive_font.c jive_group.c jive_icon.c jive_label.c jive_menu.c jive_slider.c jive_style.c jive_surface.c jive_textarea.c jive_textinput.c jive_utils.c jive_widget.c jive_window.c jive_framework.c log.c system.c jive_dns.c jive_debug.c resize.c
 
@@ -27,6 +27,12 @@ $(EXE): $(OBJECTS)
 	$(CC) $(OBJECTS) $(LDFLAGS) -o $@
 
 $(OBJECTS): $(DEPS)
+
+makeFileDir := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
+build_info.h: FORCE
+	$(makeFileDir)/build_info.sh
+
+FORCE: ;
 
 .c.o:
 	$(CC) $(CFLAGS) $< -c -o $@
