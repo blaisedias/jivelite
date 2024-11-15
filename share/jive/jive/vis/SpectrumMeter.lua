@@ -294,18 +294,21 @@ local function _drawBins(surface, bch, params)
 								yCentre + ((cch[i] - totalCapHeight)/2),
 								decapColor)
 						end
-						surface:filledRectangle(
-							xLeft,
-							yCentre - ((cch[i] + totalCapHeight)/2),
-							xLeft + barStep,
-							yCentre - ((cch[i] + capHeight)/2),
-							capColor)
-						surface:filledRectangle(
-							xLeft,
-							yCentre + ((cch[i] + totalCapHeight)/2),
-							xLeft + barStep,
-							yCentre + ((cch[i] + capHeight)/2),
-							capColor)
+						-- fill does at least one horizontal fill if y is the same
+						if capHeight > 0 then
+							surface:filledRectangle(
+								xLeft,
+								yCentre - ((cch[i] + totalCapHeight)/2),
+								xLeft + barStep,
+								yCentre - ((cch[i] + capHeight)/2),
+								capColor)
+							surface:filledRectangle(
+								xLeft,
+								yCentre + ((cch[i] + totalCapHeight)/2),
+								xLeft + barStep,
+								yCentre + ((cch[i] + capHeight)/2),
+								capColor)
+						end
 					end
 				else
 					if fgImg ~= nil then
@@ -344,12 +347,15 @@ local function _drawBins(surface, bch, params)
 								y,
 								decapColor)
 						end
-						surface:filledRectangle(
-							xLeft,
-							y - (cch[i] + totalCapHeight),
-							xLeft + barStep,
-							y - (cch[i] + capSpace),
-							capColor)
+						-- fill does at least one horizontal fill if y is the same
+						if capHeight > 0 then
+							surface:filledRectangle(
+								xLeft,
+								y - (cch[i] + totalCapHeight),
+								xLeft + barStep,
+								y - (cch[i] + capSpace),
+								capColor)
+						end
 					end
 				end
 			end
