@@ -6,3 +6,5 @@ visucache
 primed-visu-images
 precache
 resized
+src/gitinfo.h
+src/build_info.h
