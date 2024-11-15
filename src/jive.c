@@ -8,6 +8,7 @@
 /* Standard includes */
 #include "common.h"
 #include "version.h"
+#include "long_version.h"
 
 /* Lua API */
 #include <lua.h>
@@ -543,6 +544,15 @@ int main (int argc, char **argv) {
 	l_message(NULL, "\nJiveLite " JIVE_VERSION " src:rev:" SRC_GIT_VERSION);
 #else
 	l_message(NULL, "\nJiveLite " JIVE_VERSION);
+#endif
+#ifdef SRC_GIT_REMOTE
+	l_message(NULL, "git remote         :" SRC_GIT_REMOTE);
+#endif
+#ifdef SRC_GIT_BRANCH
+	l_message(NULL, "git branch         :" SRC_GIT_BRANCH);
+#endif
+#ifdef SRC_GIT_HEAD_REV
+	l_message(NULL, "git head revision  :" SRC_GIT_HEAD_REV);
 #endif
 // FIXME: make features selectable by defines
 	l_message(NULL, "features:");
