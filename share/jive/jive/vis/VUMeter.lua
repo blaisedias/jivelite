@@ -51,6 +51,24 @@ function _skin(self)
 	end
 end
 
+-- FIXME dynamic based on number of bars
+local RMS_MAP = {
+	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
+	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
+	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
+	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
+	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 5000,
+}
+
+local function samplAcc2Vol(sampleAcc)
+	for i = #RMS_MAP, 1, -1 do
+		if sampleAcc > RMS_MAP[i] then
+			return i
+		end
+	end
+	return 1
+end
+
 local function drawVuMeterBackground(params, surface)
 	if params.bgImg ~= nil then
 		params.bgImg:blit(surface, params.bounds)
@@ -110,6 +128,7 @@ local function drawVFD(params, surface, vol)
 	local bh = params.vfd.bh
 	local h = params.vfd.h
 
+    -- 1 = 0 => no bars ON -
 	for i = 2, 37 do
 		if i <= vol or i == cap then
 			params.vfd.on:blit(surface, x, y, bw, bh)
@@ -136,7 +155,8 @@ end
 
 
 local function draw25FrameVuMeter(params, surface, vol)
-	local val = math.min(math.floor(vol/2), 24)
+--	local val = math.min(math.floor(vol/2), 24)
+	local val = math.min(math.floor(vol * (25/#RMS_MAP)), 25 - 1)
 	if val >= params.cap then
 		params.cap = val
 	elseif params.cap > 0 then
@@ -220,7 +240,7 @@ function _layout(self)
 		if self.vutbl.displayResizing ~= nil then
 			return
 		end
-		if self.vutbl.vutype == "frame"  then
+		if self.vutbl.vutype == "25frames"  then
 			self.bgImg = self.vutbl.bgImg
 			if self.bgImg ~= nil then
 				local imgW, imgH = self.bgImg:getSize()
@@ -305,24 +325,6 @@ function _layout(self)
 	end
 end
 
-
--- FIXME dynamic based on number of bars
-local RMS_MAP = {
-	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
-	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
-	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
-	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
-	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755,
-}
-
-local function samplAcc2Vol(sampleAcc)
-	for i = #RMS_MAP, 1, -1 do
-		if sampleAcc > RMS_MAP[i] then
-			return i
-		end
-	end
-	return 1
-end
 
 function draw(self, surface)
 	if self.countDown then
