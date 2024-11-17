@@ -154,9 +154,9 @@ local function drawVFDStatic(params, surface)
 end
 
 
-local function draw25FrameVuMeter(params, surface, vol)
+local function drawVUMeterFrames(params, surface, vol)
 --	local val = math.min(math.floor(vol/2), 24)
-	local val = math.min(math.floor(vol * (25/#RMS_MAP)), 25 - 1)
+	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
 	if val >= params.cap then
 		params.cap = val
 	elseif params.cap > 0 then
@@ -226,34 +226,31 @@ function _layout(self)
 		self.drawMeter = drawVuMeter
 		self.bgParams = { bgImg = self.bgImg, bounds=self:getBounds() }
 		self.drawBackground = drawVuMeterBackground
-	elseif self.style == "vumeter_analog" then
-		local imgW, imgH = self.bgImg:getSize()
-		local frame_w = imgW/25
-		local fx = x + math.floor(w / 2) - frame_w
-		self.left =  { img=self.bgImg, x=fx ,                   y=y, src_y=0, w=frame_w, h=imgH, cap=0}
-		self.right = { img=self.bgImg, x=self.left.x + frame_w, y=y, src_y=0, w=frame_w, h=imgH, cap=0}
-		self.drawMeter = draw25FrameVuMeter
+--	elseif self.style == "vumeter_analog" then
+--		local imgW, imgH = self.bgImg:getSize()
+--		local frame_w = imgW/25
+--		local fx = x + math.floor(w / 2) - frame_w
+--		self.left =  { img=self.bgImg, x=fx ,                   y=y, src_y=0, w=frame_w, h=imgH, cap=0}
+--		self.right = { img=self.bgImg, x=self.left.x + frame_w, y=y, src_y=0, w=frame_w, h=imgH, cap=0}
+--		self.drawMeter = draw25FrameVuMeter
 	elseif self.style == "vumeter_v2" then
 		self.drawMeter = nullDraw
-		log:debug("-----------------------------------------------------------------------")
 		self.vutbl = visImage:getVuImage(w,h)
 		if self.vutbl.displayResizing ~= nil then
 			return
 		end
-		if self.vutbl.vutype == "25frames"  then
-			self.bgImg = self.vutbl.bgImg
-			if self.bgImg ~= nil then
-				local imgW, imgH = self.bgImg:getSize()
-				-- FIXME VU Meter images will not always be 25 frames
-				local frame_w = imgW/25
-				-- centre the VUMeter image within the designated space
-				-- horizontally
---				local lx = x + math.floor(w / 4) - math.floor(frame_w / 2)
---				local rx = x + math.floor((3*w) / 4) - math.floor(frame_w / 2)
+		if self.vutbl.vutype == "frames" then
+			if self.vutbl.imageFrames[1] ~= nil then
+                -- FIXME: frame images for multiple channels must have the same characteristics.
+				local imgW, imgH = self.vutbl.imageFrames[1]:getSize()
+				log:info("frame count: ", self.vutbl.jsData.framecount)
+				local frame_w = imgW/self.vutbl.jsData.framecount
+				-- place the VUMeter images within the designated space
+                -- with equal spacing on the left, right and centre
 				local spacing = math.floor((w - frame_w - frame_w)/3)
 				local lx = x + spacing
 				local rx = lx + frame_w + spacing
-				-- vertically
+				-- centre vertically
 				local fy = y
 				local src_y = 0
 				if imgH < h then
@@ -262,49 +259,18 @@ function _layout(self)
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
 				end
-				self.left =  { img=self.bgImg, x=lx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
---				self.right = { img=self.bgImg, x=self.left.x + frame_w, y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-				self.right = { img=self.bgImg, x=rx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
+				self.left  = { img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+								framecount = self.vutbl.jsData.framecount
+                            }
+				self.right = { img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+								framecount = self.vutbl.jsData.framecount
+                            }
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
 							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
 				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y,
 							" w:", self.right.w, " h:", self.right.h)
-				self.drawMeter = draw25FrameVuMeter
-			else
-				self.left =  { img=nil }
-				self.right = { img=nil }
-				self.drawMeter = nullDraw
-			end
-		elseif self.vutbl.vutype == "25framesLR"  then
-			if self.vutbl.leftImg ~= nil and self.vutbl.rightImg ~= nil then
-				local imgW, imgH = self.vutbl.leftImg:getSize()
-				-- FIXME VU Meter images will not always be 25 frames
-				local frame_w = imgW/25
-				-- centre the VUMeter image within the designated space
-				-- horizontally
---				local lx = x + math.floor(w / 4) - math.floor(frame_w / 2)
---				local rx = x + math.floor((3*w) / 4) - math.floor(frame_w / 2)
-				local spacing = math.floor((w - frame_w - frame_w)/3)
-				local lx = x + spacing
-				local rx = lx + frame_w + spacing
-				-- vertically
-				local fy = y
-				local src_y = 0
-				if imgH < h then
-					fy = math.floor(y + ((h - imgH)/2))
-				elseif imgH > h then
-					-- clip the image at the top and bottom
-					src_y = math.floor((imgH - h)/2)
-				end
-				self.left =  { img=self.vutbl.leftImg, x=lx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-				self.right = { img=self.vutbl.rightImg, x=rx ,                   y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0}
-				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
-				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
-							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
-				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y,
-							" w:", self.right.w, " h:", self.right.h)
-				self.drawMeter = draw25FrameVuMeter
+				self.drawMeter = drawVUMeterFrames
 			else
 				self.left =  { img=nil }
 				self.right = { img=nil }
