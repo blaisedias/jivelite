@@ -1,0 +1,14 @@
+{
+    "kind": "vumeter",
+    "name": "Array 4x6 Cyan",
+    "vutype": "frames",
+    "framecount": 25,
+    "format:": "singleimage",
+    "files": {
+        "#channels": "convention first channel is left",
+        "frames": [
+            "vu-Array-4x6-Cyan-left.png",
+            "vu-Array-4x6-Cyan-right.png"
+        ]
+    }
+}
