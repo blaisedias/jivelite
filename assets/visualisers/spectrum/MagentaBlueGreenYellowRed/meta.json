@@ -1,0 +1,11 @@
+{
+    "kind": "spectrum-meter",
+    "name" : "GradientMagentaBlueGreenYellowRed",
+    "foreground": "MagentaBlueGreenYellowRed.png",
+    "translucent": "TspMagentaBlueGreenYellowRed.png",
+    "sptype": "image",
+    "turbine": {
+        "foreground": "turbineMagentaBlueGreenYellowRed.png",
+        "translucent": "turbineTspMagentaBlueGreenYellowRed.png"
+    }
+}
