@@ -1,0 +1,14 @@
+{
+    "kind": "vumeter",
+    "name": "Glow Blue",
+    "vutype": "frames",
+    "framecount": 25,
+    "channels": 1,
+    "#format": "single image -> all frames in a single image file",
+    "format:": "singleimage",
+    "files": {
+        "frames": [
+            "vu_analog_25seq_daab_Blue_Glow.png"
+        ]
+    }
+}

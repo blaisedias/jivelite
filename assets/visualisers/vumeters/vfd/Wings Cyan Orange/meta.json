@@ -1,0 +1,43 @@
+{
+    "kind": "vumeter",
+    "name": "Wings Cyan Orange",
+    "vutype": "discrete",
+    "#1": "channels == 2 => left and right channels are composed from different images",
+    "channels": 2,
+    "#2": "bartypes > 1 => last set of bars in the array is used for db >= 0 ",
+    "bartypes": 2,
+    "files": {
+        "bars": {
+            "left": {
+                "off": [
+                    "bar-off.png",
+                    "bar-peak-off.png"
+                ],
+                "on": [
+                    "bar-on.png",
+                    "bar-peak-on.png"
+                ]
+            },
+            "right" : {
+                "off": [
+                    "r-bar-off.png",
+                    "r-bar-peak-off.png"
+                ],
+                "on": [
+                    "r-bar-on.png",
+                    "r-bar-peak-on.png"
+                ]
+            }
+        },
+        "centre": "center.png",
+        "left": {
+            "trail": "left-trail.png",
+            "lead": "left.png"
+        },
+        "right": {
+            "right-trail": "right-trail.png",
+            "lead": "right.png"
+        }
+    },
+    "step": 36
+}

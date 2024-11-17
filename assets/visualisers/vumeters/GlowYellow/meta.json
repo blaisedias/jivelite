@@ -1,0 +1,15 @@
+{
+    "kind": "vumeter",
+    "name": "Glow Yellow",
+    "vutype": "frames",
+    "framecount": 25,
+    "channels": 1,
+    "#format": "single image -> all frames in a single image file",
+    "format:": "singleimage",
+    "files": {
+        "frames": [
+            "vu_analog_25seq_daab_Yellow_Glow.png"
+        ]
+    }
+}
+

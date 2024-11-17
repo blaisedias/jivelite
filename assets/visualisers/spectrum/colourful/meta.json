@@ -1,0 +1,6 @@
+{
+    "kind": "spectrum-meter",
+    "name" : "Colourful",
+    "foreground": "colorful-background-2084164.png",
+    "sptype": "backlit"
+}

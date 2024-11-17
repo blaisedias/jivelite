@@ -1,0 +1,14 @@
+{
+    "kind": "vumeter",
+    "name": "Tunnel Green Red",
+    "vutype": "frames",
+    "framecount": 25,
+    "format:": "singleimage",
+    "files": {
+        "#channels": "convention first channel is left",
+        "frames": [
+            "vu-TunnelGreenRed-left.png",
+            "vu-TunnelGreenRed-right.png"
+        ]
+    }
+}

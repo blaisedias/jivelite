@@ -1,0 +1,6 @@
+{
+    "kind": "spectrum-meter",
+    "name" : "Tile3",
+    "foreground": "tile-1179386-4.png",
+    "sptype": "backlit"
+}

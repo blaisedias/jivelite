@@ -1,0 +1,30 @@
+{
+    "kind": "vumeter",
+    "name": "Chevrons Pastel Green Red",
+    "vutype": "discrete",
+    "channels": 1,
+    "#": "bartypes > 1 => last set of bars in the array is used for db >= 0 ",
+    "bartypes": 2,
+    "files": {
+        "bars" : {
+            "off": [
+                "bar-off.png",
+                "bar-peak-off.png"
+            ],
+            "on": [
+                "bar-on.png",
+                "bar-peak-on.png"
+            ]
+        },
+        "centre": "center.png",
+        "left": {
+            "trail": "left-trail.png",
+            "lead": "left.png"
+        },
+        "right" : {
+            "trail": "right-trail.png",
+            "lead": "right.png"
+        }
+    },
+    "step": 36
+}
