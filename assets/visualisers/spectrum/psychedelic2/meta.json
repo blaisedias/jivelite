@@ -1,0 +1,6 @@
+{
+    "kind": "spectrum-meter",
+    "name" : "Psychedelic2",
+    "foreground": "background-5421678_1920_inverted.png",
+    "sptype": "backlit"
+}

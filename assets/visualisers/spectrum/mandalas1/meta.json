@@ -1,0 +1,6 @@
+{
+    "kind": "spectrum-meter",
+    "name" : "Mandalas1",
+    "foreground": "mandalas-1084082-c.png",
+    "sptype": "backlit"
+}
