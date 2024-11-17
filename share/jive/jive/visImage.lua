@@ -11,7 +11,7 @@
   - image caching
   - ....
 
- (c) Blaise Dias, 2023
+ (c) Blaise Dias, 2023-2024
 
  =cut
  --]]
@@ -103,7 +103,7 @@ local function loadJsonFile(jsPath)
 		-- it isn't possible to return a value using pcall
 		-- so we do the operation twice :-(
 		local status, resOrError = pcall(json.parse, content)
-        if status then
+		if status then
 			jsonData = resOrError
 		else
 			log:error("json.parse ", jsPath, " error: ", resOrError)
@@ -194,10 +194,9 @@ local function platformDetect()
 	end
 
 	os.execute("mkdir -p " .. resizedCachePath)
-	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/gradient")
-	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum/backlit")
-	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25frames")
-	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/25framesLR")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
+	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
 
 	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
@@ -471,9 +470,9 @@ end
 
 local function __addSpectrum(path, jsData)
 	local entry = jsData.foreground
-    if spectrumImagesMap[jsData.name] ~= nil then
-        return
-    end
+	if spectrumImagesMap[jsData.name] ~= nil then
+		return
+	end
 	local mode = lfs.attributes(path .. "/" .. entry, "mode")
 	if mode == "file" then
 		local parts = _parseImagePath(entry)
@@ -951,16 +950,17 @@ end
 --	end
 --end
 local function pathsAreImageFiles(root_path, path_lst)
-    for _, pth in ipairs(path_lst) do
-        local src = root_path .. "/" .. pth
-        local mode = lfs.attributes(src, "mode")
-        if mode ~= "file" or _parseImagePath(src) == nil then
-            return false
-        end
-    end
-    return true
+	for _, pth in ipairs(path_lst) do
+		local src = root_path .. "/" .. pth
+		local mode = lfs.attributes(src, "mode")
+		if mode ~= "file" or _parseImagePath(src) == nil then
+		 return false
+end
+	end
+	return true
 end
 
+local vuLoaded = {}
 local function _populate25fVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
@@ -972,20 +972,20 @@ local function _populate25fVuMeterList(search_root)
 			if mode == "directory" then
 				local path = search_root .. "/" .. entry
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
-				if jsData ~= nil and jsData.vutype == "25frames" and pathsAreImageFiles(path, jsData.files.frames) == true then
-					if jsData.channels == 1 then
-						log:info("VUMeter 25frames ", jsData.name)
-						vuImagesMap[jsData.name] = {src= path .. "/" .. jsData.files.frames[1] }
-						table.insert(vuImages, {name=jsData.name, enabled=false, displayName='25f-' .. entry, vutype="25frames"})
-				    end
-					if jsData.channels == 2 then
-						log:info("VUMeter 25framesLR ", jsData.name)
-						vuImagesMap[jsData.name .. ":left"] = {src= path .. "/" .. jsData.files.frames[1] }
-						vuImagesMap[jsData.name .. ":right"] = {src= path .. "/" .. jsData.files.frames[2] }
-						table.insert(vuImages, {name=jsData.name, enabled=false, displayName='25fLR-' .. entry, vutype="25framesLR"})
-				    end
+				if jsData ~= nil and  vuLoaded[jsData.name] == nil and jsData.vutype == "frames" and pathsAreImageFiles(path, jsData.files.frames) == true then
+					-- prevent future loading of VUMeter with the same name
+					vuLoaded[jsData.name] = true
+					log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
+					for i,_ in ipairs(jsData.files.frames) do
+						vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+					end
+					table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
 				else
-					log:error("VU Meter ", jsData.name, " unable to locate some image files")
+					if jsData == nil then
+						log:info("json load failed:", path .. "/" .. "meta.json")
+					else
+						log:error("VU Meter ", jsData.name, " unable to locate some image files")
+					end
 				end
 			end
 		end
@@ -1009,6 +1009,7 @@ end
 local function initVuMeterList()
 	vuImages = {}
 	vuImagesMap = {}
+	vuLoaded = {}
 
 	local relativePath = "assets/visualisers/vumeters/vfd"
 	if workSpace ~= System.getUserDir() then
@@ -1016,25 +1017,14 @@ local function initVuMeterList()
 	end
 	_initVfdVuMeterList(relativePath)
 	_initVfdVuMeterList("../../" .. relativePath)
---	relativePath = "assets/visualisers/vumeters/analogue"
---	_initAnalogueVuMeterList("../../" .. relativePath)
---	_initAnalogueVuMeterList(relativePath)
---	if workSpace ~= System.getUserDir() then
---		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
---	end
-	relativePath = "assets/visualisers/vumeters/25frames"
+
+	relativePath = "assets/visualisers/vumeters"
 	if workSpace ~= System.getUserDir() then
 		_populate25fVuMeterList(workSpace .. "/" .. relativePath)
 	end
 	_init25fVuMeterList(relativePath)
 	_init25fVuMeterList("../../" .. relativePath)
 
-	relativePath = "assets/visualisers/vumeters/25framesLR"
-	if workSpace ~= System.getUserDir() then
-		_populate25fLRVuMeterList(workSpace .. "/" .. relativePath)
-	end
-	_init25fLRVuMeterList(relativePath)
-	_init25fLRVuMeterList("../../" .. relativePath)
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
@@ -1270,21 +1260,18 @@ function getVuImage(_,w,h)
 		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
 	end
 
-	local frameVU
-
-	if entry.vutype == "25framesLR" then
-		local ldicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':left'
-		local rdicKey =  "for-" .. w .. "x" .. h .. "-" .. entry.name .. ':right'
-		local leftImg = loadResizedImage(ldicKey)
-		local rightImg = loadResizedImage(rdicKey)
-		return {vutype=entry.vutype, leftImg=leftImg, rightImg=rightImg, displayResizing=makeResizingParams(leftImg==nil or  rightImg==nil)}
+	local imgs = {}
+	local resizeRequired = false
+	for i,_ in ipairs(entry.jsData.files.frames) do
+		local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ":" .. i
+		local frameVU = loadResizedImage(dicKey)
+		table.insert(imgs, frameVU)
+		resizeRequired = resizeRequired or (frameVU == nil)
 	end
-
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name
-	-- image is in the cache load and return
-	log:debug("getVuImage: load ", dicKey, " ", resizedImagesTable[dicKey])
-	frameVU = loadResizedImage(dicKey)
-	return {vutype=entry.vutype, bgImg=frameVU, displayResizing=makeResizingParams(frameVU==nil)}
+	if #imgs < 2 then
+		table.insert(imgs, imgs[1])
+	end
+	return {vutype=entry.vutype, imageFrames=imgs, displayResizing=makeResizingParams(resizeRequired), jsData=entry.jsData}
 end
 
 
@@ -1378,12 +1365,7 @@ function enumerateResizableVuMeters(_, all)
 	local vMeters = {}
 	for _, v in pairs(vuImages) do
 		if all or v.enabled then
-			if v.vutype == "25frames" then
-				for _, vr in pairs(vuMeterResolutions) do
-					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
-				end
-			end
-			if v.vutype == "25framesLR" then
+			if v.vutype == "frames" then
 				for _, vr in pairs(vuMeterResolutions) do
 					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
@@ -1418,14 +1400,12 @@ function concurrentResizeVuMeter(_, name, w, h)
 --	log:info("concurrentResizeVuMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(vuImages) do
 		if name == v.name then
-			if v.vutype == "25frames" then
-				return requestVuResize(name, w, h)
-			end
-
-			if v.vutype == "25framesLR" then
-				local l =  requestVuResize(name .. ':left', w, h)
-				local r =  requestVuResize(name .. ':right', w, h)
-				return l and r
+			if v.vutype == "frames" then
+				local ready = true
+				for i,_ in ipairs(v.jsData.files.frames) do
+					ready = ready and requestVuResize(name .. ':' .. i, w, h)
+				end
+				return ready
 			end
 		end
 	end
@@ -1468,22 +1448,13 @@ function resizeRequiredVuMeter(_, name)
 	for _, v in pairs(vuImages) do
 		if v.name == name then
 			-- found vu meter
-			if v.vutype == "25frames" then
+			if v.vutype == "frames" then
 				-- resizable type
 				for _, vr in pairs(vuMeterResolutions) do
-					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
-						return true
-					end
-				end
-			end
-			if v.vutype == "25framesLR" then
-				-- create the cached image for skin resolutions
-				for _, vr in pairs(vuMeterResolutions) do
-					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':left'] == nil then
-						return true
-					end
-					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':right'] == nil then
-						return true
+					for i,_ in ipairs(v.jsData.files.frames) do
+						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':' .. i] == nil then
+							return true
+						end
 					end
 				end
 			end
