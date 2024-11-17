@@ -24,8 +24,8 @@ local lfs	= require("lfs")
 local os	= require("os")
 local io	= require("io")
 
---local ipairs, pairs = ipairs, pairs
-local pairs = pairs
+local ipairs, pairs = ipairs, pairs
+local pcall = pcall
 local coroutine, package	= coroutine, package
 
 -- jive package imports
@@ -36,6 +36,7 @@ local Surface		= require("jive.ui.Surface")
 local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
 local FRAME_RATE    = jive.ui.FRAME_RATE
+local json		    = require("jive.json")
 
 module(...)
 
@@ -79,6 +80,36 @@ local function _parseImagePath(imgpath)
 		return parts
 	end
 	return nil
+end
+
+local function dumpTable(tbl, indent)
+	indent = indent or 0
+	for k, v in pairs(tbl) do
+		print(string.rep(" ", indent) .. tostring(k) .. ":")
+		if type(v) == "table" then
+			dumpTable(v, indent + 2)
+		else
+			print(string.rep(" ", indent + 2) .. tostring(v))
+		end
+	end
+end
+
+local function loadJsonFile(jsPath)
+	local jsonData = nil
+	local file = io.open(jsPath, "rb")
+	if file then
+		local content = file:read "*a"
+		file.close()
+		-- it isn't possible to return a value using pcall
+		-- so we do the operation twice :-(
+		local status, resOrError = pcall(json.parse, content)
+        if status then
+			jsonData = resOrError
+		else
+			log:error("json.parse ", jsPath, " error: ", resOrError)
+		end
+	end
+	return jsonData
 end
 
 local function boolOsEnv(envName, defaultValue)
@@ -401,15 +432,15 @@ local function initColourSpectrums()
 	local csp ={
 		{
 			name="mc-White",   enabled=false, spType=SPT_COLOUR,
-			barColor=0xf0f0f0ff, capColor=0xffffffff, decapColor=0xc0c0c0e0
+			barColor=0xf0f0f0ff, capColor=0xffffffff, decapColor=0xc0c0c080
 		},
 		{
 		 name="mc-Yellow",  enabled=false, spType=SPT_COLOUR,
-			barColor=0xffff00ff, capColor=0xffff00ff, decapColor=0xd0d000e0
+			barColor=0xffff00ff, capColor=0xffff00ff, decapColor=0xd0d00080
 		},
 		{
 			name="mc-Cyan",	enabled=false, spType=SPT_COLOUR,
-			barColor=0x00ffffff, capColor=0x00ffffff, decapColor=0x00d0d0e0
+			barColor=0x00ffffff, capColor=0x00ffffff, decapColor=0x00d0d080
 		},
 --		{
 --			name="mc-Magenta", enabled=false, spType=SPT_COLOUR,
@@ -422,7 +453,7 @@ local function initColourSpectrums()
 		{
 			name="mc-Green",   enabled=false, spType=SPT_COLOUR,
 --			barColor=0x00d000ff, capColor=0x00d000ff, decapColor=0x00d000a0
-			barColor=0x00ff00ff, capColor=0x00ff00ff, decapColor=0x00d000e0
+			barColor=0x00ff00ff, capColor=0x00ff00ff, decapColor=0x00d00080
 		},
 --		{
 --			name="mc-Blue",	enabled=false, spType=SPT_COLOUR,
@@ -438,93 +469,80 @@ local function initColourSpectrums()
 	end
 end
 
-
-local function __addSpectrumBacklit(path, entry)
-		local mode = lfs.attributes(path .. "/" .. entry, "mode")
-		if mode == "file" then
-			local parts = _parseImagePath(entry)
-			if parts ~= nil then
-				local imgName = 'bl-' .. parts[1]
-				local bgImgName = "bg-" .. imgName
-				if spectrumImagesMap[imgName] == nil then
-					table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_BACKLIT})
-				end
-				log:debug(" SpectrumImage :", imgName, " ", bgImgName, ", ", path .. "/" .. entry)
-				spectrumImagesMap[imgName] = {fg=imgName, bg=bgImgName, src=path .. "/" .. entry, dc="dc-" .. imgName}
-			end
-		end
-end
-
---FIXME make idempotent
-local function _populateSpectrumBacklitList(search_root)
-	if (lfs.attributes(search_root, "mode") ~= "directory") then
-		return
-	end
-
-	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			__addSpectrumBacklit(search_root, entry)
-		end
-		if mode == "directory" then
-			local path = search_root .. "/" .. entry
-			for f in lfs.dir(path) do
-				mode = lfs.attributes(path .. "/" .. f, "mode")
-				if mode == "file" then
-					__addSpectrumBacklit(path, f)
-				end
-			end
-		end
-	end
-end
-
-local function _scanSpectrumBacklitList(rpath)
-	for search_root in findPaths(rpath) do
-		_populateSpectrumBacklitList(search_root)
-	end
-end
-
-local function __addSpectrumImage(path, entry)
+local function __addSpectrum(path, jsData)
+	local entry = jsData.foreground
+    if spectrumImagesMap[jsData.name] ~= nil then
+        return
+    end
 	local mode = lfs.attributes(path .. "/" .. entry, "mode")
 	if mode == "file" then
 		local parts = _parseImagePath(entry)
 		if parts ~= nil then
-			local imgName = 'im-' .. parts[1]
-			if spectrumImagesMap[imgName] == nil then
-				table.insert(spectrumList, {name=imgName, enabled=false, spType=SPT_IMAGE})
+			local imgName = jsData.name
+			local src_tsp = nil
+			local src_bg = nil
+			if jsData.translucent ~= nil then
+				src_tsp = path .. "/" .. jsData.translucent
+				mode = lfs.attributes(src_tsp, "mode")
+				if mode ~= "file" then
+					log:error("Is not a file", src_tsp, " ignoring configuration for ", jsData.name)
+					return
+				end
 			end
-			log:debug(" SpectrumImage :", imgName, ", ", path .. "/" .. entry)
-			spectrumImagesMap[imgName] = {fg=imgName, bg=nil, src=path .. "/" .. entry, dc="dc-" .. imgName}
+			if jsData.background ~= nil then
+				src_bg = path .. "/" .. jsData.background
+				mode = lfs.attributes(src_bg, "mode")
+				if mode ~= "file" then
+					log:error("Is not a file", src_bg, " ignoring configuration for ", jsData.name)
+					return
+				end
+			end
+
+			table.insert(spectrumList, {name=imgName, enabled=false, spType=jsData.sptype})
+
+			local bg = nil
+			if jsData.sptype == SPT_BACKLIT then
+				bg = "bg-" .. imgName
+			end
+			log:info(" SpectrumImage :", imgName, ", ", path .. "/" .. entry, " ", src_tsp, " ", src_bg)
+			spectrumImagesMap[imgName] = {
+				fg=imgName,
+				bg=bg,
+				src=path .. "/" .. entry,
+				src_tsp=src_tsp,
+				src_bg=src_bg,
+				dc="dc-" .. imgName
+			}
 		end
+	else
+		log:error("Is not a file", entry, " ignoring configuration for ", jsData.name)
 	end
 end
 
+
 --FIXME make idempotent
-local function _populateSpectrumImageList(search_root)
+local function _populateSpectrum(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
 
 	for entry in lfs.dir(search_root) do
-		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-		if mode == "file" then
-			__addSpectrumImage(search_root, entry)
-		end
-		if mode == "directory" then
-			local path = search_root .. "/" .. entry
-			for f in lfs.dir(path) do
-				mode = lfs.attributes(path .. "/" .. f, "mode")
-				if mode == "file" then
-					__addSpectrumImage(path, f)
+		if entry ~= "." and entry ~= ".." then
+			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
+			if mode == "directory" then
+				local path = search_root .. "/" .. entry
+				local jsData = loadJsonFile(path .. "/" .. "meta.json")
+				if jsData ~= nil then
+					__addSpectrum(path, jsData)
 				end
 			end
 		end
 	end
 end
 
-local function _scanSpectrumImageList(rpath)
+local function _scanSpectrum(rpath)
 	for search_root in findPaths(rpath) do
-		_populateSpectrumImageList(search_root)
+		_populateSpectrum(search_root)
 	end
 end
 
@@ -534,19 +552,12 @@ local function initSpectrumList()
 
 	initColourSpectrums()
 
-	local relativePath = "assets/visualisers/spectrum/backlit"
-	_scanSpectrumBacklitList("../../" .. relativePath)
-	_scanSpectrumBacklitList(relativePath)
+	local relativePath = "assets/visualisers/spectrum"
 	if workSpace ~= System.getUserDir() then
-		_populateSpectrumBacklitList(workSpace .. "/" .. relativePath)
+		_populateSpectrum(workSpace .. "/" .. relativePath)
 	end
-
-	relativePath = "assets/visualisers/spectrum/gradient"
-	_scanSpectrumImageList("../../" .. relativePath)
-	_scanSpectrumImageList(relativePath)
-	if workSpace ~= System.getUserDir() then
-		_populateSpectrumImageList(workSpace .. "/" .. relativePath)
-	end
+	_scanSpectrum(relativePath)
+	_scanSpectrum("../../" .. relativePath)
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
@@ -939,6 +950,16 @@ end
 --		_populateAnalogueVuMeterList(search_root)
 --	end
 --end
+local function pathsAreImageFiles(root_path, path_lst)
+    for _, pth in ipairs(path_lst) do
+        local src = root_path .. "/" .. pth
+        local mode = lfs.attributes(src, "mode")
+        if mode ~= "file" or _parseImagePath(src) == nil then
+            return false
+        end
+    end
+    return true
+end
 
 local function _populate25fVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
@@ -950,21 +971,21 @@ local function _populate25fVuMeterList(search_root)
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "directory" then
 				local path = search_root .. "/" .. entry
-				local found = 0
-				for f in lfs.dir(path) do
-					mode = lfs.attributes(path .. "/" .. f, "mode")
-					if mode == "file" then
-						local parts = _parseImagePath(f)
-						if parts ~= nil then
-							log:debug("25frames ", path .. "/" .. f)
-							vuImagesMap[entry] = {src= path .. "/" .. f}
-							found = found + 1
-						end
-					end
-				end
-				if found == 1 then
-					log:debug("25frames ", entry)
-					table.insert(vuImages, {name=entry, enabled=false, displayName='25f-' .. entry, vutype="frame"})
+				local jsData = loadJsonFile(path .. "/" .. "meta.json")
+				if jsData ~= nil and jsData.vutype == "25frames" and pathsAreImageFiles(path, jsData.files.frames) == true then
+					if jsData.channels == 1 then
+						log:info("VUMeter 25frames ", jsData.name)
+						vuImagesMap[jsData.name] = {src= path .. "/" .. jsData.files.frames[1] }
+						table.insert(vuImages, {name=jsData.name, enabled=false, displayName='25f-' .. entry, vutype="25frames"})
+				    end
+					if jsData.channels == 2 then
+						log:info("VUMeter 25framesLR ", jsData.name)
+						vuImagesMap[jsData.name .. ":left"] = {src= path .. "/" .. jsData.files.frames[1] }
+						vuImagesMap[jsData.name .. ":right"] = {src= path .. "/" .. jsData.files.frames[2] }
+						table.insert(vuImages, {name=jsData.name, enabled=false, displayName='25fLR-' .. entry, vutype="25framesLR"})
+				    end
+				else
+					log:error("VU Meter ", jsData.name, " unable to locate some image files")
 				end
 			end
 		end
@@ -978,46 +999,9 @@ local function _init25fVuMeterList(rpath)
 end
 
 
-local function _populate25fLRVuMeterList(search_root)
-	if (lfs.attributes(search_root, "mode") ~= "directory") then
-		return
-	end
-
-	for entry in lfs.dir(search_root) do
-		if entry ~= "." and entry ~= ".." then
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "directory" then
-				local path = search_root .. "/" .. entry
-				local found = 0
-				for f in lfs.dir(path) do
-					mode = lfs.attributes(path .. "/" .. f, "mode")
-					if mode == "file" then
-						local parts = _parseImagePath(f)
-						if parts ~= nil then
-							log:debug("25framesLR ", path .. "/" .. f)
-							if string.find(parts[#parts-1], 'left') ~= nil then
-								vuImagesMap[entry .. ':left'] = {src= path .. "/" .. f}
-								found = found + 1
-							end
-							if string.find(parts[#parts-1], 'right') ~= nil then
-								vuImagesMap[entry .. ':right'] = {src= path .. "/" .. f}
-								found = found + 1
-							end
-						end
-					end
-				end
-				if found == 2 then
-					log:debug("25framesLR ", entry)
-					table.insert(vuImages, {name=entry, enabled=false, displayName='25flr-' .. entry, vutype="25framesLR"})
-				end
-			end
-		end
-	end
-end
-
 local function _init25fLRVuMeterList(rpath)
 	for search_root in findPaths(rpath) do
-		_populate25fLRVuMeterList(search_root)
+		_populate25fVuMeterList(search_root)
 	end
 end
 
@@ -1027,11 +1011,11 @@ local function initVuMeterList()
 	vuImagesMap = {}
 
 	local relativePath = "assets/visualisers/vumeters/vfd"
-	_initVfdVuMeterList("../../" .. relativePath)
-	_initVfdVuMeterList(relativePath)
 	if workSpace ~= System.getUserDir() then
 		_populateVfdVuMeterList(workSpace .. "/" .. relativePath)
 	end
+	_initVfdVuMeterList(relativePath)
+	_initVfdVuMeterList("../../" .. relativePath)
 --	relativePath = "assets/visualisers/vumeters/analogue"
 --	_initAnalogueVuMeterList("../../" .. relativePath)
 --	_initAnalogueVuMeterList(relativePath)
@@ -1039,17 +1023,18 @@ local function initVuMeterList()
 --		_populateAnalogueVuMeterList(workSpace .. "/" .. relativePath)
 --	end
 	relativePath = "assets/visualisers/vumeters/25frames"
-	_init25fVuMeterList("../../" .. relativePath)
-	_init25fVuMeterList(relativePath)
 	if workSpace ~= System.getUserDir() then
 		_populate25fVuMeterList(workSpace .. "/" .. relativePath)
 	end
+	_init25fVuMeterList(relativePath)
+	_init25fVuMeterList("../../" .. relativePath)
+
 	relativePath = "assets/visualisers/vumeters/25framesLR"
-	_init25fLRVuMeterList("../../" .. relativePath)
-	_init25fLRVuMeterList(relativePath)
 	if workSpace ~= System.getUserDir() then
 		_populate25fLRVuMeterList(workSpace .. "/" .. relativePath)
 	end
+	_init25fLRVuMeterList(relativePath)
+	_init25fLRVuMeterList("../../" .. relativePath)
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
@@ -1393,7 +1378,7 @@ function enumerateResizableVuMeters(_, all)
 	local vMeters = {}
 	for _, v in pairs(vuImages) do
 		if all or v.enabled then
-			if v.vutype == "frame" then
+			if v.vutype == "25frames" then
 				for _, vr in pairs(vuMeterResolutions) do
 					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
@@ -1433,7 +1418,7 @@ function concurrentResizeVuMeter(_, name, w, h)
 --	log:info("concurrentResizeVuMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(vuImages) do
 		if name == v.name then
-			if v.vutype == "frame" then
+			if v.vutype == "25frames" then
 				return requestVuResize(name, w, h)
 			end
 
@@ -1483,7 +1468,7 @@ function resizeRequiredVuMeter(_, name)
 	for _, v in pairs(vuImages) do
 		if v.name == name then
 			-- found vu meter
-			if v.vutype == "frame" then
+			if v.vutype == "25frames" then
 				-- resizable type
 				for _, vr in pairs(vuMeterResolutions) do
 					if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
@@ -1596,6 +1581,33 @@ function initialiseCache()
 end
 
 function initialise()
+--local RMS_MAP = {
+--	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
+--	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
+--	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
+--	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
+--	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 5000,
+--}
+--
+--	local filepath = defaultWorkspace .. "/test.json"
+--	local file= io.open(filepath, "rb")
+--	if file then
+--		local content = file:read "*a"
+--		file:close()
+--		local tbl = json.parse(content)
+--		if tbl ~= nil then
+--			log:info("############ ", tbl.kind)
+--			log:info("############ ", tbl.payload.eNested.gNestedNested.hInt)
+--		end
+--	end
+--    local x = 1
+--    for i = 2, 37 do
+--        log:info(i, ", ", x)
+--        x = x + 1
+--    end
+--    for i = 38, 50 do
+--        log:info(i, ", ", x)
+--        x = x + 1
+--    end
+
 end
-
-
