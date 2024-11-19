@@ -96,18 +96,24 @@ end
 
 local function loadJsonFile(jsPath)
 	local jsonData = nil
+
+	if (lfs.attributes(jsPath, "mode") ~= "file") then
+		log:warn("loadJson: not a file ", jsPath, " ", lfs.attributes(jsPath, "mode"))
+		return jsonData
+	end
+
 	local file = io.open(jsPath, "rb")
-	if file then
+	if file ~= nil then
 		local content = file:read "*a"
-		file.close()
-		-- it isn't possible to return a value using pcall
-		-- so we do the operation twice :-(
+		file:close()
 		local status, resOrError = pcall(json.parse, content)
 		if status then
 			jsonData = resOrError
 		else
 			log:error("json.parse ", jsPath, " error: ", resOrError)
 		end
+	else
+		log:warn("loadJson: failed to open file ", jsPath)
 	end
 	return jsonData
 end
@@ -535,8 +541,6 @@ local function _populateSpectrum(search_root)
 					if jsData.kind == "spectrum-meter" then
 						__addSpectrum(path, jsData)
 					end
-				else
-					log:info("json load failed:", path .. "/" .. "meta.json")
 				end
 			end
 		end
@@ -992,8 +996,6 @@ local function _populate25fVuMeterList(search_root)
 							log:error("failed to find all images in ", path .. "/" .. "meta.json")
 						end
 					end
-				else
-					log:info("json load failed:", path .. "/" .. "meta.json")
 				end
 			end
 		end
