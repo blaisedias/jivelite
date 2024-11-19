@@ -532,7 +532,11 @@ local function _populateSpectrum(search_root)
 				local path = search_root .. "/" .. entry
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
 				if jsData ~= nil then
-					__addSpectrum(path, jsData)
+					if jsData.kind == "spectrum-meter" then
+						__addSpectrum(path, jsData)
+					end
+				else
+					log:info("json load failed:", path .. "/" .. "meta.json")
 				end
 			end
 		end
@@ -972,20 +976,24 @@ local function _populate25fVuMeterList(search_root)
 			if mode == "directory" then
 				local path = search_root .. "/" .. entry
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
-				if jsData ~= nil and  vuLoaded[jsData.name] == nil and jsData.vutype == "frames" and pathsAreImageFiles(path, jsData.files.frames) == true then
-					-- prevent future loading of VUMeter with the same name
-					vuLoaded[jsData.name] = true
-					log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
-					for i,_ in ipairs(jsData.files.frames) do
-						vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+				if jsData ~= nil then
+					if jsData.kind == "vumeter"
+						and vuLoaded[jsData.name] == nil
+						and jsData.vutype == "frames" then
+						if pathsAreImageFiles(path, jsData.files.frames) == true then
+							-- prevent future loading of VUMeter with the same name
+							vuLoaded[jsData.name] = true
+							log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
+							for i,_ in ipairs(jsData.files.frames) do
+								vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+							end
+							table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
+						else
+							log:error("failed to find all images in ", path .. "/" .. "meta.json")
+						end
 					end
-					table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
 				else
-					if jsData == nil then
-						log:info("json load failed:", path .. "/" .. "meta.json")
-					else
-						log:error("VU Meter ", jsData.name, " unable to locate some image files")
-					end
+					log:info("json load failed:", path .. "/" .. "meta.json")
 				end
 			end
 		end
