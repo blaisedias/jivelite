@@ -87,6 +87,17 @@ local function _parseImagePath(imgpath)
 	return nil
 end
 
+local function pathsAreImageFiles(root_path, path_lst)
+	for _, pth in ipairs(path_lst) do
+		local src = root_path .. "/" .. pth
+		local mode = lfs.attributes(src, "mode")
+		if mode ~= "file" or _parseImagePath(src) == nil then
+		 return false
+end
+	end
+	return true
+end
+
 local function dumpTable(tbl, indent)
 	indent = indent or 0
 	for k, v in pairs(tbl) do
@@ -96,6 +107,13 @@ local function dumpTable(tbl, indent)
 		else
 			print(string.rep(" ", indent + 2) .. tostring(v))
 		end
+	end
+end
+
+-- only insert non-nil values into table
+local function tbl_insert(tbl, val)
+	if val ~= nil then
+		table.insert(tbl, val)
 	end
 end
 
@@ -491,6 +509,21 @@ local function __addSpectrum(path, jsData)
 	if spectrumImagesMap[jsData.name] ~= nil then
 		return
 	end
+	-- check that all files referenced exist
+	-- insert a nil value in a table stops iteration there
+	local tmp = {}
+	tbl_insert(tmp, jsData.foreground)
+	tbl_insert(tmp, jsData.background)
+	tbl_insert(tmp, jsData.translucent)
+	if jsData.turbine ~= nil then
+		tbl_insert(tmp, jsData.turbine.foreground)
+		tbl_insert(jsData.turbine.background)
+		tbl_insert(tmp, jsData.turbine.translucent)
+	end
+	if pathsAreImageFiles(path, tmp) == false then
+		return false
+	end
+
 	local mode = lfs.attributes(path .. "/" .. entry, "mode")
 	if mode == "file" then
 		local parts = _parseImagePath(entry)
@@ -813,19 +846,10 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	if spectrumImagesMap[spkey] ~= nil then
 		rszOp =  spectrumImagesMap[spkey].rszOp
 	end
-	local rszs={}
+
 	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	if rszFg ~= nil then
-		table.insert(rszs, rszFg)
-	end
 	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	if rszBg ~= nil then
-		table.insert(rszs, rszBg)
-	end
 	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	if rszDc ~= nil then
-		table.insert(rszs, rszDc)
-	end
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
@@ -834,6 +858,12 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	if spectrumList[spImageIndex].decapColor ~= nil then
 		decapColor = spectrumList[spImageIndex].decapColor
 	end
+
+	-- resize table must only contain non-nil values
+	local rszs={}
+	tbl_insert(rszs, rszFg)
+	tbl_insert(rszs, rszBg)
+	tbl_insert(rszs, rszDc)
 
 	local capHeight = capHeightIn
 	local capSpace = capSpaceIn
@@ -974,17 +1004,6 @@ end
 --		_populateAnalogueVuMeterList(search_root)
 --	end
 --end
-local function pathsAreImageFiles(root_path, path_lst)
-	for _, pth in ipairs(path_lst) do
-		local src = root_path .. "/" .. pth
-		local mode = lfs.attributes(src, "mode")
-		if mode ~= "file" or _parseImagePath(src) == nil then
-		 return false
-end
-	end
-	return true
-end
-
 local vuLoaded = {}
 local function _populate25fVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
