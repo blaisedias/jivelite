@@ -1,6 +1,6 @@
 {
     "kind": "spectrum-meter",
-    "name" : "GradientBlueGreeenYellowRed",
+    "name" : "GradientBlueGreenYellowRed",
     "foreground": "BlueGreenYellowRed.png",
     "translucent": "TspBlueGreenYellowRed.png",
     "sptype": "image",
