@@ -422,9 +422,7 @@ function draw(self, surface)
 		local d = self.spparms.displayResizing
 		d.img:blitClip(math.floor((d.c % d.m)/d.d) * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		d.c = d.c + 1
-		local spname = visImage:getCurrentSpectrumMeterName()
-		local resized = visImage:concurrentResizeSpectrumMeter(spname, w, h)
-		if resized == true then
+        if visImage:resizeVisualisers(w, h, self.spparms.rszs, self.spparms.rszOp) then
 			self:_layout(self)
 		end
 		return
