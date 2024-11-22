@@ -11,6 +11,10 @@
 #include <pthread.h>
 #include <stdio.h>
 
+// values must match those in lua code.
+#define RESIZEOP_VU						1
+#define RESIZEOP_FILL					2
+#define RESIZEOP_SCALED_CENTERED_CROP 	3
 /*
  * This file combines both JiveSurface and JiveTile into a single implementation.
  * The separate typdefs, JiveSurface and JiveTile, are still kept so that the
@@ -2759,13 +2763,13 @@ void do_resize(resize_request_ptr req) {
 				if (req->src_sdl != NULL) {
 //fprintf(stderr, "do_resize: +++ src_sdl %p\n", req->src_sdl); fflush(stderr);
 					switch(req->op) {
-						case 1:
+						case RESIZEOP_VU:
 							vu_resize(req);
 							break;
-						case 2:
+						case RESIZEOP_FILL:
 							sp_resize(req);
 							break;
-						case 3:
+						case RESIZEOP_SCALED_CENTERED_CROP:
 							sp_scale_centered_crop(req);
 							break;
 					}

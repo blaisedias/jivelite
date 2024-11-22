@@ -35,8 +35,8 @@ local Surface		= require("jive.ui.Surface")
 --local debug		 	= require("jive.utils.debug")
 local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
-local FRAME_RATE    = jive.ui.FRAME_RATE
-local json		    = require("jive.json")
+local FRAME_RATE	= jive.ui.FRAME_RATE
+local json			= require("jive.json")
 
 module(...)
 
@@ -45,6 +45,11 @@ module(...)
 local SPT_BACKLIT = "backlit"
 local SPT_IMAGE = "image"
 local SPT_COLOUR = "colour"
+
+-- values must match C code (jive_surface.c)
+local RESIZEOP_VU					= 1
+local RESIZEOP_FILL					= 2
+local RESIZEOP_SCALED_CENTERED_CROP	= 3
 
 local vuImages = {}
 local spectrumList = {}
@@ -513,8 +518,30 @@ local function __addSpectrum(path, jsData)
 			table.insert(spectrumList, {name=imgName, enabled=false, spType=jsData.sptype})
 
 			local bg = nil
+			local rszOp = RESIZEOP_FILL
 			if jsData.sptype == SPT_BACKLIT then
 				bg = "bg-" .. imgName
+				rszOp = RESIZEOP_SCALED_CENTERED_CROP
+			end
+			local tdata = nil
+			if jsData.turbine ~= nil then
+				if jsData.turbine.foreground ~= nil then
+					tdata = {
+						fg="trb-" .. imgName,
+						dc="trb-dc-" .. imgName,
+						bg="trb-bg-" .. imgName,
+					}
+					tdata["src_fg"] =  path .. "/" .. jsData.turbine.foreground
+					if jsData.turbine.translucent ~= nil then
+						tdata["src_tsp"] =  path .. "/" .. jsData.turbine.translucent
+					end
+					if jsData.turbine.background ~= nil then
+						tdata["src_bg"] =  path .. "/" .. jsData.turbine.background
+					end
+					if jsData.sptype == SPT_BACKLIT then
+						tdata["bg"] =  nil
+					end
+				end
 			end
 			log:info(" SpectrumImage :", imgName, ", ", path .. "/" .. entry, " ", src_tsp, " ", src_bg)
 			spectrumImagesMap[imgName] = {
@@ -524,6 +551,8 @@ local function __addSpectrum(path, jsData)
 				src_fg=path .. "/" .. entry,
 				src_tsp=src_tsp,
 				src_bg=src_bg,
+				turbine = tdata,
+				rszOp = rszOp,
 			}
 		end
 	else
@@ -664,37 +693,42 @@ end
 local function _getFgSpectrumImage(spkey, w, h, _)
 	local fgImage
 	if spectrumImagesMap[spkey] == nil then
-		return nil, false
+		return nil, false, nil
 	end
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
 	if spectrumImagesMap[spkey].fg == nil then
-		return nil, false
+		return nil, false, nil
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
 	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg,
 				" ", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
-	return fgImage, fgImage == nil
+	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_fg}
 end
 
 local function _getBgSpectrumImage(spkey, w, h, spType)
 	local bgImage
 	if spectrumImagesMap[spkey] == nil then
-		return nil, false
+		return nil, false, nil
 	end
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
 	if spectrumImagesMap[spkey].bg == nil then
-		return nil, false
+		return nil, false, nil
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
 	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
 
+	if spectrumImagesMap[spkey].src_bg ~= nil then
+		bgImage = loadResizedImage(dicKey)
+		return bgImage, bgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_bg}
+	end
+
 	local resizeRequired = false
 	bgImage = imCacheGet(dicKey)
 	if bgImage == nil then
-		local fgimg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spType)
+		local fgimg, fgResizeRequired, _ = _getFgSpectrumImage(spkey, w, h, spType)
 		resizeRequired = fgResizeRequired
 		if fgimg ~= nil then
 			-- FIXME:
@@ -711,27 +745,32 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 			imCachePut(dicKey, bgImage)
 		end
 	end
-	return bgImage, resizeRequired
+	return bgImage, resizeRequired, nil
 end
 
 
 local function _getDcSpectrumImage(spkey, w, h, spType)
 	local dcImage
 	if spectrumImagesMap[spkey] == nil then
-		return nil, false
+		return nil, false, nil
 	end
 	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc)
 	if spectrumImagesMap[spkey].dc == nil then
-		return nil, false
+		return nil, false, nil
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].dc
 	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc, " ", dicKey)
 
+	if spectrumImagesMap[spkey].src_tsp ~= nil then
+		dcImage = loadResizedImage(dicKey)
+		return dcImage, dcImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_tsp}
+	end
+
 	local resizeRequired = false
 	dcImage = imCacheGet(dicKey)
 	if dcImage == nil then
-		local fgimg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spType)
+		local fgimg, fgResizeRequired, _ = _getFgSpectrumImage(spkey, w, h, spType)
 		resizeRequired = fgResizeRequired
 		if fgimg ~= nil then
 			-- FIXME:
@@ -748,7 +787,7 @@ local function _getDcSpectrumImage(spkey, w, h, spType)
 			imCachePut(dicKey, dcImage)
 		end
 	end
-	return dcImage, resizeRequired
+	return dcImage, resizeRequired, nil
 end
 
 
@@ -770,10 +809,23 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		imCacheClear()
 	end
 	prevSpImageIndex = spImageIndex
-
-	local fgImg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local bgImg, bgResizeRequired = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local dcImg, dcResizeRequired = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local rszOp = 0
+	if spectrumImagesMap[spkey] ~= nil then
+		rszOp =  spectrumImagesMap[spkey].rszOp
+	end
+	local rszs={}
+	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	if rszFg ~= nil then
+		table.insert(rszs, rszFg)
+	end
+	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	if rszBg ~= nil then
+		table.insert(rszs, rszBg)
+	end
+	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	if rszDc ~= nil then
+		table.insert(rszs, rszDc)
+	end
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
@@ -789,7 +841,6 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		capHeight = {0,0}
 		capSpace = {0,0}
 	end
-
 --	return fg, bg, dc, barColor, capColor, decapColor, displayResizing
 	local spparms = {
 		fgImg=fgImg,
@@ -807,8 +858,10 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		baselineAlways=visSettings.spectrum.baselineAlways,
 		baselineOn=visSettings.spectrum.baselineOn,
 		fill=visSettings.spectrum.fill,
+		rszs=rszs,
+		rszOp=rszOp,
 	}
-    return spparms
+	return spparms
 end
 
 function selectSpectrum(_, name, selected)
@@ -1306,33 +1359,53 @@ function enumerateResizableSpectrumMeters(_, all)
 end
 
 function concurrentResizeSpectrumMeter(_, name, w, h)
---	log:info("concurrentResizeSpectrumMeter ", name, ", ", w, ", ", h)
-	for _, v in pairs(spectrumList) do
-		if name == v.name then
-			-- create the resized images for skin resolutions
-			if spectrumImagesMap[v.name].src_fg ~= nil then
-				local path = spectrumImagesMap[v.name].src_fg
-				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
-				local dcpath = resizedImagePath(dicKey)
-				if resizedImagesTable[dicKey] ~= nil then
-					return true
-				end
-				local ok
-				if v.spType == SPT_BACKLIT then
-					ok = Surface:requestResize(path, dcpath, w, h, 0, 3, saveimage_type) == 1
-				elseif v.spType == SPT_IMAGE then
-					ok = Surface:requestResize(path, dcpath, w, h, 0, 2, saveimage_type) == 1
-				else
-					ok = true
-				end
-				if ok then
-					resizedImagesTable[dicKey] = dcpath
-					return true
-				end
+----	log:info("concurrentResizeSpectrumMeter ", name, ", ", w, ", ", h)
+--	for _, v in pairs(spectrumList) do
+--		if name == v.name then
+--			-- create the resized images for skin resolutions
+--			if spectrumImagesMap[v.name].src_fg ~= nil then
+--				local path = spectrumImagesMap[v.name].src_fg
+--				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+--				local dcpath = resizedImagePath(dicKey)
+--				if resizedImagesTable[dicKey] ~= nil then
+--					return true
+--				end
+--				local ok
+--				if v.spType == SPT_BACKLIT then
+--					ok = Surface:requestResize(path, dcpath, w, h, 0,
+--												RESIZEOP_SCALED_CENTERED_CROP,
+--												saveimage_type) == 1
+--				elseif v.spType == SPT_IMAGE then
+--					ok = Surface:requestResize(path, dcpath, w, h, 0,
+--												RESIZEOP_FILL,
+--												saveimage_type) == 1
+--				else
+--					ok = true
+--				end
+--				if ok then
+--					resizedImagesTable[dicKey] = dcpath
+--					return true
+--				end
+--			end
+--		end
+--	end
+	return false
+end
+
+function resizeVisualisers(_, w, h, rszs, rszOp)
+	local resized = true
+	for _, rsz in ipairs(rszs) do
+		if resizedImagesTable[rsz.key] == nil then
+			local dcpath = resizedImagePath(rsz.key)
+			local path = rsz.src
+			if Surface:requestResize(path, dcpath, w, h, 0, rszOp, saveimage_type) == 1 then
+				resizedImagesTable[rsz.key] = dcpath
+			else
+				resized = false
 			end
 		end
 	end
-	return false
+	return resized
 end
 
 function enumerateResizableVuMeters(_, all)
@@ -1362,7 +1435,9 @@ local function requestVuResize(name, w , h)
 	-- resize to 90% of the display window, and all the bars
 	-- will visually be the same size.
 	-- Note: this only works if the VU Meters do not have any borders along the horizontal axis
-	local ok = Surface:requestResize(path, dcpath, math.floor(w*9/10), h, 25, 1, saveimage_type) == 1
+	local ok = Surface:requestResize(path, dcpath, math.floor(w*9/10), h, 25,
+										RESIZEOP_VU,
+										saveimage_type) == 1
 	if ok then
 		resizedImagesTable[dicKey] = dcpath
 		return true
@@ -1526,33 +1601,5 @@ function initialiseCache()
 end
 
 function initialise()
---local RMS_MAP = {
---	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
---	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
---	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
---	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
---	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 5000,
---}
---
---	local filepath = defaultWorkspace .. "/test.json"
---	local file= io.open(filepath, "rb")
---	if file then
---		local content = file:read "*a"
---		file:close()
---		local tbl = json.parse(content)
---		if tbl ~= nil then
---			log:info("############ ", tbl.kind)
---			log:info("############ ", tbl.payload.eNested.gNestedNested.hInt)
---		end
---	end
---    local x = 1
---    for i = 2, 37 do
---        log:info(i, ", ", x)
---        x = x + 1
---    end
---    for i = 38, 50 do
---        log:info(i, ", ", x)
---        x = x + 1
---    end
 
 end

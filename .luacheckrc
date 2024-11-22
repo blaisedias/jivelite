@@ -13,6 +13,7 @@ files["share/jive/jive/visImage.lua"] = {
        "getWorkspacePath",
        "getDefaultWorkspacePath",
        "setVisSettings",
+       "resizeVisualisers",
    }
 }
 files["share/jive/jive/vis/SpectrumMeter.lua"] = {
