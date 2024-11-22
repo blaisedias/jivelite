@@ -723,7 +723,7 @@ end
 --	return spectrumList[1].name
 --end
 
-local function _getFgSpectrumImage(spkey, w, h, _)
+local function _getFgSpectrumImage(spkey, w, h)
 	local fgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
@@ -740,7 +740,7 @@ local function _getFgSpectrumImage(spkey, w, h, _)
 	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_fg}
 end
 
-local function _getBgSpectrumImage(spkey, w, h, spType)
+local function _getBgSpectrumImage(spkey, w, h, fgimg)
 	local bgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
@@ -761,8 +761,6 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 	local resizeRequired = false
 	bgImage = imCacheGet(dicKey)
 	if bgImage == nil then
-		local fgimg, fgResizeRequired, _ = _getFgSpectrumImage(spkey, w, h, spType)
-		resizeRequired = fgResizeRequired
 		if fgimg ~= nil then
 			-- FIXME:
 			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
@@ -782,7 +780,7 @@ local function _getBgSpectrumImage(spkey, w, h, spType)
 end
 
 
-local function _getDcSpectrumImage(spkey, w, h, spType)
+local function _getDcSpectrumImage(spkey, w, h, fgimg)
 	local dcImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
@@ -803,8 +801,6 @@ local function _getDcSpectrumImage(spkey, w, h, spType)
 	local resizeRequired = false
 	dcImage = imCacheGet(dicKey)
 	if dcImage == nil then
-		local fgimg, fgResizeRequired, _ = _getFgSpectrumImage(spkey, w, h, spType)
-		resizeRequired = fgResizeRequired
 		if fgimg ~= nil then
 			-- FIXME:
 			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
@@ -847,9 +843,9 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		rszOp =  spectrumImagesMap[spkey].rszOp
 	end
 
-	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h)
+	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, fgImg)
+	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, fgImg)
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
