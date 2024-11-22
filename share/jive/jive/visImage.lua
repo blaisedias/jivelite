@@ -408,6 +408,13 @@ end
 --------------------------------------------------------
 --- Spectrum
 --------------------------------------------------------
+local channelFlips  = {
+		LHHL={0,1},
+		HLHL={1,1},
+		HLLH={1,0},
+		LHLH={0,0},
+}
+
 local spImageIndex = 1
 local spectrumImagesMap = {}
 local spectrumResolutions = {}
@@ -512,11 +519,11 @@ local function __addSpectrum(path, jsData)
 			log:info(" SpectrumImage :", imgName, ", ", path .. "/" .. entry, " ", src_tsp, " ", src_bg)
 			spectrumImagesMap[imgName] = {
 				fg=imgName,
+				dc="dc-" .. imgName,
 				bg=bg,
-				src=path .. "/" .. entry,
+				src_fg=path .. "/" .. entry,
 				src_tsp=src_tsp,
 				src_bg=src_bg,
-				dc="dc-" .. imgName
 			}
 		end
 	else
@@ -746,7 +753,7 @@ end
 
 
 local prevSpImageIndex = -1
-function getSpectrum(_, w, h, barColorIn, capColorIn)
+function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
 --	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
@@ -764,9 +771,9 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 	end
 	prevSpImageIndex = spImageIndex
 
-	local fg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local bg, bgResizeRequired = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
-	local dc, dcResizeRequired = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local fgImg, fgResizeRequired = _getFgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local bgImg, bgResizeRequired = _getBgSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
+	local dcImg, dcResizeRequired = _getDcSpectrumImage(spkey, w, h, spectrumList[spImageIndex].spType)
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
@@ -776,7 +783,32 @@ function getSpectrum(_, w, h, barColorIn, capColorIn)
 		decapColor = spectrumList[spImageIndex].decapColor
 	end
 
-	return fg, bg, dc, barColor, capColor, decapColor, displayResizing
+	local capHeight = capHeightIn
+	local capSpace = capSpaceIn
+	if not visSettings.spectrum.capsOn then
+		capHeight = {0,0}
+		capSpace = {0,0}
+	end
+
+--	return fg, bg, dc, barColor, capColor, decapColor, displayResizing
+	local spparms = {
+		fgImg=fgImg,
+		bgImg=bgImg,
+		dcImg=dcImg,
+		barColor=barColor,
+		capColor=capColor,
+		decapColor=decapColor,
+		displayResizing=displayResizing,
+		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
+		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
+		capHeight=((capHeight[1]+capHeight[2])*2)/4,
+		capSpace=((capSpace[1]+capSpace[2])*2)/4,
+		turbine=visSettings.spectrum.turbine,
+		baselineAlways=visSettings.spectrum.baselineAlways,
+		baselineOn=visSettings.spectrum.baselineOn,
+		fill=visSettings.spectrum.fill,
+	}
+    return spparms
 end
 
 function selectSpectrum(_, name, selected)
@@ -807,74 +839,6 @@ function isCurrentSpectrumEnabled()
 	return spectrumList[spImageIndex].enabled
 end
 
---------------------------------------------------------
---- Spectrum bars format
---------------------------------------------------------
---function getBarsFormat()
---	log:debug("getBarsFormat", " ", visSettings.spectrum.barsFormat)
---	return visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat]
---end
---
---------------------------------------------------------
---- Spectrum caps
---------------------------------------------------------
---function getCapsValues(_, capsHeight, capsSpace)
---	if not visSettings.spectrum.capsOn then
---		return {0,0}, {0,0}
---	end
---	return capsHeight, capsSpace
---end
---
---------------------------------------------------------
---- Spectrum baseline
---------------------------------------------------------
---function getBaselineValues(_)
---	return visSettings.spectrum.baselineAlways, visSettings.spectrum.baselineOn
---end
---
---
---------------------------------------------------------
---- Spectrum turbine
---------------------------------------------------------
---function getSpectrumTurbine(_)
---	log:debug("getSpectrumTurbine", " ", visSettings.spectrum.turbine)
---	return visSettings.spectrum.turbine
---end
-
----------------------------------------------------------
---- Spectrum channel flip
---------------------------------------------------------
-local channelFlips  = {
-		LHHL={0,1},
-		HLHL={1,1},
-		HLLH={1,0},
-		LHLH={0,0},
-}
-
---function getChannelFlipValues()
---	log:debug("getChannelFlipValues", " ", visSettings.spectrum.channelFlip,
---				" ", channelFlips[visSettings.spectrum.channelFlip])
---	return channelFlips[visSettings.spectrum.channelFlip]
---end
-
-function getSpectrumMeterSettings(_, capHeightIn, capSpaceIn)
-	local capHeight = capHeightIn
-	local capSpace = capSpaceIn
-	if not visSettings.spectrum.capsOn then
-		capHeight = {0,0}
-		capSpace = {0,0}
-	end
-	return {
-		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
-		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
-		capHeight=((capHeight[1]+capHeight[2])*2)/4,
-		capSpace=((capSpace[1]+capSpace[2])*2)/4,
-		turbine=visSettings.spectrum.turbine,
-		baselineAlways=visSettings.spectrum.baselineAlways,
-		baselineOn=visSettings.spectrum.baselineOn,
-		fill=visSettings.spectrum.fill,
-	}
-end
 --------------------------------------------------------
 --- VU meter
 --------------------------------------------------------
@@ -1332,7 +1296,7 @@ function enumerateResizableSpectrumMeters(_, all)
 	for _, v in pairs(spectrumList) do
 		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
-				if spectrumImagesMap[v.name].src ~= nil then
+				if spectrumImagesMap[v.name].src_fg ~= nil then
 					table.insert(spMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
@@ -1346,8 +1310,8 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 	for _, v in pairs(spectrumList) do
 		if name == v.name then
 			-- create the resized images for skin resolutions
-			if spectrumImagesMap[v.name].src ~= nil then
-				local path = spectrumImagesMap[v.name].src
+			if spectrumImagesMap[v.name].src_fg ~= nil then
+				local path = spectrumImagesMap[v.name].src_fg
 				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 				local dcpath = resizedImagePath(dicKey)
 				if resizedImagesTable[dicKey] ~= nil then
@@ -1436,7 +1400,7 @@ function resizeRequiredSpectrumMeter(_, name)
 			-- spectrum meter found
 			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
 				-- of type that does require resize
-				if spectrumImagesMap[name].src ~= nil then
+				if spectrumImagesMap[name].src_fg ~= nil then
 					-- have path to source image
 					for _, vr in pairs(spectrumResolutions) do
 						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
