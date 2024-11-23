@@ -471,14 +471,14 @@ function draw(self, surface)
 		else
 			if self.spparms.turbine then
 				surface:filledRectangle(self.x1, self.yCentre - halfBaseLineHeight, self.x1 + xSpan ,
-										self.yCentre + baseLineHeight - halfBaseLineHeight, self.barColor)
+										self.yCentre + baseLineHeight - halfBaseLineHeight, self.spparms.barColor)
 				surface:filledRectangle(self.x2, self.yCentre - halfBaseLineHeight, self.x2 + xSpan ,
-										self.yCentre + baseLineHeight - halfBaseLineHeight, self.barColor)
+										self.yCentre + baseLineHeight - halfBaseLineHeight, self.spparms.barColor)
 			else
 				surface:filledRectangle(self.x1, self.y - baseLineHeight - self.yoffset_controls,
-										self.x1 + xSpan, self.y - self.yoffset_controls, self.barColor)
+										self.x1 + xSpan, self.y - self.yoffset_controls, self.spparms.barColor)
 				surface:filledRectangle(self.x2, self.y - baseLineHeight - self.yoffset_controls,
-										self.x2 + xSpan, self.y - self.yoffset_controls, self.barColor)
+										self.x2 + xSpan, self.y - self.yoffset_controls, self.spparms.barColor)
 			end
 		end
 	end
