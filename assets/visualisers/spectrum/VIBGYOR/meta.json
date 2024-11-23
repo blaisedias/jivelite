@@ -2,10 +2,10 @@
     "kind": "spectrum-meter",
     "name": "GradientRainbow",
     "foreground": "VIBGYOR.png",
-    "translucent": "TspVIBGYOR.png",
+    "desaturated": "TspVIBGYOR.png",
     "sptype": "image",
     "turbine": {
         "foreground": "turbineVIBGYOR.png",
-        "translucent": "turbineTspVIBGYOR.png"
+        "desaturated": "turbineTspVIBGYOR.png"
     }
 }
