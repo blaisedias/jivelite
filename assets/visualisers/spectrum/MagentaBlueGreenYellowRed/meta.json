@@ -2,10 +2,10 @@
     "kind": "spectrum-meter",
     "name" : "GradientMagentaBlueGreenYellowRed",
     "foreground": "MagentaBlueGreenYellowRed.png",
-    "translucent": "TspMagentaBlueGreenYellowRed.png",
+    "desaturated": "TspMagentaBlueGreenYellowRed.png",
     "sptype": "image",
     "turbine": {
         "foreground": "turbineMagentaBlueGreenYellowRed.png",
-        "translucent": "turbineTspMagentaBlueGreenYellowRed.png"
+        "desaturated": "turbineTspMagentaBlueGreenYellowRed.png"
     }
 }
