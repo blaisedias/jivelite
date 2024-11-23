@@ -49,7 +49,7 @@ function _skin(self)
 
 	self.capColor = self:styleColor("capColor", { 0xff, 0xff, 0xff, 0xff })
 
-	self.decapColor = self:styleColor("decapColor", { 0xff, 0xff, 0xff, 0x20 })
+	self.desatColor = self:styleColor("desatColor", { 0xff, 0xff, 0xff, 0x20 })
 end
 
 
@@ -69,7 +69,7 @@ function _layout(self)
 
 	self.isMono =  self:styleValue("isMono")
 
---	self.fgImg, self.bgImg, self.dcImg, self.barColor, self.capColor, self.decapColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
+--	self.fgImg, self.bgImg, self.dsImg, self.barColor, self.capColor, self.desatColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
 	self.spparms = visImage:getSpectrum(w, h, self.barColor, self.capColor, self:styleValue("capHeight"), self:styleValue("capSpace"))
 
 --	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
@@ -163,7 +163,7 @@ function _layout(self)
 	self.left = table.clone(self.spparms.barsFormat)
 	self.left.fgImg = self.spparms.fgImg
 	self.left.bgImg = self.spparms.bgImg
-	self.left.dcImg = self.spparms.dcImg
+	self.left.dsImg = self.spparms.dsImg
 	self.left.xshift = self.xshift
 	self.left.y = self.y
 	self.left.h = self.h
@@ -171,7 +171,7 @@ function _layout(self)
 	self.left.yoffset_controls = self.yoffset_controls
 	self.left.barColor = self.spparms.barColor
 	self.left.capColor = self.spparms.capColor
-	self.left.decapColor = self.spparms.decapColor
+	self.left.desatColor = self.spparms.desatColor
 	self.left.turbine = self.spparms.turbine
 	self.left.fill = self.spparms.fill
 	self.left.barSize = self.left.barWidth + self.left.barSpace
@@ -225,7 +225,7 @@ local function _drawBins(surface, bch, params)
 	local totalCapHeight = params.totalCapHeight
 	local capHeight = params.capHeight
 	local capSpace = params.capSpace
-	local decapColor = params.decapColor
+	local desatColor = params.desatColor
 
 	local fgImg = params.fgImg
 	local turbine = params.turbine
@@ -267,9 +267,9 @@ local function _drawBins(surface, bch, params)
 										barWidth, (capHeight/2),
 										surface,
 										xLeft, yCentre + y1)
-						if fill == 1 and params.dcImg ~= nil then
+						if fill == 1 and params.dsImg ~= nil then
 							yTop = yCentre - (cch[i]/2)
-							params.dcImg:blitClip(imgXLeft, halfHeight - (cch[i]/2),
+							params.dsImg:blitClip(imgXLeft, halfHeight - (cch[i]/2),
 										barWidth, cch[i],
 										surface,
 										xLeft, yTop)
@@ -279,7 +279,7 @@ local function _drawBins(surface, bch, params)
 									yCentre - ((cch[i] - totalCapHeight)/2),
 									xLeft + barStep,
 									yCentre + ((cch[i] - totalCapHeight)/2),
-									decapColor)
+									desatColor)
 							end
 						end
 					else
@@ -289,7 +289,7 @@ local function _drawBins(surface, bch, params)
 								yCentre - ((cch[i] - totalCapHeight)/2),
 								xLeft + barStep,
 								yCentre + ((cch[i] - totalCapHeight)/2),
-								decapColor)
+								desatColor)
 						end
 						-- fill does at least one horizontal fill if y is the same
 						if capHeight > 0 then
@@ -315,10 +315,10 @@ local function _drawBins(surface, bch, params)
 										barWidth, capHeight,
 										surface,
 										xLeft, yTop)
-						if fill == 1 and params.dcImg ~= nil then
+						if fill == 1 and params.dsImg ~= nil then
 							yTop = y - cch[i] + 1
 							if params.bgImg == nil then
-								params.dcImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
+								params.dsImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
 											barWidth, cch[i],
 											surface,
 											xLeft, yTop)
@@ -327,9 +327,9 @@ local function _drawBins(surface, bch, params)
 --									y - cch[i],
 --									xLeft + barStep,
 --									y,
---									decapColor)
+--									desatColor)
 							else
-								params.dcImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
+								params.dsImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
 											barWidth, cch[i],
 											surface,
 											xLeft, yTop)
@@ -342,7 +342,7 @@ local function _drawBins(surface, bch, params)
 								y - cch[i],
 								xLeft + barStep,
 								y,
-								decapColor)
+								desatColor)
 						end
 						-- fill does at least one horizontal fill if y is the same
 						if capHeight > 0 then

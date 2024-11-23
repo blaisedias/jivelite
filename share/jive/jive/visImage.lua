@@ -467,20 +467,20 @@ local function initColourSpectrums()
 	local csp ={
 		{
 			name="mc-White",   enabled=false, spType=SPT_COLOUR,
-			barColor=0xf0f0f0ff, capColor=0xffffffff, decapColor=0xc0c0c080
+			barColor=0xf0f0f0ff, capColor=0xffffffff, desatColor=0xc0c0c080
 		},
 		{
 		 name="mc-Yellow",  enabled=false, spType=SPT_COLOUR,
-			barColor=0xffff00ff, capColor=0xffff00ff, decapColor=0xd0d00080
+			barColor=0xffff00ff, capColor=0xffff00ff, desatColor=0xd0d00080
 		},
 		{
 			name="mc-Cyan",	enabled=false, spType=SPT_COLOUR,
-			barColor=0x00ffffff, capColor=0x00ffffff, decapColor=0x00d0d080
+			barColor=0x00ffffff, capColor=0x00ffffff, desatColor=0x00d0d080
 		},
 		{
 			name="mc-Green",   enabled=false, spType=SPT_COLOUR,
---			barColor=0x00d000ff, capColor=0x00d000ff, decapColor=0x00d000a0
-			barColor=0x00ff00ff, capColor=0x00ff00ff, decapColor=0x00d00080
+--			barColor=0x00d000ff, capColor=0x00d000ff, desatColor=0x00d000a0
+			barColor=0x00ff00ff, capColor=0x00ff00ff, desatColor=0x00d00080
 		},
 	}
 	for _,c in pairs(csp) do
@@ -498,11 +498,11 @@ local function __addSpectrum(path, jsData)
 	local tmp = {}
 	tbl_insert(tmp, jsData.foreground)
 	tbl_insert(tmp, jsData.background)
-	tbl_insert(tmp, jsData.translucent)
+	tbl_insert(tmp, jsData.desaturated)
 	if jsData.turbine ~= nil then
 		tbl_insert(tmp, jsData.turbine.foreground)
 		tbl_insert(jsData.turbine.background)
-		tbl_insert(tmp, jsData.turbine.translucent)
+		tbl_insert(tmp, jsData.turbine.desaturated)
 	end
 	if pathsAreImageFiles(path, tmp) == false then
 		return false
@@ -511,12 +511,12 @@ local function __addSpectrum(path, jsData)
 	local imgName = jsData.name
 	local propN = {
 		fg=imgName,
-		dc="dc-" .. imgName,
+		ds="ds-" .. imgName,
 		bg="bg-" .. imgName,
 	}
 	propN["src_fg"] =  path .. "/" .. jsData.foreground
-	if jsData.translucent ~= nil then
-		propN["src_tsp"] = path .. "/" .. jsData.translucent
+	if jsData.desaturated ~= nil then
+		propN["src_ds"] = path .. "/" .. jsData.desaturated
 	end
 	if jsData.background ~= nil then
 		propN["src_bg"] = path .. "/" .. jsData.background
@@ -535,12 +535,12 @@ local function __addSpectrum(path, jsData)
 		if jsData.turbine.foreground ~= nil then
 			propT = {
 				fg="trb-" .. imgName,
-				dc="trb-dc-" .. imgName,
+				ds="trb-ds-" .. imgName,
 				bg="trb-bg-" .. imgName,
 			}
 			propT["src_fg"] =  path .. "/" .. jsData.turbine.foreground
-			if jsData.turbine.translucent ~= nil then
-				propT["src_tsp"] =  path .. "/" .. jsData.turbine.translucent
+			if jsData.turbine.desaturated ~= nil then
+				propT["src_ds"] =  path .. "/" .. jsData.turbine.desaturated
 			end
 			if jsData.turbine.background ~= nil then
 				propT["src_bg"] =  path .. "/" .. jsData.turbine.background
@@ -695,13 +695,13 @@ local function _getFgSpectrumImage(spkey, w, h, propsIndex)
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg)
+	log:debug("getFgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg)
 	if spectrumImagesMap[spkey].properties[propsIndex].fg == nil then
 		return nil, false, nil
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].fg
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg,
+	log:debug("getFgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg,
 				" ", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
 	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_fg}
@@ -712,13 +712,13 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg)
+	log:debug("getBgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg)
 	if spectrumImagesMap[spkey].properties[propsIndex].bg == nil then
 		return nil, false, nil
 	end
 
 	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].bg
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg, " ", dicKey)
+	log:debug("getBgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg, " ", dicKey)
 
 	if spectrumImagesMap[spkey].properties[propsIndex].src_bg ~= nil then
 		bgImage = loadResizedImage(dicKey)
@@ -747,27 +747,27 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 end
 
 
-local function _getDcSpectrumImage(spkey, w, h, fgimg, propsIndex)
-	local dcImage
+local function _getDsSpectrumImage(spkey, w, h, fgimg, propsIndex)
+	local dsImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].dc)
-	if spectrumImagesMap[spkey].properties[propsIndex].dc == nil then
+	log:debug("getDsSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].ds)
+	if spectrumImagesMap[spkey].properties[propsIndex].ds == nil then
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].dc
-	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].dc, " ", dicKey)
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].ds
+	log:debug("getDsSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].ds, " ", dicKey)
 
-	if spectrumImagesMap[spkey].properties[propsIndex].src_tsp ~= nil then
-		dcImage = loadResizedImage(dicKey)
-		return dcImage, dcImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_tsp}
+	if spectrumImagesMap[spkey].properties[propsIndex].src_ds ~= nil then
+		dsImage = loadResizedImage(dicKey)
+		return dsImage, dsImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_ds}
 	end
 
 	local resizeRequired = false
-	dcImage = imCacheGet(dicKey)
-	if dcImage == nil then
+	dsImage = imCacheGet(dicKey)
+	if dsImage == nil then
 		if fgimg ~= nil then
 			-- FIXME:
 			-- Odd: it appears that when invoking blitAlpha from the foreground image to the background image,
@@ -777,13 +777,13 @@ local function _getDcSpectrumImage(spkey, w, h, fgimg, propsIndex)
 			local tmp = Surface:newRGB(w,h)
 			tmp:filledRectangle(0,0,w,h,0)
 			fgimg:blit(tmp, 0, 0)
-			dcImage = Surface:newRGB(w,h)
-			tmp:blitAlpha(dcImage, 0, 0, visSettings.spectrum.decayAlpha)
+			dsImage = Surface:newRGB(w,h)
+			tmp:blitAlpha(dsImage, 0, 0, visSettings.spectrum.decayAlpha)
 			tmp:altRelease()
-			imCachePut(dicKey, dcImage)
+			imCachePut(dicKey, dsImage)
 		end
 	end
-	return dcImage, resizeRequired, nil
+	return dsImage, resizeRequired, nil
 end
 
 
@@ -808,7 +808,7 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	end
 	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h, propsIndex)
 	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, fgImg, propsIndex)
-	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, fgImg, propsIndex)
+	local dsImg, dsResizeRequired, rszDc = _getDsSpectrumImage(spkey, w, h, fgImg, propsIndex)
 	-- resize table must only contain non-nil values
 	local rszs={}
 	tbl_insert(rszs, rszFg)
@@ -817,11 +817,11 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
-	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
---	local decapColor = spectrumList[spImageIndex].decapColor and spectrumList[spImageIndex].decapColor or 0xffffff30
-	local decapColor = 0xffffff30
-	if spectrumList[spImageIndex].decapColor ~= nil then
-		decapColor = spectrumList[spImageIndex].decapColor
+	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dsResizeRequired)
+--	local desatColor = spectrumList[spImageIndex].desatColor and spectrumList[spImageIndex].desatColor or 0xffffff30
+	local desatColor = 0xffffff30
+	if spectrumList[spImageIndex].desatColor ~= nil then
+		desatColor = spectrumList[spImageIndex].desatColor
 	end
 
 	local capHeight = capHeightIn
@@ -830,14 +830,14 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		capHeight = {0,0}
 		capSpace = {0,0}
 	end
---	return fg, bg, dc, barColor, capColor, decapColor, displayResizing
+--	return fg, bg, ds, barColor, capColor, desatColor, displayResizing
 	local spparms = {
 		fgImg=fgImg,
 		bgImg=bgImg,
-		dcImg=dcImg,
+		dsImg=dsImg,
 		barColor=barColor,
 		capColor=capColor,
-		decapColor=decapColor,
+		desatColor=desatColor,
 		displayResizing=displayResizing,
 		channelFlipped=channelFlips[visSettings.spectrum.channelFlip],
 		barsFormat=visSettings.spectrum.barFormats[visSettings.spectrum.barsFormat],
@@ -1446,52 +1446,6 @@ end
 
 function getCurrentSpectrumMeterName()
 	return spectrumList[spImageIndex].name
-end
-
-function resizeRequiredSpectrumMeter(_, name)
-	for _, v in pairs(spectrumList) do
-		if v.name == name then
-			-- spectrum meter found
-			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
-				-- of type that does require resize
-                -- FIXME: this test may not be enough
-				if spectrumImagesMap[name].properties[1].src_fg ~= nil then
-					-- have path to source image
-					for _, vr in pairs(spectrumResolutions) do
-						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
-							return true
-						end
-					end
-				end
-			end
-			-- not resizable 1) not resizable type 2) no source image
-			break
-		end
-	end
-	-- spectrum meter not resizable : not found, not resizable, no source images
-	return false
-end
-
-function resizeRequiredVuMeter(_, name)
-
-	for _, v in pairs(vuImages) do
-		if v.name == name then
-			-- found vu meter
-			if v.vutype == "frames" then
-				-- resizable type
-				for _, vr in pairs(vuMeterResolutions) do
-					for i,_ in ipairs(v.jsData.files.frames) do
-						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name .. ':' .. i] == nil then
-							return true
-						end
-					end
-				end
-			end
-			break
-		end
-	end
-	-- vu meter not resizable : not found, not resizable
-	return false
 end
 
 function getVisualiserChangeOnTimerValue(_)
