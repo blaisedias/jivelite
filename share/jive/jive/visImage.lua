@@ -477,27 +477,11 @@ local function initColourSpectrums()
 			name="mc-Cyan",	enabled=false, spType=SPT_COLOUR,
 			barColor=0x00ffffff, capColor=0x00ffffff, decapColor=0x00d0d080
 		},
---		{
---			name="mc-Magenta", enabled=false, spType=SPT_COLOUR,
---			barColor=0xf000f0ff, capColor=0xff00ffff, decapColor=0xd000d0ff
---		},
---		{
---			name="mc-Black",   enabled=false, spType=SPT_COLOUR,
---			barColor=0x101010ff, capColor=0x000000ff, decapColor=0x101010ff
---		},
 		{
 			name="mc-Green",   enabled=false, spType=SPT_COLOUR,
 --			barColor=0x00d000ff, capColor=0x00d000ff, decapColor=0x00d000a0
 			barColor=0x00ff00ff, capColor=0x00ff00ff, decapColor=0x00d00080
 		},
---		{
---			name="mc-Blue",	enabled=false, spType=SPT_COLOUR,
---			barColor=0x0000f0ff, capColor=0x0000ffff, decapColor=0x0000d0ff
---		},
---		{
---			name="mc-Red",	 enabled=false, spType=SPT_COLOUR,
---			barColor=0xf00000ff, capColor=0xff0000ff, decapColor=0xd00000ff
---		},
 	}
 	for _,c in pairs(csp) do
 		table.insert(spectrumList, c)
@@ -505,10 +489,10 @@ local function initColourSpectrums()
 end
 
 local function __addSpectrum(path, jsData)
-	local entry = jsData.foreground
 	if spectrumImagesMap[jsData.name] ~= nil then
 		return
 	end
+
 	-- check that all files referenced exist
 	-- insert a nil value in a table stops iteration there
 	local tmp = {}
@@ -524,73 +508,56 @@ local function __addSpectrum(path, jsData)
 		return false
 	end
 
-	local mode = lfs.attributes(path .. "/" .. entry, "mode")
-	if mode == "file" then
-		local parts = _parseImagePath(entry)
-		if parts ~= nil then
-			local imgName = jsData.name
-			local src_tsp = nil
-			local src_bg = nil
-			if jsData.translucent ~= nil then
-				src_tsp = path .. "/" .. jsData.translucent
-				mode = lfs.attributes(src_tsp, "mode")
-				if mode ~= "file" then
-					log:error("Is not a file", src_tsp, " ignoring configuration for ", jsData.name)
-					return
-				end
-			end
-			if jsData.background ~= nil then
-				src_bg = path .. "/" .. jsData.background
-				mode = lfs.attributes(src_bg, "mode")
-				if mode ~= "file" then
-					log:error("Is not a file", src_bg, " ignoring configuration for ", jsData.name)
-					return
-				end
-			end
-
-			table.insert(spectrumList, {name=imgName, enabled=false, spType=jsData.sptype})
-
-			local bg = nil
-			local rszOp = RESIZEOP_FILL
-			if jsData.sptype == SPT_BACKLIT then
-				bg = "bg-" .. imgName
-				rszOp = RESIZEOP_SCALED_CENTERED_CROP
-			end
-			local tdata = nil
-			if jsData.turbine ~= nil then
-				if jsData.turbine.foreground ~= nil then
-					tdata = {
-						fg="trb-" .. imgName,
-						dc="trb-dc-" .. imgName,
-						bg="trb-bg-" .. imgName,
-					}
-					tdata["src_fg"] =  path .. "/" .. jsData.turbine.foreground
-					if jsData.turbine.translucent ~= nil then
-						tdata["src_tsp"] =  path .. "/" .. jsData.turbine.translucent
-					end
-					if jsData.turbine.background ~= nil then
-						tdata["src_bg"] =  path .. "/" .. jsData.turbine.background
-					end
-					if jsData.sptype == SPT_BACKLIT then
-						tdata["bg"] =  nil
-					end
-				end
-			end
-			log:info(" SpectrumImage :", imgName, ", ", path .. "/" .. entry, " ", src_tsp, " ", src_bg)
-			spectrumImagesMap[imgName] = {
-				fg=imgName,
-				dc="dc-" .. imgName,
-				bg=bg,
-				src_fg=path .. "/" .. entry,
-				src_tsp=src_tsp,
-				src_bg=src_bg,
-				turbine = tdata,
-				rszOp = rszOp,
-			}
-		end
-	else
-		log:error("Is not a file", entry, " ignoring configuration for ", jsData.name)
+	local imgName = jsData.name
+	local propN = {
+		fg=imgName,
+		dc="dc-" .. imgName,
+		bg="bg-" .. imgName,
+	}
+	propN["src_fg"] =  path .. "/" .. jsData.foreground
+	if jsData.translucent ~= nil then
+		propN["src_tsp"] = path .. "/" .. jsData.translucent
 	end
+	if jsData.background ~= nil then
+		propN["src_bg"] = path .. "/" .. jsData.background
+	end
+
+	table.insert(spectrumList, {name=imgName, enabled=false, spType=jsData.sptype})
+
+	local rszOp = RESIZEOP_FILL
+	if jsData.sptype == SPT_BACKLIT then
+		rszOp = RESIZEOP_SCALED_CENTERED_CROP
+	else
+		propN["bg"] = nil
+	end
+	local propT = nil
+	if jsData.turbine ~= nil then
+		if jsData.turbine.foreground ~= nil then
+			propT = {
+				fg="trb-" .. imgName,
+				dc="trb-dc-" .. imgName,
+				bg="trb-bg-" .. imgName,
+			}
+			propT["src_fg"] =  path .. "/" .. jsData.turbine.foreground
+			if jsData.turbine.translucent ~= nil then
+				propT["src_tsp"] =  path .. "/" .. jsData.turbine.translucent
+			end
+			if jsData.turbine.background ~= nil then
+				propT["src_bg"] =  path .. "/" .. jsData.turbine.background
+			end
+			if jsData.sptype ~= SPT_BACKLIT then
+				propT["bg"] =  nil
+			end
+		end
+	end
+	spectrumImagesMap[imgName] = {
+		properties = {
+			propN,
+			propT,
+		},
+		rszOp = rszOp,
+	}
+	log:info("SpectrumImage :", imgName)
 end
 
 
@@ -723,39 +690,39 @@ end
 --	return spectrumList[1].name
 --end
 
-local function _getFgSpectrumImage(spkey, w, h)
+local function _getFgSpectrumImage(spkey, w, h, propsIndex)
 	local fgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg)
-	if spectrumImagesMap[spkey].fg == nil then
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg)
+	if spectrumImagesMap[spkey].properties[propsIndex].fg == nil then
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].fg
-	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].fg,
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].fg
+	log:debug("getFgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg,
 				" ", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
-	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_fg}
+	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_fg}
 end
 
-local function _getBgSpectrumImage(spkey, w, h, fgimg)
+local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 	local bgImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg)
-	if spectrumImagesMap[spkey].bg == nil then
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg)
+	if spectrumImagesMap[spkey].properties[propsIndex].bg == nil then
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].bg
-	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].bg, " ", dicKey)
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].bg
+	log:debug("getBgImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg, " ", dicKey)
 
-	if spectrumImagesMap[spkey].src_bg ~= nil then
+	if spectrumImagesMap[spkey].properties[propsIndex].src_bg ~= nil then
 		bgImage = loadResizedImage(dicKey)
-		return bgImage, bgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_bg}
+		return bgImage, bgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_bg}
 	end
 
 	local resizeRequired = false
@@ -780,22 +747,22 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg)
 end
 
 
-local function _getDcSpectrumImage(spkey, w, h, fgimg)
+local function _getDcSpectrumImage(spkey, w, h, fgimg, propsIndex)
 	local dcImage
 	if spectrumImagesMap[spkey] == nil then
 		return nil, false, nil
 	end
-	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc)
-	if spectrumImagesMap[spkey].dc == nil then
+	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].dc)
+	if spectrumImagesMap[spkey].properties[propsIndex].dc == nil then
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].dc
-	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].dc, " ", dicKey)
+	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].dc
+	log:debug("getDcImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].dc, " ", dicKey)
 
-	if spectrumImagesMap[spkey].src_tsp ~= nil then
+	if spectrumImagesMap[spkey].properties[propsIndex].src_tsp ~= nil then
 		dcImage = loadResizedImage(dicKey)
-		return dcImage, dcImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].src_tsp}
+		return dcImage, dcImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_tsp}
 	end
 
 	local resizeRequired = false
@@ -824,28 +791,30 @@ local prevSpImageIndex = -1
 function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
---	if not spectrumList[spImageIndex].enabled or (spType ~= nil and spectrumList[spImageIndex].spType ~= spType) then
---		if not __spBump(nil, spType) then
---			spkey = spFindSpectrumByType(spType)
---		else
---			spkey = spectrumList[spImageIndex].name
---		end
---		__spBump(nil, nil)
---	end
 	log:debug("getSpectrum: spkey: ", spkey)
 
 	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
 	end
 	prevSpImageIndex = spImageIndex
-	local rszOp = 0
-	if spectrumImagesMap[spkey] ~= nil then
-		rszOp =  spectrumImagesMap[spkey].rszOp
-	end
 
-	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h)
-	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, fgImg)
-	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, fgImg)
+	local rszOp = 0
+	local propsIndex = 1
+	if spectrumImagesMap[spkey] ~= nil then
+		rszOp = spectrumImagesMap[spkey].rszOp
+		if visSettings.spectrum.turbine and #spectrumImagesMap[spkey].properties > 1 then
+			propsIndex = 2
+		end
+	end
+	local fgImg, fgResizeRequired, rszFg = _getFgSpectrumImage(spkey, w, h, propsIndex)
+	local bgImg, bgResizeRequired, rszBg = _getBgSpectrumImage(spkey, w, h, fgImg, propsIndex)
+	local dcImg, dcResizeRequired, rszDc = _getDcSpectrumImage(spkey, w, h, fgImg, propsIndex)
+	-- resize table must only contain non-nil values
+	local rszs={}
+	tbl_insert(rszs, rszFg)
+	tbl_insert(rszs, rszBg)
+	tbl_insert(rszs, rszDc)
+
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dcResizeRequired)
@@ -854,12 +823,6 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	if spectrumList[spImageIndex].decapColor ~= nil then
 		decapColor = spectrumList[spImageIndex].decapColor
 	end
-
-	-- resize table must only contain non-nil values
-	local rszs={}
-	tbl_insert(rszs, rszFg)
-	tbl_insert(rszs, rszBg)
-	tbl_insert(rszs, rszDc)
 
 	local capHeight = capHeightIn
 	local capSpace = capSpaceIn
@@ -1364,7 +1327,8 @@ function enumerateResizableSpectrumMeters(_, all)
 	for _, v in pairs(spectrumList) do
 		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
-				if spectrumImagesMap[v.name].src_fg ~= nil then
+                -- FIXME this test may not be enough
+				if spectrumImagesMap[v.name].properties[1].src_fg ~= nil then
 					table.insert(spMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
@@ -1490,7 +1454,8 @@ function resizeRequiredSpectrumMeter(_, name)
 			-- spectrum meter found
 			if v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE then
 				-- of type that does require resize
-				if spectrumImagesMap[name].src_fg ~= nil then
+                -- FIXME: this test may not be enough
+				if spectrumImagesMap[name].properties[1].src_fg ~= nil then
 					-- have path to source image
 					for _, vr in pairs(spectrumResolutions) do
 						if resizedImagesTable["for-" .. vr.w .. "x" .. vr.h .. "-" .. name] == nil then
