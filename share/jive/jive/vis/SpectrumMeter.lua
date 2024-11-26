@@ -118,6 +118,8 @@ function _layout(self)
 --	barHeight[1] = h - t - b - self.spparms.capHeight[1] - self.spparms.capSpace[1]
 --	barHeight[2] = h - t - b - self.spparms.capHeight[2] - self.spparms.capSpace[2]
 	local barHeight = h - t - b - self.spparms.capHeight - self.spparms.capSpace
+	-- debug - doubly ensure no sailing over bounds
+	barHeight = barHeight - 16
 
 	-- max bin value from C code is 31
 --	self.barHeightMulti = {}
