@@ -1089,6 +1089,8 @@ local function getVFDVUmeter(name, w, h)
 		log:info("vfdCache -> ", key, vfd)
 		return vfd
 	end
+	-- FIXME: workaround. shouldn't be necessary but fixes a corner case
+	imCacheClear()
 	local bar_on = name .. ":bar-on"
 	local bar_off = name .. ":bar-off"
 	local bar_peak_on = name .. ":bar-peak-on"
