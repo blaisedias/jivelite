@@ -38,13 +38,13 @@ end
 
 function defaultSettings(self)
 	return {
-		rew = true, 
-		play = true, 
+		rew = true,
+		play = true,
 		fwd = true,
 		repeatMode = false,
 		shuffleMode = false,
 		volDown = true,
-		volSlider = false,
+		volSlider = true,
 		volUp = true
 	}
 end
