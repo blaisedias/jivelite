@@ -117,9 +117,12 @@ function _layout(self)
 --
 --	barHeight[1] = h - t - b - self.spparms.capHeight[1] - self.spparms.capSpace[1]
 --	barHeight[2] = h - t - b - self.spparms.capHeight[2] - self.spparms.capSpace[2]
-	local barHeight = h - t - b - self.spparms.capHeight - self.spparms.capSpace
-	-- debug - doubly ensure no sailing over bounds
-	barHeight = barHeight - 16
+	local barHeight = h - t - b - ((self.spparms.capHeight + self.spparms.capSpace)*2)
+	-- doubly ensure no out of bounds scribbling
+	barHeight = barHeight - 4
+	if barHeight > 31 then
+		barHeight = math.floor(barHeight/31) * 31
+	end
 
 	-- max bin value from C code is 31
 --	self.barHeightMulti = {}
@@ -137,7 +140,7 @@ function _layout(self)
 	log:debug("** x: " .. x .. " l: " .. l)
 	log:debug("** x1: " .. self.x1 .. " x2: " .. self.x2)
 	log:debug("** w: " .. w .. " l: " .. l, " r:", r)
-	log:info("** b: " .. b .. " t: " .. t, " xshift: ", self.xshift)
+	log:debug("** b: " .. b .. " t: " .. t, " xshift: ", self.xshift)
 
 	self.y = y + h - b
 	self.h = h
@@ -161,6 +164,8 @@ function _layout(self)
 --	for i = 1, numBars[2] do
 --		self.cap[2][i] = 0
 --	end
+	log:info("** fg: ", self.spparms.fgImg, " bg: ", self.spparms.bgImg, " ds: ", self.spparms.dsImg)
+	log:info("** C: ", self.spparms.capColor, " B: ", self.spparms.barColor, " D: ", self.spparms.desatColor)
 
 	self.left = table.clone(self.spparms.barsFormat)
 	self.left.fgImg = self.spparms.fgImg
@@ -212,6 +217,141 @@ local function _drawBins(surface, bch, params)
 	local xStep = params.xStep
 
 	local y = params.adjustedY
+	local adjustedHeight = params.adjustedHeight
+	local halfHeight = params.halfHeight
+
+	local barHeightMulti = params.barHeightMulti
+	local barsInBin = params.barsInBin
+	local barSize = params.barSize
+	local barWidth = params.barWidth
+	local barStep = params.barStep
+	local barColor = params.barColor
+
+	local capColor = params.capColor
+	local totalCapHeight = params.totalCapHeight
+	local capHeight = params.capHeight
+	local capSpace = params.capSpace
+	local desatColor = params.desatColor
+
+	local fgImg = params.fgImg
+	local fill = params.fill
+
+	local xLeft
+	local yTop
+	local imgXLeft, imgY
+	local dy, yA, yB
+
+	for i = 1, #bch do
+		bch[i] = bch[i] * barHeightMulti
+
+		if cch[i] > 0 then
+			cch[i] = cch[i] - barHeightMulti
+			if cch[i] < 0 then
+				cch[i] = 0
+			end
+		end
+		if bch[i] >= cch[i] then
+			cch[i] = bch[i]
+		end
+
+		if fill == 2 then
+			bch[i] = cch[i]
+		end
+
+		-- partial fill to caps
+		if cch[i] > 0 and fill == 1 then
+			nz = true
+			yTop = y - cch[i] + 1
+			dy = cch[i] - bch[i]
+			yA = y - cch[i]
+			yB = y - bch[i]
+			imgY = adjustedHeight - cch[i] + 1
+			for k = 0, barsInBin - 1 do
+				xLeft = x + (k * barSize)
+				if fgImg ~= nil then
+					imgXLeft = xLeft - xshift
+					if params.dsImg ~= nil then
+						params.dsImg:blitClip(imgXLeft, imgY,
+									barWidth, cch[i] - bch[i],
+									surface,
+									xLeft, yTop)
+					end
+				else
+					surface:filledRectangle(
+						xLeft,
+						yA,
+						xLeft + barStep,
+						yB,
+						desatColor)
+				end
+			end
+		end
+
+		if cch[i] > 0 and capHeight > 0 then
+			nz = true
+			yTop = y - (cch[i] + totalCapHeight)
+			yA = y - (cch[i] + totalCapHeight)
+			yB = y - (cch[i] + capSpace)
+			imgY = adjustedHeight - (cch[i] + totalCapHeight)
+			for k = 0, barsInBin - 1 do
+				xLeft = x + (k * barSize)
+				if fgImg ~= nil then
+					imgXLeft = xLeft - xshift
+					fgImg:blitClip(imgXLeft, imgY,
+									barWidth, capHeight,
+									surface,
+									xLeft, yTop)
+				else
+					surface:filledRectangle(
+						xLeft,
+						yA,
+						xLeft + barStep,
+						yB,
+						capColor)
+				end
+   			end
+		end
+
+		-- bar
+		if bch[i] > 0 then
+			nz = true
+			yTop = y - bch[i] + 1
+			yC = adjustedHeight - bch[i] + 1
+			yA = y - bch[i] + 1
+			for k = 0, barsInBin - 1 do
+				xLeft = x + (k * barSize)
+				if fgImg ~= nil then
+					imgXLeft = xLeft - xshift
+					fgImg:blitClip(imgXLeft, yC,
+									barWidth, bch[i],
+									surface,
+									xLeft, yTop)
+				else
+					surface:filledRectangle(
+						xLeft, y,
+						xLeft + barStep, yA,
+						barColor
+						)
+				end
+			end
+		end
+
+		x = x + xStep
+	end
+	return nz
+end
+
+local function _drawTurbineBins(surface, bch, params)
+	--	mutating
+	local cch = params.cap
+	local x = params.x
+	local nz = false
+
+	--	non-mutating
+	local xshift = params.xshift
+	local xStep = params.xStep
+
+	local y = params.adjustedY
 	local yCentre = params.yCentre
 	local adjustedHeight = params.adjustedHeight
 	local halfHeight = params.halfHeight
@@ -230,132 +370,101 @@ local function _drawBins(surface, bch, params)
 	local desatColor = params.desatColor
 
 	local fgImg = params.fgImg
-	local turbine = params.turbine
 	local fill = params.fill
 
 	local xLeft
-	local yTop
+	local yTop, yBot
 	local imgXLeft
+
+	local dyFill, yT1, yT2, yB1, yB2, xF
 
 	for i = 1, #bch do
 		bch[i] = bch[i] * barHeightMulti
 
-		if bch[i] >= cch[i] then
-			cch[i] = bch[i]
-		elseif cch[i] > 0 then
+		if cch[i] > 0 then
 			cch[i] = cch[i] - barHeightMulti
 			if cch[i] < 0 then
 				cch[i] = 0
 			end
 		end
+		if bch[i] >= cch[i] then
+			cch[i] = bch[i]
+		end
 		if fill == 2 then
 			bch[i] = cch[i]
 		end
 
-		if cch[i] > 0 then
+		-- partial fill to caps 
+		if cch[i] > 0 and fill == 1 then
+			dyFill = (cch[i] - bch[i])/2
+			nz = true
+			yTop = yCentre - (cch[i]/2)
+			yBot = yCentre + (cch[i]/2)
+			yT1 = halfHeight - (cch[i]/2)
+			yT2 = yTop + dyFill
+			yB1 = halfHeight + (cch[i]/2) - dyFill
+			yB2 = yBot - dyFill
+			for k = 0, barsInBin - 1 do
+				xLeft = x + (k * barSize)
+				if fgImg ~= nil and  params.dsImg ~= nil then
+					imgXLeft = xLeft - xshift
+					params.dsImg:blitClip(imgXLeft, yT1,
+								barWidth, dyFill,
+								surface,
+								xLeft, yTop)
+					params.dsImg:blitClip(imgXLeft, yB1,
+								barWidth, dyFill,
+								surface,
+								xLeft, yB2)
+				else
+					surface:filledRectangle(
+						xLeft,
+						yTop,
+						xLeft + barStep,
+						yT2 - 1,
+						desatColor)
+					surface:filledRectangle(
+						xLeft,
+--						yBot - dyFill,
+						yB2 + 1,
+						xLeft + barStep,
+						yBot,
+						desatColor)
+				end
+			end
+		end
+
+		-- caps 
+		if cch[i] > 0 and capHeight > 0 then
 			nz = true
 			for k = 0, barsInBin - 1 do
 				xLeft = x + (k * barSize)
-				if turbine then
-					if fgImg ~= nil then
-						imgXLeft = xLeft - xshift
-						local y1 = (cch[i] + totalCapHeight)/2
-						fgImg:blitClip(imgXLeft, halfHeight - y1,
-										barWidth, (capHeight/2),
-										surface,
-										xLeft, yCentre - y1)
-						y1 = (cch[i] + capSpace)/2
-						fgImg:blitClip(imgXLeft, halfHeight + y1,
-										barWidth, (capHeight/2),
-										surface,
-										xLeft, yCentre + y1)
-						if fill == 1 and params.dsImg ~= nil then
-							yTop = yCentre - (cch[i]/2)
-							params.dsImg:blitClip(imgXLeft, halfHeight - (cch[i]/2),
-										barWidth, cch[i],
-										surface,
-										xLeft, yTop)
-							if params.bgImg == nil then
-								surface:filledRectangle(
-									xLeft,
-									yCentre - ((cch[i] - totalCapHeight)/2),
-									xLeft + barStep,
-									yCentre + ((cch[i] - totalCapHeight)/2),
-									desatColor)
-							end
-						end
-					else
-						if fill == 1 then
-							surface:filledRectangle(
-								xLeft,
-								yCentre - ((cch[i] - totalCapHeight)/2),
-								xLeft + barStep,
-								yCentre + ((cch[i] - totalCapHeight)/2),
-								desatColor)
-						end
-						-- fill does at least one horizontal fill if y is the same
-						if capHeight > 0 then
-							surface:filledRectangle(
-								xLeft,
-								yCentre - ((cch[i] + totalCapHeight)/2),
-								xLeft + barStep,
-								yCentre - ((cch[i] + capHeight)/2),
-								capColor)
-							surface:filledRectangle(
-								xLeft,
-								yCentre + ((cch[i] + totalCapHeight)/2),
-								xLeft + barStep,
-								yCentre + ((cch[i] + capHeight)/2),
-								capColor)
-						end
-					end
+				if fgImg ~= nil then
+					imgXLeft = xLeft - xshift
+					local y1 = (cch[i] + totalCapHeight)/2
+					fgImg:blitClip(imgXLeft, halfHeight - y1,
+									barWidth, (capHeight/2),
+									surface,
+									xLeft, yCentre - y1)
+					y1 = (cch[i] + capSpace)/2
+					fgImg:blitClip(imgXLeft, halfHeight + y1,
+									barWidth, (capHeight/2),
+									surface,
+									xLeft, yCentre + y1)
 				else
-					if fgImg ~= nil then
-						imgXLeft = xLeft - xshift
-						yTop = y - (cch[i] + totalCapHeight)
-						fgImg:blitClip(imgXLeft, adjustedHeight - (cch[i] + totalCapHeight),
-										barWidth, capHeight,
-										surface,
-										xLeft, yTop)
-						if fill == 1 and params.dsImg ~= nil then
-							yTop = y - cch[i] + 1
-							if params.bgImg == nil then
-								params.dsImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
-											barWidth, cch[i],
-											surface,
-											xLeft, yTop)
---								surface:filledRectangle(
---									xLeft,
---									y - cch[i],
---									xLeft + barStep,
---									y,
---									desatColor)
-							else
-								params.dsImg:blitClip(imgXLeft, adjustedHeight - cch[i] + 1,
-											barWidth, cch[i],
-											surface,
-											xLeft, yTop)
-							end
-						end
-					else
-						if fill == 1 then
-							surface:filledRectangle(
-								xLeft,
-								y - cch[i],
-								xLeft + barStep,
-								y,
-								desatColor)
-						end
-						-- fill does at least one horizontal fill if y is the same
-						if capHeight > 0 then
-							surface:filledRectangle(
-								xLeft,
-								y - (cch[i] + totalCapHeight),
-								xLeft + barStep,
-								y - (cch[i] + capSpace),
-								capColor)
-						end
-					end
+					-- fill does at least one horizontal fill if y is the same
+					surface:filledRectangle(
+						xLeft,
+						yCentre - ((cch[i] + totalCapHeight)/2),
+						xLeft + barStep,
+						yCentre - ((cch[i] + capHeight)/2),
+						capColor)
+					surface:filledRectangle(
+						xLeft,
+						yCentre + ((cch[i] + totalCapHeight)/2),
+						xLeft + barStep,
+						yCentre + ((cch[i] + capHeight)/2),
+						capColor)
 				end
 			end
 		end
@@ -363,41 +472,26 @@ local function _drawBins(surface, bch, params)
 		-- bar
 		if bch[i] > 0 then
 			nz = true
+			yTop = yCentre - (bch[i]/2)
+			yT1 = halfHeight - (bch[i]/2)
+			yT2 = yCentre - (bch[i]/2)
+			yB2 = yCentre + (bch[i]/2)
 			for k = 0, barsInBin - 1 do
 				xLeft = x + (k * barSize)
 				if fgImg ~= nil then
 					imgXLeft = xLeft - xshift
-					if turbine then
-						yTop = yCentre - (bch[i]/2)
-						fgImg:blitClip(imgXLeft, halfHeight - (bch[i]/2),
-										barWidth, bch[i],
-										surface,
-										xLeft, yTop)
-					else
-						yTop = y - bch[i] + 1
-						fgImg:blitClip(imgXLeft, adjustedHeight - bch[i] + 1,
-										barWidth, bch[i],
-										surface,
-										xLeft, yTop)
-					end
+					fgImg:blitClip(imgXLeft, yT1,
+									barWidth, bch[i],
+									surface,
+									xLeft, yTop)
 				else
-					if turbine then
-						surface:filledRectangle(
+					surface:filledRectangle(
 						xLeft,
-						yCentre - (bch[i]/2),
+						yT2,
 						xLeft + barStep,
-						yCentre + (bch[i]/2),
+						yB2,
 						barColor
 						)
-					else
-						surface:filledRectangle(
-						xLeft,
-						y,
-						xLeft + barStep,
-						y - bch[i] + 1,
-						barColor
-						)
-					end
 				end
 			end
 		end
@@ -424,7 +518,7 @@ function draw(self, surface)
 		local d = self.spparms.displayResizing
 		d.img:blitClip(math.floor((d.c % d.m)/d.d) * d.w, 0, d.w, d.h, surface, (x + (w-d.w)/2), (y + (h-d.h)/2))
 		d.c = d.c + 1
-        if visImage:resizeVisualisers(w, h, self.spparms.rszs, self.spparms.rszOp) then
+		if visImage:resizeVisualisers(w, h, self.spparms.rszs, self.spparms.rszOp) then
 			self:_layout(self)
 		end
 		return
@@ -444,8 +538,15 @@ function draw(self, surface)
 
 	bins[1], bins[2] = vis:spectrum()
 
-	local nz1 = _drawBins( surface, bins[1], self.left)
-	local nz2 = _drawBins( surface, bins[2], self.right)
+	local nz1,nz2
+	if self.spparms.turbine then
+		nz1 = _drawTurbineBins( surface, bins[1], self.left)
+		nz2 = _drawTurbineBins( surface, bins[2], self.right)
+	else
+		nz1 = _drawBins( surface, bins[1], self.left)
+		nz2 = _drawBins( surface, bins[2], self.right)
+	end
+
 
 	-- simulate draw analyzer baseline only if playing,
 	-- by not drawing baseline if volume is 0
