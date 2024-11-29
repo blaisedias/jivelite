@@ -83,6 +83,23 @@ local shuffleModes = {
 
 local SCROLL_TIMEOUT = 750
 
+local defaultEnabledStyles = {
+    'nowplaying',
+    'nowplaying_spectrum_text',
+    'nowplaying_vumeter_text',
+    'nowplaying_vuanalog_text',
+}
+
+local function has_value (tab, val)
+    for _, value in ipairs(tab) do
+        if value == val then
+            return true
+        end
+    end
+
+    return false
+end
+
 ----------------------------------------------------------------------------------------
 -- Helper Functions
 --
@@ -190,10 +207,11 @@ function getNPStyles(self)
 		end
 
 		for _, v in pairs(npSkinStyles) do
-			if settings and settings.views and settings.views[v.style] == false then
-				v.enabled = false
+			if settings and settings.views and settings.views[v.style] ~= nil then
+				v.enabled = settings.views[v.style]
 			else
-				v.enabled = true
+				--  setting for style/view is undefined, only enable it if is defined as enabled by default
+				v.enabled = has_value(defaultEnabledStyles, v.style)
 			end
 			if not self.player:isLocal() and v.localPlayerOnly then
 				log:debug('the style ', v.style , ' is not for non-local players. Removing...')
@@ -350,9 +368,10 @@ function npviewsSettingsShow(self)
 		settingsViews = settingsViews + 1
 	end
 	if settingsViews == 0 then
+		-- views are undefined - only enable those defined as enabled by default
 		for i, v in ipairs(npscreenViews) do
-			settings.views[v.style] = true
-			npscreenViews[i].enabled = true
+			settings.views[v.style] = has_value(defaultEnabledStyles, v.style)
+			npscreenViews[i].enabled = has_value(defaultEnabledStyles, v.style)
 		end
 		self:storeSettings()
 	end
@@ -362,7 +381,7 @@ function npviewsSettingsShow(self)
 	for _, v in pairs(npscreenViews) do
 		if settings.views[v.style] or settings.views[v.style] == false then
 			-- style is stored in table, even if value is false
-            log:info("??? settings.views[v.style]", settings.views[v.style], " v.style=", v.style)
+			log:info("settings.views[v.style]", settings.views[v.style], " v.style=", v.style)
 		else
 			log:warn('add v.style')
 			settings.views[v.style] = true
