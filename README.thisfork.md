@@ -6,8 +6,8 @@ Features:
   * VU Meters are now selectable see *Selection* and *Location* below
 * Spectrum analyzers:
   * Spectrum analyzers can now be rendered using images as
-    * colour gradients
-    * foreground image over a background image simulating lighting up vertical bars on an image
+    * reveals, typically colour gradients
+    * foreground image over a background image simulating back lighting up vertical bars on an image
   * Spectrum analyzers are also render as coloured bars
   * Spectrum analyzers can be configured see [README.visualiser](./README.visualiserapplet.md)
 * Now Playing
@@ -62,7 +62,7 @@ The trade-off is more disk space is used
 **Note:** resizing VU Meters is capped to the resolution of `1280x800`, scaling for larger resolutions crashes Jivelite.
 
 ## Selection
-It is now possible to change the VU Meter displayed without restarting Jivelite
+It is possible to change the VU Meter displayed without restarting Jivelite
 
 A menu item `VU Meter Selection` has been added under 
 `Settings` -> `Screen` -> `Now Playing` -> `Visualiser`
@@ -74,82 +74,138 @@ At least one VU Meter image must be selected
 There are 3 classes of VU Meters:
  * 25 frames
  * 25 frames LR (frames for left and right meters are different)
- * vfd
+ * composite 
 
 ## VU Meters
 ### Location
-VU meter images are located here
+VU meter resources are located in subdirectories under
 * `assets/visualisers/vumeters/`
 
-Currently there is no meta-data associated with the VU meter image files.
+Jivelite derives the handling required for each VU meter based on the metadata file `meta.json` associated by location.
+For example:
+* `assets/visualisers/vumeters/GlowBlue/meta.json`
+* `assets/visualisers/vumeters/GlowBlue/vu_analog_25seq_daab_Blue_Glow.png`
 
-Jivelite derives the handling required for each VU meter based on the location under the `assets` path.
+The metadata schema for VU meter images is *TO DO*
 
-The schema for location of VU meter images is
-`assets/visusalisers/vumeters/<class>/<VU meter name>/`
+### Examples:
+#### frames
+```
+{
+    "kind": "vumeter",
+    "name": "Logitech Black",
+    "vutype": "frames",
+    "framecount": 25,
+    "#format": "single image -> all frames in a single image file",
+    "format:": "singleimage",
+    "files": {
+        "frames": [
+            "vu_analog_25seq_Logitech_Black.png"
+        ]
+    }
+}
+```
+#### frames LR
+```
+{
+    "kind": "vumeter",
+    "name": "Array 4x6 Green Red",
+    "vutype": "frames",
+    "framecount": 25,
+    "format:": "singleimage",
+    "files": {
+        "#channels": "convention first channel is left",
+        "frames": [
+            "vu-Array-4x6-GreenRed-left.png",
+            "vu-Array-4x6-GreenRed-right.png"
+        ]
+    }
+}
+```
+#### composite
+```
+{
+    "kind": "vumeter",
+    "name": "Wings Cyan Orange",
+    "vutype": "compose1",
+    "files": {
+        "bars": [
+            {
+                "off": [
+                    "bar-off.png",
+                    "bar-peak-off.png"
+                ],
+                "on": [
+                    "bar-on.png",
+                    "bar-peak-on.png"
+                ]
+            },
+            {
+                "off": [
+                    "r-bar-off.png",
+                    "r-bar-peak-off.png"
+                ],
+                "on": [
+                    "r-bar-on.png",
+                    "r-bar-peak-on.png"
+                ]
+            }
+        ],
+        "centre": "center.png",
+        "lead": [
+            "left.png",
+            "right.png"
+        ],
+        "trail": [
+            "left-trail.png",
+            "right-trail.png"
+        ]
+    },
+    "step": 36
+}
+```
 
-Where class is one of:
- * 25frames
- * 25framesLR
- * vfd
-
-25 frames VU Meters must be located under  `assets/visualisers/vumeters/25frames`
- * examples:
-   * assets/visualisers/vumeters/25frames/TubeD/vu_analog_25seq_daab_Tube.png
-   * assets/visualisers/vumeters/25frames/TubeD/vu_analog_25seq_daab_Tube.png.info
-25 frames LR VU Meters must be located under `assets/visualisers/vumeters/25framesLR`
- * examples:
-   * assets/visualisers/vumeters/25framesLR/Array-4x6-Cyan/Array-4x6-Cyan.info
-   * assets/visualisers/vumeters/25framesLR/Array-4x6-Cyan/vu-Array-4x6-Cyan-left.png
-   * assets/visualisers/vumeters/25framesLR/Array-4x6-Cyan/vu-Array-4x6-Cyan-right.png
-
-vfd  VU Meters must be location under `assets/visualisers/vumeters/vfd` 
- * examples:
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/bar-off.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/bar-on.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/bar-peak-off.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/bar-peak-on.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/center.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/left-trail.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/left.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/right-trail.png
-   * assets/visualisers/vumeters/vfd/Chevrons Cyan Orange/right.png
-
-Note 1: the VU Meter images in this location are in a different form factor from those in
- * share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter
- * share/jive/applets/HDSkin/images/UNOFFICIAL/VUMeter
-
-Note 2: the VU Meter images in these location have been trimmed at the top and bottom.
+*Note:*
+*  The VU Meter images in this location are in a different form factor from those in
+   * share/jive/applets/JogglerSkin/images/UNOFFICIAL/VUMeter
+   * share/jive/applets/HDSkin/images/UNOFFICIAL/VUMeter
+*  The VU Meter images  have been trimmed at the top and bottom.
 This makes it possible to use the same images as the source for multiple skins and resolutions,
-by resizing them to fit the display area.
+by resizing them to fit the viewport (display area).
 
 ### Accreditations:
 #### Peppy VU meter images
 provided with kind permission by https://github.com/project-owner/PeppyMeter.doc/wiki
-artwork files are (packaged by @Eyerex https://forums.slimdevices.com/member/65695-eyerex)
-* ./assets/visualisers/vumeters/25frames/Peppy_Meter_Rainbow/vu_analog_25seq-Peppy_Meter_Rainbow.png
-The VU Meter
-* ./assets/visualisers/vumeters/25frames/TubeD/vu_analog_25seq_daab_Tube.png
-is a derivation of the Peppy Meter Tube VUMeter.
+
+The following artwork files in artwork/vumeters/25frames are (packaged by @Eyerex https://forums.slimdevices.com/member/65695-eyerex)
+* artwork/vumeters/25frames/vu_analog_25seq-Peppy_Meter_Tube.png
+* artwork/vumeters/25frames/vu_analog_25seq-Peppy_Meter_White_and_Red.png
+* artwork/vumeters/25frames/vu_analog_25seq-Peppy_Meter_White_and_Red_Rainbow.png
+* artwork/vumeters/25frames/vu_analog_25seq-Peppy_Meter_White_and_Red_V2.png
+
+These have not been not included under the `assets` directory, because the calibration does not match that of other VU Meters.
+
+The VU Meter `assets/visualisers/vumeters/TubeD/`
+is a derivation of the Peppy Meter Tube VU Meter with calibration consistent with other VU Meters.
 
 ## Digital VU Meters
-### VFD
-Simulates Vacuum Fluorescent Displays of old.
-The images for these VU Meters are located here
-* `./assets/visualisers/vumeters/vfd`
+### Compose1
+These VU meters are rendered by composition.
 
-These VU meters are resized on demand, as the images are relatively small the resize operation time is not noticeable.
-TBD: Details on composition of the VFD. Source code is here ./share/jive/jive/vis/VUMeter.lua
+The images are relatively small and any resizing operation is performed synchronously, as resize time is not noticeable.
+
+*TO DO*: Details on composition. Source code is here ./share/jive/jive/vis/VUMeter.lua
 
 # Spectrum Meter
 Spectrum meters can now be rendered using images.
 There are 3 classes of spectrum meters
 * colour
   * these are predefined in the code
-* gradient
-  * a custom colour gradient
+* image (gradient)
+  * sections of the image are "revealed" in accordance with spectrum amplitude values.
 * backlit
-  * simulate lighting up sections of an image in accordance with spectrum values
+  * simulate lighting up sections of an image in accordance with spectrum amplitude values.
+
 Spectrum Meter images are selectable see *Selection* and *Location* below
 
 Spectrum layout can be configured see [README.visualiser](./README.visualiserapplet.md) for more details
@@ -170,26 +226,42 @@ Multiple items in the menu may be selected Spectrum meter display is cycled on t
 The logic enforces that at least one item is selected
 
 ## Location
-Spectrum meter images are enumerated from the locations
- `./assets/visualisers/spectrum/backlit`
- `assets/visualisers/spectrum/gradient`
+Spectrum meter resources are sub directories under the location
+ `./assets/visualisers/spectrum`
 
-Currently there is no meta-data associated with the Spectrum meter image files.
+Jivelite derives the handling required for each spectrum meter based on the metadata file `meta.json` associated by location.
+The metadata schema for Spectrum meter metadata is *TO DO*
 
-Jivelite derives the handling required for each Spectrum meter based on the location under the `assets` path.
-
-The schema for location of VU meter images is
-`assets/visusalisers/spectrum/<class>/<Spectrum meter name>/`
-
-Where class is one of:
- * backlit
- * gradient
-
-New Spectrum images can be added simply by copying appropriate files to these locations.
+### Examples:
+#### Backlit
+```
+{
+    "kind": "spectrum-meter",
+    "name" : "Psychedelic2",
+    "foreground": "background-5421678_1920_inverted.png",
+    "sptype": "backlit",
+    "backlitAlpha": 64,
+    "desatAlpha": 96
+}
+```
+#### Image
+```
+{
+    "kind": "spectrum-meter",
+    "name" : "GradientBlueGreenYellowRed",
+    "foreground": "BlueGreenYellowRed.png",
+    "desaturated": "TspBlueGreenYellowRed.png",
+    "sptype": "image",
+    "turbine": {
+        "foreground": "turbineBlueGreenYellowRed.png",
+        "desaturated": "turbineTspBlueGreenYellowRed.png"
+    }
+}
+```
 
 ### Resizing
 #### Backlit
-Images in `.../backlit` are rendered as foreground over a dimmed version as the background.
+Images are rendered as foreground over a dimmed version as the background.
 At the moment that dimming is not configurable from the menu but can be 
 adjusted by changing the value of `backgroundAlpha` in
 
@@ -198,8 +270,8 @@ adjusted by changing the value of `backgroundAlpha` in
 The resizing strategy for these images is the same on both axes to preserve the aspect ratio.
 Images will be resized, centered and clipped to fit.
 
-#### Gradient
-Images in `.../gradient` and are treated as source images to render spectrum meter as gradients.
+#### Image
+Images are treated as source images to render spectrum meter typically as gradients.
 
 The resizing strategy for these images is to expand and compress to fit, without preserving the aspect ratio.
 An image consisting of a single vertical line with different colours would suffice.
