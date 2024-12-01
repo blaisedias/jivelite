@@ -226,7 +226,6 @@ local function platformDetect()
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/spectrum")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
-	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters/vfd")
 
 	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
 	log:info("saveResizedImages:", saveResizedImages, " save image type:" , saveimage_type)
@@ -1052,18 +1051,7 @@ local function initVuMeterList()
 	vuImagesMap = {}
 	vuLoaded = {}
 
-	local relativePath = "assets/visualisers/vumeters/vfd"
-	if workSpace ~= System.getUserDir() then
-		_populateVuMeterList(workSpace .. "/" .. relativePath)
-	end
-	for search_root in findPaths(relativePath) do
-		_populateVuMeterList(search_root)
-	end
-	for search_root in findPaths("../../" .. relativePath) do
-		_populateVuMeterList(search_root)
-	end
-
-	relativePath = "assets/visualisers/vumeters"
+	local relativePath = "assets/visualisers/vumeters"
 	if workSpace ~= System.getUserDir() then
 		_populateVuMeterList(workSpace .. "/" .. relativePath)
 	end
