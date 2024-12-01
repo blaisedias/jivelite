@@ -237,8 +237,8 @@ end
 --- in memory image cache(s)
 --------------------------------------------------------
 
--- FIXME: vfdCache should go through imCache
-local vfdCache = {}
+-- FIXME: c1vuCache should go through imCache
+local c1vuCache = {}
 local imCache = {}
 
 local function imCachePut(key, img)
@@ -258,7 +258,7 @@ end
 
 local function imCacheClear()
 --	log:info("imCacheClear")
-	vfdCache = {}
+	c1vuCache = {}
 	for k,v in pairs(imCache) do
 --		log:info("releasing ", k)
 		v:altRelease()
@@ -921,7 +921,7 @@ function getVuMeterList()
 	return vuImages
 end
 
-local function _populateVfdVuMeterList(search_root)
+local function _populateCompose1VuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
 		return
 	end
@@ -1006,15 +1006,15 @@ local function _populateVfdVuMeterList(search_root)
 				else
 					return
 				end
-				table.insert(vuImages, {name=entry, enabled=false, displayName='vfd-' .. entry, vutype="vfd"})
+				table.insert(vuImages, {name=entry, enabled=false, displayName='c1-' .. entry, vutype="compose1"})
 			end
 		end
 	end
 end
 
-local function _initVfdVuMeterList(rpath)
+local function _initCompose1VuMeterList(rpath)
 	for search_root in findPaths(rpath) do
-		_populateVfdVuMeterList(search_root)
+		_populateCompose1VuMeterList(search_root)
 	end
 end
 
@@ -1106,10 +1106,10 @@ local function initVuMeterList()
 
 	local relativePath = "assets/visualisers/vumeters/vfd"
 	if workSpace ~= System.getUserDir() then
-		_populateVfdVuMeterList(workSpace .. "/" .. relativePath)
+		_populateCompose1VuMeterList(workSpace .. "/" .. relativePath)
 	end
-	_initVfdVuMeterList(relativePath)
-	_initVfdVuMeterList("../../" .. relativePath)
+	_initCompose1VuMeterList(relativePath)
+	_initCompose1VuMeterList("../../" .. relativePath)
 
 	relativePath = "assets/visualisers/vumeters"
 	if workSpace ~= System.getUserDir() then
@@ -1124,27 +1124,27 @@ end
 -- Enable at least one valid VU Meter
 local function enableOneVUMeter()
 		local enabled_count = 0
-		-- select a default try to find a vfd (no resize required)
+		-- select a default, try to find a compose1 (time expensive resize not required)
 		-- 1: try "Chevrons White Orange"
 		for _, v in pairs(vuImages) do
-			if v.name == "Chevrons White Orange" and v.vutype=="vfd" then
+			if v.name == "Chevrons White Orange" and v.vutype=="compose1" then
 				v.enabled = true
 				enabled_count = 1
 			end
 		end
+		-- 2: try any Compose1 VU
 		if enabled_count == 0 then
-			-- 2: try any VFD
 			for _, v in pairs(vuImages) do
-				if v.vutype=="vfd" then
+				if v.vutype=="compose1" then
 					v.enabled = true
 					enabled_count = 1
 					break
 				end
 			end
 		end
+		-- 3: finally use whatever is first in the list
+		-- a resize may be involved at a later stage
 		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
 			vuImages[1].enabled = true
 		end
 end
@@ -1195,9 +1195,9 @@ function vuChange(_, name)
 	end
 end
 
-local function _resizedVFDElement(srcImg, key, w, h)
+local function _resizedCompose1Element(srcImg, key, w, h)
 	local dicKey = key .. "-" .. w .. "x" .. h
---	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey)
+--	log:info("_resizedCompose1Element ", "key=", key, " dicKey=", dicKey)
 	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
@@ -1210,13 +1210,13 @@ local function _resizedVFDElement(srcImg, key, w, h)
 	return img
 end
 
--- FIXME: vfdCache should go through imCache
-local function getVFDVUmeter(name, w, h)
+-- FIXME: c1vuCache should go through imCache
+local function getCompose1VUmeter(name, w, h)
 	local key = name .. w .. "x" .. h
-	local vfd = vfdCache[key]
-	if vfd ~= nil then
-		log:info("vfdCache -> ", key, vfd)
-		return vfd
+	local c1vu = c1vuCache[key]
+	if c1vu ~= nil then
+		log:info("c1vuCache -> ", key, c1vu)
+		return c1vu
 	end
 	-- FIXME: workaround. shouldn't be necessary but fixes a corner case
 	imCacheClear()
@@ -1236,47 +1236,47 @@ local function getVFDVUmeter(name, w, h)
 	local left_trail = name .. ":left-trail"
 	local right_trail = name .. ":right-trail"
 	local center = name .. ":center"
-	vfd = {}
-	vfd.left={}
-	vfd.right={}
+	c1vu = {}
+	c1vu.left={}
+	c1vu.right={}
 	-- bar render x-offset
-	vfd.left.on = loadImage(cvu.left_on)
---	log:info("vfd.left.on = loadImage(cvu.left_on)", vfd.left.on , " ", cvu.left_on)
-	vfd.left.off = loadImage(cvu.left_off)
---	log:info("vfd.left.off = loadImage(cvu.left_off)", vfd.left.off , " ", cvu.left_off)
-	vfd.left.peakon = loadImage(cvu.left_peakon)
---	log:info("vfd.left.peakon = loadImage(cvu.left_peakon)", vfd.left.peakon , " ", cvu.left_peakon)
-	vfd.left.peakoff = loadImage(cvu.left_peakoff)
---	log:info("vfd.left.peakoff = loadImage(cvu.left.peakoff)", vfd.left.peakoff , " ", cvu.left_peakoff)
+	c1vu.left.on = loadImage(cvu.left_on)
+--	log:info("c1vu.left.on = loadImage(cvu.left_on)", c1vu.left.on , " ", cvu.left_on)
+	c1vu.left.off = loadImage(cvu.left_off)
+--	log:info("c1vu.left.off = loadImage(cvu.left_off)", c1vu.left.off , " ", cvu.left_off)
+	c1vu.left.peakon = loadImage(cvu.left_peakon)
+--	log:info("c1vu.left.peakon = loadImage(cvu.left_peakon)", c1vu.left.peakon , " ", cvu.left_peakon)
+	c1vu.left.peakoff = loadImage(cvu.left_peakoff)
+--	log:info("c1vu.left.peakoff = loadImage(cvu.left.peakoff)", c1vu.left.peakoff , " ", cvu.left_peakoff)
 
-	vfd.right.on = loadImage(cvu.right_on)
---	log:info("vfd.right.on = loadImage(cvu.right_on)", vfd.right.on , " ", cvu.right_on)
-	vfd.right.off = loadImage(cvu.right_off)
---	log:info("vfd.right.off = loadImage(cvu.right_off)", vfd.right.off , " ", cvu.right_off)
-	vfd.right.peakon = loadImage(cvu.right_peakon)
---	log:info("vfd.right.peakon = loadImage(cvu.right_peakon)", vfd.right.peakon , " ", cvu.right_peakon)
-	vfd.right.peakoff = loadImage(cvu.right_peakoff)
---	log:info("vfd.right.peakoff = loadImage(cvu.right_peakoff)", vfd.right.peakoff , " ", cvu.right_peakoff)
+	c1vu.right.on = loadImage(cvu.right_on)
+--	log:info("c1vu.right.on = loadImage(cvu.right_on)", c1vu.right.on , " ", cvu.right_on)
+	c1vu.right.off = loadImage(cvu.right_off)
+--	log:info("c1vu.right.off = loadImage(cvu.right_off)", c1vu.right.off , " ", cvu.right_off)
+	c1vu.right.peakon = loadImage(cvu.right_peakon)
+--	log:info("c1vu.right.peakon = loadImage(cvu.right_peakon)", c1vu.right.peakon , " ", cvu.right_peakon)
+	c1vu.right.peakoff = loadImage(cvu.right_peakoff)
+--	log:info("c1vu.right.peakoff = loadImage(cvu.right_peakoff)", c1vu.right.peakoff , " ", cvu.right_peakoff)
 
-	vfd.leftlead = loadImage(cvu.left_lead)
---	log:info("vfd.leftlead = loadImage(cvu.left_lead)", vfd.leftlead , " ", cvu.left_lead)
-	vfd.rightlead = loadImage(cvu.right_lead)
---	log:info("vfd.rightlead = loadImage(cvu.right_lead)", vfd.rightlead , " ", cvu.right_lead)
-	vfd.lefttrail = loadImage(cvu.left_trail)
---	log:info("vfd.lefttrail = loadImage(cvu.left_trail)", vfd.lefttrail , " ", cvu.left_trail)
-	vfd.righttrail = loadImage(cvu.right_trail)
---	log:info("vfd.righttrail = loadImage(cvu.right_trail)", vfd.righttrail , " ", cvu.right_trail)
-	vfd.center = loadImage(cvu.centre)
---	log:info("vfd.center = loadImage(cvu.centre)", vfd.center , " ", cvu.centre)
+	c1vu.leftlead = loadImage(cvu.left_lead)
+--	log:info("c1vu.leftlead = loadImage(cvu.left_lead)", c1vu.leftlead , " ", cvu.left_lead)
+	c1vu.rightlead = loadImage(cvu.right_lead)
+--	log:info("c1vu.rightlead = loadImage(cvu.right_lead)", c1vu.rightlead , " ", cvu.right_lead)
+	c1vu.lefttrail = loadImage(cvu.left_trail)
+--	log:info("c1vu.lefttrail = loadImage(cvu.left_trail)", c1vu.lefttrail , " ", cvu.left_trail)
+	c1vu.righttrail = loadImage(cvu.right_trail)
+--	log:info("c1vu.righttrail = loadImage(cvu.right_trail)", c1vu.righttrail , " ", cvu.right_trail)
+	c1vu.center = loadImage(cvu.centre)
+--	log:info("c1vu.center = loadImage(cvu.centre)", c1vu.center , " ", cvu.centre)
 
-	local bw, bh = vfd.left.on:getSize()
-	local lw, lh = vfd.leftlead:getSize()
+	local bw, bh = c1vu.left.on:getSize()
+	local lw, lh = c1vu.leftlead:getSize()
 	local tw, th = 0, 0
-	if vfd.lefttrail ~= nil then
-		tw, th = vfd.lefttrail:getSize()
+	if c1vu.lefttrail ~= nil then
+		tw, th = c1vu.lefttrail:getSize()
 	end
 
-	local cw, ch = vfd.center:getSize()
+	local cw, ch = c1vu.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
 --	local barwidth = math.floor((cw - lw)/49)
@@ -1285,17 +1285,17 @@ local function getVFDVUmeter(name, w, h)
 	if calcbw ~= barwidth then
 		log:warn("  barwidth:", barwidth, " calcbw:", calcbw)
 	end
-	-- vfd.bar_rxo= barwidth - bw
-	vfd.left.bar_rxo= 0
-	vfd.right.bar_rxo= 0
+	-- c1vu.bar_rxo= barwidth - bw
+	c1vu.left.bar_rxo= 0
+	c1vu.right.bar_rxo= 0
 --	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
 --	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w > dw and h >= dh then
-		vfd.w = dw
-		vfd.h = dh
+		c1vu.w = dw
+		c1vu.h = dh
 	else
 		local sf = math.min(w/dw, h/dh)
---		log:debug("#### vfd : sf : ", sf)
+--		log:debug("#### c1vu : sf : ", sf)
 		barwidth = math.floor(barwidth * sf)
 		calcbw = math.floor(calcbw * sf)
 		bw = math.floor(bw * sf)
@@ -1309,36 +1309,36 @@ local function getVFDVUmeter(name, w, h)
 --	  	log:debug("delta calc vs sf ", (calcbw *49) + lw + tw - cw)
 		cw = (calcbw *49) + lw + tw
 		ch = math.floor((ch * sf))
-		-- vfd.bar_rxo= barwidth - bw
-		vfd.left.on = _resizedVFDElement(vfd.left.on, bar_on, bw, bh)
-		vfd.left.off = _resizedVFDElement(vfd.left.off, bar_off, bw, bh)
-		vfd.left.peakon = _resizedVFDElement(vfd.left.peakon, bar_peak_on, bw, bh)
-		vfd.left.peakoff = _resizedVFDElement(vfd.left.peakoff, bar_peak_off, bw, bh)
-		vfd.right.on = _resizedVFDElement(vfd.right.on, r_bar_on, bw, bh)
-		vfd.right.off = _resizedVFDElement(vfd.right.off, r_bar_off, bw, bh)
-		vfd.right.peakon = _resizedVFDElement(vfd.right.peakon, r_bar_peak_on, bw, bh)
-		vfd.right.peakoff = _resizedVFDElement(vfd.right.peakoff, r_bar_peak_off, bw, bh)
+		-- c1vu.bar_rxo= barwidth - bw
+		c1vu.left.on = _resizedCompose1Element(c1vu.left.on, bar_on, bw, bh)
+		c1vu.left.off = _resizedCompose1Element(c1vu.left.off, bar_off, bw, bh)
+		c1vu.left.peakon = _resizedCompose1Element(c1vu.left.peakon, bar_peak_on, bw, bh)
+		c1vu.left.peakoff = _resizedCompose1Element(c1vu.left.peakoff, bar_peak_off, bw, bh)
+		c1vu.right.on = _resizedCompose1Element(c1vu.right.on, r_bar_on, bw, bh)
+		c1vu.right.off = _resizedCompose1Element(c1vu.right.off, r_bar_off, bw, bh)
+		c1vu.right.peakon = _resizedCompose1Element(c1vu.right.peakon, r_bar_peak_on, bw, bh)
+		c1vu.right.peakoff = _resizedCompose1Element(c1vu.right.peakoff, r_bar_peak_off, bw, bh)
 
-		vfd.leftlead = _resizedVFDElement(vfd.leftlead, left, lw, lh)
-		vfd.rightlead = _resizedVFDElement(vfd.rightlead, right, lw, lh)
-		vfd.center = _resizedVFDElement(vfd.center, center, cw, ch)
-		vfd.w = cw
-		vfd.h = ch + (bh * 2)
+		c1vu.leftlead = _resizedCompose1Element(c1vu.leftlead, left, lw, lh)
+		c1vu.rightlead = _resizedCompose1Element(c1vu.rightlead, right, lw, lh)
+		c1vu.center = _resizedCompose1Element(c1vu.center, center, cw, ch)
+		c1vu.w = cw
+		c1vu.h = ch + (bh * 2)
 	end
-	vfd.left.barwidth = barwidth
-	vfd.right.barwidth = barwidth
-	vfd.bw = bw
-	vfd.bh = bh
-	vfd.lw = lw
-	vfd.lh = lh
-	vfd.cw = cw
-	vfd.ch = ch
---	log:debug("####  vfd.w:", vfd.w, " vfd.h:", vfd.h)
---	log:debug("####  vfd.bw:", vfd.bw, " vfd.bh:", vfd.bh, " vfd.lw:", vfd.lw, " vfd.lh", vfd.lh)
---	log:debug("####  vfd.cw:", vfd.cw, " vfd.ch", vfd.ch)
-	log:info("vfdCache <- ", key, vfd)
-	vfdCache[key] = vfd
-	return vfd
+	c1vu.left.barwidth = barwidth
+	c1vu.right.barwidth = barwidth
+	c1vu.bw = bw
+	c1vu.bh = bh
+	c1vu.lw = lw
+	c1vu.lh = lh
+	c1vu.cw = cw
+	c1vu.ch = ch
+--	log:debug("####  c1vu.w:", c1vu.w, " c1vu.h:", c1vu.h)
+--	log:debug("####  c1vu.bw:", c1vu.bw, " c1vu.bh:", c1vu.bh, " c1vu.lw:", c1vu.lw, " c1vu.lh", c1vu.lh)
+--	log:debug("####  c1vu.cw:", c1vu.cw, " c1vu.ch", c1vu.ch)
+	log:info("c1vuCache <- ", key, c1vu)
+	c1vuCache[key] = c1vu
+	return c1vu
 end
 
 
@@ -1355,8 +1355,8 @@ function getVuImage(_,w,h)
 	end
 	prevVuImageIndex = vuImageIndex
 
-	if entry.vutype == "vfd" then
-		return  {vutype=entry.vutype, vfd=getVFDVUmeter(entry.name, w, h)}
+	if entry.vutype == "compose1" then
+		return  {vutype=entry.vutype, compose1=getCompose1VUmeter(entry.name, w, h)}
 	end
 
 	local imgs = {}
