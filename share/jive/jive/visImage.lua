@@ -921,142 +921,106 @@ function getVuMeterList()
 	return vuImages
 end
 
-local function _populateCompose1VuMeterList(search_root)
-	if (lfs.attributes(search_root, "mode") ~= "directory") then
-		return
-	end
-
-	for entry in lfs.dir(search_root) do
-		if entry ~= "." and entry ~= ".." then
-			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
-			if mode == "directory" then
-				local path = search_root .. "/" .. entry
-				local jsData = loadJsonFile(path .. "/" .. "meta.json")
-				if jsData ~= nil then
-					if jsData.kind == "vumeter" and jsData.vutype == "compose1" then
-						local tmp = {}
-						for _, av in ipairs(jsData.files.bars) do
-							for _, nm in ipairs(av.off) do
-								tbl_insert(tmp,nm)
-							end
-							for _, nm in ipairs(av.on) do
-								tbl_insert(tmp,nm)
-							end
-						end
-						for _, nm in ipairs(jsData.files.lead) do
-							tbl_insert(tmp,nm)
-						end
-						for _, nm in ipairs(jsData.files.trail) do
-							tbl_insert(tmp,nm)
-						end
-						tbl_insert(tmp, jsData.files.centre)
-
-						if pathsAreImageFiles(path, tmp) == false then
-							return
-						end
-					end
-
-					local cvu = {}
-					cvu.name = jsData.name
-					cvu["left_off"] = path .. "/" .. jsData.files.bars[1].off[1]
-					cvu["left_peakoff"] = cvu["left_off"]
-					if #jsData.files.bars[1].off > 1 then
-						cvu["left_peakoff"] = path .. "/" .. jsData.files.bars[1].off[2]
-					end
-					cvu["left_on"] = path .. "/" .. jsData.files.bars[1].on[1]
-					cvu["left_peakon"] = cvu["left_on"]
-					if #jsData.files.bars[1].on > 1 then
-						cvu["left_peakon"] = path .. "/" .. jsData.files.bars[1].on[2]
-					end
-					cvu["right_off"] = cvu["left_off"]
-					cvu["right_peakoff"] = cvu["left_peakoff"]
-					cvu["right_on"] = cvu["left_on"]
-					cvu["right_peakon"] = cvu["left_peakon"]
-
-					if #jsData.files.bars > 1 then
-						cvu["right_off"] = path .. "/" .. jsData.files.bars[2].off[1]
-						cvu["right_peakoff"] = cvu["right_off"]
-						if #jsData.files.bars[2].off > 1 then
-							cvu["right_peakoff"] = path .. "/" .. jsData.files.bars[2].off[2]
-						end
-						cvu["right_on"] = path .. "/" .. jsData.files.bars[2].on[1]
-						cvu["right_peakon"] = cvu["right_on"]
-						if #jsData.files.bars[2].on > 1 then
-							cvu["right_peakon"] = path .. "/" .. jsData.files.bars[2].on[2]
-						end
-					end
-
-					cvu["left_lead"] = path .. "/" .. jsData.files.lead[1]
-					cvu["right_lead"] = cvu["left_lead"]
-					if #jsData.files.lead > 1 then
-						cvu["right_lead"] = path .. "/" .. jsData.files.lead[2]
-					end
-					cvu["left_trail"] = path .. "/" .. jsData.files.trail[1]
-					cvu["right_trail"] = cvu["left_trail"]
-					if #jsData.files.trail > 1 then
-						cvu["right_trail"] = path .. "/" .. jsData.files.trail[2]
-					end
-					cvu["centre"] = path .. "/" .. jsData.files.centre
-					cvu.step = jsData.step
-
-					compositeVuMeters[cvu.name] = cvu
---					for k,v in pairs(cvu) do
---						log:info("cvu: ", k, " : ", v)
---					end
-				else
-					return
-				end
-				table.insert(vuImages, {name=entry, enabled=false, displayName='c1-' .. entry, vutype="compose1"})
-			end
-		end
-	end
-end
-
-local function _initCompose1VuMeterList(rpath)
-	for search_root in findPaths(rpath) do
-		_populateCompose1VuMeterList(search_root)
-	end
-end
-
---local function _populateAnalogueVuMeterList(search_root)
---	if (lfs.attributes(search_root, "mode") ~= "directory") then
---		return
---	end
---
---	for entry in lfs.dir(search_root) do
---		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
---		if mode == "file" then
---			local parts = _parseImagePath(entry)
---			if parts ~= nil then
---				local imgName = parts[1]
---				local displayName = imgName
---				local ixSub = string.find(imgName, "25seq")
---				if ixSub ~= nil then
---					if string.find(imgName, "25seq_") ~= nil or string.find(imgName, "25seq-") ~= nil then
---						displayName = '25f-' .. string.sub(imgName, ixSub + 6)
---					else
---						displayName = '25f-' .. string.sub(imgName, ixSub + 5)
---					end
---				end
---				log:debug("Analogue VU meter :", imgName, " ", displayName, ", ", search_root .. "/" .. entry)
---				table.insert(vuImages, {name=imgName, enabled=false, displayName=displayName, vutype="frame"})
---				vuImagesMap[imgName] = {src=search_root .. "/" .. entry}
---			end
---		end
---	end
---end
---
---local function _initAnalogueVuMeterList(rpath)
---	for search_root in findPaths(rpath) do
---		_populateAnalogueVuMeterList(search_root)
---	end
---end
 local vuLoaded = {}
-local function _populate25fVuMeterList(search_root)
-	if (lfs.attributes(search_root, "mode") ~= "directory") then
+
+local function addCompose1VUMeter(jsData, path)
+	log:info("VUMeter compose1: ", jsData.name)
+	local tmp = {}
+	for _, av in ipairs(jsData.files.bars) do
+		for _, nm in ipairs(av.off) do
+			tbl_insert(tmp,nm)
+		end
+		for _, nm in ipairs(av.on) do
+			tbl_insert(tmp,nm)
+		end
+	end
+	for _, nm in ipairs(jsData.files.lead) do
+		tbl_insert(tmp,nm)
+	end
+	for _, nm in ipairs(jsData.files.trail) do
+		tbl_insert(tmp,nm)
+	end
+	tbl_insert(tmp, jsData.files.centre)
+
+	if pathsAreImageFiles(path, tmp) == false then
+		log:warn("VUMeter: compose1: all image files are not present at ", path)
 		return
 	end
 
+	-- sparse definition support:
+		-- If a resource is defined for the 1st channel but not the 2nd,
+		-- then use the same resource for both channels
+	local cvu = {}
+	cvu.name = jsData.name
+	-- sparse definition support:
+		-- used off/on for peakon/peakoff if peak value are not defined
+	cvu["left_off"] = path .. "/" .. jsData.files.bars[1].off[1]
+	cvu["left_peakoff"] = cvu["left_off"]
+	if #jsData.files.bars[1].off > 1 then
+		cvu["left_peakoff"] = path .. "/" .. jsData.files.bars[1].off[2]
+	end
+	cvu["left_on"] = path .. "/" .. jsData.files.bars[1].on[1]
+	cvu["left_peakon"] = cvu["left_on"]
+	if #jsData.files.bars[1].on > 1 then
+		cvu["left_peakon"] = path .. "/" .. jsData.files.bars[1].on[2]
+	end
+	-- default right channel to left channel
+	cvu["right_off"] = cvu["left_off"]
+	cvu["right_peakoff"] = cvu["left_peakoff"]
+	cvu["right_on"] = cvu["left_on"]
+	cvu["right_peakon"] = cvu["left_peakon"]
+
+	if #jsData.files.bars > 1 then
+		cvu["right_off"] = path .. "/" .. jsData.files.bars[2].off[1]
+		cvu["right_peakoff"] = cvu["right_off"]
+		if #jsData.files.bars[2].off > 1 then
+			cvu["right_peakoff"] = path .. "/" .. jsData.files.bars[2].off[2]
+		end
+		cvu["right_on"] = path .. "/" .. jsData.files.bars[2].on[1]
+		cvu["right_peakon"] = cvu["right_on"]
+		if #jsData.files.bars[2].on > 1 then
+			cvu["right_peakon"] = path .. "/" .. jsData.files.bars[2].on[2]
+		end
+	end
+
+	cvu["left_lead"] = path .. "/" .. jsData.files.lead[1]
+	cvu["right_lead"] = cvu["left_lead"]
+	if #jsData.files.lead > 1 then
+		cvu["right_lead"] = path .. "/" .. jsData.files.lead[2]
+	end
+	cvu["left_trail"] = path .. "/" .. jsData.files.trail[1]
+	cvu["right_trail"] = cvu["left_trail"]
+	if #jsData.files.trail > 1 then
+		cvu["right_trail"] = path .. "/" .. jsData.files.trail[2]
+	end
+	cvu["centre"] = path .. "/" .. jsData.files.centre
+	cvu.step = jsData.step
+
+	compositeVuMeters[cvu.name] = cvu
+--	for k,v in pairs(cvu) do
+--		log:info("cvu: ", k, " : ", v)
+--	end
+	table.insert(vuImages, {name=jsData.name, enabled=false, displayName='c1-' .. jsData.name, vutype="compose1"})
+end
+
+local function addFrameVUMeter(jsData, path)
+	if pathsAreImageFiles(path, jsData.files.frames) == true then
+		-- prevent future loading of VUMeter with the same name
+		vuLoaded[jsData.name] = true
+		log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
+		for i,_ in ipairs(jsData.files.frames) do
+			vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+		end
+		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
+	else
+		log:error("failed to find all images in ", path .. "/" .. "meta.json")
+	end
+end
+
+local function _populateVuMeterList(search_root)
+	if (lfs.attributes(search_root, "mode") ~= "directory") then
+		return
+	end
 	for entry in lfs.dir(search_root) do
 		if entry ~= "." and entry ~= ".." then
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
@@ -1064,19 +1028,17 @@ local function _populate25fVuMeterList(search_root)
 				local path = search_root .. "/" .. entry
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
 				if jsData ~= nil then
-					if jsData.kind == "vumeter"
-						and vuLoaded[jsData.name] == nil
-						and jsData.vutype == "frames" then
-						if pathsAreImageFiles(path, jsData.files.frames) == true then
-							-- prevent future loading of VUMeter with the same name
-							vuLoaded[jsData.name] = true
-							log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
-							for i,_ in ipairs(jsData.files.frames) do
-								vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+					if jsData.kind == "vumeter" then
+						if  vuLoaded[jsData.name] == nil then
+							if jsData.vutype == "frames" then
+								addFrameVUMeter(jsData, path)
+							elseif jsData.vutype == "compose1" then
+								addCompose1VUMeter(jsData, path)
+							else
+								log:warn("VU meter ",jsData.name," unknown type " , jsData.vutype, " at ", path)
 							end
-							table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
 						else
-							log:error("failed to find all images in ", path .. "/" .. "meta.json")
+							log:warn("VU meter ",jsData.name," has been defined before, skipping VU meter defined at ", path)
 						end
 					end
 				end
@@ -1084,20 +1046,6 @@ local function _populate25fVuMeterList(search_root)
 		end
 	end
 end
-
-local function _init25fVuMeterList(rpath)
-	for search_root in findPaths(rpath) do
-		_populate25fVuMeterList(search_root)
-	end
-end
-
-
-local function _init25fLRVuMeterList(rpath)
-	for search_root in findPaths(rpath) do
-		_populate25fVuMeterList(search_root)
-	end
-end
-
 
 local function initVuMeterList()
 	vuImages = {}
@@ -1106,17 +1054,25 @@ local function initVuMeterList()
 
 	local relativePath = "assets/visualisers/vumeters/vfd"
 	if workSpace ~= System.getUserDir() then
-		_populateCompose1VuMeterList(workSpace .. "/" .. relativePath)
+		_populateVuMeterList(workSpace .. "/" .. relativePath)
 	end
-	_initCompose1VuMeterList(relativePath)
-	_initCompose1VuMeterList("../../" .. relativePath)
+	for search_root in findPaths(relativePath) do
+		_populateVuMeterList(search_root)
+	end
+	for search_root in findPaths("../../" .. relativePath) do
+		_populateVuMeterList(search_root)
+	end
 
 	relativePath = "assets/visualisers/vumeters"
 	if workSpace ~= System.getUserDir() then
-		_populate25fVuMeterList(workSpace .. "/" .. relativePath)
+		_populateVuMeterList(workSpace .. "/" .. relativePath)
 	end
-	_init25fVuMeterList(relativePath)
-	_init25fVuMeterList("../../" .. relativePath)
+	for search_root in findPaths(relativePath) do
+		_populateVuMeterList(search_root)
+	end
+	for search_root in findPaths("../../" .. relativePath) do
+		_populateVuMeterList(search_root)
+	end
 
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
