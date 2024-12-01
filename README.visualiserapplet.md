@@ -1,5 +1,9 @@
 # Overview
 The Visualiser Applet adds the Visualiser settings with the following menu items:
+* **VU Meter Selection:**
+Select VU Meters for display - multiple VU Meters can be selected.
+* **Spectrum Analyzer Selection:**
+Select Spectrum Meters for display - multiple Spectrum Meters can be selected.
 * **Spectrum Analyzer Settings:**
   * **Bar Format:** Select bar width and spacing between bars.
    Smaller values for bar width and spacing will increase the number of bars - but also increase the load.
