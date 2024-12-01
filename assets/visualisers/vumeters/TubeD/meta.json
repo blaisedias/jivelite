@@ -3,7 +3,6 @@
     "name": "Tube D",
     "vutype": "frames",
     "framecount": 25,
-    "channels": 1,
     "#format": "single image -> all frames in a single image file",
     "format:": "singleimage",
     "files": {
