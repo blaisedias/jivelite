@@ -62,7 +62,7 @@ function defaultSettings(_)
             fill=1,
             channelFlip="LHHL",
             backlitAlpha=80,
-            decayAlpha=160,
+            desatAlpha=160,
             capsOn=true,
             barsFormat="1-15-0-5",
             barFormats  = {
@@ -108,8 +108,11 @@ function registerApplet(self)
     -- early setup of visualiser image module settings
     local settings = self:getSettings()
     visImage:setVisSettings(settings)
-    if settings.decayAlpha == nil then
-        settings.decayAlpha = 160
+    if settings.backlitAlpha == nil then
+        settings.backlitAlpha = 80
+    end
+    if settings.desatAlpha == nil then
+        settings.desatAlpha = 160
     end
     local tmp = visImage:getVuMeterList()
 
