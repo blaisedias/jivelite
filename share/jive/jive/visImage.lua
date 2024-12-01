@@ -557,15 +557,19 @@ local function __addSpectrum(path, jsData)
 		},
 		rszOp = rszOp,
 	}
-	if jsData.backlitAlpha ~= nil and type(jsData.backlitAlpha) == 'number' and jsData.backlitAlpha >1 and jsData.backlitAlpha < 256 then
-		spectrumImagesMap[imgName].backlitAlpha = jsData.backlitAlpha
-	else
-		log:warn(jsData.name, " invalid value for backlit alpha ", jsData.backlitAlpha)
+	if jsData.backlitAlpha ~= nil then
+		if type(jsData.backlitAlpha) == 'number' and jsData.backlitAlpha >1 and jsData.backlitAlpha < 256 then
+			spectrumImagesMap[imgName].backlitAlpha = jsData.backlitAlpha
+		else
+			log:warn(jsData.name, " invalid value for backlit alpha ", jsData.backlitAlpha)
+		end
 	end
-	if jsData.desatAlpha ~= nil and type(jsData.desatAlpha) == 'number' and jsData.desatAlpha >1 and jsData.desatAlpha < 256 then
-		spectrumImagesMap[imgName].desatAlpha = jsData.desatAlpha
-	else
-	 log:warn(jsData.name, " invalid value for desaturated alpha ", jsData.desatAlpha)
+	if jsData.desatAlpha ~= nil then
+		if type(jsData.desatAlpha) == 'number' and jsData.desatAlpha >1 and jsData.desatAlpha < 256 then
+			spectrumImagesMap[imgName].desatAlpha = jsData.desatAlpha
+		else
+			 log:warn(jsData.name, " invalid value for desaturated alpha ", jsData.desatAlpha)
+		end
 	end
 
 	log:info("SpectrumImage :", imgName)
@@ -1201,7 +1205,7 @@ local function _resizedVFDElement(srcImg, key, w, h)
 		saveImage(img, dicKey, dcpath)
 --		resizedImagesTable[dicKey] = dcpath
 		imCachePut(dcpath, img)
-		srcImg:altRelease()
+--		srcImg:altRelease()
 	end
 	return img
 end
