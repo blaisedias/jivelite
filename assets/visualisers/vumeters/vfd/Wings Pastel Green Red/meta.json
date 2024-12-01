@@ -1,43 +1,39 @@
 {
     "kind": "vumeter",
-    "name": "Wings Paster Green Red",
-    "vutype": "discrete",
-    "#": "channels == 2 => left and right channles have diffrent graphics",
-    "channels": 2,
-    "#": "bartypes > 1 => last set of bars in the array is used for db >= 0 ",
-    "bartypes": 2,
+    "name": "Wings Pastel Green Red",
+    "vutype": "compose1",
     "files": {
-            "bars": {
-                "left": {
-                    "off": [
-                        "bar-off.png",
-                        "bar-peak-off.png"
-                    ],
-                    "on": [
-                        "bar-on.png",
-                        "bar-peak-on.png"
-                    ]
-                },
-                "right" : {
-                    "off": [
-                        "r-bar-off.png",
-                        "r-bar-peak-off.png"
-                    ],
-                    "on": [
-                        "r-bar-on.png",
-                        "r-bar-peak-on.png"
-                    ]
-                }
+        "bars": [
+            {
+                "off": [
+                    "bar-off.png",
+                    "bar-peak-off.png"
+                ],
+                "on": [
+                    "bar-on.png",
+                    "bar-peak-on.png"
+                ]
             },
-            "centre": "center.png",
-            "left": {
-                "trail": "left-trail.png",
-                "lead": "left.png"
-            },
-            "right": {
-                "right-trail": "right-trail.png",
-                "lead": "right.png"
+            {
+                "off": [
+                    "r-bar-off.png",
+                    "r-bar-peak-off.png"
+                ],
+                "on": [
+                    "r-bar-on.png",
+                    "r-bar-peak-on.png"
+                ]
             }
+        ],
+        "centre": "center.png",
+        "lead": [
+             "left.png",
+             "right.png"
+        ],
+        "trail": [
+            "left-trail.png",
+            "right-trail.png"
+        ]
     },
     "step": 36
 }
