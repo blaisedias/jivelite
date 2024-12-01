@@ -109,8 +109,8 @@ local function drawVuMeter(params, surface, vol)
 	end
 end
 
-local function drawVFD(params, surface, vol)
-	-- add vfd bar render x offset here
+local function drawCompose1(params, surface, vol)
+	-- add compose1 bar render x offset here
 	if vol >= params.cap then
 		params.cap = vol
 		params.peak_hold_counter = math.floor(FRAME_RATE/2)
@@ -121,36 +121,36 @@ local function drawVFD(params, surface, vol)
 		end
 	end
 
-	local x = params.x + params.vfd.bar_rxo
+	local x = params.x + params.compose1.bar_rxo
 	local y = params.y
 	local cap = params.cap
-	local bw = params.vfd.bw
-	local bh = params.vfd.bh
-	local h = params.vfd.h
+	local bw = params.compose1.bw
+	local bh = params.compose1.bh
+	local h = params.compose1.h
 
     -- 1 = 0 => no bars ON -
 	for i = 2, 37 do
 		if i <= vol or i == cap then
-			params.vfd.on:blit(surface, x, y, bw, bh)
+			params.compose1.on:blit(surface, x, y, bw, bh)
 		else
-			params.vfd.off:blit(surface, x, y, bw, bh)
+			params.compose1.off:blit(surface, x, y, bw, bh)
 		end
-		x = x + params.vfd.barwidth
+		x = x + params.compose1.barwidth
 	end
 	for i = 38, 50 do
 		if i <= vol or i == cap then
-			params.vfd.peakon:blit(surface, x, y, bw, h)
+			params.compose1.peakon:blit(surface, x, y, bw, h)
 		else
-			params.vfd.peakoff:blit(surface, x, y, bw, h)
+			params.compose1.peakoff:blit(surface, x, y, bw, h)
 		end
-		x = x + params.vfd.barwidth
+		x = x + params.compose1.barwidth
 	end
 end
 
-local function drawVFDStatic(params, surface)
-	params.vfd.center:blit(surface, params.x, params.y, params.w, params.h)
-	params.vfd.leftlead:blit(surface, params.x, params.left.y,  params.vfd.lw, params.vfd.lh)
-	params.vfd.rightlead:blit(surface, params.x, params.right.y, params.vfd.lw, params.vfd.lh)
+local function drawCompose1Static(params, surface)
+	params.compose1.center:blit(surface, params.x, params.y, params.w, params.h)
+	params.compose1.leftlead:blit(surface, params.x, params.left.y,  params.compose1.lw, params.compose1.lh)
+	params.compose1.rightlead:blit(surface, params.x, params.right.y, params.compose1.lw, params.compose1.lh)
 end
 
 
@@ -276,18 +276,22 @@ function _layout(self)
 				self.right = { img=nil }
 				self.drawMeter = nullDraw
 			end
-		elseif self.vutbl.vutype == "vfd" then
-			self.vfd = self.vutbl.vfd
-			local vfdx = x + math.floor((w - self.vfd.w)/2)
-			local y1 = y + math.floor((h - self.vfd.h)/2)
-			local y2 = y1 + self.vfd.bh + self.vfd.ch
-			self.left =  {x=(vfdx + self.vfd.lw), y=y1, cap=0, peak_hold_counter=0, vfd=self.vfd.left}
-			self.right = {x=(vfdx + self.vfd.lw), y=y2, cap=0, peak_hold_counter=0, vfd=self.vfd.right}
-			self.drawMeter = drawVFD
+		elseif self.vutbl.vutype == "compose1" then
+			self.compose1 = self.vutbl.compose1
+			local compose1x = x + math.floor((w - self.compose1.w)/2)
+			local y1 = y + math.floor((h - self.compose1.h)/2)
+			local y2 = y1 + self.compose1.bh + self.compose1.ch
+			self.left =  {x=(compose1x + self.compose1.lw), y=y1, cap=0, peak_hold_counter=0, compose1=self.compose1.left}
+			self.right = {x=(compose1x + self.compose1.lw), y=y2, cap=0, peak_hold_counter=0, compose1=self.compose1.right}
+			self.drawMeter = drawCompose1
 
-			self.bgParams = {x=vfdx, y=y1 + self.vfd.bh, vfd=self.vfd, left=self.left, right=self.right}
-			self.drawBackground = drawVFDStatic
+			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right}
+			self.drawBackground = drawCompose1Static
+		else
+			log:warn("unknown vutype ", self.vutbl.vutype)
 		end
+	else
+		log:warn("unknown VU style ", self.style)
 	end
 end
 
