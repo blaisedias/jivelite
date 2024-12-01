@@ -25,7 +25,7 @@ local os	= require("os")
 local io	= require("io")
 
 local ipairs, pairs = ipairs, pairs
-local pcall = pcall
+local pcall, type = pcall, type
 local coroutine, package	= coroutine, package
 
 -- jive package imports
@@ -101,11 +101,11 @@ end
 local function dumpTable(tbl, indent)
 	indent = indent or 0
 	for k, v in pairs(tbl) do
-		print(string.rep(" ", indent) .. tostring(k) .. ":")
+		log:info(string.rep(" ", indent) .. tostring(k) .. ":")
 		if type(v) == "table" then
 			dumpTable(v, indent + 2)
 		else
-			print(string.rep(" ", indent + 2) .. tostring(v))
+			log:info(string.rep(" ", indent + 2) .. tostring(v))
 		end
 	end
 end
@@ -242,25 +242,25 @@ local vfdCache = {}
 local imCache = {}
 
 local function imCachePut(key, img)
-	log:info("imCache <- ", key,  " ", img)
+--	log:info("imCache <- ", key,  " ", img)
 	imCache[key] = img
 end
 
 local function imCacheGet(key)
 	local img = imCache[key]
-	if img ~= nil then
-		log:info("imCache -> ", key,  " ", img)
-	else
-		log:info("imCache X ", key)
-	end
+--	if img ~= nil then
+--		log:info("imCache -> ", key,  " ", img)
+--	else
+--		log:info("imCache X ", key)
+--	end
 	return img
 end
 
 local function imCacheClear()
-	log:info("imCacheClear")
+--	log:info("imCacheClear")
 	vfdCache = {}
 	for k,v in pairs(imCache) do
-		log:info("releasing ", k)
+--		log:info("releasing ", k)
 		v:altRelease()
 	end
 	imCache={}
@@ -557,6 +557,17 @@ local function __addSpectrum(path, jsData)
 		},
 		rszOp = rszOp,
 	}
+	if jsData.backlitAlpha ~= nil and type(jsData.backlitAlpha) == 'number' and jsData.backlitAlpha >1 and jsData.backlitAlpha < 256 then
+		spectrumImagesMap[imgName].backlitAlpha = jsData.backlitAlpha
+	else
+		log:warn(jsData.name, " invalid value for backlit alpha ", jsData.backlitAlpha)
+	end
+	if jsData.desatAlpha ~= nil and type(jsData.desatAlpha) == 'number' and jsData.desatAlpha >1 and jsData.desatAlpha < 256 then
+		spectrumImagesMap[imgName].desatAlpha = jsData.desatAlpha
+	else
+	 log:warn(jsData.name, " invalid value for desaturated alpha ", jsData.desatAlpha)
+	end
+
 	log:info("SpectrumImage :", imgName)
 end
 
@@ -726,6 +737,10 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 	end
 
 	local resizeRequired = false
+	local backlitAlpha = visSettings.spectrum.backlitAlpha
+	if spectrumImagesMap[spkey].backlitAlpha ~= nil then
+		backlitAlpha = spectrumImagesMap[spkey].backlitAlpha
+	end
 	bgImage = imCacheGet(dicKey)
 	if bgImage == nil then
 		if fgimg ~= nil then
@@ -738,7 +753,7 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 			tmp:filledRectangle(0,0,w,h,0)
 			fgimg:blit(tmp, 0, 0)
 			bgImage = Surface:newRGB(w,h)
-			tmp:blitAlpha(bgImage, 0, 0, visSettings.spectrum.backlitAlpha)
+			tmp:blitAlpha(bgImage, 0, 0, backlitAlpha)
 			tmp:altRelease()
 			imCachePut(dicKey, bgImage)
 		end
@@ -767,6 +782,10 @@ local function _getDsSpectrumImage(spkey, w, h, fgimg, propsIndex)
 
 	local resizeRequired = false
 	dsImage = imCacheGet(dicKey)
+	local desatAlpha = visSettings.spectrum.desatAlpha
+	if spectrumImagesMap[spkey].dsAlpha ~= nil then
+		desatAlpha = spectrumImagesMap[spkey].desatAlpha
+	end
 	if dsImage == nil then
 		if fgimg ~= nil then
 			-- FIXME:
@@ -778,7 +797,7 @@ local function _getDsSpectrumImage(spkey, w, h, fgimg, propsIndex)
 			tmp:filledRectangle(0,0,w,h,0)
 			fgimg:blit(tmp, 0, 0)
 			dsImage = Surface:newRGB(w,h)
-			tmp:blitAlpha(dsImage, 0, 0, visSettings.spectrum.decayAlpha)
+			tmp:blitAlpha(dsImage, 0, 0, desatAlpha)
 			tmp:altRelease()
 			imCachePut(dicKey, dsImage)
 		end
@@ -887,7 +906,7 @@ end
 local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
-local vfdImageSources = {}
+local compositeVuMeters = {}
 
 function registerVUMeterResolution(_, w,h)
 	log:debug("registerVUMeterResolution ", w, " x ", h)
@@ -908,15 +927,80 @@ local function _populateVfdVuMeterList(search_root)
 			local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 			if mode == "directory" then
 				local path = search_root .. "/" .. entry
-				for f in lfs.dir(path) do
-					mode = lfs.attributes(path .. "/" .. f, "mode")
-					if mode == "file" then
-						local parts = _parseImagePath(f)
-						if parts ~= nil then
-							log:debug("VFD ", entry .. ":" .. parts[1], "  ", path .. "/" .. f)
-							vfdImageSources[entry .. ":" .. parts[1]] = path .. "/" .. f
+				local jsData = loadJsonFile(path .. "/" .. "meta.json")
+				if jsData ~= nil then
+					if jsData.kind == "vumeter" and jsData.vutype == "compose1" then
+						local tmp = {}
+						for _, av in ipairs(jsData.files.bars) do
+							for _, nm in ipairs(av.off) do
+								tbl_insert(tmp,nm)
+							end
+							for _, nm in ipairs(av.on) do
+								tbl_insert(tmp,nm)
+							end
+						end
+						for _, nm in ipairs(jsData.files.lead) do
+							tbl_insert(tmp,nm)
+						end
+						for _, nm in ipairs(jsData.files.trail) do
+							tbl_insert(tmp,nm)
+						end
+						tbl_insert(tmp, jsData.files.centre)
+
+						if pathsAreImageFiles(path, tmp) == false then
+							return
 						end
 					end
+
+					local cvu = {}
+					cvu.name = jsData.name
+					cvu["left_off"] = path .. "/" .. jsData.files.bars[1].off[1]
+					cvu["left_peakoff"] = cvu["left_off"]
+					if #jsData.files.bars[1].off > 1 then
+						cvu["left_peakoff"] = path .. "/" .. jsData.files.bars[1].off[2]
+					end
+					cvu["left_on"] = path .. "/" .. jsData.files.bars[1].on[1]
+					cvu["left_peakon"] = cvu["left_on"]
+					if #jsData.files.bars[1].on > 1 then
+						cvu["left_peakon"] = path .. "/" .. jsData.files.bars[1].on[2]
+					end
+					cvu["right_off"] = cvu["left_off"]
+					cvu["right_peakoff"] = cvu["left_peakoff"]
+					cvu["right_on"] = cvu["left_on"]
+					cvu["right_peakon"] = cvu["left_peakon"]
+
+					if #jsData.files.bars > 1 then
+						cvu["right_off"] = path .. "/" .. jsData.files.bars[2].off[1]
+						cvu["right_peakoff"] = cvu["right_off"]
+						if #jsData.files.bars[2].off > 1 then
+							cvu["right_peakoff"] = path .. "/" .. jsData.files.bars[2].off[2]
+						end
+						cvu["right_on"] = path .. "/" .. jsData.files.bars[2].on[1]
+						cvu["right_peakon"] = cvu["right_on"]
+						if #jsData.files.bars[2].on > 1 then
+							cvu["right_peakon"] = path .. "/" .. jsData.files.bars[2].on[2]
+						end
+					end
+
+					cvu["left_lead"] = path .. "/" .. jsData.files.lead[1]
+					cvu["right_lead"] = cvu["left_lead"]
+					if #jsData.files.lead > 1 then
+						cvu["right_lead"] = path .. "/" .. jsData.files.lead[2]
+					end
+					cvu["left_trail"] = path .. "/" .. jsData.files.trail[1]
+					cvu["right_trail"] = cvu["left_trail"]
+					if #jsData.files.trail > 1 then
+						cvu["right_trail"] = path .. "/" .. jsData.files.trail[2]
+					end
+					cvu["centre"] = path .. "/" .. jsData.files.centre
+					cvu.step = jsData.step
+
+					compositeVuMeters[cvu.name] = cvu
+--					for k,v in pairs(cvu) do
+--						log:info("cvu: ", k, " : ", v)
+--					end
+				else
+					return
 				end
 				table.insert(vuImages, {name=entry, enabled=false, displayName='vfd-' .. entry, vutype="vfd"})
 			end
@@ -1109,7 +1193,7 @@ end
 
 local function _resizedVFDElement(srcImg, key, w, h)
 	local dicKey = key .. "-" .. w .. "x" .. h
-	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey)
+--	log:info("_resizedVFDElement ", "key=", key, " dicKey=", dicKey)
 	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
@@ -1132,6 +1216,8 @@ local function getVFDVUmeter(name, w, h)
 	end
 	-- FIXME: workaround. shouldn't be necessary but fixes a corner case
 	imCacheClear()
+
+	local cvu = compositeVuMeters[name]
 	local bar_on = name .. ":bar-on"
 	local bar_off = name .. ":bar-off"
 	local bar_peak_on = name .. ":bar-peak-on"
@@ -1141,20 +1227,6 @@ local function getVFDVUmeter(name, w, h)
 	local r_bar_off = name .. ":r-bar-off"
 	local r_bar_peak_on = name .. ":r-bar-peak-on"
 	local r_bar_peak_off = name .. ":r-bar-peak-off"
-
-	if vfdImageSources[r_bar_on] == nil then
-		r_bar_on = bar_on
-	end
-	if vfdImageSources[r_bar_off] == nil then
-		r_bar_off = bar_off
-	end
-	if vfdImageSources[r_bar_peak_on] == nil then
-		r_bar_peak_on = bar_peak_on
-	end
-	if vfdImageSources[r_bar_peak_off] == nil then
-		r_bar_peak_off = bar_peak_off
-	end
-
 	local left = name .. ":left"
 	local right = name .. ":right"
 	local left_trail = name .. ":left-trail"
@@ -1164,21 +1236,34 @@ local function getVFDVUmeter(name, w, h)
 	vfd.left={}
 	vfd.right={}
 	-- bar render x-offset
-	vfd.left.on = loadImage(vfdImageSources[bar_on])
-	vfd.left.off = loadImage(vfdImageSources[bar_off])
-	vfd.left.peakon = loadImage(vfdImageSources[bar_peak_on])
-	vfd.left.peakoff = loadImage(vfdImageSources[bar_peak_off])
+	vfd.left.on = loadImage(cvu.left_on)
+--	log:info("vfd.left.on = loadImage(cvu.left_on)", vfd.left.on , " ", cvu.left_on)
+	vfd.left.off = loadImage(cvu.left_off)
+--	log:info("vfd.left.off = loadImage(cvu.left_off)", vfd.left.off , " ", cvu.left_off)
+	vfd.left.peakon = loadImage(cvu.left_peakon)
+--	log:info("vfd.left.peakon = loadImage(cvu.left_peakon)", vfd.left.peakon , " ", cvu.left_peakon)
+	vfd.left.peakoff = loadImage(cvu.left_peakoff)
+--	log:info("vfd.left.peakoff = loadImage(cvu.left.peakoff)", vfd.left.peakoff , " ", cvu.left_peakoff)
 
-	vfd.right.on = loadImage(vfdImageSources[r_bar_on])
-	vfd.right.off = loadImage(vfdImageSources[r_bar_off])
-	vfd.right.peakon = loadImage(vfdImageSources[r_bar_peak_on])
-	vfd.right.peakoff = loadImage(vfdImageSources[r_bar_peak_off])
+	vfd.right.on = loadImage(cvu.right_on)
+--	log:info("vfd.right.on = loadImage(cvu.right_on)", vfd.right.on , " ", cvu.right_on)
+	vfd.right.off = loadImage(cvu.right_off)
+--	log:info("vfd.right.off = loadImage(cvu.right_off)", vfd.right.off , " ", cvu.right_off)
+	vfd.right.peakon = loadImage(cvu.right_peakon)
+--	log:info("vfd.right.peakon = loadImage(cvu.right_peakon)", vfd.right.peakon , " ", cvu.right_peakon)
+	vfd.right.peakoff = loadImage(cvu.right_peakoff)
+--	log:info("vfd.right.peakoff = loadImage(cvu.right_peakoff)", vfd.right.peakoff , " ", cvu.right_peakoff)
 
-	vfd.leftlead = loadImage(vfdImageSources[left])
-	vfd.rightlead = loadImage(vfdImageSources[right])
-	vfd.lefttrail = loadImage(vfdImageSources[left_trail])
-	vfd.righttrail = loadImage(vfdImageSources[right_trail])
-	vfd.center = loadImage(vfdImageSources[center])
+	vfd.leftlead = loadImage(cvu.left_lead)
+--	log:info("vfd.leftlead = loadImage(cvu.left_lead)", vfd.leftlead , " ", cvu.left_lead)
+	vfd.rightlead = loadImage(cvu.right_lead)
+--	log:info("vfd.rightlead = loadImage(cvu.right_lead)", vfd.rightlead , " ", cvu.right_lead)
+	vfd.lefttrail = loadImage(cvu.left_trail)
+--	log:info("vfd.lefttrail = loadImage(cvu.left_trail)", vfd.lefttrail , " ", cvu.left_trail)
+	vfd.righttrail = loadImage(cvu.right_trail)
+--	log:info("vfd.righttrail = loadImage(cvu.right_trail)", vfd.righttrail , " ", cvu.right_trail)
+	vfd.center = loadImage(cvu.centre)
+--	log:info("vfd.center = loadImage(cvu.centre)", vfd.center , " ", cvu.centre)
 
 	local bw, bh = vfd.left.on:getSize()
 	local lw, lh = vfd.leftlead:getSize()
@@ -1190,9 +1275,12 @@ local function getVFDVUmeter(name, w, h)
 	local cw, ch = vfd.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
-	local barwidth = math.floor((cw - lw)/49)
+--	local barwidth = math.floor((cw - lw)/49)
+	local barwidth = cvu.step
 	local calcbw = (cw - lw - tw)/49
---	log:debug("#### bw:", bw, " barwidth:", barwidth)
+	if calcbw ~= barwidth then
+		log:warn("  barwidth:", barwidth, " calcbw:", calcbw)
+	end
 	-- vfd.bar_rxo= barwidth - bw
 	vfd.left.bar_rxo= 0
 	vfd.right.bar_rxo= 0
@@ -1329,7 +1417,7 @@ function enumerateResizableSpectrumMeters(_, all)
 	for _, v in pairs(spectrumList) do
 		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
-                -- FIXME this test may not be enough
+				-- FIXME this test may not be enough
 				if spectrumImagesMap[v.name].properties[1].src_fg ~= nil then
 					table.insert(spMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
