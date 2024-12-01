@@ -13,7 +13,11 @@ files["share/jive/jive/visImage.lua"] = {
        "getWorkspacePath",
        "getDefaultWorkspacePath",
        "setVisSettings",
-       "resizeVisualisers","concurrentResizeVuMeter",
+       "resizeVisualisers",
+       "concurrentResizeVuMeter",
+       "concurrentResizeSpectrumMeter",
+       "enumerateResizableSpectrumMeters",
+       "enumerateResizableVuMeters",
    }
 }
 files["share/jive/jive/vis/SpectrumMeter.lua"] = {
@@ -84,6 +88,15 @@ files["share/jive/applets/Visualiser/VisualiserMeta.lua"] = {
    },
    read_globals = {
        "_M", "jive", "appletManager", "jiveMain", "jnt",
+   }
+}
+
+files["share/jive/applets/Visualiser/VisualiserApplet.lua"] = {
+   globals = {
+       "init",
+   },
+   read_globals = {
+       "_M", "appletManager", "jiveMain",
    }
 }
 
