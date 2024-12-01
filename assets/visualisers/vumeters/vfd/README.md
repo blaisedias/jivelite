@@ -1,15 +1,19 @@
-# VFD (Vaccuum Fluorescent Display) simulation
+# Composite VU meter
 
 Artwork created by Blaise Dias (2023-2024)
+Copying-policy:	Public Domain
+License: "CC-BY-SA-4.0"
 
-* Cyan Orange Chevrons
-* Green Red Bars
-* Green Red Chevrons
-* Pastel Green Red Bars
-* Pastel Green Red Chevrons
+* Bars Green Red
+* Bars Pastel Green Red
+* Chevrons Cyan Orange
+* Chevrons Green Red
+* Chevrons Pastel Green Red
+* Chevrons White Orange
 * RS-M250
 * RS-M250 Cyan
-* White Orange Chevrons
+* Wings Cyan Orange
+* Wings Pastel Green Red
 
 Tools used:
 * gimp https://www.gimp.org/
