@@ -1163,7 +1163,7 @@ local function getCompose1VUmeter(name, w, h)
 		return c1vu
 	end
 	-- FIXME: workaround. shouldn't be necessary but fixes a corner case
-	imCacheClear()
+	-- imCacheClear()
 
 	local cvu = compositeVuMeters[name]
 	local bar_on = name .. ":bar-on"
@@ -1375,40 +1375,6 @@ function enumerateResizableSpectrumMeters(_, all)
 	return spMeters
 end
 
-function concurrentResizeSpectrumMeter(_, name, w, h)
-----	log:info("concurrentResizeSpectrumMeter ", name, ", ", w, ", ", h)
---	for _, v in pairs(spectrumList) do
---		if name == v.name then
---			-- create the resized images for skin resolutions
---			if spectrumImagesMap[v.name].src_fg ~= nil then
---				local path = spectrumImagesMap[v.name].src_fg
---				local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
---				local dcpath = resizedImagePath(dicKey)
---				if resizedImagesTable[dicKey] ~= nil then
---					return true
---				end
---				local ok
---				if v.spType == SPT_BACKLIT then
---					ok = Surface:requestResize(path, dcpath, w, h, 0,
---												RESIZEOP_SCALED_CENTERED_CROP,
---												saveimage_type) == 1
---				elseif v.spType == SPT_IMAGE then
---					ok = Surface:requestResize(path, dcpath, w, h, 0,
---												RESIZEOP_FILL,
---												saveimage_type) == 1
---				else
---					ok = true
---				end
---				if ok then
---					resizedImagesTable[dicKey] = dcpath
---					return true
---				end
---			end
---		end
---	end
-	return false
-end
-
 function resizeVisualisers(_, w, h, rszs, rszOp)
 	local resized = true
 	for _, rsz in ipairs(rszs) do
@@ -1424,6 +1390,40 @@ function resizeVisualisers(_, w, h, rszs, rszOp)
 	end
 	return resized
 end
+
+function concurrentResizeSpectrumMeter(_, name, w, h)
+--	log:info("concurrentResizeSpectrumMeter ", name, ", ", w, ", ", h)
+	for _, v in pairs(spectrumList) do
+		if name == v.name then
+			-- create the resized images for skin resolutions
+			local rszs = {}
+			for _, prop in ipairs(spectrumImagesMap[name].properties) do
+				if prop.src_fg ~= nil then
+					table.insert(rszs, {
+						key = "for-" .. w .. "x" .. h .. "-" ..  prop.fg,
+						src = prop.src_fg}
+					)
+				end
+				if prop.src_bg ~= nil then
+					table.insert(rszs, {
+						key = "for-" .. w .. "x" .. h .. "-" ..  prop.bg,
+						src = prop.src_bg}
+					)
+				end
+				if prop.src_ds ~= nil then
+					table.insert(rszs, {
+						key = "for-" .. w .. "x" .. h .. "-" ..  prop.ds,
+						src = prop.src_ds}
+					)
+				end
+			end
+			return resizeVisualisers(_, w, h, rszs, spectrumImagesMap[name].rszOp)
+		end
+	end
+	log:warn("concurrentResizeSpectrumMeter spectrum meter not found ", name)
+	return false
+end
+
 
 function enumerateResizableVuMeters(_, all)
 	local vMeters = {}
