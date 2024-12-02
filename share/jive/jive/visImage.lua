@@ -1365,8 +1365,10 @@ function enumerateResizableSpectrumMeters(_, all)
 	for _, v in pairs(spectrumList) do
 		if (v.spType == SPT_BACKLIT or v.spType == SPT_IMAGE) and (all or v.enabled) then
 			for _, vr in pairs(spectrumResolutions) do
-				-- FIXME this test may not be enough
-				if spectrumImagesMap[v.name].properties[1].src_fg ~= nil then
+				local has_fg = spectrumImagesMap[v.name].properties[1].src_fg ~= nil
+				local has_bg = spectrumImagesMap[v.name].properties[1].src_bg ~= nil
+				local has_ds = spectrumImagesMap[v.name].properties[1].src_ds ~= nil
+				if has_fg or has_bg or has_ds then
 					table.insert(spMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
 			end
