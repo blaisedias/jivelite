@@ -589,7 +589,13 @@ local function _populateSpectrum(search_root)
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
 				if jsData ~= nil then
 					if jsData.kind == "spectrum-meter" then
-						__addSpectrum(path, jsData)
+						-- if the name is absent from the metadata,
+						-- then name is set to the basename of the path to the metadata file
+						if jsData.name == nil then
+							jsData.name = entry
+						end
+--						__addSpectrum(path, jsData)
+						pcall(__addSpectrum, path, jsData)
 					end
 				end
 			end
@@ -1028,11 +1034,18 @@ local function _populateVuMeterList(search_root)
 				local jsData = loadJsonFile(path .. "/" .. "meta.json")
 				if jsData ~= nil then
 					if jsData.kind == "vumeter" then
+						-- if the name is absent from the metadata,
+						-- then name is set to the basename of the path to the metadata file
+						if jsData.name == nil then
+							jsData.name = entry
+						end
 						if  vuLoaded[jsData.name] == nil then
 							if jsData.vutype == "frames" then
-								addFrameVUMeter(jsData, path)
+--								addFrameVUMeter(jsData, path)
+								pcall(addFrameVUMeter, jsData, path)
 							elseif jsData.vutype == "compose1" then
-								addCompose1VUMeter(jsData, path)
+--								addCompose1VUMeter(jsData, path)
+								pcall(addCompose1VUMeter, jsData, path)
 							else
 								log:warn("VU meter ",jsData.name," unknown type " , jsData.vutype, " at ", path)
 							end
