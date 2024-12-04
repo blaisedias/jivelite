@@ -1000,6 +1000,10 @@ local function addCompose1VUMeter(jsData, path)
 	end
 	cvu["centre"] = path .. "/" .. jsData.files.centre
 	cvu.step = jsData.step
+	cvu.maxVU = 50
+	if jsData.maxVolumeUnits ~= nil and type(jsData.maxVolumeUnits) == 'number' then
+		cvu.maxVU = jsData.jsData.maxVolumeUnits
+	end
 
 	compositeVuMeters[cvu.name] = cvu
 --	for k,v in pairs(cvu) do
@@ -1252,7 +1256,9 @@ local function getCompose1VUmeter(name, w, h)
 		c1vu.h = dh
 	else
 		local sf = math.min(w/dw, h/dh)
---		log:debug("#### c1vu : sf : ", sf)
+		log:info("compose1 : raw scaling factor      : ", sf, " scaled barwidth:", barwidth * sf)
+		sf = math.floor(barwidth * sf)/barwidth
+		log:info("compose1 : adjusted scaling factor : ", sf, " scaled barwidth:", barwidth * sf)
 		barwidth = math.floor(barwidth * sf)
 		calcbw = math.floor(calcbw * sf)
 		bw = math.floor(bw * sf)
@@ -1290,6 +1296,8 @@ local function getCompose1VUmeter(name, w, h)
 	c1vu.lh = lh
 	c1vu.cw = cw
 	c1vu.ch = ch
+    c1vu.db0 = math.ceil(cvu.maxVU * 0.72)
+    c1vu.maxVU = cvu.maxVU
 --	log:debug("####  c1vu.w:", c1vu.w, " c1vu.h:", c1vu.h)
 --	log:debug("####  c1vu.bw:", c1vu.bw, " c1vu.bh:", c1vu.bh, " c1vu.lw:", c1vu.lw, " c1vu.lh", c1vu.lh)
 --	log:debug("####  c1vu.cw:", c1vu.cw, " c1vu.ch", c1vu.ch)
