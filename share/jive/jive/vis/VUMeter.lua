@@ -109,7 +109,9 @@ local function drawVuMeter(params, surface, vol)
 	end
 end
 
-local function drawCompose1(params, surface, vol)
+local function drawCompose1(params, surface, volIn)
+	local vol = math.min(params.maxVU - 1, (volIn * params.maxVU)/#RMS_MAP)
+
 	-- add compose1 bar render x offset here
 	if vol >= params.cap then
 		params.cap = vol
@@ -127,9 +129,10 @@ local function drawCompose1(params, surface, vol)
 	local bw = params.compose1.bw
 	local bh = params.compose1.bh
 	local h = params.compose1.h
+	local iDB0 = params.db0 + 1
 
-    -- 1 = 0 => no bars ON -
-	for i = 2, 37 do
+	-- 1 = 0 => no bars ON -
+	for i = 2, iDB0 do
 		if i <= vol or i == cap then
 			params.compose1.on:blit(surface, x, y, bw, bh)
 		else
@@ -137,7 +140,7 @@ local function drawCompose1(params, surface, vol)
 		end
 		x = x + params.compose1.barwidth
 	end
-	for i = 38, 50 do
+	for i = iDB0+1, params.maxVU do
 		if i <= vol or i == cap then
 			params.compose1.peakon:blit(surface, x, y, bw, h)
 		else
@@ -241,12 +244,12 @@ function _layout(self)
 		end
 		if self.vutbl.vutype == "frames" then
 			if self.vutbl.imageFrames[1] ~= nil then
-                -- FIXME: frame images for multiple channels must have the same characteristics.
+				-- FIXME: frame images for multiple channels must have the same characteristics.
 				local imgW, imgH = self.vutbl.imageFrames[1]:getSize()
 				log:info("frame count: ", self.vutbl.jsData.framecount)
 				local frame_w = imgW/self.vutbl.jsData.framecount
 				-- place the VUMeter images within the designated space
-                -- with equal spacing on the left, right and centre
+				-- with equal spacing on the left, right and centre
 				local spacing = math.floor((w - frame_w - frame_w)/3)
 				local lx = x + spacing
 				local rx = lx + frame_w + spacing
@@ -261,10 +264,10 @@ function _layout(self)
 				end
 				self.left  = { img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount
-                            }
+							}
 				self.right = { img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount
-                            }
+							}
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
 							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
@@ -281,8 +284,18 @@ function _layout(self)
 			local compose1x = x + math.floor((w - self.compose1.w)/2)
 			local y1 = y + math.floor((h - self.compose1.h)/2)
 			local y2 = y1 + self.compose1.bh + self.compose1.ch
-			self.left =  {x=(compose1x + self.compose1.lw), y=y1, cap=0, peak_hold_counter=0, compose1=self.compose1.left}
-			self.right = {x=(compose1x + self.compose1.lw), y=y2, cap=0, peak_hold_counter=0, compose1=self.compose1.right}
+			self.left =  {
+				x=(compose1x + self.compose1.lw), y=y1, cap=0, peak_hold_counter=0,
+				maxVU = self.compose1.maxVU,
+				db0 = self.compose1.db0,
+				compose1=self.compose1.left
+			}
+			self.right = {
+				x=(compose1x + self.compose1.lw), y=y2, cap=0, peak_hold_counter=0,
+				maxVU = self.compose1.maxVU,
+				db0 = self.compose1.db0,
+				compose1=self.compose1.right
+			}
 			self.drawMeter = drawCompose1
 
 			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right}
