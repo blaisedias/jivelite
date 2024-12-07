@@ -82,20 +82,20 @@ end
 function init(self)
     local settings = self:getSettings()
 
-    jiveMain:addItem({
-        id = "vic",
-        node = 'visualiserSettings',
-        text = self:string("VISUALISER_CACHE_IMAGE_RAM"),
-        style = 'item_choice',
-        weight = 50,
---        check = Checkbox("checkbox", function(applet, checked)
-        check = Checkbox("checkbox", function(_, checked)
-            local cb_settings = self:getSettings()
-            cb_settings.cacheEnabled = checked
-            self:storeSettings()
-            end,
-            settings.cacheEnabled)
-    })
+--    jiveMain:addItem({
+--        id = "vic",
+--        node = 'visualiserSettings',
+--        text = self:string("VISUALISER_CACHE_IMAGE_RAM"),
+--        style = 'item_choice',
+--        weight = 50,
+----        check = Checkbox("checkbox", function(applet, checked)
+--        check = Checkbox("checkbox", function(_, checked)
+--            local cb_settings = self:getSettings()
+--            cb_settings.cacheEnabled = checked
+--            self:storeSettings()
+--            end,
+--            settings.cacheEnabled)
+--    })
 
     jiveMain:addItem({
         id = "viseqrand",
