@@ -1,2 +1,2 @@
-CFLAGS += -DUSERPATH=\"userpath-visu5\"
+CFLAGS += -DUSERPATH=\"userpath-vis\"
 
