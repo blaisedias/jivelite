@@ -1016,7 +1016,7 @@ local function addCompose1VUMeter(jsData, path)
 --	for k,v in pairs(cvu) do
 --		log:info("cvu: ", k, " : ", v)
 --	end
-	table.insert(vuImages, {name=jsData.name, enabled=false, displayName='c1-' .. jsData.name, vutype="compose1"})
+	table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="compose1"})
 end
 
 local function addFrameVUMeter(jsData, path)
