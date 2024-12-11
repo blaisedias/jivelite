@@ -77,6 +77,12 @@ local appletManager          = appletManager
 
 local BLACK_BACKGROUND       = false
 
+-- empirical values to adjust for decent rendering when progress bar 
+-- is displayed in spectrum and vu meter now playing views (no art)
+local PGBAR_HEIGHT           = 40
+local PGBAR_ADJUST           = 25
+local PGBAR_Y_OFFSET         = 25
+
 module(..., Framework.constants)
 oo.class(_M, Applet)
 
@@ -814,8 +820,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local FIVE_ITEM_HEIGHT = 45
 	local TITLE_BUTTON_WIDTH = 76
 
-	local VU_H = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38)
-	local SP_H = screenHeight - TITLE_HEIGHT - 67 - 38 - 38
+	local VU_H = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38) - PGBAR_ADJUST
+	local SP_H = screenHeight - TITLE_HEIGHT - 67 - 38 - 38 - PGBAR_ADJUST
 	local VU_ONLY_H = screenHeight - 38 - 38
 	local SP_ONLY_H = screenHeight - 38 - 38
 	local mini_visu_H =  screenHeight - 100 - (TITLE_HEIGHT + 65) - 120
@@ -3727,8 +3733,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			zOrder = 3,
 			position = LAYOUT_NONE,
 			x = 10,
-			y = TITLE_HEIGHT + 20,
-			h = 60,
+			y = TITLE_HEIGHT + 20 +  PGBAR_Y_OFFSET,
+--			h = 60,
+			h = PGBAR_HEIGHT,
 			w = screenWidth - 30,
 			elapsed = {
 				w = 60,
@@ -3746,7 +3753,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				h = 29,
 				w = WH_FILL,
 				zOrder = 10,
-				padding = { 0, 19, 0, 15 },
+--				padding = { 0, 19, 0, 15 },
+				padding = { 0, 0, 0, 0 },
 				horizontal = 1,
 				bgImg = false,
 				img = _vizProgressBar,
@@ -3756,7 +3764,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 		npprogressNB = {
 			x = screenWidth - 80,
-			y = TITLE_HEIGHT + 22,
+--			y = TITLE_HEIGHT + 22,
+			y = TITLE_HEIGHT + 20 + PGBAR_Y_OFFSET,
 			h = 38,
 		},
 	})
@@ -3768,7 +3777,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			hidden = 0,
 			position = LAYOUT_NONE,
 			x = 0,
-			y = 2 * TITLE_HEIGHT + 4,
+			y = 2 * TITLE_HEIGHT + 4 + PGBAR_ADJUST,
 			w = screenWidth,
 --			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
 			h = SP_H,
@@ -4061,7 +4070,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			hidden = 0,
 			position = LAYOUT_NONE,
 			x = 0,
-			y = TITLE_HEIGHT + 63,
+			y = TITLE_HEIGHT + 63 + PGBAR_ADJUST,
 			w = screenWidth,
 --			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
 			h = VU_H,
