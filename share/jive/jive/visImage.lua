@@ -24,7 +24,7 @@ local lfs	= require("lfs")
 local os	= require("os")
 local io	= require("io")
 
-local ipairs, pairs = ipairs, pairs
+local ipairs, pairs, tonumber = ipairs, pairs, tonumber
 local pcall, type = pcall, type
 local coroutine, package	= coroutine, package
 
@@ -440,6 +440,7 @@ local channelFlips  = {
 local spImageIndex = 1
 local spectrumImagesMap = {}
 local spectrumResolutions = {}
+local spLoaded = {}
 
 function registerSpectrumResolution(_, w,h)
 	log:debug("registerSpectrumResolution", w, " x ", h)
@@ -451,44 +452,13 @@ function getSpectrumMeterList()
 	return spectrumList
 end
 
---function getSpectrumSettings()
---	local settings = {}
---	for _,v in ipairs(spectrumList) do
---		settings[v.name]={enabled=v.enabled, spType=v.spType, barColor=v.barColor, capColor=v.capColor}
---	end
---	return settings
---end
-
--- Workaround for mono-colour spectrums
--- if not present in settings add them
--- if present in settings then use those settings
-local function initColourSpectrums()
-	local csp ={
-		{
-			name="mc-White",   enabled=false, spType=SPT_COLOUR,
-			barColor=0xf0f0f0ff, capColor=0xffffffff, desatColor=0xc0c0c080
-		},
-		{
-		 name="mc-Yellow",  enabled=false, spType=SPT_COLOUR,
-			barColor=0xffff00ff, capColor=0xffff00ff, desatColor=0xd0d00080
-		},
-		{
-			name="mc-Cyan",	enabled=false, spType=SPT_COLOUR,
-			barColor=0x00ffffff, capColor=0x00ffffff, desatColor=0x00d0d080
-		},
-		{
-			name="mc-Green",   enabled=false, spType=SPT_COLOUR,
---			barColor=0x00d000ff, capColor=0x00d000ff, desatColor=0x00d000a0
-			barColor=0x00ff00ff, capColor=0x00ff00ff, desatColor=0x00d00080
-		},
-	}
-	for _,c in pairs(csp) do
-		table.insert(spectrumList, c)
-	end
-end
-
 local function __addSpectrum(path, jsData)
+	if spLoaded[jsData.name] == true then
+		log:warn("spectrum meter ", jsData.name, " has already been defined ignoring ", path)
+		return
+	end
 	if spectrumImagesMap[jsData.name] ~= nil then
+		log:error("spectrum meter ", jsData.name, " has already been defined ignoring ", path)
 		return
 	end
 
@@ -556,6 +526,7 @@ local function __addSpectrum(path, jsData)
 		},
 		rszOp = rszOp,
 	}
+	spLoaded[jsData.name] = true
 	if jsData.backlitAlpha ~= nil then
 		if type(jsData.backlitAlpha) == 'number' and jsData.backlitAlpha >1 and jsData.backlitAlpha < 256 then
 			spectrumImagesMap[imgName].backlitAlpha = jsData.backlitAlpha
@@ -603,17 +574,53 @@ local function _populateSpectrum(search_root)
 	end
 end
 
+-- convert a value to an integer
+local function toInteger(v)
+	if type(v) == 'number' then
+		return math.floor(v)
+	end
+	if type(v) == 'string' then
+		local i,j = string.find(v, "0x")
+		if i == 1 then
+			return tonumber(string.sub(v, j + 1), 16)
+		end
+		return math.floor(tonumber(v))
+	end
+	return nil
+end
+
 local function _scanSpectrum(rpath)
 	for search_root in findPaths(rpath) do
 		_populateSpectrum(search_root)
+		local jsData = loadJsonFile(search_root .. "/colours.json")
+		if jsData ~= nil then
+			if jsData.kind == "spectrum-meter" and jsData.sptype == SPT_COLOUR then
+				for _, v in pairs(jsData.colours) do
+					local entry = {
+						name=v.name, enabled=false, sptype = jsData.sptype,
+						barColor = toInteger(v.barColor),
+						capColor = toInteger(v.capColor),
+						desatColor = toInteger(v.desatColor)
+					}
+					if entry.barColor ~= nil and entry.capColor ~= nil and entry.desatColor ~= nil then
+						if spLoaded[v.name] ~= true then
+							table.insert(spectrumList, entry)
+							spLoaded[v.name] = true
+						else
+							log:warn("Spectrum meter ", v.name," has been defined before, ignoring redefinition in (", search_root .. "/colours.json", ")")
+						end
+					else
+						log:warn("spectrum: colour: invalid values for ", v.name)
+					end
+				end
+			end
+		end
 	end
 end
 
 local function initSpectrumList()
 	spectrumList = {}
 	spectrumImagesMap = {}
-
-	initColourSpectrums()
 
 	local relativePath = "assets/visualisers/spectrum"
 	if workSpace ~= System.getUserDir() then
@@ -629,7 +636,7 @@ local function enableOneSpectrumMeter()
 		-- try to select a meter which does not require a resize
 		-- 1: try white colour
 		for _, v in pairs(spectrumList) do
-			if v.name == "mc-White" and v.spType == "colour" then
+			if v.name == "White" and v.spType == "colour" then
 				v.enabled = true
 				enabled_count = 1
 			end
@@ -916,6 +923,7 @@ local vuImageIndex = 1
 local vuImagesMap = {}
 local vuMeterResolutions = {}
 local compositeVuMeters = {}
+local vuLoaded = {}
 
 function registerVUMeterResolution(_, w,h)
 	log:debug("registerVUMeterResolution ", w, " x ", h)
@@ -926,7 +934,6 @@ function getVuMeterList()
 	return vuImages
 end
 
-local vuLoaded = {}
 
 local function addCompose1VUMeter(jsData, path)
 	log:info("VUMeter compose1: ", jsData.name)
@@ -1296,8 +1303,8 @@ local function getCompose1VUmeter(name, w, h)
 	c1vu.lh = lh
 	c1vu.cw = cw
 	c1vu.ch = ch
-    c1vu.db0 = math.ceil(cvu.maxVU * 0.72)
-    c1vu.maxVU = cvu.maxVU
+	c1vu.db0 = math.ceil(cvu.maxVU * 0.72)
+	c1vu.maxVU = cvu.maxVU
 --	log:debug("####  c1vu.w:", c1vu.w, " c1vu.h:", c1vu.h)
 --	log:debug("####  c1vu.bw:", c1vu.bw, " c1vu.bh:", c1vu.bh, " c1vu.lw:", c1vu.lw, " c1vu.lh", c1vu.lh)
 --	log:debug("####  c1vu.cw:", c1vu.cw, " c1vu.ch", c1vu.ch)
@@ -1596,5 +1603,4 @@ function initialiseCache()
 end
 
 function initialise()
-
 end
