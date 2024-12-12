@@ -12,6 +12,9 @@ Select Spectrum Meters for display - multiple Spectrum Meters can be selected.
   * **Channel Flip:** Select spectrum analyzer bar frequency ordering.
   * **Show Caps:** Display peak caps on spectrum analyzer bars (decaying).
   *Note:* show peak caps does not work if *Turbine* is selected (see below).
+  * Fill to caps none: space between current level and previous cap is not rendered
+  * Fill to caps semi: space between current level and decaying cap value is filled with desaturated colour/image content
+  * Fill to caps: space between current level and decaying cap value is filled with "foreground" colour/image content
   * **Turbine:** Render the spectrum analyzer as bidirectional bars from a baseline which centered vertically.
 * **Randomise Visualiser Image Sequence:**
     When multiple spectrum analyzers and VU meters are enabled, the visualiser image selected for display changes when the track changes.
