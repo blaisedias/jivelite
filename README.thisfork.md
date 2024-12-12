@@ -200,7 +200,7 @@ The images are relatively small and any resizing operation is performed synchron
 Spectrum meters can now be rendered using images.
 There are 3 classes of spectrum meters
 * colour
-  * these are predefined in the code
+  * these are defined in the file `assets/visualisers/spectrum/colours.json`
 * image (gradient)
   * sections of the image are "revealed" in accordance with spectrum amplitude values.
 * backlit
@@ -233,6 +233,39 @@ Jivelite derives the handling required for each spectrum meter based on the meta
 The metadata schema for Spectrum meter metadata is *TO DO*
 
 ### Examples:
+#### Colours
+```
+{
+    "kind": "spectrum-meter",
+    "sptype": "colour",
+    "colours": [
+        {
+            "name" : "White",
+            "barColor" : "0xf0f0f0ff",
+            "capColor" : "0xffffffff",
+            "desatColor" : "0xc0c0c080"
+        },
+        {
+            "name" : "Yellow",
+            "barColor" : "0xffff00ff",
+            "capColor" : "0xffff00ff",
+            "desatColor" : "0xd0d00080"
+        },
+        {
+            "name" : "Cyan",
+            "barColor" : "0x00ffffff",
+            "capColor" : "0x00ffffff",
+            "desatColor" : "0x00d0d080"
+        },
+        {
+            "name" : "Green",
+            "barColor" : "0x00ff00ff",
+            "capColor" : "0x00ff00ff",
+            "desatColor" : "0x00d00080"
+        }
+    ]
+}
+```
 #### Backlit
 ```
 {
@@ -276,13 +309,25 @@ Images are treated as source images to render spectrum meter typically as gradie
 The resizing strategy for these images is to expand and compress to fit, without preserving the aspect ratio.
 An image consisting of a single vertical line with different colours would suffice.
 
+# User defined visualisers
+User defined visualisers can be added at 
+* `/home/<username>/.jivelite/userpath-visu5/assets/visualisers`
+  * `spectrum`
+  * `vumeters`
+* `<workspace>/assets`
+  * `spectrum`
+  * `vumeters`
+
+The location of files and formats must match that described in the preceding sections.
+
+User defined visualisers replace those included by default if they have the same name.
+
 # Known issues
 Resizing images on the target can produce stutters in the UI in the NowPlaying views.
 
 To a large extent this has been addressed by caching the output of resize operations so should occur just once
 
-Even with caching loading a resized image consumes time, and can result in a noticeable delay.
-
+Occassionally transitioning to a now playing screen, results in sluggish rendering. Cycling through now playing views fixes the rendering.
  
 # Thanks
 Thanks to those involved in creating and maintaining Jivelite,
