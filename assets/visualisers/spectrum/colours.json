@@ -1,0 +1,30 @@
+{
+    "kind": "spectrum-meter",
+    "sptype": "colour",
+    "colours": [
+		{
+			"name" : "White",
+			"barColor" : "0xf0f0f0ff",
+            "capColor" : "0xffffffff",
+            "desatColor" : "0xc0c0c080"
+		},
+		{
+		    "name" : "Yellow",
+			"barColor" : "0xffff00ff",
+            "capColor" : "0xffff00ff",
+            "desatColor" : "0xd0d00080"
+		},
+		{
+			"name" : "Cyan",
+			"barColor" : "0x00ffffff",
+            "capColor" : "0x00ffffff",
+            "desatColor" : "0x00d0d080"
+		},
+		{
+			"name" : "Green",
+			"barColor" : "0x00ff00ff",
+            "capColor" : "0x00ff00ff",
+            "desatColor" : "0x00d00080"
+		}
+    ]
+}
