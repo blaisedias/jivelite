@@ -820,6 +820,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local FIVE_ITEM_HEIGHT = 45
 	local TITLE_BUTTON_WIDTH = 76
 
+    local AUDIO_METADATA_FONT_HEIGHT = 14
+    local AUDIO_METADATA_Y = screenHeight - AUDIO_METADATA_FONT_HEIGHT
+    local AUDIO_METADATA_X = 0
+    local AUDIO_METADATA_W = screenWidth
+    local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
+
 	local VU_H = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38) - PGBAR_ADJUST
 	local SP_H = screenHeight - TITLE_HEIGHT - 67 - 38 - 38 - PGBAR_ADJUST
 	local VU_ONLY_H = screenHeight - 38 - 38
@@ -3084,6 +3090,23 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npartistalbum = {
 			hidden = 1,
 		},
+		npaudiometadata = {
+			hidden = 0,
+			zOrder = 2,
+			position = LAYOUT_NONE,
+			x = AUDIO_METADATA_X,
+			y = AUDIO_METADATA_Y,
+			w = AUDIO_METADATA_W,
+			h = AUDIO_METADATA_H,
+			bgImg = nil,
+			align = "right",
+			fg = TEXT_COLOR,
+--			fg = TEXT_COLOR_TEAL,
+			sh = TEXT_SH_COLOR,
+			padding = { 5, 0, 0, 5 },
+			font = _boldfont(AUDIO_METADATA_FONT_HEIGHT),
+		},
+
 	
 		-- cover art
 		npartwork = {
@@ -3725,7 +3748,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			align = "center",
 			fg = V_npartistalbumFg,
 			sh = TEXT_SH_COLOR,
-			padding = { 100, 0, 100, 5 },
+			padding = { 100, 0, 100, 0 },
 			font = _font(NP_ARTISTALBUM_FONT_SIZE),
 		},
 
@@ -3988,6 +4011,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				w = screenWidth - 196,
 			},
 		},
+
         npartistgroup = { hidden = 1 },
         npalbumgroup = { hidden = 1 },
         npartistalbum = { hidden = 1 },
@@ -4044,6 +4068,23 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				useVisImage = true,
 			}
 		},
+		npaudiometadata = {
+			hidden = 0,
+			zOrder = 2,
+			position = LAYOUT_NONE,
+			x = AUDIO_METADATA_X,
+			y = 0,
+			w = AUDIO_METADATA_W,
+			h = AUDIO_METADATA_H,
+			bgImg = nil,
+			align = "right",
+			fg = TEXT_COLOR,
+--			fg = TEXT_COLOR_TEAL,
+			sh = TEXT_SH_COLOR,
+			padding = { 5, 0, 0, 5 },
+			font = _font(AUDIO_METADATA_FONT_HEIGHT),
+		},
+
         nptitle = { hidden = 1 },
         npartistgroup = { hidden = 1 },
         npalbumgroup = { hidden = 1 },
@@ -4202,6 +4243,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				w = screenWidth - 196,
 			},
 		},
+
         npartistgroup = { hidden = 1 },
         npalbumgroup = { hidden = 1 },
         npartistalbum = { hidden = 1 },
