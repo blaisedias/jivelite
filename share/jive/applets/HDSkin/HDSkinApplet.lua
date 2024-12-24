@@ -2640,6 +2640,13 @@ function skin(self, s)
 	local NP_ARTISTALBUM_FONT_SIZE = math.floor(72*screenWidth/1920)
 	local NP_TRACK_FONT_SIZE = math.floor(72*screenWidth/1920)
 
+    local AUDIO_METADATA_FONT_HEIGHT = math.max(14, math.floor(14*screenHeight/600))
+    local AUDIO_METADATA_Y = screenHeight - AUDIO_METADATA_FONT_HEIGHT
+    local AUDIO_METADATA_X = 0
+    local AUDIO_METADATA_W = screenWidth
+    local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
+
+
 	local controlHeight = 66
 	local controlWidth = 100
 	local buttonPadding = 0
@@ -2744,7 +2751,23 @@ function skin(self, s)
 		npartistalbum = {
 			hidden = 1,
 		},
-	
+		npaudiometadata = {
+			hidden = 0,
+			zOrder = 2,
+			position = LAYOUT_NONE,
+			x = AUDIO_METADATA_X,
+			y = AUDIO_METADATA_Y,
+			w = AUDIO_METADATA_W,
+			h = AUDIO_METADATA_H,
+			bgImg = nil,
+			align = "right",
+			fg = TEXT_COLOR,
+--			fg = TEXT_COLOR_TEAL,
+			sh = TEXT_SH_COLOR,
+			padding = { 5, 0, 0, 5 },
+			font = _boldfont(AUDIO_METADATA_FONT_HEIGHT),
+		},
+
 		-- cover art
 		npartwork = {
 			w = coverSize,
