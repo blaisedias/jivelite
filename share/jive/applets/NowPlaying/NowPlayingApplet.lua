@@ -172,6 +172,47 @@ local function _setScrollParameters(settings)
 	Label:setScrollParameters(scroll_step_minimum, scroll_fps, font_scroll_factor)
 end
 
+local function getAudioStreamMetadata(self)
+	local settings = self:getSettings()
+	if settings.showaudiometa == true then
+		local server = self.player:getSlimServer()
+		local cmd = {'status', '-' , 1, 'tags:IgGkoQrRTuyw'}
+		server:userRequest(function(chunk,err)
+			local bitrate, contentType, samplerate, samplesize
+			if err then
+				log:warn(err)
+			else
+				local statusLoopData = chunk.data.playlist_loop[1]
+				if statusLoopData then
+					contentType = statusLoopData.type
+					bitrate = statusLoopData.bitrate
+					samplerate = statusLoopData.samplerate
+					samplesize = statusLoopData.samplesize
+
+					local stream_metadata = " " .. contentType
+					if bitrate then
+						stream_metadata = stream_metadata .. " • " .. bitrate
+					end
+					if samplerate then
+						stream_metadata = stream_metadata .. " • " .. samplerate .. " Hz"
+					end
+					if samplesize then
+						stream_metadata = stream_metadata .. " • " .. samplesize .. " bits"
+					end
+					self.audiometadata:setValue(stream_metadata .. " ")
+					log:info("audio stream metadata " .. stream_metadata)
+				else
+					log:info("no audio stream metadata")
+				end
+			end
+		end,
+		self.player:getId(),
+		cmd
+		)
+    end
+end
+
+
 function init(self)
 
 	jnt:subscribe(self)
@@ -180,6 +221,23 @@ function init(self)
 	self.cumulativeScrollTicks = 0
 
 	local settings      = self:getSettings()
+	if settings.showaudiometa == nil then
+		settings.showaudiometa = true
+	end
+	jiveMain:addItem({
+		id = "showaudiometa",
+		node = 'screenSettingsNowPlaying',
+		text = self:string("SHOW_AUDIO_METADATA"),
+		style = 'item_choice',
+		weight = 50,
+		check = Checkbox("checkbox", function(_, checked)
+			local cb_settings = self:getSettings()
+			cb_settings.showaudiometa = checked
+			self:storeSettings()
+			end,
+			settings.showaudiometa)
+	})
+
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
 	_setScrollParameters(settings)
@@ -563,6 +621,7 @@ end
 
 function _setTitleStatus(self, text, duration)
 	log:debug("_setTitleStatus", text)
+    getAudioStreamMetadata(self)
 
 	local nowPlayingTrackInfoLines = jiveMain:getSkinParam("NOWPLAYING_TRACKINFO_LINES")
 	local msgs = string.split("\n", text)
@@ -667,6 +726,8 @@ function notify_playerTrackChange(self, player, nowPlaying)
 		--no np window yet exists so don't need to create the window yet until user goes to np.
 		return
 	end
+
+    getAudioStreamMetadata(self)
 
 	if not self.snapshot then
 		self.snapshot = SnapshotWindow()
@@ -1098,6 +1159,7 @@ function _updateTrack(self, trackinfo, _, _)
 		self.albumTitle:setValue(album)
 		self.artistTitle:setValue(artist)
 		self.artistalbumTitle:setValue(artistalbum)
+		self.audiometadata:setValue("")
 		if self.scrollText then
 			self.trackTitle:animate(true)
 		else
@@ -1106,6 +1168,7 @@ function _updateTrack(self, trackinfo, _, _)
 		self.artistTitle:animate(false)
 		self.albumTitle:animate(false)
 		self.artistalbumTitle:animate(false)
+--		self.audiometadata:animate(false)
 
 	end
 end
@@ -1512,6 +1575,7 @@ function toggleNPScreenStyle(self)
 
 	log:debug('setting NP window style to: ', self.selectedStyle)
 
+    getAudioStreamMetadata(self)
 	if self.window and self.window:getStyle() == self.selectedStyle then
 		-- no need to replace this window with the same style
 		log:debug('the style of self.window matches self.selectedStyle. No need to do anything')
@@ -1576,6 +1640,7 @@ function _createUI(self)
 	self.albumTitle  = Label('npalbum', "")
 	self.artistTitle = Label('npartist', "")
 	self.artistalbumTitle = Label('npartistalbum', "")
+	self.audiometadata = Label('npaudiometadata', "")
 
 	local launchContextMenu =
 		function()
@@ -1606,6 +1671,7 @@ function _createUI(self)
 						self.artistalbumTitle:animate(false)
 						self.artistTitle:animate(false)
 						self.albumTitle:animate(false)
+--						self.audiometadata:animate(false)
 					end, true)
 
 	end
@@ -1618,6 +1684,7 @@ function _createUI(self)
 				self.artistalbumTitle:animate(true)
 				self.artistTitle:animate(true)
 				self.trackTitle:animate(false)
+--				self.audiometadata:animate(true)
 			end
 		end
 
@@ -1931,6 +1998,8 @@ function _createUI(self)
 	window:addWidget(self.npartistGroup)
 	window:addWidget(self.artistalbumTitle)
 	window:addWidget(self.artworkGroup)
+	window:addWidget(self.audiometadata)
+
 	-- Visualizer: Only load if needed
 	if npStyleHasSpectrum(self.windowStyle) or npStyleHasVuMeter(self.windowStyle) then
 		window:addWidget(self.visuGroup)
@@ -2126,6 +2195,7 @@ function showNowPlaying(self, transition, direct)
 
 		_getIcon(self, _thisTrack, self.artwork, playerStatus.remote)
 		self:_updateMode(playerStatus.mode)
+        getAudioStreamMetadata(self)
 		self:_updateTrack(trackInfo)
 		self:_updateProgress(playerStatus)
 		self:_updatePlaylist()
@@ -2165,6 +2235,7 @@ function _addScrollSwitchTimer(self)
 				self.artistalbumTitle:animate(false)
 				self.artistTitle:animate(false)
 				self.albumTitle:animate(false)
+--				self.audiometadata:animate(false)
 			end,
 			true
 		)
