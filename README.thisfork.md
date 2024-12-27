@@ -16,6 +16,7 @@ Features:
     * the complete set of controls displayed is now selectable - Joggler based skins only
     * a new control to cycle visualiser graphics has been added - Joggler based skins only
     * the `\` key cycles the visualiser graphics
+  * audio metadata on screen display - screen bottom right corner or top right corner
 
 The set of available Now Playing Views with visualisers are dependent on the selected skin.
 
@@ -321,6 +322,21 @@ User defined visualisers can be added at
 The location of files and formats must match that described in the preceding sections.
 
 User defined visualisers replace those included by default if they have the same name.
+
+# Audio metadata
+On screen display of audio metadata can be enabled or disabled in the  `Now Playing` menu.
+
+The audio metadata is retrieved by querying the Lyrion Music Server .
+
+The following parameters are displayed
+* audio stream type - flac, mp3, aac etc.
+* bit rate
+* sample rate
+* sample size
+
+Only parameters returned by the Lyrion Music Server are displayed.
+
+For example online streams may not include the sample size parameter.
 
 # Known issues
 Resizing images on the target can produce stutters in the UI in the NowPlaying views.
