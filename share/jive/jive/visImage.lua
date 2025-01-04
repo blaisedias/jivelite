@@ -636,7 +636,7 @@ local function enableOneSpectrumMeter()
 		-- try to select a meter which does not require a resize
 		-- 1: try white colour
 		for _, v in pairs(spectrumList) do
-			if v.name == "White" and v.spType == SPT_COLOUR then
+			if v.name == "Cyan" and v.spType == SPT_COLOUR then
 				v.enabled = true
 				enabled_count = 1
 			end
@@ -1093,9 +1093,9 @@ end
 local function enableOneVUMeter()
 		local enabled_count = 0
 		-- select a default, try to find a compose1 (time expensive resize not required)
-		-- 1: try "Chevrons White Orange"
+		-- 1: try "Chevrons Cyan Orange"
 		for _, v in pairs(vuImages) do
-			if v.name == "Chevrons White Orange" and v.vutype=="compose1" then
+			if v.name == "Chevrons Cyan Orange" and v.vutype=="compose1" then
 				v.enabled = true
 				enabled_count = 1
 			end
