@@ -597,7 +597,7 @@ local function _scanSpectrum(rpath)
 			if jsData.kind == "spectrum-meter" and jsData.sptype == SPT_COLOUR then
 				for _, v in pairs(jsData.colours) do
 					local entry = {
-						name=v.name, enabled=false, sptype = jsData.sptype,
+						name=v.name, enabled=false, spType = jsData.sptype,
 						barColor = toInteger(v.barColor),
 						capColor = toInteger(v.capColor),
 						desatColor = toInteger(v.desatColor)
@@ -636,7 +636,7 @@ local function enableOneSpectrumMeter()
 		-- try to select a meter which does not require a resize
 		-- 1: try white colour
 		for _, v in pairs(spectrumList) do
-			if v.name == "White" and v.spType == "colour" then
+			if v.name == "White" and v.spType == SPT_COLOUR then
 				v.enabled = true
 				enabled_count = 1
 			end
@@ -644,7 +644,7 @@ local function enableOneSpectrumMeter()
 		if enabled_count == 0 then
 			-- 2: try a colour
 			for _, v in pairs(spectrumList) do
-				if v.spType == "colour" then
+				if v.spType == SPT_COLOUR then
 					v.enabled = true
 					enabled_count = 1
 					break
