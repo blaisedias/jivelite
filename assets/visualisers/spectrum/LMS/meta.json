@@ -1,0 +1,12 @@
+{
+    "comment": "Created by Alex, https://forums.lyrion.org/member/75364-superlusche",
+    "kind": "spectrum-meter",
+    "name" : "LMSGradient",
+    "foreground": "LMSGradient.png",
+    "desaturated": "TspLMSGradient.png",
+    "sptype": "image",
+    "turbine": {
+        "foreground": "turbineLMSGradient.png",
+        "desaturated": "turbineTspLMSGradient.png"
+    }
+}
