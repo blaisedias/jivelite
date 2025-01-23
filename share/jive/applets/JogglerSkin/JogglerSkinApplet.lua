@@ -109,18 +109,11 @@ function param(self)
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
 	local midArtwork = tostring(screenHeight - 180) .. 'x' .. tostring(screenHeight - 180)
-	
-	return {
-		THUMB_SIZE = 40,
-		THUMB_SIZE_MENU = 40,
-		NOWPLAYING_MENU = false,
-		-- NOWPLAYING_TRACKINFO_LINES used in assisting scroll behavior animation on NP
-		-- 3 is for a three line track, artist, and album (e.g., SBtouch)
-		-- 2 is for a two line track, artist+album (e.g., SBradio, SBcontroller)
-		NOWPLAYING_TRACKINFO_LINES = 3,
-		POPUP_THUMB_SIZE = 120,
-		piCorePlayerStyle = 'hm_settings_pcp',
-		nowPlayingScreenStyles = { 
+	local screenAR = screenWidth/screenHeight
+    local npSS = {}
+
+    if screenAR < 3 then
+		npSS = { 
 			-- every skin needs to start off with a nowplaying style
 			{
 				style = 'nowplaying', 
@@ -219,7 +212,76 @@ function param(self)
 				suppressXofY = true,
 				suppressTitlebar = 1,
 			},
-		},
+		}
+    else
+		npSS = { 
+			-- every skin needs to start off with a nowplaying style
+			{
+				style = 'nowplaying_large_art',
+				artworkSize = maxArtwork,
+				titleXofYonly = true,
+				text = self:string("LARGE_ART_AND_TEXT"),
+			},
+			{
+				style = 'nowplaying_art_only',
+				artworkSize = maxArtwork,
+				suppressTitlebar = 1,
+				text = self:string("ART_ONLY"),
+			},
+			{
+				style = 'nowplaying_spectrum_text_art',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+			},
+			{
+				style = 'nowplaying_large_spectrum',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				trackartistalbum = true,
+				text = self:string("LARGE_SPECTRUM_ANALYZER"),
+				suppressXofY = true,
+				suppressTitleText = 1,
+			},
+			{
+				style = 'nowplaying_spectrum_only',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				suppressXofY = true,
+--				suppressTitlebar = 1,
+				trackartistalbum = true,
+				text = self:string("SPECTRUM_ANALYZER_ONLY"),
+				suppressTitlebar = 1,
+			},
+			{
+				style = 'nowplaying_vumeter_text_art',
+				artworkSize = midArtwork,
+				localPlayerOnly = 1,
+				text = self:string("VU_METER_TEXT_ART"),
+			},
+			{
+				style = 'nowplaying_vumeter_only',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				trackartistalbum = true,
+				text = self:string("VU_METER_ONLY"),
+				suppressXofY = true,
+				suppressTitlebar = 1,
+			},
+		}
+    end
+
+	return {
+		THUMB_SIZE = 40,
+		THUMB_SIZE_MENU = 40,
+		NOWPLAYING_MENU = false,
+		-- NOWPLAYING_TRACKINFO_LINES used in assisting scroll behavior animation on NP
+		-- 3 is for a three line track, artist, and album (e.g., SBtouch)
+		-- 2 is for a two line track, artist+album (e.g., SBradio, SBcontroller)
+		NOWPLAYING_TRACKINFO_LINES = 3,
+		POPUP_THUMB_SIZE = 120,
+		piCorePlayerStyle = 'hm_settings_pcp',
+        nowPlayingScreenStyles = npSS,
 	}
 end
 
