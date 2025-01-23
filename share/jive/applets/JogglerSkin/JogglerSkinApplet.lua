@@ -2958,7 +2958,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local NP_TRACK_FONT_SIZE = 36
 
 	local controlHeight = 72
-	local controlWidth = 76
+	local controlWidth = 70
 	local volumeBarWidth = 240 -- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
 	local buttonPadding = 0
 
@@ -2996,6 +2996,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local settings = appletManager:callService("getNowPlayingScreenButtons")
 	local divVolSpacing = screenWidth
 	local volSpacingInserted = false
+	local volSliderIsEnabled = false
+	-- volume controls width
+	local vc_width = 0
 	for k,v in ipairs(tbButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
 			if k > 1 then
@@ -3005,14 +3008,49 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				else
 					table.insert(buttonOrder, 'div' .. tostring(iDiv))
 				end
+--				divVolSpacing = divVolSpacing - _transportControlBorder.w
 				iDiv = iDiv + 1
-				divVolSpacing = divVolSpacing - _transportControlBorder.w
 			end
 			table.insert(buttonOrder, v)
 			if v ~= 'volSlider' then
 				divVolSpacing = divVolSpacing - controlWidth
+				volSliderIsEnabled = true
 			else
 				divVolSpacing = divVolSpacing - volumeBarWidth
+				vc_width = vc_width + volumeBarWidth
+			end
+			if (v == 'volDown' or v == 'volUp') then
+				vc_width = vc_width + controlWidth
+			end
+		end
+	end
+
+	-- FIXME:
+    -- The correct solution would be for NowPlaying to perform this task
+    -- for each NowPlaying view - that isn't possible at this time.
+	-- So we are stuck with a single value of volumeBarWidth for all NowPlaying views
+    -- The following block almost works for all cases...
+	if divVolSpacing > 0 and volSliderIsEnabled then
+		-- total width of all controls
+		local tc_width =  screenWidth - divVolSpacing
+		-- large art control width
+		local lac_width =  screenWidth - screenHeight - math.floor(controlWidth/2) - _transportControlBorder.w
+		-- if large art control width is < width of all controls, increase the volume bar width so
+		-- increase the volume bar width such that the same volume bar width works for all NowPlaying views
+		if lac_width > tc_width and vc_width ~= tc_width then
+			volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
+			divVolSpacing = divVolSpacing - (lac_width - tc_width)
+		-- if
+		-- 1) if the volume bar cannot be rendered in the large art view
+        -- 2) only volume controls are rendered
+		--    we are free to increase the volume bar width such that volume
+		--    controls use most of the right half of the screen width
+		--    (right justification)
+		elseif divVolSpacing > 0 and vc_width < (screenWidth/2) then
+			if divVolSpacing > (screenWidth/2) - vc_width then
+				local vbw_delta = (screenWidth/2) - vc_width
+				volumeBarWidth = volumeBarWidth + vbw_delta
+				divVolSpacing = divVolSpacing - vbw_delta
 			end
 		end
 	end
