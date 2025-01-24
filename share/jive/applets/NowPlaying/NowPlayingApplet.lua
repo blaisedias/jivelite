@@ -989,7 +989,7 @@ function _updateButtons(self, playerStatus)
 		else
 			self.controlsGroup:setWidget('fwd', self.fwdButton)
 		end
-		self.controlsGroup:setWidget('tiwddle', self.twiddleButton)
+		self.controlsGroup:setWidget('twiddle', self.twiddleButton)
 
 		if buttons.shuffle then
 			local callback = function()
@@ -1042,7 +1042,7 @@ function _updateButtons(self, playerStatus)
 			-- bug 15618: explicitly set style of rew and fwd here, since setWidget doesn't appear to be doing the job
 			self.controlsGroup:getWidget('rew'):setStyle('rew')
 			self.controlsGroup:getWidget('fwd'):setStyle('fwd')
-			self.controlsGroup:getWidget('twiddle'):setStyle('twiddle')
+--			self.controlsGroup:getWidget('twiddle'):setStyle('twiddle')
 		end
 	end
 end
@@ -1912,7 +1912,7 @@ function _createUI(self)
 			end
 	)
 	self.twiddleButton = Button(
-			Icon('fwd'),
+			Icon('twiddle'),
 			function()
 				self.currentVisualiser:twiddle(self.currentVisualiser)
 				return EVENT_CONSUME
