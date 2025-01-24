@@ -1,0 +1,15 @@
+{
+    "kind": "vumeter",
+    "name": "Speakers 1",
+    "vutype": "frames",
+    "framecount": 25,
+    "format:": "singleimage",
+    "files": {
+        "#channels": "convention first channel is left",
+        "frames": [
+            "vu_analog_25seq_Alex_speaker.png",
+            "vu_analog_25seq_Alex_fspeaker.png"
+        ]
+    },
+    "created-by": "https://forums.lyrion.org/member/75364-superlusche"
+}
