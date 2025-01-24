@@ -1,0 +1,15 @@
+{
+    "kind": "vumeter",
+    "name": "Record",
+    "vutype": "frames",
+    "framecount": 25,
+    "#format": "single image -> all frames in a single image file",
+    "format:": "singleimage",
+    "files": {
+        "frames": [
+            "vu_analog_25seq_Alex_record.png"
+        ]
+    },
+    "created-by": "https://forums.lyrion.org/member/75364-superlusche"
+}
+

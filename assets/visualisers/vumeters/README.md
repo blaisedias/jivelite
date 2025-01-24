@@ -4,8 +4,44 @@
 provided with kind permission by https://github.com/project-owner/PeppyMeter.doc/wiki
 * vu_analog_25seq_Peppy_Meter_Rainbow.png
 
-### Other VU meter images
-Other images are from https://github.com/ralph-irving/tcz-jivelite of which
+### Blaise Dias
+see
+* ./Array-4x6-Cyan/Array-4x6-Cyan.info
+* ./Array-4x6-GreenRed/Array-4x6-GreenRed.info
+* ./Array-4x6-RedGreen/Array-4x6-RedGreen.info
+* ./GlowBlue/vu_analog_25seq_daab_Blue_Glow.png.info
+* ./GlowDarkBlue/vu_analog_25seq_daab_DarkBlue_Glow.png.info
+* ./GlowOrange/vu_analog_25seq_daab_Orange_Glow.png.info
+* ./GlowWhite/vu_analog_25seq_daab_White_Glow.png.info
+* ./GlowYellow/vu_analog_25seq_daab_Yellow_Glow.png.info
+* ./Purple/vu_analog_25seq_daab_Purple.png.info
+* ./Purple2/vu_analog_25seq_daab_Purple2.png.info
+* ./TransparentBlack/vu_analog_25seq_daab_Float_Black.png.info
+* ./TransparentWhite/vu_analog_25seq_daab_Float_White.png.info
+* ./TubeD/vu_analog_25seq_daab_Tube.png.info
+* ./TunnelBlueRed/TunnelBlueRed.info
+* ./TunnelGreenRed/TunnelGreenRed.info
+
+### Alex Aust
+* ./Alex_blue
+* ./Alex_led
+* ./Alex_lms
+* ./Alex_record
+* ./Alex_seg1
+* ./Alex_seg2
+* ./Alex_seg3
+* ./Alex_seg4
+* ./Alex_seg5
+* ./Alex_speaker
+* ./Alex_speaker2
+* ./Alex_speaker3
+* ./Alex_speakers1
+* ./Alex_speakers2
+* ./Alex_vfd
+* ./Alex_needle
+
+### From tcz-jivelite
+The following images are from https://github.com/ralph-irving/tcz-jivelite of which
 see .info files
 * vu_analog_25seq_Blue_Glow.png
 * vu_analog_25seq_Jstraw_Dark_Peak_Rounded.png
