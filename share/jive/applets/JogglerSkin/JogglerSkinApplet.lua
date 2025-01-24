@@ -194,15 +194,15 @@ function param(self)
 				titleXofYonly = true,
 				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
 			},
---			{
---				style = 'nowplaying_large_vumeter',
---				localPlayerOnly = 1,
---				artworkSize = midArtwork,
---				trackartistalbum = true,
---				text = self:string("LARGE_VU_METER"),
---				suppressXofY = true,
---				suppressTitleText = 1,
---			},
+			{
+				style = 'nowplaying_large_vumeter',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				trackartistalbum = true,
+				text = self:string("LARGE_VU_METER"),
+				suppressXofY = true,
+				suppressTitleText = 1,
+			},
 			{
 				style = 'nowplaying_vumeter_only',
 				localPlayerOnly = 1,
@@ -258,6 +258,15 @@ function param(self)
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("VU_METER_TEXT_ART"),
+			},
+			{
+				style = 'nowplaying_large_vumeter',
+				localPlayerOnly = 1,
+				artworkSize = midArtwork,
+				trackartistalbum = true,
+				text = self:string("LARGE_VU_METER"),
+				suppressXofY = true,
+				suppressTitleText = 1,
 			},
 			{
 				style = 'nowplaying_vumeter_only',
@@ -4307,14 +4316,16 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	-- Visualizer: VU meter full screen
-	s.nowplaying_large_vumeter = _uses(s.nowplaying, {
+	s.nowplaying_large_vumeter = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
 			x = 0,
-			y = 0,
+--			y = 0,
+			y = TITLE_HEIGHT,
 			w = screenWidth,
-			h = screenHeight,
+--			h = screenHeight,
+			h = screenHeight - (TITLE_HEIGHT * 2),
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
@@ -4322,15 +4333,17 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			vumeter_analog = {
 				position = LAYOUT_CENTER,
 				x = 0,
-				y = 0,
+--				y = 0,
+				y = TITLE_HEIGHT,
 				w = screenWidth,
-				h = screenHeight,
+--				h = screenHeight,
+				h = screenHeight - (TITLE_HEIGHT * 2),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 			}
 		},
-		nptitle = { 
+		nptitle = {
 			zOrder = 2,
 			position = LAYOUT_NONE,
 			x = 80,
@@ -4352,16 +4365,16 @@ function skin0(self, s, reload, useDefaultSize, w, h)
         npprogressNB = { hidden = 1 },
 		npcontrols  = { hidden = 0 },
 	})
---	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
---
---	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
---		text = {
---			-- Hack: text needs to be there to fill the space, not visible
---			padding = { screenWidth, 0, 0, 0 }
---		},
---	})
---
---
+	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
+
+	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
+		text = {
+			-- Hack: text needs to be there to fill the space, not visible
+			padding = { screenWidth, 0, 0, 0 }
+		},
+	})
+
+
 	s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
 		nptitle = { hidden = 1 }, 
         npartistgroup = { hidden = 1 },
