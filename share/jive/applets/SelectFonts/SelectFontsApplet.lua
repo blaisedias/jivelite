@@ -55,12 +55,25 @@ local fontsdb = {
 	Genos={ regular="Genos/Genos-Regular", bold="Genos/Genos-SemiBold", },
 	Glory={ regular="Glory/Glory-Regular", bold="Glory/Glory-SemiBold", },
 	K2D={ regular="K2D/K2D-Regular", bold="K2D/K2D-SemiBold", },
+	MontserratItalic={
+        regular="Montserrat/static/Montserrat-Italic",
+        bold="Montserrat/static/Montserrat-SemiBoldItalic",
+    },
+	MontserratMedium={ regular="Montserrat/static/Montserrat-Medium", bold="Montserrat/static/Montserrat-SemiBold", },
+	MontserratRegular={ regular="Montserrat/static/Montserrat-Regular", bold="Montserrat/static/Montserrat-Bold", },
+	MontserratVariable={
+        regular="Montserrat/Montserrat-VariableFont_wght",
+        bold="Montserrat/Montserrat-Italic-VariableFont_wght"
+    },
 	MuseoModerno={ regular="MuseoModerno/MuseoModerno-Regular", bold="MuseoModerno/MuseoModerno-SemiBold", },
 	Nunito={ regular="Nunito/Nunito-Regular", bold="Nunito/Nunito-Bold", },
 	Orbitron={ regular="Orbitron/Orbitron-Regular", bold="Orbitron/Orbitron-Bold", },
 	Rajdhani={ regular="Rajdhani/Rajdhani-Regular", bold="Rajdhani/Rajdhani-SemiBold", },
 	SmoochSans={ regular="Smooch Sans/SmoochSans-Regular", bold="Smooch Sans/SmoochSans-SemiBold", },
-	Yanone_Kafeesatz={ regular="Yanone_Kafeesatz/YanoneKaffeesatz-Regular", bold="Yanone_Kafeesatz/YanoneKaffeesatz-SemiBold", },
+	Yanone_Kafeesatz={
+        regular="Yanone_Kafeesatz/YanoneKaffeesatz-Regular",
+        bold="Yanone_Kafeesatz/YanoneKaffeesatz-SemiBold",
+    },
 }
 
 function selectFontsEntryPoint(self, menuItem)
