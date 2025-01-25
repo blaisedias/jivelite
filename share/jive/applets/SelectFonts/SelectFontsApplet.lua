@@ -61,10 +61,10 @@ local fontsdb = {
     },
 	MontserratMedium={ regular="Montserrat/static/Montserrat-Medium", bold="Montserrat/static/Montserrat-SemiBold", },
 	MontserratRegular={ regular="Montserrat/static/Montserrat-Regular", bold="Montserrat/static/Montserrat-Bold", },
-	MontserratVariable={
-        regular="Montserrat/Montserrat-VariableFont_wght",
-        bold="Montserrat/Montserrat-Italic-VariableFont_wght"
-    },
+--	MontserratVariable={
+--        regular="Montserrat/Montserrat-VariableFont_wght",
+--        bold="Montserrat/Montserrat-Italic-VariableFont_wght"
+ --   },
 	MuseoModerno={ regular="MuseoModerno/MuseoModerno-Regular", bold="MuseoModerno/MuseoModerno-SemiBold", },
 	Nunito={ regular="Nunito/Nunito-Regular", bold="Nunito/Nunito-Bold", },
 	Orbitron={ regular="Orbitron/Orbitron-Regular", bold="Orbitron/Orbitron-Bold", },
