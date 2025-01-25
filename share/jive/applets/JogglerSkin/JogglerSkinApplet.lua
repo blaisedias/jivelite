@@ -3070,6 +3070,17 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local volSliderIsEnabled = false
 	-- volume controls width
 	local vc_width = 0
+	-- width when all controls are visible, use this to set volumeBarWidth up for displays
+	-- where for large art NP views the volume slider can be displayed
+	local all_tc_width = 0
+	for _,v in ipairs(tbButtons) do
+		if v == 'volSlider' then
+			all_tc_width = all_tc_width + volumeBarWidth
+		else
+			all_tc_width = all_tc_width + controlWidth
+		end
+	end
+
 	for k,v in ipairs(tbButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
 			if k > 1 then
@@ -3085,10 +3096,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			table.insert(buttonOrder, v)
 			if v ~= 'volSlider' then
 				divVolSpacing = divVolSpacing - controlWidth
-				volSliderIsEnabled = true
 			else
 				divVolSpacing = divVolSpacing - volumeBarWidth
 				vc_width = vc_width + volumeBarWidth
+				volSliderIsEnabled = true
 			end
 			if (v == 'volDown' or v == 'volUp') then
 				vc_width = vc_width + controlWidth
@@ -3097,31 +3108,33 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	-- FIXME:
-    -- The correct solution would be for NowPlaying to perform this task
-    -- for each NowPlaying view - that isn't possible at this time.
+	-- The correct solution would be for NowPlaying to perform this task
+	-- for each NowPlaying view - that isn't possible at this time.
 	-- So we are stuck with a single value of volumeBarWidth for all NowPlaying views
-    -- The following block almost works for all cases...
-	if divVolSpacing > 0 and volSliderIsEnabled then
-		-- total width of all controls
+	-- The following block almost works for all cases...
+	if divVolSpacing > 0 and vc_width ~=0 then
+		-- total width of enabled controls
 		local tc_width =  screenWidth - divVolSpacing
-		-- large art control width
+		-- available width for controls in large art NP views
 		local lac_width =  screenWidth - screenHeight - math.floor(controlWidth/2) - _transportControlBorder.w
 		-- if large art control width is < width of all controls, increase the volume bar width so
 		-- increase the volume bar width such that the same volume bar width works for all NowPlaying views
-		if lac_width > tc_width and vc_width ~= tc_width then
-			volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
-			divVolSpacing = divVolSpacing - (lac_width - tc_width)
-		-- if
-		-- 1) if the volume bar cannot be rendered in the large art view
-        -- 2) only volume controls are rendered
-		--    we are free to increase the volume bar width such that volume
-		--    controls use most of the right half of the screen width
-		--    (right justification)
-		elseif divVolSpacing > 0 and vc_width < (screenWidth/2) then
-			if divVolSpacing > (screenWidth/2) - vc_width then
-				local vbw_delta = (screenWidth/2) - vc_width
-				volumeBarWidth = volumeBarWidth + vbw_delta
-				divVolSpacing = divVolSpacing - vbw_delta
+		if volSliderIsEnabled == true then
+			if lac_width > all_tc_width and vc_width ~= tc_width then
+				volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
+				divVolSpacing = divVolSpacing - (lac_width - tc_width)
+			-- if
+			-- 1) if the volume bar cannot be rendered in the large art NP views
+			-- 2) only volume controls are rendered
+			--    we are free to increase the volume bar width such that volume
+			--    controls use most of the right half of the screen width
+			--    (right justification)
+			elseif divVolSpacing > 0 and vc_width < (screenWidth/2) then
+				if divVolSpacing > (screenWidth/2) - vc_width then
+					local vbw_delta = (screenWidth/2) - vc_width
+					volumeBarWidth = volumeBarWidth + vbw_delta
+					divVolSpacing = divVolSpacing - vbw_delta
+				end
 			end
 		end
 	end
