@@ -1,0 +1,29 @@
+{
+    "kind": "vumeter",
+    "name": "VFD2",
+    "vutype": "compose1",
+    "files": {
+        "bars" : [
+            {
+                "off": [
+                    "bar-off.png",
+                    "bar-peak-off.png"
+                ],
+                "on": [
+                    "bar-on.png",
+                    "bar-peak-on.png"
+                ]
+            }
+        ],
+        "centre": "center.png",
+        "lead": [
+            "left.png",
+            "right.png"
+        ],
+        "trail" : [
+            "left-trail.png",
+            "right-trail.png"
+        ]
+    },
+    "step": 36
+}
