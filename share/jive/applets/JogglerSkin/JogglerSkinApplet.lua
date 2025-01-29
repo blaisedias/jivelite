@@ -952,29 +952,31 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	local _songProgressBackground = _loadHTile(self, {
-		imgpath .. "Song_Progress_Bar/SP_Bar_Touch/tch_progressbar_bkgrd_l.png",
-		imgpath .. "Song_Progress_Bar/SP_Bar_Touch/tch_progressbar_bkgrd.png",
-		imgpath .. "Song_Progress_Bar/SP_Bar_Touch/tch_progressbar_bkgrd_r.png",
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd_l.png",
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd.png",
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd_r.png",
 	})
 
 	local _songProgressBar = _loadHTile(self, {
-			nil,
-			nil,
-			imgpath .. "Song_Progress_Bar/SP_Bar_Touch/tch_progressbar_slider.png"
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill_l.png",
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill.png",
+		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill_r.png",
 	})
+
+--	local _songProgressPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_slider.png")
 
 	local _songProgressBarDisabled = _loadHTile(self, {
 			nil,
 			nil,
-			imgpath .. "Song_Progress_Bar/SP_Bar_Remote/rem_progressbar_slider.png"
+			imgpath .. "UNOFFICIAL/Modern/SongProgressBar/rem_progressbar_slider.png"
 	})
 
-	local _vizProgressBar = _loadHTile(self, {
-			imgpath .. "UNOFFICIAL/viz_progress_fill_l.png",
-			imgpath .. "UNOFFICIAL/viz_progress_fill.png",
-			imgpath .. "UNOFFICIAL/viz_progress_fill_r.png",
-	})
-	local _vizProgressBarPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/viz_progress_slider.png")
+--	local _vizProgressBar = _loadHTile(self, {
+--			imgpath .. "UNOFFICIAL/viz_progress_fill_l.png",
+--			imgpath .. "UNOFFICIAL/viz_progress_fill.png",
+--			imgpath .. "UNOFFICIAL/viz_progress_fill_r.png",
+--	})
+--	local _vizProgressBarPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/viz_progress_slider.png")
 
 	local _volumeSliderBackground = _loadHTile(self, {
 		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd_l.png",
@@ -983,18 +985,36 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	local _volumeSliderBar = _loadHTile(self, {
-               imgpath .. "UNOFFICIAL/tch_volumebar_fill_l.png",
-               imgpath .. "UNOFFICIAL/tch_volumebar_fill.png",
-               imgpath .. "UNOFFICIAL/tch_volumebar_fill_r.png",
+			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_l.png",
+			   imgpath .. "UNOFFICIAL/tch_volumebar_fill.png",
+			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_r.png",
 	})
-	
+
 	local _volumeSliderPill = _loadImageTile(self, imgpath .. "Touch_Toolbar/tch_volume_slider.png")
 
 	local _popupSliderBar = _loadHTile(self, {
 		imgpath .. "Touch_Toolbar/tch_volumebar_fill_l.png",
 		imgpath .. "Touch_Toolbar/tch_volumebar_fill.png",
 		imgpath .. "Touch_Toolbar/tch_volumebar_fill_r.png",
-        })
+		})
+
+	local _modernVolumeSliderBackground = _loadHTile(self, {
+--		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd_l.png",
+--		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd.png",
+--		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd_r.png",
+		nil,
+		nil,
+		nil
+	})
+
+	local _modernVolumeSliderBar = _loadHTile(self, {
+		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill_l.png",
+		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill.png",
+		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill_r.png",
+	})
+
+	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_slider.png")
+
 
 --------- DEFAULT WIDGET STYLES ---------
 	--
@@ -3418,12 +3438,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.npvolumeB = {
 		w = volumeBarWidth,
 		border = { 5, 20, 5, 0 },
-		padding = { 6, 0, 6, 0 },
+		-- for Modern volume bar set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
+		-- note: this does not shift the slider background!
+		padding = { 6, 5, 6, 5 },
                 position = LAYOUT_SOUTH,
                 horizontal = 1,
-                bgImg = _volumeSliderBackground,
-                img = _volumeSliderBar,
-                pillImg = _volumeSliderPill,
+                bgImg = _modernVolumeSliderBackground,
+                img = _modernVolumeSliderBar,
+                pillImg = _modernVolumeSliderPill,
 	}
 	s.npvolumeB_disabled = _uses(s.npvolumeB, {
 		pillImg = false,
