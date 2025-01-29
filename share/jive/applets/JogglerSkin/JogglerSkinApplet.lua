@@ -429,7 +429,10 @@ end
 -- skin
 -- The meta arranges for this to be called to skin the interface.
 function skin0(self, s, reload, useDefaultSize, w, h)
-	
+
+    local CONTROLS_THEME_PATH = "UNOFFICIAL/Modern"
+--    CONTROLS_THEME_PATH = "UNOFFICIAL/AlexAust/Rectangles"
+
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
@@ -631,6 +634,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		nil,
 		nil,
 		imgpath .. "Text_Entry/Keyboard_Touch/keyboard_divider_vert.png",
+	})
+
+	local controlKeyMiddlePressed = _loadTile(self, {
+		imgpath .. CONTROLS_THEME_PATH .. "/Buttons/control_keyboard_button_press.png",
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
+		nil,
 	})
 
 	local sliderButtonPressed = _loadTile(self, {
@@ -952,23 +967,23 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	local _songProgressBackground = _loadHTile(self, {
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd_l.png",
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd.png",
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_bkgrd_r.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_bkgrd_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_bkgrd.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_bkgrd_r.png",
 	})
 
 	local _songProgressBar = _loadHTile(self, {
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill_l.png",
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill.png",
-		imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_fill_r.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_fill_r.png",
 	})
 
---	local _songProgressPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/Modern/SongProgressBar/tch_progressbar_slider.png")
+--	local _songProgressPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/tch_progressbar_slider.png")
 
 	local _songProgressBarDisabled = _loadHTile(self, {
 			nil,
 			nil,
-			imgpath .. "UNOFFICIAL/Modern/SongProgressBar/rem_progressbar_slider.png"
+			imgpath .. CONTROLS_THEME_PATH .. "/SongProgressBar/rem_progressbar_slider.png"
 	})
 
 --	local _vizProgressBar = _loadHTile(self, {
@@ -999,21 +1014,21 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		})
 
 	local _modernVolumeSliderBackground = _loadHTile(self, {
---		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd_l.png",
---		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd.png",
---		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_bkgrd_r.png",
+--		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_bkgrd_l.png",
+--		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_bkgrd.png",
+--		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_bkgrd_r.png",
 		nil,
 		nil,
 		nil
 	})
 
 	local _modernVolumeSliderBar = _loadHTile(self, {
-		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill_l.png",
-		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill.png",
-		imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_fill_r.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill_r.png",
 	})
 
-	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/Modern/VolumeBar/tch_volumebar_slider.png")
+	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_slider.png")
 
 
 --------- DEFAULT WIDGET STYLES ---------
@@ -2599,12 +2614,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.button_playlist.padding = { 2, 0, 0, 2 }
 
 	s.button_volume_min = {
-		img = _loadImage(self, "Icons/icon_toolbar_vol_down.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
 		border = { 5, 0, 5, 0 },
 	}
 
 	s.button_volume_max = {
-		img = _loadImage(self, "Icons/icon_toolbar_vol_up.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
 		border = { 5, 0, 5, 0 },
 	}
 
@@ -2698,18 +2713,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_popup_pause = _uses(_popupicon, {
-		img = _loadImage(self, "Icons/icon_popup_box_pause.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_pause.png"),
 	})
 
 	s.icon_popup_play = _uses(_popupicon, {
-		img = _loadImage(self, "Icons/icon_popup_box_play.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_play.png"),
 	})
 
 	s.icon_popup_fwd = _uses(_popupicon, {
-		img = _loadImage(self, "Icons/icon_popup_box_fwd.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_fwd.png"),
 	})
 	s.icon_popup_rew = _uses(_popupicon, {
-		img = _loadImage(self, "Icons/icon_popup_box_rew.png"),
+		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_rew.png"),
 	})
 
 	s.icon_popup_stop = _uses(_popupicon, {
@@ -2732,27 +2747,27 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_popup_shuffle0 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_shuffle_off.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle_off.png"),
         })
 
         s.icon_popup_shuffle1 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_shuffle.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle.png"),
         })
 
         s.icon_popup_shuffle2 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_shuffle_album.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle_album.png"),
         })
 
 	s.icon_popup_repeat0 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_repeat_off.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat_off.png"),
         })
 
         s.icon_popup_repeat1 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_repeat_song.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat_song.png"),
         })
 
         s.icon_popup_repeat2 = _uses(_popupicon, {
-                img = _loadImage(self, "Icons/icon_popup_box_repeat.png"),
+                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat.png"),
         })
 
 	s.icon_popup_sleep_15 = {
@@ -3284,49 +3299,49 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			divVolSpace = _uses(_transportControlBorder),
 
 			rew   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_rew.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_rew.png"),
 			}),
 			play  = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_play.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_play.png"),
 			}),
 			pause = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_pause.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_pause.png"),
 			}),
 			fwd   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_ffwd.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_ffwd.png"),
 			}),
 			twiddle   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_twiddle.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_twiddle.png"),
 			}),
 			shuffleMode   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_shuffle_off.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_off.png"),
 			}),
 			shuffleOff   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_shuffle_off.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_off.png"),
 			}),
 			shuffleSong  = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_shuffle_on.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_on.png"),
 			}),
 			shuffleAlbum = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_shuffle_album_on.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_album_on.png"),
 			}),
 			repeatMode   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_repeat_off.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_off.png"),
 			}),
 			repeatOff   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_repeat_off.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_off.png"),
 			}),
 			repeatPlaylist = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_repeat_on.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_on.png"),
 			}),
 			repeatSong = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_repeat_song_on.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_song_on.png"),
 			}),
 			volDown   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_vol_down.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
 			}),
 			volUp   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_vol_up.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
 			}),
 			thumbsUp   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_thumbup.png"),
@@ -3353,7 +3368,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				img = _loadImage(self, "Icons/icon_toolbar_rew_dis.png"),
 			}),
 			shuffleDisabled   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_shuffle_dis.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_dis.png"),
 			}),
 			repeatDisabled   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_repeat_dis.png"),
@@ -3438,9 +3453,11 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.npvolumeB = {
 		w = volumeBarWidth,
 		border = { 5, 20, 5, 0 },
-		-- for Modern volume bar set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
-		-- note: this does not shift the slider background!
-		padding = { 6, 5, 6, 5 },
+		-- for Modern volume bar:
+		--	  set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
+		--	  note: this does not shift the slider background!
+		--	  set right padding to 16 otherwise slider is too close to screen edge at max value
+		padding = { 6, 5, 16, 5 },
                 position = LAYOUT_SOUTH,
                 horizontal = 1,
                 bgImg = _modernVolumeSliderBackground,
@@ -3473,28 +3490,28 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.nowplaying.npartwork.pressed = s.nowplaying.npartwork
 
 	s.nowplaying.npcontrols.pressed = {
-		rew     = _uses(s.nowplaying.npcontrols.rew, { bgImg = keyMiddlePressed }),
-		play    = _uses(s.nowplaying.npcontrols.play, { bgImg = keyMiddlePressed }),
-		pause   = _uses(s.nowplaying.npcontrols.pause, { bgImg = keyMiddlePressed }),
-		fwd     = _uses(s.nowplaying.npcontrols.fwd, { bgImg = keyMiddlePressed }),
-		twiddle     = _uses(s.nowplaying.npcontrols.twiddle, { bgImg = keyMiddlePressed }),
-		repeatPlaylist  = _uses(s.nowplaying.npcontrols.repeatPlaylist, { bgImg = keyMiddlePressed }),
-		repeatSong      = _uses(s.nowplaying.npcontrols.repeatSong, { bgImg = keyMiddlePressed }),
-		repeatOff       = _uses(s.nowplaying.npcontrols.repeatOff, { bgImg = keyMiddlePressed }),
-		repeatMode      = _uses(s.nowplaying.npcontrols.repeatMode, { bgImg = keyMiddlePressed }),
-		shuffleAlbum    = _uses(s.nowplaying.npcontrols.shuffleAlbum, { bgImg = keyMiddlePressed }),
-		shuffleSong     = _uses(s.nowplaying.npcontrols.shuffleSong, { bgImg = keyMiddlePressed }),
-		shuffleMode      = _uses(s.nowplaying.npcontrols.shuffleMode, { bgImg = keyMiddlePressed }),
-		shuffleOff      = _uses(s.nowplaying.npcontrols.shuffleOff, { bgImg = keyMiddlePressed }),
-		volDown = _uses(s.nowplaying.npcontrols.volDown, { bgImg = keyMiddlePressed }),
-		volUp   = _uses(s.nowplaying.npcontrols.volUp, { bgImg = keyMiddlePressed }),
+		rew     = _uses(s.nowplaying.npcontrols.rew, { bgImg = controlKeyMiddlePressed }),
+		play    = _uses(s.nowplaying.npcontrols.play, { bgImg = controlKeyMiddlePressed }),
+		pause   = _uses(s.nowplaying.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
+		fwd     = _uses(s.nowplaying.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
+		twiddle     = _uses(s.nowplaying.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+		repeatPlaylist  = _uses(s.nowplaying.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
+		repeatSong      = _uses(s.nowplaying.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
+		repeatOff       = _uses(s.nowplaying.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
+		repeatMode      = _uses(s.nowplaying.npcontrols.repeatMode, { bgImg = controlKeyMiddlePressed }),
+		shuffleAlbum    = _uses(s.nowplaying.npcontrols.shuffleAlbum, { bgImg = controlKeyMiddlePressed }),
+		shuffleSong     = _uses(s.nowplaying.npcontrols.shuffleSong, { bgImg = controlKeyMiddlePressed }),
+		shuffleMode      = _uses(s.nowplaying.npcontrols.shuffleMode, { bgImg = controlKeyMiddlePressed }),
+		shuffleOff      = _uses(s.nowplaying.npcontrols.shuffleOff, { bgImg = controlKeyMiddlePressed }),
+		volDown = _uses(s.nowplaying.npcontrols.volDown, { bgImg = controlKeyMiddlePressed }),
+		volUp   = _uses(s.nowplaying.npcontrols.volUp, { bgImg = controlKeyMiddlePressed }),
 
-		thumbsUp    = _uses(s.nowplaying.npcontrols.thumbsUp, { bgImg = keyMiddlePressed }),
-		thumbsDown  = _uses(s.nowplaying.npcontrols.thumbsDown, { bgImg = keyMiddlePressed }),
+		thumbsUp    = _uses(s.nowplaying.npcontrols.thumbsUp, { bgImg = controlKeyMiddlePressed }),
+		thumbsDown  = _uses(s.nowplaying.npcontrols.thumbsDown, { bgImg = controlKeyMiddlePressed }),
 		thumbsUpDisabled    = s.nowplaying.npcontrols.thumbsUpDisabled,
 		thumbsDownDisabled  = s.nowplaying.npcontrols.thumbsDownDisabled,
-		love        = _uses(s.nowplaying.npcontrols.love, { bgImg = keyMiddlePressed }),
-		hate        = _uses(s.nowplaying.npcontrols.hate, { bgImg = keyMiddlePressed }),
+		love        = _uses(s.nowplaying.npcontrols.love, { bgImg = controlKeyMiddlePressed }),
+		hate        = _uses(s.nowplaying.npcontrols.hate, { bgImg = controlKeyMiddlePressed }),
 		fwdDisabled = _uses(s.nowplaying.npcontrols.fwdDisabled),
 		rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled),
 		shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled),
@@ -3680,28 +3697,28 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		s.nowplaying_large_art.npcontrols.divVolSpace = _uses(s.nowplaying_large_art.npcontrols.div1)
 
 	s.nowplaying_large_art.npcontrols.pressed = {
-		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = keyMiddlePressed }),
-		play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = keyMiddlePressed }),
-		pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = keyMiddlePressed }),
-		fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = keyMiddlePressed }),
-		twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = keyMiddlePressed }),
-		repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = keyMiddlePressed }),
-		repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = keyMiddlePressed }),
-		repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = keyMiddlePressed }),
-		repeatMode      = _uses(s.nowplaying_large_art.npcontrols.repeatMode, { bgImg = keyMiddlePressed }),
-		shuffleAlbum    = _uses(s.nowplaying_large_art.npcontrols.shuffleAlbum, { bgImg = keyMiddlePressed }),
-		shuffleSong     = _uses(s.nowplaying_large_art.npcontrols.shuffleSong, { bgImg = keyMiddlePressed }),
-		shuffleMode      = _uses(s.nowplaying_large_art.npcontrols.shuffleMode, { bgImg = keyMiddlePressed }),
-		shuffleOff      = _uses(s.nowplaying_large_art.npcontrols.shuffleOff, { bgImg = keyMiddlePressed }),
-		volDown = _uses(s.nowplaying_large_art.npcontrols.volDown, { bgImg = keyMiddlePressed }),
-		volUp   = _uses(s.nowplaying_large_art.npcontrols.volUp, { bgImg = keyMiddlePressed }),
+		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = controlKeyMiddlePressed }),
+		play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = controlKeyMiddlePressed }),
+		pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
+		fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
+		twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+		repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
+		repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
+		repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
+		repeatMode      = _uses(s.nowplaying_large_art.npcontrols.repeatMode, { bgImg = controlKeyMiddlePressed }),
+		shuffleAlbum    = _uses(s.nowplaying_large_art.npcontrols.shuffleAlbum, { bgImg = controlKeyMiddlePressed }),
+		shuffleSong     = _uses(s.nowplaying_large_art.npcontrols.shuffleSong, { bgImg = controlKeyMiddlePressed }),
+		shuffleMode      = _uses(s.nowplaying_large_art.npcontrols.shuffleMode, { bgImg = controlKeyMiddlePressed }),
+		shuffleOff      = _uses(s.nowplaying_large_art.npcontrols.shuffleOff, { bgImg = controlKeyMiddlePressed }),
+		volDown = _uses(s.nowplaying_large_art.npcontrols.volDown, { bgImg = controlKeyMiddlePressed }),
+		volUp   = _uses(s.nowplaying_large_art.npcontrols.volUp, { bgImg = controlKeyMiddlePressed }),
 
-		thumbsUp    = _uses(s.nowplaying_large_art.npcontrols.thumbsUp, { bgImg = keyMiddlePressed }),
-		thumbsDown  = _uses(s.nowplaying_large_art.npcontrols.thumbsDown, { bgImg = keyMiddlePressed }),
+		thumbsUp    = _uses(s.nowplaying_large_art.npcontrols.thumbsUp, { bgImg = controlKeyMiddlePressed }),
+		thumbsDown  = _uses(s.nowplaying_large_art.npcontrols.thumbsDown, { bgImg = controlKeyMiddlePressed }),
 		thumbsUpDisabled    = s.nowplaying_large_art.npcontrols.thumbsUpDisabled,
 		thumbsDownDisabled  = s.nowplaying_large_art.npcontrols.thumbsDownDisabled,
-		love        = _uses(s.nowplaying_large_art.npcontrols.love, { bgImg = keyMiddlePressed }),
-		hate        = _uses(s.nowplaying_large_art.npcontrols.hate, { bgImg = keyMiddlePressed }),
+		love        = _uses(s.nowplaying_large_art.npcontrols.love, { bgImg = controlKeyMiddlePressed }),
+		hate        = _uses(s.nowplaying_large_art.npcontrols.hate, { bgImg = controlKeyMiddlePressed }),
 		fwdDisabled = _uses(s.nowplaying_large_art.npcontrols.fwdDisabled),
 		rewDisabled = _uses(s.nowplaying_large_art.npcontrols.rewDisabled),
 		shuffleDisabled = _uses(s.nowplaying_large_art.npcontrols.shuffleDisabled),
@@ -3951,7 +3968,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	-- the bottom end of spectrum meter is close to 
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
-    local SP_yFudge = 5
+    local SP_yFudge = 7
 	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - 100 - SP_yFudge*2
 	visImage:registerSpectrumResolution(screenWidth, SP_H)
 	-- Visualizer: Spectrum Visualizer
@@ -4729,20 +4746,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	s.settings_volume_group = _uses(s.brightness_group, {
 		down = {
-			img = _loadImage(self, "Icons/icon_toolbar_vol_down.png"),
+			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
 		},
 		up = {
-			img = _loadImage(self, "Icons/icon_toolbar_vol_up.png"),
+			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
 		},
 	})
 	s.settings_volume_group.pressed = {
 		down = _uses(s.settings_volume_group.down, { 
 			bgImg = sliderButtonPressed,
-			img = _loadImage(self, "Icons/icon_toolbar_vol_down_dis.png"),
+			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down_dis.png"),
 		}),
 		up = _uses(s.settings_volume_group.up, { 
 			bgImg = sliderButtonPressed,
-			img = _loadImage(self, "Icons/icon_toolbar_vol_up_dis.png"),
+			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up_dis.png"),
 		}),
 	}
 
