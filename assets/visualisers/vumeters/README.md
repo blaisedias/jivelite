@@ -39,6 +39,10 @@ see
 * ./Alex_speakers2
 * ./Alex_vfd
 * ./Alex_needle
+* ./VFD2
+* ./VFD3
+* ./LED2
+* ./LED3
 
 ### From tcz-jivelite
 The following images are from https://github.com/ralph-irving/tcz-jivelite of which
