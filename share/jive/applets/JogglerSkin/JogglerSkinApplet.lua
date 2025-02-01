@@ -96,6 +96,7 @@ function init(self)
 	self.tiles = {}
 
 	jiveMain:addItem(self:buttonSettingsMenuItem())
+	jiveMain:addItem(self:buttonThemeMenuItem())
 end
 
 
@@ -429,9 +430,12 @@ end
 -- skin
 -- The meta arranges for this to be called to skin the interface.
 function skin0(self, s, reload, useDefaultSize, w, h)
+	local settings = appletManager:callService("getNowPlayingScreenButtons")
 
     local CONTROLS_THEME_PATH = "UNOFFICIAL/Modern"
---    CONTROLS_THEME_PATH = "UNOFFICIAL/AlexAust/Rectangles"
+	if settings['controlsTheme'] ~= nil then
+		CONTROLS_THEME_PATH = "UNOFFICIAL/" .. settings['controlsTheme']
+	end
 
 	Framework:setVideoMode(w, h, 0, false)
 
@@ -3085,7 +3089,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	local buttonOrder = {}
 	local iDiv = 1
-	local settings = appletManager:callService("getNowPlayingScreenButtons")
+--	local settings = appletManager:callService("getNowPlayingScreenButtons")
 	local divVolSpacing = screenWidth
 	local volSpacingInserted = false
 	local volSliderIsEnabled = false
@@ -4863,6 +4867,50 @@ function buttonSettingsMenuItem(self)
 		weight = 20,
 		callback = function(event, menuItem)
 			return self:npButtonSelectorShow() 
+		end
+	}
+end
+
+function selectControlTheme(self)
+	local window = Window("text_list", self:string('SPECTRUM_BARS_FORMAT') )
+	local menu = SimpleMenu("menu")
+	local group = RadioGroup()
+	local settings = self:getSettings()
+	local current = settings['controlsTheme']
+
+	local themes = {'Modern','Circles','Rectangles'}
+
+	for _, v in ipairs(themes) do
+		menu:addItem( {
+			text = v,
+			style = 'item_choice',
+			check = RadioButton("radio", group,
+				function()
+					local rb_settings = self:getSettings()
+					if rb_settings['controlsTheme'] ~= v then
+						rb_settings['controlsTheme']=v
+						self:storeSettings()
+						jiveMain:reloadSkin()
+					end
+				end,
+				v == current),
+		})
+	end
+
+	window:addWidget(menu)
+	window:show()
+end
+
+function buttonThemeMenuItem(self)
+	return {
+		id = "npButtonTheme",
+		iconStyle = "hm_advancedSettings",
+		node = "screenSettingsNowPlaying",
+		text = self:string("CONTROLS_THEME"),
+		sound = "WINDOWSHOW",
+		weight = 25,
+		callback = function(event, menuItem)
+			return self:selectControlTheme()
 		end
 	}
 end

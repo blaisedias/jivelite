@@ -30,6 +30,9 @@ NOW_PLAYING_BUTTONS
 	DE	Schaltflächen
 	EN	Buttons
 
+CONTROLS_THEME
+	EN	Button Style
+
 WQVGA_SMALL_SKIN
 # SLT: WQVGA refers to the "wide quarter VGA" resolution of the display
 	CS	WQVGA skin malého písma
