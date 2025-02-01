@@ -3096,9 +3096,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local all_tc_width = 0
 	for _,v in ipairs(tbButtons) do
 		if v == 'volSlider' then
-			all_tc_width = all_tc_width + volumeBarWidth
+			all_tc_width = all_tc_width + volumeBarWidth + _transportControlBorder.w
 		else
-			all_tc_width = all_tc_width + controlWidth
+			all_tc_width = all_tc_width + controlWidth + _transportControlBorder.w
 		end
 	end
 
@@ -3110,8 +3110,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 					volSpacingInserted = true
 				else
 					table.insert(buttonOrder, 'div' .. tostring(iDiv))
+				    divVolSpacing = divVolSpacing - _transportControlBorder.w
 				end
---				divVolSpacing = divVolSpacing - _transportControlBorder.w
 				iDiv = iDiv + 1
 			end
 			table.insert(buttonOrder, v)
@@ -3143,20 +3143,26 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		-- if large art control width is < width of all controls, increase the volume bar width so
 		-- increase the volume bar width such that the same volume bar width works for all NowPlaying views
 		if volSliderIsEnabled == true then
+			-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now define a fudge factor
+			local volumeBarWidthFudge = 10
 			if lac_width > all_tc_width and vc_width ~= tc_width then
 				volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
+				-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now use a fudge factor
+				volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 				divVolSpacing = divVolSpacing - (lac_width - tc_width)
 				log:info("volume slider visible in ALL NP views")
 			-- if
 			-- 1) if the volume bar cannot be rendered in the large art NP views
 			-- 2) only volume controls are rendered
-			--    we are free to increase the volume bar width such that volume
-			--    controls use most of the right half of the screen width
-			--    (right justification)
+			--		we are free to increase the volume bar width such that volume
+			--		controls use most of the right half of the screen width
+			--		(right justification)
 			elseif divVolSpacing > 0 and vc_width < (screenWidth/2) then
 				if divVolSpacing > (screenWidth/2) - vc_width then
 					local vbw_delta = (screenWidth/2) - vc_width
 					volumeBarWidth = volumeBarWidth + vbw_delta
+					-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now use a fudge factor
+					volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 					divVolSpacing = divVolSpacing - vbw_delta
 				end
 				log:info("volume slider is NOT visible in all NP views")
