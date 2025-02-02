@@ -3143,12 +3143,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		-- if large art control width is < width of all controls, increase the volume bar width so
 		-- increase the volume bar width such that the same volume bar width works for all NowPlaying views
 		if volSliderIsEnabled == true then
-			-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now define a fudge factor
-			local volumeBarWidthFudge = 10
 			if lac_width > all_tc_width and vc_width ~= tc_width then
 				volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
-				-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now use a fudge factor
-				volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 				divVolSpacing = divVolSpacing - (lac_width - tc_width)
 				log:info("volume slider visible in ALL NP views")
 			-- if
@@ -3161,14 +3157,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				if divVolSpacing > (screenWidth/2) - vc_width then
 					local vbw_delta = (screenWidth/2) - vc_width
 					volumeBarWidth = volumeBarWidth + vbw_delta
-					-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now use a fudge factor
-					volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 					divVolSpacing = divVolSpacing - vbw_delta
 				end
 				log:info("volume slider is NOT visible in all NP views")
 			end
 		end
+	elseif divVolSpacing < 0 then
+		-- divVolSpacing is negative so add it to volumeBarWidth to reduce volumeBarWidth
+		volumeBarWidth = volumeBarWidth + divVolSpacing
+		divVolSpacing = 0
 	end
+
+	-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now define and use a fudge factor
+	local volumeBarWidthFudge = 10
+	volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 
 	s.nowplaying = _uses(s.window, {
 		--title bar
