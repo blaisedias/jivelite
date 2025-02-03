@@ -87,8 +87,11 @@ charActionMappings.press = {
 	["*"]  = "set_preset_8",
 	["("]  = "set_preset_9",
 	["?"]  = "help",
-	["\\"] = "go_twiddle_visualiser",
 	["X"] = "go_resize_visu",
+
+	-- jivelite vis
+	["\\"] = "go_twiddle_visualiser",
+	["v"] = "go_twiddle_visualiser",
 
 	--development tools -- Later when modifier keys are supported, these could be obscured from everyday users
 	["R"]  = "reload_skin",
