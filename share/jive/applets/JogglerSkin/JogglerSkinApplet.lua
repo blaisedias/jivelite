@@ -3030,7 +3030,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local NP_TRACK_FONT_SIZE = 36
     local ySpacingFactor = 1.6
 
-	if h < 480 then
+	if h < 480 and screenAR < 3 then
 		local sfFont = math.max(screenHeight/480, 0.8)
 		log:debug("Font scaling factor:", sfFont)
 		NP_TRACK_FONT_SIZE = math.floor(NP_TRACK_FONT_SIZE * sfFont)
@@ -3102,6 +3102,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		end
 	end
 
+    log:info("######## all_tc_width ", all_tc_width, " ", all_tc_width - controlWidth - _transportControlBorder.w)
 	for k,v in ipairs(tbButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
 			if k > 1 then
@@ -3196,14 +3197,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + 10,
+			y          = TITLE_HEIGHT + 17,
 			h          = NP_TRACK_FONT_SIZE,
 			nptrack =  {
 				w          = screenWidth - _tracklayout.x - 10,
 				h          = WH_FILL,
 --				align      = _tracklayout.align,
 				align      = 'center',
-				lineHeight = _tracklayout.lineHeight,
+				lineHeight = _tracklayout.lineHeight - 5,
 				fg         = _tracklayout.fg,
 				font       = _boldfont(NP_TRACK_FONT_SIZE), 
 				sh = TEXT_SH_COLOR,
@@ -3214,7 +3215,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor),
+			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor + 5),
 			h          = math.floor(NP_TRACK_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
@@ -3387,7 +3388,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - 120,
+			y = screenHeight - 125,
 			padding = { 0, 11, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3440,7 +3441,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
 --			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40,
-			y = screenHeight - 105,
+			y = screenHeight - 110,
 			elapsed = {
 				w = WH_FILL,
 				align = "left",
@@ -4497,7 +4498,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
         mini_visu_W = screenWidth - mini_visu_X - 15
         local tw = (screenRem/2) - 30
         mini_visu_Y = TITLE_HEIGHT + 5
-        mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10
+        mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
 
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
