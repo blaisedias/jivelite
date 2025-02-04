@@ -100,17 +100,35 @@ end
 
 
 function param(self)
+	local npSS = {}
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
 	local midArtwork = tostring(screenHeight - 180) .. 'x' .. tostring(screenHeight - 180)
 	local screenAR = screenWidth/screenHeight
-	local npSS = {}
+	local portraitMode = screenWidth == 720 and screenHeight == 1280
+	local portraitArtworkWidth = (screenWidth/16) * 11
+	local portraitArtwork = tostring(portraitArtworkWidth) .. 'x' .. tostring(portraitArtworkWidth)
 
-	if screenAR < 3 then
-		npSS = { 
+	if portraitMode then
+		npSS = {
+			{
+				style = 'nowplaying_spectrum_text_art',
+				artworkSize = portraitArtwork,
+				localPlayerOnly = 1,
+				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+			},
+			{
+				style = 'nowplaying_vumeter_text_art',
+				artworkSize = portraitArtwork,
+				localPlayerOnly = 1,
+				text = self:string("VU_METER_TEXT_ART"),
+			},
+		}
+	elseif screenAR < 3 then
+		npSS = {
 			-- every skin needs to start off with a nowplaying style
 			{
-				style = 'nowplaying', 
+				style = 'nowplaying',
 				artworkSize = midArtwork,
 				text = self:string("ART_AND_TEXT"),
 			},
@@ -208,7 +226,7 @@ function param(self)
 			},
 		}
 	else
-		npSS = { 
+		npSS = {
 			-- every skin needs to start off with a nowplaying style
 			{
 				style = 'nowplaying_large_art',
@@ -918,6 +936,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local large_art_visu_Y
 
 	local screenAR = screenWidth/screenHeight
+	local portraitMode = screenWidth == 720 and screenHeight == 1280
 
 	visImage:initialise()
 
@@ -3045,6 +3064,15 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		ySpacingFactor = 1.9
 	end
 
+	if portraitMode then
+		local sfFont = math.min(screenHeight/480, 1.2)
+		log:debug("Font scaling factor:", sfFont)
+		NP_TRACK_FONT_SIZE = math.floor(NP_TRACK_FONT_SIZE * sfFont)
+		NP_ARTISTALBUM_FONT_SIZE =  math.floor(NP_ARTISTALBUM_FONT_SIZE * sfFont)
+		ySpacingFactor = 1.7
+	end
+
+
 	local controlHeight = 70
 	local controlWidth = 70
 	-- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
@@ -4046,9 +4074,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	-- for vu meters widths must be divisible by 2
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
-	if screenAR < 3 then
-        mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
-        mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
+	if screenAR < 3 and portraitMode == false then
+		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
+		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 	-- Visualizer: mini Spectrum Visualizer
 	s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4335,7 +4363,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 
-	if screenAR < 3 then
+	if screenAR < 3 and portraitMode == false then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -4693,6 +4721,214 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	end
 
+	if portraitMode then
+        npX = 20
+        local portraitArtworkWidth = (screenWidth/16) * 11
+        local x_artwork = (screenWidth - portraitArtworkWidth)/2
+        local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5 + 6
+        mini_visu_X = 20
+        mini_visu_W = screenWidth - 40
+        local tw = screenWidth - 40
+        mini_visu_Y = y_artwork + portraitArtworkWidth + 10
+        -- mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
+        mini_visu_H = screenHeight - 120 - mini_visu_Y - 10 - 20
+
+        mini_visu_H = 320
+        mini_visu_Y = screenHeight - mini_visu_H - 120 - 10 - 20 - 6
+
+		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
+		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
+		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
+				x = mini_visu_X,
+				y = mini_visu_Y,
+				w = mini_visu_W,
+				h = mini_visu_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				spectrum = {
+					position = LAYOUT_CENTER,
+					x = mini_visu_X,
+					y = mini_visu_Y,
+					w = mini_visu_W,
+					h = mini_visu_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
+
+					bg = { 0x00, 0x00, 0x00, 0x00 },
+
+					barColor = { 0x14, 0xbc, 0xbc, 0xff },
+					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+					isMono = 0,				-- 0 / 1
+
+					capHeight = { 4, 4 },			-- >= 0
+					capSpace = { 4, 4 },			-- >= 0
+					channelFlipped = { 0, 1 },		-- 0 / 1
+					barsInBin = { 2, 2 },			-- > 1
+					barWidth = { 1, 1 },			-- > 1
+					barSpace = { 3, 3 },			-- >= 0
+					binSpace = { 6, 6 },			-- >= 0
+					clipSubbands = { 1, 1 },		-- 0 / 1
+					useVisImage = true,
+				}
+			},
+			nptitle = {
+				x = npX,
+				nptrack = {
+					w = tw,
+					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+				},
+			},
+			npartistgroup = {
+				x = npX,
+				npartist = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = tw,
+				}
+			},
+			npalbumgroup = {
+				x = npX,
+				npalbum = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = tw,
+				}
+			},
+--			npcontrols = {
+--				order = largeArtButtonOrder,
+--				x = screenHeight,
+--			},
+			npprogress = {
+				x = npX,
+				elapsed = {
+					w = 60,
+				},
+				remain = {
+					w = 60,
+				},
+				npprogressB = {
+					w = tw - 120,
+				},
+			},
+			npprogressNB = {
+				x = npX,
+			},
+			npartwork = {
+				w = portraitArtworkWidth,
+				x = x_artwork,
+				y = y_artwork,
+				align = "center",
+				h = portraitArtworkWidth,
+				artwork = {
+					w = WH_FILL,
+					h = WH_FILL,
+					align = "center",
+					padding = 0,
+					img = false,
+				},
+			},
+		})
+		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
+
+		s.nowplaying_spectrum_text_art.title.pressed = _uses(s.nowplaying_spectrum_text_art.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+
+	    visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
+		s.nowplaying_vumeter_text_art = _uses(s.nowplaying, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
+				x = mini_visu_X,
+				y = mini_visu_Y,
+				w = mini_visu_W,
+				h = mini_visu_H,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				vumeter_analog = {
+					position = LAYOUT_CENTER,
+					x = mini_visu_X,
+					y = mini_visu_Y,
+					w = mini_visu_W,
+					h = mini_visu_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
+--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
+				}
+			},
+			nptitle = {
+				x = npX,
+				nptrack = {
+					w = tw,
+					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+				},
+			},
+			npartistgroup = {
+				x = npX,
+				npartist = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = tw,
+				}
+			},
+			npalbumgroup = {
+				x = npX,
+				npalbum = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = tw,
+				}
+			},
+--			npcontrols = {
+--				order = largeArtButtonOrder,
+--				x = screenHeight,
+--			},
+			npprogress = {
+				x = npX,
+				elapsed = {
+					w = 60,
+				},
+				remain = {
+					w = 60,
+				},
+				npprogressB = {
+					w = tw - 120,
+				},
+			},
+			npprogressNB = {
+				x = npX,
+			},
+			npartwork = {
+				w = portraitArtworkWidth,
+				x = x_artwork,
+				y = y_artwork,
+				align = "center",
+				h = portraitArtworkWidth,
+				artwork = {
+					w = WH_FILL,
+					h = WH_FILL,
+					align = "center",
+					padding = 0,
+					img = false,
+				},
+			},
+		})
+		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
+
+		s.nowplaying_vumeter_text_art.title.pressed = _uses(s.nowplaying_vumeter_text_art.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+
+	end
+
 	s.brightness_group = {
 		order = {  'down', 'div1', 'slider', 'div2', 'up' },
 		position = LAYOUT_SOUTH,
@@ -4894,6 +5130,14 @@ function skin1600x720(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 1600, 720)
 end
 
+function skin1280x720(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1280, 720)
+end
+
+function skin720x1280(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 720, 1280)
+end
+
 function skinCustom(self, s, reload, useDefaultSize)
 	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH'))
 	local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT'))
@@ -4905,12 +5149,10 @@ function skin(self, s, reload, useDefaultSize, skin_width, skin_height)
 	if not Framework:getWmAvailable() then
 		skin_width, skin_height = Framework:getDisplaySize()
 		log:info("from SDL ", skin_width, "x", skin_height)
-	else
-        if not skin_width or not skin_height then
-			skin_width = 800
-			skin_height = 480
-			log:info("defaulted ", skin_width, "x", skin_height)
-		end
+	elseif not skin_width or not skin_height then
+		skin_width = 800
+		skin_height = 480
+		log:info("defaulted ", skin_width, "x", skin_height)
 	end
 
 	log:info("screen: ", skin_width, "x", skin_height)
