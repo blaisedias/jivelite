@@ -85,7 +85,7 @@ local SCROLL_TIMEOUT = 750
 
 local defaultEnabledStyles = {
     'nowplaying',
-    'nowplaying_spectrum_text',
+    'nowplaying_spectrum_text_art',
     'nowplaying_vumeter_text',
     'nowplaying_vuanalog_text',
 }
