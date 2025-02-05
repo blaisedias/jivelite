@@ -940,6 +940,23 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	visImage:initialise()
 
+	local yScaleFactor = 1
+	local ySpacingFactor = 1.6
+	if portraitMode then
+		yScaleFactor = math.min(screenHeight/480, 1.2)
+		log:debug("vertical scaling factor:", yScaleFactor)
+		ySpacingFactor = 1.7
+	elseif h < 480 and screenAR < 3 then
+		yScaleFactor = math.max(screenHeight/480, 0.8)
+		log:debug("vertical scaling factor:", yScaleFactor)
+		ySpacingFactor = 1.6
+	elseif w >= 1280 and h > 600  then
+		yScaleFactor = math.min(screenHeight/480, 1.4)
+		log:debug("vertical scaling factor:", yScaleFactor)
+		ySpacingFactor = 1.9
+	end
+
+
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
 		frameRate = 8,
@@ -3045,33 +3062,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- BEGIN NowPlaying skin code
 
-	local NP_ARTISTALBUM_FONT_SIZE = 28
-	local NP_TRACK_FONT_SIZE = 36
-    local ySpacingFactor = 1.6
-
-	if h < 480 and screenAR < 3 then
-		local sfFont = math.max(screenHeight/480, 0.8)
-		log:debug("Font scaling factor:", sfFont)
-		NP_TRACK_FONT_SIZE = math.floor(NP_TRACK_FONT_SIZE * sfFont)
-		NP_ARTISTALBUM_FONT_SIZE =  math.floor(NP_ARTISTALBUM_FONT_SIZE * sfFont)
-	end
-
-	if w >= 1280 and h > 600  then
-		local sfFont = math.min(screenHeight/480, 1.2)
-		log:debug("Font scaling factor:", sfFont)
-		NP_TRACK_FONT_SIZE = math.floor(NP_TRACK_FONT_SIZE * sfFont)
-		NP_ARTISTALBUM_FONT_SIZE =  math.floor(NP_ARTISTALBUM_FONT_SIZE * sfFont)
-		ySpacingFactor = 1.9
-	end
-
-	if portraitMode then
-		local sfFont = math.min(screenHeight/480, 1.2)
-		log:debug("Font scaling factor:", sfFont)
-		NP_TRACK_FONT_SIZE = math.floor(NP_TRACK_FONT_SIZE * sfFont)
-		NP_ARTISTALBUM_FONT_SIZE =  math.floor(NP_ARTISTALBUM_FONT_SIZE * sfFont)
-		ySpacingFactor = 1.7
-	end
-
+	local NP_TRACK_FONT_SIZE = math.floor(36 * yScaleFactor)
+	local NP_ARTISTALBUM_FONT_SIZE =  math.floor(28 * yScaleFactor)
 
 	local controlHeight = 70
 	local controlWidth = 70
@@ -3130,7 +3122,6 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		end
 	end
 
-    log:info("######## all_tc_width ", all_tc_width, " ", all_tc_width - controlWidth - _transportControlBorder.w)
 	for k,v in ipairs(tbButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
 			if k > 1 then
