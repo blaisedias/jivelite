@@ -106,7 +106,7 @@ function param(self)
 	local midArtwork = tostring(screenHeight - 180) .. 'x' .. tostring(screenHeight - 180)
 	local screenAR = screenWidth/screenHeight
 	local portraitMode = screenWidth == 720 and screenHeight == 1280
-	local portraitArtworkWidth = (screenWidth/16) * 11
+	local portraitArtworkWidth = math.floor(screenWidth/20) * 12
 	local portraitArtwork = tostring(portraitArtworkWidth) .. 'x' .. tostring(portraitArtworkWidth)
 
 	if portraitMode then
@@ -303,6 +303,8 @@ function param(self)
 		POPUP_THUMB_SIZE = 120,
 		piCorePlayerStyle = 'hm_settings_pcp',
 		nowPlayingScreenStyles = npSS,
+		portraitMode = portraitMode,
+		portraitArtworkWidth = portraitArtworkWidth,
 	}
 end
 
@@ -873,7 +875,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
 
 	local THUMB_SIZE = self:param().THUMB_SIZE
-	
+
+	local activeNowPlayingScreenStyles = {}
+	for _,v  in pairs(self:param().nowPlayingScreenStyles) do
+		activeNowPlayingScreenStyles[v.style] = true
+	end
+
 	local TITLE_PADDING  = { 0, 15, 0, 15 }
 	local CHECK_PADDING  = { 2, 0, 6, 0 }
 	local CHECKBOX_RADIO_PADDING  = { 2, 0, 0, 0 }
@@ -936,25 +943,23 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local large_art_visu_Y
 
 	local screenAR = screenWidth/screenHeight
-	local portraitMode = screenWidth == 720 and screenHeight == 1280
+	local portraitMode = self:param().portraitMode
 
 	visImage:initialise()
 
 	local yScaleFactor = 1
 	local ySpacingFactor = 1.6
 	if portraitMode then
-		yScaleFactor = math.min(screenHeight/480, 1.2)
-		log:debug("vertical scaling factor:", yScaleFactor)
+		yScaleFactor = math.min(screenHeight/480, 1.4)
 		ySpacingFactor = 1.7
 	elseif h < 480 and screenAR < 3 then
 		yScaleFactor = math.max(screenHeight/480, 0.8)
-		log:debug("vertical scaling factor:", yScaleFactor)
 		ySpacingFactor = 1.6
 	elseif w >= 1280 and h > 600  then
 		yScaleFactor = math.min(screenHeight/480, 1.4)
-		log:debug("vertical scaling factor:", yScaleFactor)
 		ySpacingFactor = 1.9
 	end
+	log:info("vertical scaling factor:", yScaleFactor)
 
 
 	local smallSpinny = {
@@ -3065,6 +3070,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local NP_TRACK_FONT_SIZE = math.floor(36 * yScaleFactor)
 	local NP_ARTISTALBUM_FONT_SIZE =  math.floor(28 * yScaleFactor)
 
+	local progressBarHeight = 50
 	local controlHeight = 70
 	local controlWidth = 70
 	-- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
@@ -3445,7 +3451,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			npprogressB = {
 --				w = screenWidth - _tracklayout.x - 2*80 - 25,
 				w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
-				h = 50,
+				h = progressBarHeight,
 				padding = { 0, 0, 0, 0 },
 			        position = LAYOUT_SOUTH,
 				horizontal = 1,
@@ -3862,7 +3868,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			},
 			npprogressB = {
 				w = screenWidth - 2*50 - 2*60,
-				h = 50,
+				h = progressBarHeight,
 				padding = { 0, 0, 0, 0 },
 		                position = LAYOUT_SOUTH,
 				horizontal = 1,
@@ -3996,59 +4002,61 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	-- the bottom end of spectrum meter is close to 
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
-    local SP_yFudge = 7
+	local SP_yFudge = 7
 	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - 100 - SP_yFudge*2
-	visImage:registerSpectrumResolution(screenWidth, SP_H)
-	-- Visualizer: Spectrum Visualizer
-	s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = 0,
-			y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4 + SP_yFudge,
-			w = screenWidth,
---			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
-			h = SP_H,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			spectrum = {
+	if activeNowPlayingScreenStyles['nowplaying_spectrum_text'] == true then
+		visImage:registerSpectrumResolution(screenWidth, SP_H)
+		-- Visualizer: Spectrum Visualizer
+		s.nowplaying_spectrum_text = _uses(s.nowplaying_visualizer_common, {
+			npvisu = {
+				hidden = 0,
 				position = LAYOUT_NONE,
 				x = 0,
-				y = 2 * TITLE_HEIGHT + 4,
+				y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4 + SP_yFudge,
 				w = screenWidth,
---				h = screenHeight - 34  - (2 * TITLE_HEIGHT + 4 + 45),
+--			h = screenHeight -34  - (2 * TITLE_HEIGHT + 4 + 45),
 				h = SP_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				bg = { 0x00, 0x00, 0x00, 0x00 },
+				spectrum = {
+					position = LAYOUT_NONE,
+					x = 0,
+					y = 2 * TITLE_HEIGHT + 4,
+					w = screenWidth,
+--				h = screenHeight - 34  - (2 * TITLE_HEIGHT + 4 + 45),
+					h = SP_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
 
-				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0x74, 0x56, 0xa1, 0xff },
+					bg = { 0x00, 0x00, 0x00, 0x00 },
 
-				isMono = 0,				-- 0 / 1
+					barColor = { 0x14, 0xbc, 0xbc, 0xff },
+					capColor = { 0x74, 0x56, 0xa1, 0xff },
 
-				capHeight = { 4, 4 },			-- >= 0
-				capSpace = { 4, 4 },			-- >= 0
-				channelFlipped = { 0, 1 },		-- 0 / 1
-				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 1, 1 },			-- > 1
-				barSpace = { 3, 3 },			-- >= 0
-				binSpace = { 6, 6 },			-- >= 0
-				clipSubbands = { 1, 1 },		-- 0 / 1
-				useVisImage = true,
-			}
-		},
-	})
-	s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
+					isMono = 0,				-- 0 / 1
 
-	s.nowplaying_spectrum_text.title.pressed = _uses(s.nowplaying_spectrum_text.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+					capHeight = { 4, 4 },			-- >= 0
+					capSpace = { 4, 4 },			-- >= 0
+					channelFlipped = { 0, 1 },		-- 0 / 1
+					barsInBin = { 2, 2 },			-- > 1
+					barWidth = { 1, 1 },			-- > 1
+					barSpace = { 3, 3 },			-- >= 0
+					binSpace = { 6, 6 },			-- >= 0
+					clipSubbands = { 1, 1 },		-- 0 / 1
+					useVisImage = true,
+				}
+			},
+		})
+		s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
+
+		s.nowplaying_spectrum_text.title.pressed = _uses(s.nowplaying_spectrum_text.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
 
 
    	-- Visualizer: Container with titlebar, progressbar and controls.
@@ -4065,12 +4073,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	-- for vu meters widths must be divisible by 2
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
-	if screenAR < 3 and portraitMode == false then
+	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
-	-- Visualizer: mini Spectrum Visualizer
-	s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
+		-- Visualizer: mini Spectrum Visualizer
+		s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
 			npvisu = {
 				hidden = 0,
 				position = LAYOUT_NONE,
@@ -4117,22 +4125,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: large art Spectrum Visualizer
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
-	large_art_visu_H = screenHeight - 120 - large_art_visu_Y - 10
-	visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
-	visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
-	s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = large_art_visu_X,
-			y = large_art_visu_Y,
-			w = large_art_visu_W,
-			h = large_art_visu_H,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			spectrum = {
-				position = LAYOUT_CENTER,
+	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
+	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
+--	visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
+--	visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
+		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
 				x = large_art_visu_X,
 				y = large_art_visu_Y,
 				w = large_art_visu_W,
@@ -4140,121 +4140,51 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				bg = { 0x00, 0x00, 0x00, 0x00 },
+				spectrum = {
+					position = LAYOUT_CENTER,
+					x = large_art_visu_X,
+					y = large_art_visu_Y,
+					w = large_art_visu_W,
+					h = large_art_visu_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
 
-				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+					bg = { 0x00, 0x00, 0x00, 0x00 },
 
-				isMono = 0,				-- 0 / 1
+					barColor = { 0x14, 0xbc, 0xbc, 0xff },
+					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
 
-				capHeight = { 4, 4 },			-- >= 0
-				capSpace = { 4, 4 },			-- >= 0
-				channelFlipped = { 0, 1 },		-- 0 / 1
-				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 1, 1 },			-- > 1
-				barSpace = { 3, 3 },			-- >= 0
-				binSpace = { 6, 6 },			-- >= 0
-				clipSubbands = { 1, 1 },		-- 0 / 1
-				useVisImage = true,
-			}
-		},
-	})
-	s.nowplaying_spectrum_large_art.pressed = s.nowplaying_spectrum_large_art
+					isMono = 0,				-- 0 / 1
 
-	s.nowplaying_spectrum_large_art.title.pressed = _uses(s.nowplaying_spectrum_large_art.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
-
-	visImage:registerSpectrumResolution(screenWidth, screenHeight)
-	-- Visualizer: Spectrum Visualizer Full Screen
-	s.nowplaying_large_spectrum = _uses(s.nowplaying, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = 0,
-			y = 0,
-			w = screenWidth,
-			h = screenHeight,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			spectrum = {
-				position = LAYOUT_CENTER,
-				x = 0,
-				y = 0,
-				w = screenWidth,
-				h = screenHeight,
-				border = { 0, 0, 0, 0 },
-				padding = { 0, controlHeight, 0, controlHeight },
-
-				bg = { 0x00, 0x00, 0x00, 0x00 },
-
-				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-				isMono = 0,				-- 0 / 1
-
-				capHeight = { 4, 4 },			-- >= 0
-				capSpace = { 4, 4 },			-- >= 0
-				channelFlipped = { 0, 1 },		-- 0 / 1
-				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 1, 1 },			-- > 1
-				barSpace = { 3, 3 },			-- >= 0
-				binSpace = { 6, 6 },			-- >= 0
-				clipSubbands = { 1, 1 },		-- 0 / 1
-				useVisImage = true,
-			}
-		},
-		-- Drawn over regular text between buttons
-		nptitle = { 
-			zOrder = 2,
-			position = LAYOUT_NONE,
-			x = 80,
-			y = 0,
-			h = TITLE_HEIGHT,
-			border = { 0, 0 ,0, 0 },
-			padding = { 20, 14, 5, 5 },
-			nptrack = {
-				align = "center",
-				w = screenWidth - 196,
+					capHeight = { 4, 4 },			-- >= 0
+					capSpace = { 4, 4 },			-- >= 0
+					channelFlipped = { 0, 1 },		-- 0 / 1
+					barsInBin = { 2, 2 },			-- > 1
+					barWidth = { 1, 1 },			-- > 1
+					barSpace = { 3, 3 },			-- >= 0
+					binSpace = { 6, 6 },			-- >= 0
+					clipSubbands = { 1, 1 },		-- 0 / 1
+					useVisImage = true,
+				}
 			},
-		},
+		})
+		s.nowplaying_spectrum_large_art.pressed = s.nowplaying_spectrum_large_art
 
-        npartistgroup = { hidden = 1 },
-        npalbumgroup = { hidden = 1 },
-        npartistalbum = { hidden = 1 },
-        npartwork = { hidden = 1 },
-        npprogress = { hidden = 1 },
-        npprogressNB = { hidden = 1 },
-		npcontrols  = { hidden = 0 },
-	})
-	s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
+		s.nowplaying_spectrum_large_art.title.pressed = _uses(s.nowplaying_spectrum_large_art.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
 
-	s.nowplaying_large_spectrum.title.pressed = _uses(s.nowplaying_large_spectrum.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
-
-	visImage:registerSpectrumResolution(screenWidth, screenHeight)
-	-- Visualizer: Spectrum Visualizer only
-	s.nowplaying_spectrum_only = _uses(s.nowplaying, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = 0,
-			y = 0,
-			w = screenWidth,
-			h = screenHeight,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			spectrum = {
-				position = LAYOUT_CENTER,
+	if activeNowPlayingScreenStyles['nowplaying_large_spectrum'] == true then
+		visImage:registerSpectrumResolution(screenWidth, screenHeight)
+		-- Visualizer: Spectrum Visualizer Full Screen
+		s.nowplaying_large_spectrum = _uses(s.nowplaying, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
 				x = 0,
 				y = 0,
 				w = screenWidth,
@@ -4262,101 +4192,187 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				bg = { 0x00, 0x00, 0x00, 0x00 },
+				spectrum = {
+					position = LAYOUT_CENTER,
+					x = 0,
+					y = 0,
+					w = screenWidth,
+					h = screenHeight,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, controlHeight, 0, controlHeight },
 
-				barColor = { 0x14, 0xbc, 0xbc, 0xff },
-				capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+					bg = { 0x00, 0x00, 0x00, 0x00 },
 
-				isMono = 0,				-- 0 / 1
+					barColor = { 0x14, 0xbc, 0xbc, 0xff },
+					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
 
-				capHeight = { 4, 4 },			-- >= 0
-				capSpace = { 4, 4 },			-- >= 0
-				channelFlipped = { 0, 1 },		-- 0 / 1
-				barsInBin = { 2, 2 },			-- > 1
-				barWidth = { 1, 1 },			-- > 1
-				barSpace = { 3, 3 },			-- >= 0
-				binSpace = { 6, 6 },			-- >= 0
-				clipSubbands = { 1, 1 },		-- 0 / 1
-				useVisImage = true,
-			}
-		},
-		npaudiometadata = {
-			hidden = 0,
-			zOrder = 2,
-			position = LAYOUT_NONE,
-			x = AUDIO_METADATA_X,
-			y = 0,
-			w = AUDIO_METADATA_W,
-			h = AUDIO_METADATA_H,
-			bgImg = nil,
-			align = "right",
-			fg = TEXT_COLOR,
+					isMono = 0,				-- 0 / 1
+
+					capHeight = { 4, 4 },			-- >= 0
+					capSpace = { 4, 4 },			-- >= 0
+					channelFlipped = { 0, 1 },		-- 0 / 1
+					barsInBin = { 2, 2 },			-- > 1
+					barWidth = { 1, 1 },			-- > 1
+					barSpace = { 3, 3 },			-- >= 0
+					binSpace = { 6, 6 },			-- >= 0
+					clipSubbands = { 1, 1 },		-- 0 / 1
+					useVisImage = true,
+				}
+			},
+			-- Drawn over regular text between buttons
+			nptitle = { 
+				zOrder = 2,
+				position = LAYOUT_NONE,
+				x = 80,
+				y = 0,
+				h = TITLE_HEIGHT,
+				border = { 0, 0 ,0, 0 },
+				padding = { 20, 14, 5, 5 },
+				nptrack = {
+					align = "center",
+					w = screenWidth - 196,
+				},
+			},
+
+	        npartistgroup = { hidden = 1 },
+	        npalbumgroup = { hidden = 1 },
+	        npartistalbum = { hidden = 1 },
+	        npartwork = { hidden = 1 },
+	        npprogress = { hidden = 1 },
+	        npprogressNB = { hidden = 1 },
+			npcontrols  = { hidden = 0 },
+		})
+		s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
+
+		s.nowplaying_large_spectrum.title.pressed = _uses(s.nowplaying_large_spectrum.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
+
+	if activeNowPlayingScreenStyles['nowplaying_spectrum_only'] == true then
+		visImage:registerSpectrumResolution(screenWidth, screenHeight)
+		-- Visualizer: Spectrum Visualizer only
+		s.nowplaying_spectrum_only = _uses(s.nowplaying, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
+				x = 0,
+				y = 0,
+				w = screenWidth,
+				h = screenHeight,
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+				spectrum = {
+					position = LAYOUT_CENTER,
+					x = 0,
+					y = 0,
+					w = screenWidth,
+					h = screenHeight,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
+
+					bg = { 0x00, 0x00, 0x00, 0x00 },
+
+					barColor = { 0x14, 0xbc, 0xbc, 0xff },
+					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
+
+					isMono = 0,				-- 0 / 1
+
+					capHeight = { 4, 4 },			-- >= 0
+					capSpace = { 4, 4 },			-- >= 0
+					channelFlipped = { 0, 1 },		-- 0 / 1
+					barsInBin = { 2, 2 },			-- > 1
+					barWidth = { 1, 1 },			-- > 1
+					barSpace = { 3, 3 },			-- >= 0
+					binSpace = { 6, 6 },			-- >= 0
+					clipSubbands = { 1, 1 },		-- 0 / 1
+					useVisImage = true,
+				}
+			},
+			npaudiometadata = {
+				hidden = 0,
+				zOrder = 2,
+				position = LAYOUT_NONE,
+				x = AUDIO_METADATA_X,
+				y = 0,
+				w = AUDIO_METADATA_W,
+				h = AUDIO_METADATA_H,
+				bgImg = nil,
+				align = "right",
+				fg = TEXT_COLOR,
 --			fg = TEXT_COLOR_TEAL,
-			sh = TEXT_SH_COLOR,
-			padding = { 5, 0, 0, 5 },
-			font = _font(AUDIO_METADATA_FONT_HEIGHT),
-		},
+				sh = TEXT_SH_COLOR,
+				padding = { 5, 0, 0, 5 },
+				font = _font(AUDIO_METADATA_FONT_HEIGHT),
+			},
 
-        nptitle = { hidden = 1 },
-        npartistgroup = { hidden = 1 },
-        npalbumgroup = { hidden = 1 },
-        npartistalbum = { hidden = 1 },
-        npartwork = { hidden = 1 },
-        npprogress = { hidden = 1 },
-        npprogressNB = { hidden = 1 },
-		npcontrols  = { hidden = 1 },
-	})
-	s.nowplaying_spectrum_only.pressed = s.nowplaying_spectrum_only
+	        nptitle = { hidden = 1 },
+	        npartistgroup = { hidden = 1 },
+	        npalbumgroup = { hidden = 1 },
+	        npartistalbum = { hidden = 1 },
+	        npartwork = { hidden = 1 },
+	        npprogress = { hidden = 1 },
+	        npprogressNB = { hidden = 1 },
+			npcontrols  = { hidden = 1 },
+		})
+		s.nowplaying_spectrum_only.pressed = s.nowplaying_spectrum_only
 
-	s.nowplaying_spectrum_only.title.pressed = _uses(s.nowplaying_spectrum_only.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+		s.nowplaying_spectrum_only.title.pressed = _uses(s.nowplaying_spectrum_only.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
 
 
 
 	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - 100
-	visImage:registerVUMeterResolution(screenWidth, VU_H)
-	-- Visualizer: Analog VU Meter
-	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = 0,
-			y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4,
-			w = screenWidth,
---			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
-			h = VU_H,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			vumeter_analog = {
-				position = LAYOUT_CENTER,
+	if activeNowPlayingScreenStyles['nowplaying_vuanalog_text'] == true then
+		visImage:registerVUMeterResolution(screenWidth, VU_H)
+		-- Visualizer: Analog VU Meter
+		s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
 				x = 0,
-				y = TITLE_HEIGHT + 63,
+				y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4,
 				w = screenWidth,
---				h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+--			h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
 				h = VU_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
+
+				vumeter_analog = {
+					position = LAYOUT_CENTER,
+					x = 0,
+					y = TITLE_HEIGHT + 63,
+					w = screenWidth,
+--				h = screenHeight - 67 - (TITLE_HEIGHT + 38 + 38),
+					h = VU_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-			}
-		},
-	})
-	s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
+				}
+			},
+		})
+		s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
 
-	s.nowplaying_vuanalog_text.title.pressed = _uses(s.nowplaying_vuanalog_text.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+		s.nowplaying_vuanalog_text.title.pressed = _uses(s.nowplaying_vuanalog_text.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
 
-	if screenAR < 3 and portraitMode == false then
+	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
-		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
+		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer
 		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4394,112 +4410,116 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: VuMeter Visualizer large art
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
-	large_art_visu_H = screenHeight - 120 - large_art_visu_Y - 10
-	visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
-	s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = large_art_visu_X,
-			y = large_art_visu_Y,
-			w = large_art_visu_W,
-			h = large_art_visu_H,
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-			vumeter_analog = {
-				position = LAYOUT_CENTER,
+	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
+	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
+		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
+		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
 				x = large_art_visu_X,
 				y = large_art_visu_Y,
 				w = large_art_visu_W,
 				h = large_art_visu_H,
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
+
+				vumeter_analog = {
+					position = LAYOUT_CENTER,
+					x = large_art_visu_X,
+					y = large_art_visu_Y,
+					w = large_art_visu_W,
+					h = large_art_visu_H,
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-			}
-		},
-	})
-	s.nowplaying_vumeter_large_art.pressed = s.nowplaying_vumeter_large_art
+				}
+			},
+		})
+		s.nowplaying_vumeter_large_art.pressed = s.nowplaying_vumeter_large_art
 
-	s.nowplaying_vumeter_large_art.title.pressed = _uses(s.nowplaying_vumeter_large_art.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
-			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+		s.nowplaying_vumeter_large_art.title.pressed = _uses(s.nowplaying_vumeter_large_art.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+		})
+	end
 
-	visImage:registerVUMeterResolution(screenWidth, screenHeight - (TITLE_HEIGHT * 2))
-	-- Visualizer: VU meter full screen
-	s.nowplaying_large_vumeter = _uses(s.nowplaying_visualizer_common, {
-		npvisu = {
-			hidden = 0,
-			position = LAYOUT_NONE,
-			x = 0,
---			y = 0,
-			y = TITLE_HEIGHT,
-			w = screenWidth,
---			h = screenHeight,
-			h = screenHeight - (TITLE_HEIGHT * 2),
-			border = { 0, 0, 0, 0 },
-			padding = { 0, 0, 0, 0 },
-
-
-			vumeter_analog = {
-				position = LAYOUT_CENTER,
+	if activeNowPlayingScreenStyles['nowplaying_large_vumeter'] == true then
+		visImage:registerVUMeterResolution(screenWidth, screenHeight - (TITLE_HEIGHT * 2))
+		-- Visualizer: VU meter full screen
+		s.nowplaying_large_vumeter = _uses(s.nowplaying_visualizer_common, {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
 				x = 0,
---				y = 0,
+--			y = 0,
 				y = TITLE_HEIGHT,
 				w = screenWidth,
---				h = screenHeight,
+--			h = screenHeight,
 				h = screenHeight - (TITLE_HEIGHT * 2),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
+
+
+				vumeter_analog = {
+					position = LAYOUT_CENTER,
+					x = 0,
+--				y = 0,
+					y = TITLE_HEIGHT,
+					w = screenWidth,
+--				h = screenHeight,
+					h = screenHeight - (TITLE_HEIGHT * 2),
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-			}
-		},
-		nptitle = {
-			zOrder = 2,
-			position = LAYOUT_NONE,
-			x = 80,
-			y = 0,
-			h = TITLE_HEIGHT,
-			border = { 0, 0 ,0, 0 },
-			padding = { 20, 14, 5, 5 },
-			nptrack = {
-				align = "center",
-				w = screenWidth - 196,
+				}
 			},
-		},
+			nptitle = {
+				zOrder = 2,
+				position = LAYOUT_NONE,
+				x = 80,
+				y = 0,
+				h = TITLE_HEIGHT,
+				border = { 0, 0 ,0, 0 },
+				padding = { 20, 14, 5, 5 },
+				nptrack = {
+					align = "center",
+					w = screenWidth - 196,
+				},
+			},
 
-        npartistgroup = { hidden = 1 },
-        npalbumgroup = { hidden = 1 },
-        npartistalbum = { hidden = 1 },
-        npartwork = { hidden = 1 },
-        npprogress = { hidden = 1 },
-        npprogressNB = { hidden = 1 },
-		npcontrols  = { hidden = 0 },
-	})
-	s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
+	        npartistgroup = { hidden = 1 },
+	        npalbumgroup = { hidden = 1 },
+	        npartistalbum = { hidden = 1 },
+	        npartwork = { hidden = 1 },
+	        npprogress = { hidden = 1 },
+	        npprogressNB = { hidden = 1 },
+			npcontrols  = { hidden = 0 },
+		})
+		s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
 
-	s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
-		text = {
-			-- Hack: text needs to be there to fill the space, not visible
+		s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
+			text = {
+				-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }
-		},
-	})
+			},
+		})
 
 
-	s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
-		nptitle = { hidden = 1 }, 
-        npartistgroup = { hidden = 1 },
-        npalbumgroup = { hidden = 1 },
-        npartistalbum = { hidden = 1 },
-        npartwork = { hidden = 1 },
-        npprogress = { hidden = 1 },
-        npprogressNB = { hidden = 1 },
-		npcontrols  = { hidden = 1 },
-	})
-	s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
+		s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
+			nptitle = { hidden = 1 },
+	        npartistgroup = { hidden = 1 },
+	        npalbumgroup = { hidden = 1 },
+	        npartistalbum = { hidden = 1 },
+	        npartwork = { hidden = 1 },
+	        npprogress = { hidden = 1 },
+	        npprogressNB = { hidden = 1 },
+			npcontrols  = { hidden = 1 },
+		})
+		s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
+	end
 
 --	s.nowplaying_vumeter_only.title.pressed = _uses(s.nowplaying_vumeter_only.title, {
 --		text = {
@@ -4509,15 +4529,15 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 --	})
 
 	if screenAR >= 3 then
-        -- previously
-        -- npX = screenHeight + 15
-        -- so l,r border = 15 pixels
-        local screenRem = screenWidth - screenHeight
-        mini_visu_X = npX + (screenRem/2)
-        mini_visu_W = screenWidth - mini_visu_X - 15
-        local tw = (screenRem/2) - 30
-        mini_visu_Y = TITLE_HEIGHT + 5
-        mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
+		-- previously
+		-- npX = screenHeight + 15
+		-- so l,r border = 15 pixels
+		local screenRem = screenWidth - screenHeight
+		mini_visu_X = npX + (screenRem/2)
+		mini_visu_W = screenWidth - mini_visu_X - 15
+		local tw = (screenRem/2) - 30
+		mini_visu_Y = TITLE_HEIGHT + 5
+		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
 
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
@@ -4623,7 +4643,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			},
 		})
 
-	    visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
+		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 		s.nowplaying_vumeter_text_art = _uses(s.nowplaying, {
 			npvisu = {
 				hidden = 0,
@@ -4713,19 +4733,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	if portraitMode then
-        npX = 20
-        local portraitArtworkWidth = (screenWidth/16) * 11
-        local x_artwork = (screenWidth - portraitArtworkWidth)/2
-        local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5 + 6
-        mini_visu_X = 20
-        mini_visu_W = screenWidth - 40
-        local tw = screenWidth - 40
-        mini_visu_Y = y_artwork + portraitArtworkWidth + 10
-        -- mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
-        mini_visu_H = screenHeight - 120 - mini_visu_Y - 10 - 20
+		npX = 30
+		local portraitArtworkWidth = self:param().portraitArtworkWidth
+		local x_artwork = (screenWidth - portraitArtworkWidth)/2
+		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + math.floor(NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5 + 6
+		mini_visu_X = npX
+		mini_visu_W = screenWidth - (npX * 2)
+		local tw = screenWidth - (npX * 2)
+		mini_visu_Y = y_artwork + portraitArtworkWidth + 44
+		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10 - 20
 
-        mini_visu_H = 320
-        mini_visu_Y = screenHeight - mini_visu_H - 120 - 10 - 20 - 6
+--		mini_visu_H = 320
+--		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
 
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
@@ -4831,7 +4850,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			},
 		})
 
-	    visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
+		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 		s.nowplaying_vumeter_text_art = _uses(s.nowplaying, {
 			npvisu = {
 				hidden = 0,
@@ -5077,10 +5096,10 @@ end
 
 function getNowPlayingScreenButtons(self)
 	local settings = self:getSettings()
-    -- remove volUp and volDown superceded by volDownUp
-    settings['volUp'] = nil
-    settings['volDown'] = nil
-    return settings
+	-- remove volUp and volDown superceded by volDownUp
+	settings['volUp'] = nil
+	settings['volDown'] = nil
+	return settings
 end
 
 function buttonSettingsMenuItem(self)
