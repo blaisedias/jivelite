@@ -579,7 +579,7 @@ int main (int argc, char **argv) {
 		return EXIT_FAILURE;
 	}
 	
-	start_concurrent_resizer();
+//	start_concurrent_resizer();
 
 	// call our main in protected mode
 	s.argc = argc;
@@ -592,6 +592,7 @@ int main (int argc, char **argv) {
 	// close state
 	lua_close(L);
 
+//	stop_concurrent_resizer();
 	// report status to caller
 	return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
 }

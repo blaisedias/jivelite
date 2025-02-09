@@ -213,6 +213,7 @@ int jive_traceback (lua_State *L) {
 }
 
 void jive_quit(void) {
+	stop_concurrent_resizer();
 	SDL_Quit();
 }
 
@@ -357,6 +358,8 @@ static int jiveL_initSDL(lua_State *L) {
 	lua_newtable(L);
 	lua_setfield(L, -2, "style");
 	lua_pop(L, 2);
+
+	start_concurrent_resizer();
 
 	return 0;
 }
