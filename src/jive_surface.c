@@ -2661,7 +2661,7 @@ static SDL_mutex* resizer_lock = NULL;
 typedef struct resize_request {
 	struct resize_request* perma_next;
 	struct resize_request* next;
-    size_t size;
+	size_t size;
 	char * src_path;
 	char * dest_path;
 	int   width;
@@ -2805,14 +2805,21 @@ void do_resize(resize_request_ptr req) {
 		}
 }
 
+// read only in the fn_thread_resizer
+static volatile unsigned flag_run_resize = 1;
+// read only outside fn_thread_resizer
+static volatile unsigned flag_in_resize = 0;
+
 // resizer thread - runs as daemon - polling every second
 int fn_thread_resizer(void *ptr)
 {
+	int retValue = 0;
 	resize_request_ptr req;
-	while(1) {
+	fprintf(stderr, "fn_thread_resizer: starting\n"); fflush(stderr);
+	while(flag_run_resize) {
 		if (resize_pending != NULL) {
 			if (SDL_LockMutex(resizer_lock) < 0) {
-				fprintf(stderr, "mutex lock failed\n"); fflush(stderr);
+				fprintf(stderr, "fn_thread_resizer: mutex lock failed\n"); fflush(stderr);
 				continue;
 			}
 
@@ -2822,16 +2829,20 @@ int fn_thread_resizer(void *ptr)
 //				req->next = NULL;
 			}
 			if (SDL_UnlockMutex(resizer_lock) < 0) {
-				fprintf(stderr, "mutex unlock failed\n"); fflush(stderr);
-				return -1;
+				fprintf(stderr, "fn_thread_resizer: terminating: mutex unlock failed\n"); fflush(stderr);
+				retValue = -1;
+				break;
 			}
 
+			flag_in_resize = 1;
 			do_resize(req);
+			flag_in_resize = 0;
 		} else {
 			sleep(1);
 		}
 	}
-	return  0;
+	fprintf(stderr, "fn_thread_resizer: terminating\n"); fflush(stderr);
+	return  retValue;
 }
 
 void start_concurrent_resizer(void) {
@@ -2847,6 +2858,21 @@ void start_concurrent_resizer(void) {
 		fprintf(stderr,"failed to initialise lock\n");
 	}
 	fflush(stderr);
+}
+
+void stop_concurrent_resizer(void) {
+	int th_status = 0;
+	fprintf(stderr,"stop_concurrent_resizer: resize_thread: %p\n", resizer_thread); fflush(stderr);
+	if (resizer_thread == NULL)
+		return;
+
+	// signal thread to stop, by clearing the run flag
+	flag_run_resize = 0;
+	fprintf(stderr,"stop_concurrent_resizer: flag_in_resize=%d, invoking SDL_WaitThread\n", flag_in_resize); fflush(stderr);
+	// wait for thread to terminate
+	SDL_WaitThread(resizer_thread, &th_status);
+	fprintf(stderr,"stop_concurrent_resizer: resize_thread status: %d\n", th_status); fflush(stderr);
+	resizer_thread = NULL;
 }
 
 int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
