@@ -1273,6 +1273,7 @@ local function getCompose1VUmeter(name, w, h)
 		lw = math.floor(lw * sf)
 		lh = math.floor(lh * sf)
 		tw = math.floor(tw * sf)
+		th = math.floor(th * sf)
 		-- Due to rounding errors, scaling the calibration part like so
 		-- cw = math.floor((cw * sf))
 		-- scales at odds with the smaller bits.
@@ -1291,6 +1292,8 @@ local function getCompose1VUmeter(name, w, h)
 
 		c1vu.leftlead = _resizedCompose1Element(c1vu.leftlead, left, lw, lh)
 		c1vu.rightlead = _resizedCompose1Element(c1vu.rightlead, right, lw, lh)
+		c1vu.lefttrail = _resizedCompose1Element(c1vu.lefttrail, left, tw, th)
+		c1vu.righttrail = _resizedCompose1Element(c1vu.righttrail, right, tw, th)
 		c1vu.center = _resizedCompose1Element(c1vu.center, center, cw, ch)
 		c1vu.w = cw
 		c1vu.h = ch + (bh * 2)
@@ -1301,13 +1304,16 @@ local function getCompose1VUmeter(name, w, h)
 	c1vu.bh = bh
 	c1vu.lw = lw
 	c1vu.lh = lh
+	c1vu.tw = tw
+	c1vu.th = th
 	c1vu.cw = cw
 	c1vu.ch = ch
 	c1vu.db0 = math.ceil(cvu.maxVU * 0.72)
 	c1vu.maxVU = cvu.maxVU
---	log:debug("####  c1vu.w:", c1vu.w, " c1vu.h:", c1vu.h)
---	log:debug("####  c1vu.bw:", c1vu.bw, " c1vu.bh:", c1vu.bh, " c1vu.lw:", c1vu.lw, " c1vu.lh", c1vu.lh)
---	log:debug("####  c1vu.cw:", c1vu.cw, " c1vu.ch", c1vu.ch)
+	log:debug("c1vu.w: ", c1vu.w, " c1vu.h: ", c1vu.h)
+	log:debug("c1vu.bw: ", c1vu.bw, " c1vu.bh: ", c1vu.bh)
+	log:debug("c1vu.lw:", c1vu.lw, " c1vu.lh: ", c1vu.lh, " c1vu.tw: ", c1vu.tw, " c1vu.th: ", c1vu.th)
+	log:debug("c1vu.cw: ", c1vu.cw, " c1vu.ch: ", c1vu.ch)
 	log:info("c1vuCache <- ", key, c1vu)
 	c1vuCache[key] = c1vu
 	return c1vu
