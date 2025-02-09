@@ -154,6 +154,8 @@ local function drawCompose1Static(params, surface)
 	params.compose1.center:blit(surface, params.x, params.y, params.w, params.h)
 	params.compose1.leftlead:blit(surface, params.x, params.left.y,  params.compose1.lw, params.compose1.lh)
 	params.compose1.rightlead:blit(surface, params.x, params.right.y, params.compose1.lw, params.compose1.lh)
+	params.compose1.lefttrail:blit(surface, params.xtrail, params.left.y,  params.compose1.tw, params.compose1.th)
+	params.compose1.righttrail:blit(surface, params.xtrail, params.right.y, params.compose1.tw, params.compose1.th)
 end
 
 
@@ -282,6 +284,7 @@ function _layout(self)
 		elseif self.vutbl.vutype == "compose1" then
 			self.compose1 = self.vutbl.compose1
 			local compose1x = x + math.floor((w - self.compose1.w)/2)
+			local xtrail = compose1x + self.compose1.lw + (49 * self.compose1.left.barwidth)
 			local y1 = y + math.floor((h - self.compose1.h)/2)
 			local y2 = y1 + self.compose1.bh + self.compose1.ch
 			self.left =  {
@@ -298,7 +301,7 @@ function _layout(self)
 			}
 			self.drawMeter = drawCompose1
 
-			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right}
+			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right, xtrail = xtrail}
 			self.drawBackground = drawCompose1Static
 		else
 			log:warn("unknown vutype ", self.vutbl.vutype)
