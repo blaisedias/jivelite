@@ -3,7 +3,7 @@
     "name": "Tunnel Green Red",
     "vutype": "frames",
     "framecount": 25,
-    "format:": "singleimage",
+    "format": "singleimage",
     "files": {
         "#channels": "convention first channel is left",
         "frames": [
