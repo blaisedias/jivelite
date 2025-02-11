@@ -4,7 +4,7 @@
     "vutype": "frames",
     "framecount": 25,
     "#format": "single image -> all frames in a single image file",
-    "format:": "singleimage",
+    "format": "singleimage",
     "files": {
         "frames": [
             "vu_analog_25seq_daab_Tube.png"
