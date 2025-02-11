@@ -74,6 +74,8 @@ local fontsdb = {
         regular="Yanone_Kafeesatz/YanoneKaffeesatz-Regular",
         bold="Yanone_Kafeesatz/YanoneKaffeesatz-SemiBold",
     },
+	Antonio={ regular="Antonio/static/Antonio-Regular", bold="Antonio/static/Antonio-SemiBold", },
+	Oswald={ regular="Oswald/static/Oswald-Regular", bold="Oswald/static/Oswald-SemiBold", },
 }
 
 function selectFontsEntryPoint(self, menuItem)
