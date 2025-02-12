@@ -40,6 +40,11 @@ local json			= require("jive.json")
 
 module(...)
 
+-- VUMeter types
+local VUT_frames = "frames"
+local VUT_compose1 = "compose1"
+local VUT_discreteframes = "discreteframes"
+
 -- Spectrum visualisation types
 --local SPT_DEFAULT = "default"
 local SPT_BACKLIT = "backlit"
@@ -50,6 +55,7 @@ local SPT_COLOUR = "colour"
 local RESIZEOP_VU					= 1
 local RESIZEOP_FILL					= 2
 local RESIZEOP_SCALED_CENTERED_CROP	= 3
+local RESIZEOP_FIT					= 4
 
 local vuImages = {}
 local spectrumList = {}
@@ -1016,10 +1022,10 @@ local function addCompose1VUMeter(jsData, path)
 --	for k,v in pairs(cvu) do
 --		log:info("cvu: ", k, " : ", v)
 --	end
-	table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="compose1"})
+	table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_compose1})
 end
 
-local function addFrameVUMeter(jsData, path)
+local function addSingleImageFrameVUMeter(jsData, path)
 	if pathsAreImageFiles(path, jsData.files.frames) == true then
 		-- prevent future loading of VUMeter with the same name
 		vuLoaded[jsData.name] = true
@@ -1027,11 +1033,41 @@ local function addFrameVUMeter(jsData, path)
 		for i,_ in ipairs(jsData.files.frames) do
 			vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
 		end
-		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype="frames", jsData=jsData})
+		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_frames, jsData=jsData})
 	else
 		log:error("failed to find all images in ", path .. "/" .. "meta.json")
 	end
 end
+
+local function addDiscreteFrameVUMeter(jsData, path)
+	if pathsAreImageFiles(path, jsData.files.frames) == true then
+		-- hijack jsData to add LR metadata
+		if jsData.framecount ~= nil then
+			if jsData.framecount ~= #jsData.files.frames then
+				if jsData.framecount*2 ~= #jsData.files.frames then
+					log:warn("frame counts do not align with number of frame image files, ignoring:", jsData.name, " frameCount:", jsData.framecount, " #frames:", #jsData.files.frames)
+					return
+				end
+			end
+		else
+			jsData.framecount = #jsData.files.frames
+		end
+		if jsData.framecount > 50 then
+			log:warn("frame counts > 50 are not supported, ignoring:", jsData.name, " frameCount:", jsData.framecount, " #frames", #jsData.files.frames)
+			return
+		end
+		-- prevent subsequent loading of VUMeters with the same name
+		vuLoaded[jsData.name] = true
+		for i,_ in ipairs(jsData.files.frames) do
+			local xk = jsData.name .. ":" .. i
+			vuImagesMap[xk] = {src= path .. "/" .. jsData.files.frames[i] }
+		end
+		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_discreteframes, jsData=jsData})
+	else
+		log:warn("failed to find all images in ", path .. "/" .. "meta.json", " ignoring:", jsData.name)
+	end
+end
+
 
 local function _populateVuMeterList(search_root)
 	if (lfs.attributes(search_root, "mode") ~= "directory") then
@@ -1051,10 +1087,14 @@ local function _populateVuMeterList(search_root)
 							jsData.name = entry
 						end
 						if  vuLoaded[jsData.name] == nil then
-							if jsData.vutype == "frames" then
---								addFrameVUMeter(jsData, path)
-								pcall(addFrameVUMeter, jsData, path)
-							elseif jsData.vutype == "compose1" then
+							if jsData.vutype == VUT_frames then
+--								addSingleImageFrameVUMeter(jsData, path)
+								if jsData.format == "singleimage" then
+									pcall(addSingleImageFrameVUMeter, jsData, path)
+								elseif jsData.format == "discrete" then
+									pcall(addDiscreteFrameVUMeter, jsData, path)
+								end
+							elseif jsData.vutype == VUT_compose1 then
 --								addCompose1VUMeter(jsData, path)
 								pcall(addCompose1VUMeter, jsData, path)
 							else
@@ -1095,7 +1135,7 @@ local function enableOneVUMeter()
 		-- select a default, try to find a compose1 (time expensive resize not required)
 		-- 1: try "Chevrons Cyan Orange"
 		for _, v in pairs(vuImages) do
-			if v.name == "Chevrons Cyan Orange" and v.vutype=="compose1" then
+			if v.name == "Chevrons Cyan Orange" and v.vutype==VUT_compose1 then
 				v.enabled = true
 				enabled_count = 1
 			end
@@ -1103,7 +1143,7 @@ local function enableOneVUMeter()
 		-- 2: try any Compose1 VU
 		if enabled_count == 0 then
 			for _, v in pairs(vuImages) do
-				if v.vutype=="compose1" then
+				if v.vutype==VUT_compose1 then
 					v.enabled = true
 					enabled_count = 1
 					break
@@ -1333,7 +1373,7 @@ function getVuImage(_,w,h)
 	end
 	prevVuImageIndex = vuImageIndex
 
-	if entry.vutype == "compose1" then
+	if entry.vutype == VUT_compose1 then
 		return  {vutype=entry.vutype, compose1=getCompose1VUmeter(entry.name, w, h)}
 	end
 
@@ -1345,7 +1385,7 @@ function getVuImage(_,w,h)
 		table.insert(imgs, frameVU)
 		resizeRequired = resizeRequired or (frameVU == nil)
 	end
-	if #imgs < 2 then
+	if entry.vutype == VUT_frames and #imgs < 2 then
 		table.insert(imgs, imgs[1])
 	end
 	return {vutype=entry.vutype, imageFrames=imgs, displayResizing=makeResizingParams(resizeRequired), jsData=entry.jsData}
@@ -1465,7 +1505,7 @@ function enumerateResizableVuMeters(_, all)
 	local vMeters = {}
 	for _, v in pairs(vuImages) do
 		if all or v.enabled then
-			if v.vutype == "frames" then
+			if v.vutype == VUT_frames or v.vutype == VUT_discreteframes then
 				for _, vr in pairs(vuMeterResolutions) do
 					table.insert(vMeters, {name=v.name, w=vr.w, h=vr.h})
 				end
@@ -1475,15 +1515,15 @@ function enumerateResizableVuMeters(_, all)
 	return vMeters
 end
 
-local function requestVuResize(name, w , h)
---	log:info("requestVuResize ", name, ", ", w, ", ", h)
+local function requestFramesVuResize(name, w , h)
+--	log:info("requestFramesVuResize ", name, ", ", w, ", ", h)
 	local path = vuImagesMap[name].src
 	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
 	local dcpath = resizedImagePath(dicKey)
 	if resizedImagesTable[dicKey] ~= nil then
 		return true
 	end
-	-- When VU meters are rendered there are 3 "bars" of spacing,
+	-- When frames VU meters are rendered there are 3 "bars" of spacing,
 	-- left, between and right.
 	-- resize to 90% of the display window, and all the bars
 	-- will visually be the same size.
@@ -1498,14 +1538,44 @@ local function requestVuResize(name, w , h)
 	return false
 end
 
+local function requestDiscreteFrameVuResize(name, w , h)
+--	log:info("requestFramesVuResize ", name, ", ", w, ", ", h)
+	local path = vuImagesMap[name].src
+	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+	local dcpath = resizedImagePath(dicKey)
+	if resizedImagesTable[dicKey] ~= nil then
+		return true
+	end
+	-- When frames VU meters are rendered there are 3 "bars" of spacing,
+	-- left, between and right.
+	-- resize to 90% of the display window, and all the bars
+	-- will visually be the same size.
+	-- Note: this only works if the VU Meters do not have any borders along the horizontal axis
+	local ok = Surface:requestResize(path, dcpath, math.floor((w/2)*9/10), h, 0,
+										RESIZEOP_FIT,
+										saveimage_type) == 1
+	if ok then
+		resizedImagesTable[dicKey] = dcpath
+		return true
+	end
+	return false
+end
+
+
 function concurrentResizeVuMeter(_, name, w, h)
 --	log:info("concurrentResizeVuMeter ", name, ", ", w, ", ", h)
 	for _, v in pairs(vuImages) do
 		if name == v.name then
-			if v.vutype == "frames" then
+			if v.vutype == VUT_frames then
 				local ready = true
 				for i,_ in ipairs(v.jsData.files.frames) do
-					ready = ready and requestVuResize(name .. ':' .. i, w, h)
+					ready = ready and requestFramesVuResize(name .. ':' .. i, w, h)
+				end
+				return ready
+			elseif v.vutype == VUT_discreteframes then
+				local ready = true
+				for i,_ in ipairs(v.jsData.files.frames) do
+					ready = ready and requestDiscreteFrameVuResize(name .. ':' .. i, w, h)
 				end
 				return ready
 			end
