@@ -160,7 +160,6 @@ end
 
 
 local function drawVUMeterFrames(params, surface, vol)
---	local val = math.min(math.floor(vol/2), 24)
 	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
 	if val >= params.cap then
 		params.cap = val
@@ -168,6 +167,16 @@ local function drawVUMeterFrames(params, surface, vol)
 		params.cap = params.cap -1
 	end
 	params.img:blitClip(params.cap * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
+end
+
+local function drawVUMeterDiscreteFrames(params, surface, vol)
+	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
+	if val >= params.cap then
+		params.cap = val
+	elseif params.cap > 0 then
+		params.cap = params.cap -1
+	end
+	params.img[params.cap + params.indexOffset]:blit(surface, params.x, params.y)
 end
 
 local function nullDraw(_, _, _)
@@ -303,6 +312,44 @@ function _layout(self)
 
 			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right, xtrail = xtrail}
 			self.drawBackground = drawCompose1Static
+		elseif self.vutbl.vutype == "discreteframes" then
+				-- FIXME: frame images for multiple channels must have the same characteristics.
+				local frame_w, imgH = self.vutbl.imageFrames[1]:getSize()
+				log:info("frame count: ", self.vutbl.jsData.framecount, " ",  #self.vutbl.imageFrames)
+				local leftIndexOffset = 0
+				local rightIndexOffset = 0
+				if #self.vutbl.imageFrames == 2*self.vutbl.jsData.framecount then
+					rightIndexOffset = self.vutbl.jsData.framecount
+				end
+				-- place the VUMeter images within the designated space
+				-- with equal spacing on the left, right and centre
+				local spacing = math.floor((w - frame_w - frame_w)/3)
+				local lx = x + spacing
+				local rx = lx + frame_w + spacing
+				-- centre vertically
+				local fy = y
+				local src_y = 0
+				if imgH < h then
+					fy = math.floor(y + ((h - imgH)/2))
+				elseif imgH > h then
+					-- clip the image at the top and bottom
+					src_y = math.floor((imgH - h)/2)
+				end
+				self.left  = { img=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+								framecount = self.vutbl.jsData.framecount,
+								indexOffset = leftIndexOffset
+							}
+				self.right = { img=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+								framecount = self.vutbl.jsData.framecount,
+								indexOffset = rightIndexOffset
+							}
+				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
+				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
+							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
+				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y,
+							" w:", self.right.w, " h:", self.right.h)
+				self.drawMeter = drawVUMeterDiscreteFrames
+
 		else
 			log:warn("unknown vutype ", self.vutbl.vutype)
 		end
