@@ -15,6 +15,7 @@
 #define RESIZEOP_VU						1
 #define RESIZEOP_FILL					2
 #define RESIZEOP_SCALED_CENTERED_CROP 	3
+#define RESIZEOP_FIT					4
 /*
  * This file combines both JiveSurface and JiveTile into a single implementation.
  * The separate typdefs, JiveSurface and JiveTile, are still kept so that the
@@ -2656,6 +2657,7 @@ int jiveL_surfacetile_gc(lua_State *L) {
 //static pthread_mutex_t resizer_lock; 
 static SDL_Thread* resizer_thread = NULL;
 static SDL_mutex* resizer_lock = NULL;
+static SDL_sem* resizer_sem;
 
 
 typedef struct resize_request {
@@ -2746,6 +2748,24 @@ void sp_scale_centered_crop(resize_request_ptr req) {
 	}
 }
 
+// scale the src image so that either width or height matches the destination
+// and the other fits within the destination.
+void scale_to_fit(resize_request_ptr req) {
+	if (req->src_sdl != NULL) {
+		// Choose the smallest scaling factor horizontal or vertical
+		float f = ((float)req->width)/req->src_sdl->w;
+		if (f > ((float)req->height)/req->src_sdl->h) {
+			f = ((float)req->height)/req->src_sdl->h;
+		}
+		req->dst_sdl = surface_newRGBA((Uint16)(f * req->src_sdl->w), (Uint16)(f * req->src_sdl->h));
+		if (req->dst_sdl != NULL) {
+//fprintf(stderr, "sp_resize: WxH ox: %d oy: %d dw: %d dh: %d sw: %d sh: %d\n", 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h); fflush(stderr);
+			copyResampled(req->dst_sdl, req->src_sdl, 0, 0, 0, 0, req->dst_sdl->w, req->dst_sdl->h, req->src_sdl->w, req->src_sdl->h);
+		}
+	}
+}
+
+
 void do_resize(resize_request_ptr req) {
 		if (req != NULL) {
 //fprintf(stderr, "do_resize: %s %s %dx%d\n", req->src_path, req->dest_path, req->width, req->height); fflush(stderr);
@@ -2771,6 +2791,9 @@ void do_resize(resize_request_ptr req) {
 							break;
 						case RESIZEOP_SCALED_CENTERED_CROP:
 							sp_scale_centered_crop(req);
+							break;
+						case RESIZEOP_FIT:
+							scale_to_fit(req);
 							break;
 					}
 //fprintf(stderr, "do_resize: +++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
@@ -2817,7 +2840,16 @@ int fn_thread_resizer(void *ptr)
 	resize_request_ptr req;
 	fprintf(stderr, "fn_thread_resizer: starting\n"); fflush(stderr);
 	while(flag_run_resize) {
+		// use wait timeout for more robust behaviour,
+		while(SDL_SemWaitTimeout(resizer_sem, 5000) == -1) {
+			// if wait for semaphore fails fall back to polling mode
+			if (resize_pending != NULL || flag_run_resize == 0) {
+				break;
+			}
+			sleep(1);
+		}
 		if (resize_pending != NULL) {
+			fprintf(stderr, "fn_thread_resizer: resize start\n"); fflush(stderr);
 			if (SDL_LockMutex(resizer_lock) < 0) {
 				fprintf(stderr, "fn_thread_resizer: mutex lock failed\n"); fflush(stderr);
 				continue;
@@ -2837,8 +2869,7 @@ int fn_thread_resizer(void *ptr)
 			flag_in_resize = 1;
 			do_resize(req);
 			flag_in_resize = 0;
-		} else {
-			sleep(1);
+			fprintf(stderr, "fn_thread_resizer: resize finished\n"); fflush(stderr);
 		}
 	}
 	fprintf(stderr, "fn_thread_resizer: terminating\n"); fflush(stderr);
@@ -2846,14 +2877,19 @@ int fn_thread_resizer(void *ptr)
 }
 
 void start_concurrent_resizer(void) {
+	resizer_sem = SDL_CreateSemaphore(0);
+	if (resizer_sem == NULL) {
+		fprintf(stderr,"failed to create semaphore\n");
+		return;
+	}
 	resizer_lock = SDL_CreateMutex();
-	if (resizer_lock != NULL) {
-		resizer_thread = SDL_CreateThread(fn_thread_resizer, NULL);
-		if (resizer_thread != NULL) {
-			fprintf(stderr,"started resizer thread\n");
-		} else {
-			fprintf(stderr,"failed to initialise lock\n");
-		}
+	if (resizer_lock == NULL) {
+		fprintf(stderr,"failed to initialise lock\n");
+		return;
+	}
+	resizer_thread = SDL_CreateThread(fn_thread_resizer, NULL);
+	if (resizer_thread != NULL) {
+		fprintf(stderr,"started resizer thread\n");
 	} else {
 		fprintf(stderr,"failed to initialise lock\n");
 	}
@@ -2868,6 +2904,9 @@ void stop_concurrent_resizer(void) {
 
 	// signal thread to stop, by clearing the run flag
 	flag_run_resize = 0;
+	// post twice 
+	SDL_SemPost(resizer_sem);
+	SDL_SemPost(resizer_sem);
 	fprintf(stderr,"stop_concurrent_resizer: flag_in_resize=%d, invoking SDL_WaitThread\n", flag_in_resize); fflush(stderr);
 	// wait for thread to terminate
 	SDL_WaitThread(resizer_thread, &th_status);
@@ -2895,10 +2934,9 @@ int submit_resize_request(const char* src_path, const char* dest_path, int width
 	size_t req_len = sizeof(*req) + src_size + dst_size;
 	req = calloc(1, req_len);
 	if (req != NULL) {
-fprintf(stderr, "resize queue memory = %ld bytes, including %ld\n", qmem+req_len, req_len);
+fprintf(stderr, "submit_resize_request: resize queue memory = %ld bytes, including %ld\n", qmem+req_len, req_len);
 		req->size = req_len;
-fprintf(stderr, "RESIZE: allocated %p %ld\n", req, req->size);
-fflush(stderr);
+fprintf(stderr, "submit_resize_request: RESIZE: allocated %p %ld\n", req, req->size); fflush(stderr);
 		req->width = width;
 		req->height = height;
 		req->seq = seq;
@@ -2922,7 +2960,9 @@ fflush(stderr);
 			fprintf(stderr, "mutex unlock failed\n"); fflush(stderr);
 			return RESIZE_ERROR;
 		}
-
+		if (SDL_SemPost(resizer_sem) != 0) {
+			fprintf(stderr, "submit_resize_request: SDL_SemPost failed\n"); fflush(stderr);
+		}
 		return RESIZE_PENDING;
 	}
 	return RESIZE_ERROR;
