@@ -4076,6 +4076,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
+		mini_visu_Y = math.floor(mini_visu_Y)
+		mini_visu_H = math.floor(mini_visu_H)
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer
 		s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4373,6 +4375,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
+		mini_visu_Y = math.floor(mini_visu_Y)
+		mini_visu_H = math.floor(mini_visu_H)
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer
 		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4538,6 +4542,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		local tw = (screenRem/2) - 30
 		mini_visu_Y = TITLE_HEIGHT + 5
 		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
+		mini_visu_Y = math.floor(mini_visu_Y)
+		mini_visu_H = math.floor(mini_visu_H)
 
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
@@ -4742,6 +4748,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		local tw = screenWidth - (npX * 2)
 		mini_visu_Y = y_artwork + portraitArtworkWidth + 44
 		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10 - 20
+		mini_visu_Y = math.floor(mini_visu_Y)
+		mini_visu_H = math.floor(mini_visu_H)
 
 --		mini_visu_H = 320
 --		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
