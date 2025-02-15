@@ -9,6 +9,7 @@ local Icon          = require("jive.ui.Icon")
 
 local vis           = require("jive.vis")
 local visImage      = require("jive.visImage")
+local framework     = require("jive.ui.Framework")
 
 --local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
@@ -20,6 +21,14 @@ local appletManager = appletManager
 module(...)
 oo.class(_M, Icon)
 
+
+-- VU meter metadata globals read by NowPlaying
+-- frames per second
+FPS=0
+-- frames count
+FC=0
+-- number of frames defined for VU Meter
+NF=0
 
 function __init(self, style)
 	local obj = oo.rawnew(self, Icon(style))
@@ -164,19 +173,19 @@ local function drawVUMeterFrames(params, surface, vol)
 	if val >= params.cap then
 		params.cap = val
 	elseif params.cap > 0 then
-		params.cap = params.cap -1
+		params.cap = math.max(0, params.cap - (params.framecount/FPS))
 	end
-	params.img:blitClip(params.cap * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
+	params.img:blitClip(math.floor(params.cap) * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
 end
 
 local function drawVUMeterDiscreteFrames(params, surface, vol)
 	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
 	if val >= params.cap then
 		params.cap = val
-	elseif params.cap > 0 then
-		params.cap = params.cap -1
+	elseif params.cap > 1 then
+		params.cap = math.max(1, params.cap - (params.framecount/FPS))
 	end
-	params.img[params.cap + params.indexOffset]:blit(surface, params.x, params.y)
+	params.img[math.floor(params.cap) + params.indexOffset]:blit(surface, params.x, params.y)
 end
 
 local function nullDraw(_, _, _)
@@ -191,6 +200,16 @@ function _layout(self)
 	self.countDown = self.counter ~= 0
 
 	self.player = appletManager:callService("getCurrentPlayer")
+
+	-- if FPS is 0 => FPS is unmeasured, so use FRAME_RATE
+	-- If actual frame rate differs significantly from FRAME_RATE
+	-- the first 120 frames would rendered "incorrectly"
+	if FPS == 0 then
+		FPS = FRAME_RATE
+	end
+	NF = 0
+	FC = 0
+	self.lastSampleTicks = framework:getTicks()
 
 	-- When used in NP screen _layout gets called with strange values
 --	BlaiseD disabling this check allows us to render VU Meters for newer
@@ -258,6 +277,7 @@ function _layout(self)
 				-- FIXME: frame images for multiple channels must have the same characteristics.
 				local imgW, imgH = self.vutbl.imageFrames[1]:getSize()
 				log:info("frame count: ", self.vutbl.jsData.framecount)
+				NF = self.vutbl.jsData.framecount
 				local frame_w = imgW/self.vutbl.jsData.framecount
 				-- place the VUMeter images within the designated space
 				-- with equal spacing on the left, right and centre
@@ -274,10 +294,10 @@ function _layout(self)
 					src_y = math.floor((imgH - h)/2)
 				end
 				self.left  = { img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount
+								framecount = self.vutbl.jsData.framecount,
 							}
 				self.right = { img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount
+								framecount = self.vutbl.jsData.framecount,
 							}
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
@@ -316,6 +336,7 @@ function _layout(self)
 				-- FIXME: frame images for multiple channels must have the same characteristics.
 				local frame_w, imgH = self.vutbl.imageFrames[1]:getSize()
 				log:info("frame count: ", self.vutbl.jsData.framecount, " ",  #self.vutbl.imageFrames)
+				NF = self.vutbl.jsData.framecount
 				local leftIndexOffset = 0
 				local rightIndexOffset = 0
 				if #self.vutbl.imageFrames == 2*self.vutbl.jsData.framecount then
@@ -337,11 +358,11 @@ function _layout(self)
 				end
 				self.left  = { img=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
-								indexOffset = leftIndexOffset
+								indexOffset = leftIndexOffset,
 							}
 				self.right = { img=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
-								indexOffset = rightIndexOffset
+								indexOffset = rightIndexOffset,
 							}
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
@@ -349,7 +370,6 @@ function _layout(self)
 				log:debug("right: x:", self.right.x, " y:", self.right.y, " src_y:", self.right.src_y,
 							" w:", self.right.w, " h:", self.right.h)
 				self.drawMeter = drawVUMeterDiscreteFrames
-
 		else
 			log:warn("unknown vutype ", self.vutbl.vutype)
 		end
@@ -360,6 +380,7 @@ end
 
 
 function draw(self, surface)
+	local ticks = framework:getTicks()
 	if self.countDown then
 		self.counter = self.counter - 1
 		if self.counter < 1 then
@@ -391,6 +412,15 @@ function draw(self, surface)
 
 	self.drawMeter(self.left, surface, vol[1])
 	self.drawMeter(self.right, surface, vol[2])
+
+	FC = FC + 1
+	-- update counters every 120 frames, 2 secs at 60 fps, 5.5 secs at 22 fps
+	if FC % 120 == 0 then
+		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
+		-- self corrects next time around
+		FPS = math.floor(120/((ticks - self.lastSampleTicks)/1000))
+		self.lastSampleTicks = ticks
+	end
 end
 
 function twiddle(self)
