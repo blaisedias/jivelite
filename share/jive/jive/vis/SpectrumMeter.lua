@@ -9,6 +9,7 @@ local Icon          = require("jive.ui.Icon")
 
 local vis           = require("jive.vis")
 local visImage      = require("jive.visImage")
+local framework     = require("jive.ui.Framework")
 
 --local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite.vis")
@@ -22,6 +23,11 @@ local sep = 6
 module(...)
 oo.class(_M, Icon)
 
+-- Spectrum meter metadata globals read by NowPlaying
+-- frames per second
+FPS=0
+-- frames count
+FC=0
 
 function __init(self, style, windowStyle)
 	local obj = oo.rawnew(self, Icon(style))
@@ -61,6 +67,10 @@ function _layout(self)
 	if (w <= 0) and (h <= 0) then
 		return
 	end
+
+	FPS = 0
+	FC = 0
+	self.lastSampleTicks = 0
 
 	self.channelWidth = {}
 	self.clipSubbands = {}
@@ -502,6 +512,7 @@ local function _drawTurbineBins(surface, bch, params)
 end
 
 function draw(self, surface)
+	local ticks = framework:getTicks()
 	if self.countDown then
 		self.counter = self.counter - 1
 		if self.counter < 1 then
@@ -584,6 +595,15 @@ function draw(self, surface)
 										self.x2 + xSpan, self.y - self.yoffset_controls, self.spparms.barColor)
 			end
 		end
+	end
+
+	FC = FC + 1
+	-- update counters every 120 frames, 2 secs at 60 fps, 5.5 secs at 22 fps
+	if FC % 120 == 0 then
+		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
+		-- self corrects next time around
+		FPS = math.floor(120/((ticks - self.lastSampleTicks)/1000))
+		self.lastSampleTicks = ticks
 	end
 end
 
