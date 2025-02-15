@@ -199,6 +199,7 @@ local function getAudioStreamMetadata(self)
 					if samplesize then
 						stream_metadata = stream_metadata .. " • " .. samplesize .. " bits"
 					end
+					self.audiometadatatxt = stream_metadata
 					self.audiometadata:setValue(stream_metadata .. " ")
 					log:info("audio stream metadata " .. stream_metadata)
 				else
@@ -209,7 +210,7 @@ local function getAudioStreamMetadata(self)
 		self.player:getId(),
 		cmd
 		)
-    end
+	end
 end
 
 
@@ -1287,6 +1288,12 @@ function _updatePosition(self)
 			self.progressSlider:setValue(elapsed)
 		end
 	end
+	if self.showVUMetadata then
+		self.audiometadata:setValue("VU:fc=" .. VUMeter.FC .. ", fps=" .. VUMeter.FPS .. ", nf=" .. VUMeter.NF .. " •••  AUDIO:" .. self.audiometadatatxt)
+	end
+	if self.showSPMetadata then
+		self.audiometadata:setValue("SP:fc=" .. SpectrumMeter.FC .. ", fps=" .. SpectrumMeter.FPS .. " •••  AUDIO:" .. self.audiometadatatxt)
+	end
 end
 
 function _updateVolume(self)
@@ -1612,6 +1619,7 @@ end
 --
 
 function _createUI(self)
+	self.audiometadatatxt = "-"
 	--local window = Window("text_list")
 	self.windowStyle = self.selectedStyle
 	if not self.windowStyle then
@@ -1779,7 +1787,9 @@ function _createUI(self)
 	)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
+	self.showSPMetadata = false
 	if npStyleHasSpectrum(self.windowStyle) then
+		self.showSPMetadata = true
 		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
 		self.visuGroup = Button(
 			Group('npvisu', {
@@ -1793,9 +1803,10 @@ function _createUI(self)
 		)
 	end
 
-
+	self.showVUMetadata = false
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
+		self.showVUMetadata = true
 		self.currentVisualiser = VUMeter("vumeter_analog")
 		self.visuGroup = Button(
 			Group('npvisu', {
@@ -2195,7 +2206,7 @@ function showNowPlaying(self, transition, direct)
 
 		_getIcon(self, _thisTrack, self.artwork, playerStatus.remote)
 		self:_updateMode(playerStatus.mode)
-        getAudioStreamMetadata(self)
+		getAudioStreamMetadata(self)
 		self:_updateTrack(trackInfo)
 		self:_updateProgress(playerStatus)
 		self:_updatePlaylist()

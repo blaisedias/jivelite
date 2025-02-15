@@ -25,6 +25,7 @@ files["share/jive/jive/vis/SpectrumMeter.lua"] = {
        "__init", "_skin",
        "_layout", "draw",
        "twiddle",
+       "FPS", "FC",
    },
    read_globals = {
        "_M", "jive"
@@ -35,6 +36,7 @@ files["share/jive/jive/vis/VUMeter.lua"] = {
        "__init", "_skin",
        "_layout", "draw",
        "twiddle",
+       "FPS", "FC", "NF",
    },
    read_globals = {
        "_M", "jive", "appletManager"
