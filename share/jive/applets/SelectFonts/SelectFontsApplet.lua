@@ -76,6 +76,10 @@ local fontsdb = {
     },
 	Antonio={ regular="Antonio/static/Antonio-Regular", bold="Antonio/static/Antonio-SemiBold", },
 	Oswald={ regular="Oswald/static/Oswald-Regular", bold="Oswald/static/Oswald-SemiBold", },
+    Roboto= { regular="Roboto/static/Roboto-Regular", bold="Roboto/static/Roboto-SemiBold" },
+    RobotoItalic= { regular="Roboto/static/Roboto-Italic", bold="Roboto/static/Roboto-SemiBoldItalic" },
+    RobotoSemiCondensed= { regular="Roboto/static/Roboto_SemiCondensed-Regular", bold="Roboto/static/Roboto_SemiCondensed-SemiBold" },
+    RobotoCondensed= { regular="Roboto/static/Roboto_Condensed-Regular", bold="Roboto/static/Roboto_Condensed-SemiBold" },
 }
 
 function selectFontsEntryPoint(self, menuItem)
