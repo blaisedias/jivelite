@@ -182,10 +182,10 @@ local function drawVUMeterDiscreteFrames(params, surface, vol)
 	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
 	if val >= params.cap then
 		params.cap = val
-	elseif params.cap > 1 then
-		params.cap = math.max(1, params.cap - (params.framecount/FPS))
+	elseif params.cap > 0 then
+		params.cap = math.max(0, params.cap - (params.framecount/FPS))
 	end
-	params.img[math.floor(params.cap) + params.indexOffset]:blit(surface, params.x, params.y)
+	params.image_frames[math.floor(params.cap) + params.firstframe_index]:blit(surface, params.x, params.y)
 end
 
 local function nullDraw(_, _, _)
@@ -337,10 +337,10 @@ function _layout(self)
 				local frame_w, imgH = self.vutbl.imageFrames[1]:getSize()
 				log:info("frame count: ", self.vutbl.jsData.framecount, " ",  #self.vutbl.imageFrames)
 				NF = self.vutbl.jsData.framecount
-				local leftIndexOffset = 0
-				local rightIndexOffset = 0
+				local ffindx_left = 1
+				local ffindex_right = ffindx_left
 				if #self.vutbl.imageFrames == 2*self.vutbl.jsData.framecount then
-					rightIndexOffset = self.vutbl.jsData.framecount
+					ffindex_right = self.vutbl.jsData.framecount + 1
 				end
 				-- place the VUMeter images within the designated space
 				-- with equal spacing on the left, right and centre
@@ -356,13 +356,13 @@ function _layout(self)
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
 				end
-				self.left  = { img=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+				self.left  = { image_frames=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
-								indexOffset = leftIndexOffset,
+								firstframe_index = ffindx_left,
 							}
-				self.right = { img=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
+				self.right = { image_frames=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
-								indexOffset = rightIndexOffset,
+								firstframe_index = ffindex_right,
 							}
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
