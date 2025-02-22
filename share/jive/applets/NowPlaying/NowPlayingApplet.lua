@@ -1789,7 +1789,8 @@ function _createUI(self)
 	-- Visualizer: Spectrum Visualizer - only load if needed
 	self.showSPMetadata = false
 	if npStyleHasSpectrum(self.windowStyle) then
-		self.showSPMetadata = true
+		local settings = self:getSettings()
+		self.showSPMetadata = settings.showVisualiserMeta
 		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
 		self.visuGroup = Button(
 			Group('npvisu', {
@@ -1806,7 +1807,8 @@ function _createUI(self)
 	self.showVUMetadata = false
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
-		self.showVUMetadata = true
+		local settings = self:getSettings()
+		self.showVUMetadata = settings.showVisualiserMeta
 		self.currentVisualiser = VUMeter("vumeter_analog")
 		self.visuGroup = Button(
 			Group('npvisu', {
