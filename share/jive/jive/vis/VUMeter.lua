@@ -30,6 +30,8 @@ FC=0
 -- number of frames defined for VU Meter
 NF=0
 
+local TWO_SECS_FRAME_COUNT = FRAME_RATE * 2
+
 function __init(self, style)
 	local obj = oo.rawnew(self, Icon(style))
 
@@ -209,7 +211,6 @@ function _layout(self)
 	end
 	NF = 0
 	FC = 0
-	self.lastSampleTicks = framework:getTicks()
 
 	-- When used in NP screen _layout gets called with strange values
 --	BlaiseD disabling this check allows us to render VU Meters for newer
@@ -413,12 +414,21 @@ function draw(self, surface)
 	self.drawMeter(self.left, surface, vol[1])
 	self.drawMeter(self.right, surface, vol[2])
 
+	if FC == 0 then
+		self.lastSampleTicks = ticks
+	end
 	FC = FC + 1
-	-- update counters every 120 frames, 2 secs at 60 fps, 5.5 secs at 22 fps
-	if FC % 120 == 0 then
+	-- update FPS every 2 seconds
+	if FC % TWO_SECS_FRAME_COUNT == 0 then
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
-		FPS = math.floor(120/((ticks - self.lastSampleTicks)/1000))
+		FPS = (math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000)))
+		if self.left.framecount/FPS > 1.1 then
+			log:warn("FPS LOW ", FPS, " step:", self.left.framecount/FPS)
+		end
+		if FPS > FRAME_RATE then
+			log:warn("FPS HIGH ", FPS, " step:", self.left.framecount/FPS)
+		end
 		self.lastSampleTicks = ticks
 	end
 end

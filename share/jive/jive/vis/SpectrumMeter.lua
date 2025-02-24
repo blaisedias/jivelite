@@ -29,6 +29,8 @@ FPS=0
 -- frames count
 FC=0
 
+local TWO_SECS_FRAME_COUNT = FRAME_RATE * 2
+
 function __init(self, style, windowStyle)
 	local obj = oo.rawnew(self, Icon(style))
 
@@ -70,7 +72,6 @@ function _layout(self)
 
 	FPS = 0
 	FC = 0
-	self.lastSampleTicks = 0
 
 	self.channelWidth = {}
 	self.clipSubbands = {}
@@ -597,12 +598,15 @@ function draw(self, surface)
 		end
 	end
 
+	if FC == 0 then
+		self.lastSampleTicks = ticks
+	end
 	FC = FC + 1
-	-- update counters every 120 frames, 2 secs at 60 fps, 5.5 secs at 22 fps
-	if FC % 120 == 0 then
+	-- update FPS every 2 seconds
+	if FC % TWO_SECS_FRAME_COUNT == 0 then
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
-		FPS = math.floor(120/((ticks - self.lastSampleTicks)/1000))
+		FPS = math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000))
 		self.lastSampleTicks = ticks
 	end
 end
