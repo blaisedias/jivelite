@@ -637,36 +637,32 @@ local function initSpectrumList()
 	table.sort(spectrumList, function (left, right) return left.name < right.name end)
 end
 
-local function enableOneSpectrumMeter()
-		local enabled_count = 0
+-- return the index of the "default" spectrum meter
+local function getDefaultSpectrumMeter()
 		-- try to select a meter which does not require a resize
 		-- 1: try white colour
-		for _, v in pairs(spectrumList) do
+		for i, v in pairs(spectrumList) do
 			if v.name == "Cyan" and v.spType == SPT_COLOUR then
-				v.enabled = true
-				enabled_count = 1
+				return i
 			end
 		end
-		if enabled_count == 0 then
-			-- 2: try a colour
-			for _, v in pairs(spectrumList) do
-				if v.spType == SPT_COLOUR then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
+		-- 2: try a colour
+		for i, v in pairs(spectrumList) do
+			if v.spType == SPT_COLOUR then
+				return i
 			end
 		end
-		if enabled_count == 0 then
-			-- 3: finally just use whatever is first in the list
-			-- a resize may be involved at a later stage
-			spectrumList[1].enabled = true
-		end
+		-- 3: finally just use whatever is first in the list
+		-- a resize may be involved at a later stage
+		return 1
 end
 
 local function populateSpSeq()
 	local indx = 1
 	spSeq = {}
+	if #spectrumList == 0 then
+		log:warn("No Spectrum Meters!")
+	end
 	for i = 1, #spectrumList do
 		if spectrumList[i].enabled == true then
 		 spSeq[indx] = i
@@ -674,8 +670,7 @@ local function populateSpSeq()
 		end
 	end
 	if #spSeq == 0 then
-		enableOneSpectrumMeter()
-		populateSpSeq()
+		spSeq[1] = getDefaultSpectrumMeter()
 	end
 end
 
@@ -692,10 +687,8 @@ local function __spBump(_, _)
 		populateSpSeq()
 		ShuffleInPlace(spSeq)
 	end
+
 	spImageIndex = spSeq[spSeqIndex]
-	if #spSeq == 0 then
-		log:error("No spectrum meters enabled")
-	end
 	spSeqIndex = spSeqIndex + 1
 	return true
 end
@@ -1129,37 +1122,32 @@ local function initVuMeterList()
 	table.sort(vuImages, function (left, right) return left.displayName < right.displayName end)
 end
 
--- Enable at least one valid VU Meter
-local function enableOneVUMeter()
-		local enabled_count = 0
+-- return the index of the "default" VU Meter
+local function getDefaultVUMeter()
 		-- select a default, try to find a compose1 (time expensive resize not required)
 		-- 1: try "Chevrons Cyan Orange"
-		for _, v in pairs(vuImages) do
+		for i, v in pairs(vuImages) do
 			if v.name == "Chevrons Cyan Orange" and v.vutype==VUT_compose1 then
-				v.enabled = true
-				enabled_count = 1
+				return i
 			end
 		end
 		-- 2: try any Compose1 VU
-		if enabled_count == 0 then
-			for _, v in pairs(vuImages) do
-				if v.vutype==VUT_compose1 then
-					v.enabled = true
-					enabled_count = 1
-					break
-				end
+		for i, v in pairs(vuImages) do
+			if v.vutype==VUT_compose1 then
+				return i
 			end
 		end
 		-- 3: finally use whatever is first in the list
 		-- a resize may be involved at a later stage
-		if enabled_count == 0 then
-			vuImages[1].enabled = true
-		end
+		return 1
 end
 
 local function populateVuSeq()
 	local indx = 1
 	vuSeq = {}
+	if #vuImages == 0 then
+		log:warn("No VU Meters!")
+	end
 	for i = 1, #vuImages do
 		if vuImages[i].enabled == true then
 			vuSeq[indx] = i
@@ -1167,8 +1155,7 @@ local function populateVuSeq()
 		end
 	end
 	if #vuSeq == 0 then
-		enableOneVUMeter()
-		populateVuSeq()
+		vuSeq[1] = getDefaultVUMeter()
 	end
 end
 
@@ -1185,9 +1172,6 @@ local function __vuBump()
 		ShuffleInPlace(vuSeq)
 	end
 	vuImageIndex = vuSeq[vuSeqIndex]
-	if #vuSeq == 0 then
-		log:error("No VU meters enabled")
-	end
 	vuSeqIndex = vuSeqIndex + 1
 end
 
@@ -1643,9 +1627,6 @@ function setVisSettings(_, settings)
 			enabled_count = enabled_count + 1
 		end
 	end
-	if enabled_count == 0 and #spectrumList > 0 then
-		enableOneSpectrumMeter()
-	end
 
 	initVuMeterList()
 	enabled_count = 0
@@ -1656,9 +1637,7 @@ function setVisSettings(_, settings)
 			enabled_count = enabled_count + 1
 		end
 	end
-	if enabled_count == 0 and #vuImages > 0 then
-		enableOneVUMeter()
-	end
+
 	__spBump()
 	__vuBump()
 end

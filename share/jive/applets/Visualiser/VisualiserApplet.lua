@@ -526,19 +526,11 @@ function selectVuMeters(self)
 --                function(object, isSelected)
                 function(_, isSelected)
                     local cb_settings = self:getSettings()
-                    local selected = isSelected
-                    if isSelected then
-                        visImage:selectVuImage(nm, true)
-                    else
-                        if visImage:selectVuImage(nm, false) <= 0 then
-                            visImage:selectVuImage(nm, true)
-                            selected = true
-                        else
-                            refreshNowPlaying()
-                        end
-                    end
-                    cb_settings.vuMeterSelection[nm] = selected
+                    visImage:selectVuImage(nm, isSelected)
+                    cb_settings.vuMeterSelection[nm] = isSelected
                     self:storeSettings()
+                    visImage:vuChange('force', 'force')
+                    refreshNowPlaying()
                 end,
             enabled),
         } )
@@ -570,19 +562,11 @@ function selectSpectrumMeters(self)
 --                function(object, isSelected)
                 function(_, isSelected)
                     local cb_settings = self:getSettings()
-                    local selected = isSelected
-                    if isSelected then
-                        visImage:selectSpectrum(nm, true)
-                    else
-                        if visImage:selectSpectrum(nm, false) <= 0 then
-                            visImage:selectSpectrum(nm, true)
-                            selected = true
-                        else
-                            refreshNowPlaying()
-                        end
-                    end
-                    cb_settings.spectrumMeterSelection[nm] = selected
+                    visImage:selectSpectrum(nm, isSelected)
+                    cb_settings.spectrumMeterSelection[nm] = isSelected
                     self:storeSettings()
+                    visImage:spChange('force', 'force')
+                    refreshNowPlaying()
                 end,
             enabled),
         } )

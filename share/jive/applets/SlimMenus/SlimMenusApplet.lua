@@ -760,7 +760,7 @@ local function _menuSink(self, isCurrentServer, server)
 			self.waitingForPlayerMenuStatus = false
 			jnt:notify("playerLoaded", _player)
 			appletManager:callService("hideConnectingToServer")
-         end
+		end
 	end
 end
 
