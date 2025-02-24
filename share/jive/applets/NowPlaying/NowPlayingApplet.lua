@@ -2121,6 +2121,8 @@ end
 
 function showNowPlaying(self, transition, direct)
 
+	VUMeter.FC = 0
+	SpectrumMeter.FC = 0
 	-- now we're ready to save the style table to self
 	self.nowPlayingScreenStyles = self:getNPStyles()
 
