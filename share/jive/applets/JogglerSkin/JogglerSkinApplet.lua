@@ -450,7 +450,7 @@ end
 -- The meta arranges for this to be called to skin the interface.
 function skin0(self, s, reload, useDefaultSize, w, h)
 
-    local CONTROLS_THEME_PATH = "UNOFFICIAL/Modern"
+    local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
 --    CONTROLS_THEME_PATH = "UNOFFICIAL/AlexAust/Rectangles"
 
 	Framework:setVideoMode(w, h, 0, false)
@@ -3396,7 +3396,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				img = _loadImage(self, "Icons/icon_toolbar_love_off.png"),
 			}),
 			fwdDisabled   = _uses(_transportControlButton, {
-				img = _loadImage(self, "Icons/icon_toolbar_ffwd_dis.png"),
+				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_ffwd_dis.png"),
 			}),
 			rewDisabled   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_rew_dis.png"),
@@ -3487,7 +3487,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.npvolumeB = {
 		w = volumeBarWidth,
 		border = { 5, 20, 5, 0 },
-		-- for Modern volume bar:
+		-- for Material skin volume bar:
 		--	  set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
 		--	  note: this does not shift the slider background!
 		--	  set right padding to 16 otherwise slider is too close to screen edge at max value
