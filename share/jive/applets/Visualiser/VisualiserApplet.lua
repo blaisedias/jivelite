@@ -31,7 +31,7 @@ local log               = require("jive.utils.log").logger("applet.Visualiser")
 --local debug             = require("jive.utils.debug")
 
 local Applet            = require("jive.Applet")
-
+local VUMeter           = require("jive.vis.VUMeter")
 local appletManager     = appletManager
 local jiveMain      = jiveMain
 
@@ -96,6 +96,39 @@ function init(self)
 --            end,
 --            settings.cacheEnabled)
 --    })
+
+    local groupS = RadioGroup()
+    for i, v in ipairs(VUMeter.RTZP_VALUES) do
+        local txt
+        if v == 0 then
+            txt = 'Instantaneous'
+        elseif v == -1 then
+            txt = '1 level down for each frame'
+        elseif v < 0 then
+            txt = ''..(-v)..' levels for each frame'
+        elseif v == 1 then
+            txt = '' .. v .. ' second'
+        elseif v < 1 then
+            txt = '' .. v .. ' seconds'
+        else
+            txt = '' .. v .. ' seconds'
+        end
+        jiveMain:addItem({
+            id = 'pdt'..i,
+            node = 'visualiserVUMeterRTZP',
+            text = txt,
+            style = 'item_choice',
+            weight = i,
+    --        check =  Checkbox("checkbox", function(applet, checked)
+            check =  RadioButton("radio", groupS, function()
+                local cb_settings = self:getSettings()
+                cb_settings.framesVU_RTZP = v
+                self:storeSettings()
+                refreshNowPlaying()
+            end,
+            settings.framesVU_RTZP == v)
+        })
+    end
 
     jiveMain:addItem({
         id = "viseqrand",

@@ -32,6 +32,7 @@ local jiveMain      = jiveMain
 --local Checkbox      = require("jive.ui.Checkbox")
 local visImage      = require("jive.visImage")
 --local os            = require("os")
+local VUMeter           = require("jive.vis.VUMeter")
 
 --local arg, ipairs, string = arg, ipairs, string
 
@@ -114,8 +115,14 @@ function registerApplet(self)
     if settings.desatAlpha == nil then
         settings.desatAlpha = 160
     end
-    local tmp = visImage:getVuMeterList()
 
+    -- if frames VU RTZP is not set - fall back to legacy beahviour
+    if settings.framesVU_RTZP == nil then
+        settings.framesVU_RTZP = -1
+    end
+
+
+    local tmp = visImage:getVuMeterList()
     for _, v in pairs(tmp) do
         settings.vuMeterSelection[v.name] = v.enabled
     end
@@ -168,6 +175,17 @@ function registerApplet(self)
         weight=30,
     }
     jiveMain:addNode(node)
+
+    node = {
+        id = 'visualiserVUMeterRTZP',
+        iconStyle = 'hm_settings',
+        node = 'visualiserSettings',
+        text = 'Frames VU Meter RTZ from Peak',
+        windowStyle = 'text_only',
+        weight=31,
+    }
+    jiveMain:addNode(node)
+
 
     jiveMain:addItem(
         self:menuItem(
