@@ -4129,8 +4129,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
---	visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
---	visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
+		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
 			npvisu = {
 				hidden = 0,
@@ -4416,7 +4415,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
 	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
-		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
+		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
 			npvisu = {
 				hidden = 0,
