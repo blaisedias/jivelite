@@ -36,7 +36,7 @@ files["share/jive/jive/vis/VUMeter.lua"] = {
        "__init", "_skin",
        "_layout", "draw",
        "twiddle",
-       "FPS", "FC", "NF",
+       "FPS", "FC", "NF", "RTZP_VALUES",
    },
    read_globals = {
        "_M", "jive", "appletManager"

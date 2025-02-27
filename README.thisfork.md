@@ -72,9 +72,15 @@ Multiple VU Meter images may be selected.
 The VU meter display is cycled on track change or clicking on the VU meter see [README.visualiser](./README.visualiserapplet.md) for more details
 At least one VU Meter image must be selected
 
-There are 3 classes of VU Meters:
- * 25 frames
- * 25 frames LR (frames for left and right meters are different)
+There are 4 classes of VU Meters:
+ * frames - all frames are contained in a single image, typically 25 frames
+   * the frame count can be changed, however increasing the frame count beyond 25 is not recommended, Jivelite may crash
+ * frames per channel (frames for left and right meters are different) typically 25 frames for each channel
+   * all frames are contained a single image, one for each channel
+   * the frame count can be changed, however increasing the frame count beyond 25 is not recommended, Jivelite may crash
+ * Discrete frames up to 50 frames
+   * each frame is in a separate image
+   * if the number frame images specified is twice that of the frame count then the first set is used for the left channel and the second set for the right channel
  * composite 
 
 ## VU Meters
@@ -106,7 +112,7 @@ The metadata schema for VU meter images is *TO DO*
     }
 }
 ```
-#### frames LR
+#### frames per channel
 ```
 {
     "kind": "vumeter",
@@ -165,6 +171,69 @@ The metadata schema for VU meter images is *TO DO*
     "step": 36
 }
 ```
+#### discrete frames (49 frames)
+```
+{
+    "kind": "vumeter",
+    "name": "PurpleHiRes",
+    "vutype": "frames",
+    "#format": "single image -> all frames in a single image file, discrete -> one file for each frame",
+    "format": "discrete",
+    "files": {
+        "frames": [
+            "Purple-00.png",
+            "Purple-01.png",
+            "Purple-02.png",
+            "Purple-03.png",
+            "Purple-04.png",
+            "Purple-05.png",
+            "Purple-06.png",
+            "Purple-07.png",
+            "Purple-08.png",
+            "Purple-09.png",
+            "Purple-10.png",
+            "Purple-11.png",
+            "Purple-12.png",
+            "Purple-13.png",
+            "Purple-14.png",
+            "Purple-15.png",
+            "Purple-16.png",
+            "Purple-17.png",
+            "Purple-18.png",
+            "Purple-19.png",
+            "Purple-20.png",
+            "Purple-21.png",
+            "Purple-22.png",
+            "Purple-23.png",
+            "Purple-24.png",
+            "Purple-25.png",
+            "Purple-26.png",
+            "Purple-27.png",
+            "Purple-28.png",
+            "Purple-29.png",
+            "Purple-30.png",
+            "Purple-31.png",
+            "Purple-32.png",
+            "Purple-33.png",
+            "Purple-34.png",
+            "Purple-35.png",
+            "Purple-36.png",
+            "Purple-37.png",
+            "Purple-38.png",
+            "Purple-39.png",
+            "Purple-40.png",
+            "Purple-41.png",
+            "Purple-42.png",
+            "Purple-43.png",
+            "Purple-44.png",
+            "Purple-45.png",
+            "Purple-46.png",
+            "Purple-47.png",
+            "Purple-48.png"
+        ]
+    }
+}
+```
 
 *Note:*
 *  The VU Meter images in this location are in a different form factor from those in
@@ -173,6 +242,67 @@ The metadata schema for VU meter images is *TO DO*
 *  The VU Meter images  have been trimmed at the top and bottom.
 This makes it possible to use the same images as the source for multiple skins and resolutions,
 by resizing them to fit the viewport (display area).
+
+#### Discrete frames VU Meters
+Discrete frames VU meters were introduced in an effort to improve rendering of "analogue" VU Meters.
+
+This format removes limitations of the frames VU Meter format.
+SDL has an upper size limit when loading and manipulating images - and Jivelite crashes if the combination of image resolution and number of frames yields frames images which are too large.
+
+Using separate images for each frame removes this restriction.
+It is now possible to use higher resolution images for each frame and also more frames to define the VU Meter.
+
+##### High Resolution VU Meters
+In this context a high resolution VU Meter is a discrete frames VU meter with
+ *  image resolution of width > 512 pixels
+ *  defined by frame counts > 48
+
+These characteristics do not necessarily yield smoother VU meter animation.
+To the human eye, the rate at which the frames are rendered is also a factor.
+
+Jivelite animates VU meters by rendering frames depicting volume levels at regular intervals (frame rate).
+
+Jivelite does not necessarily render a frame matching the sampled volume level at the instant of rendering the frame.
+Instead a value based on the previous peak value - which decreases by one level for each frame rendered - will be used **if** it is larger than the sampled volume level.
+
+This approximates the behaviour of genuine analog VU meters.
+
+However
+* changing the frame rate changes the perceived characteristics of the VU Meters, by changing the time it takes for the volume level to return to zero from peak (RTZP time).
+* changing the number of frames defining a VU meter changes it characteristics.
+* when frame rates are low compared to the number frames defining a VU meter then the animation of VU meter will be sluggish.
+
+For clarity this is the definition of *RTZP Time*
+* *RTZP Time* is defined as the number of seconds that would elapse animating a VU meter needle from peak value to minimum value, with the needle position decreasing at a constant rate.
+
+Typically 
+ * larger values for RTZP time yield smoother animation with reduced accuracy.
+ * smaller values for RTZP time yield jerkier animation with higher accuracy.
+
+Given that there is a choice to be made, a new configuration parameter has been introduced: **Frames VU Meter RTZ from Peak**
+ 
+This allows users to tune the behaviour to suit their preferences - it should be noted that this setting only affects the rate at which the peak level decreases.
+
+The parameter is numerical, however the entire range of numbers is not valid and some values are associated with specific behaviours instead of times.
+
+
+Note that in the above definition, constant rate is restricted to volume level quantisation inherent within the definition of the VU meter.
+For example VU meters with larger numbers of frames "encode" a larger set of volume levels, therefore it is possible to show volume levels decreasing more accurately.
+
+Special values:
+* -1: the behaviour associated with this value is to match existing Jivelite behaviour, where the peak level decreases by one level for each frame rendered.
+* 0: the associated behaviour is to render the frame matching the sampled volume level (highest accuracy possible), simulating a fast reacting VU meter. In general VU meter rendering will not be smooth.
+
+For all positive values, the measured the frame rate and the frame count of the VU meter are used to calculate which frame to render, and the value is the number of seconds for the needle to return to 0 from peak position.
+ * 1: the recommended value, (1 second) - this appears yield the right balance between accuracy and smoothness, especially if the frame rate value is as high or higher than all VU meter frame counts.
+ * \> 1: values greater than 1 ( > 1 second) yield smoother animation, with reduced accuracy. ( Needle position decreases at a slower rate)
+ * < 1 and > 0:  values less than 1 ( < 1 second ) and greater than 0 yield higher accuracy, with reduced animation smoothness. ( Needle position decreases at a high rate - some frames may be skipped)
+
+All negative values other then -1 are invalid.
+
+For convenience of discussion the preceding description used VU meters depiting needles.
+
+However this parameter applies to all frames VU Meters.
 
 ### Accreditations:
 #### Peppy VU meter images
