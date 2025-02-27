@@ -1372,7 +1372,13 @@ function getVuImage(_,w,h)
 	if entry.vutype == VUT_frames and #imgs < 2 then
 		table.insert(imgs, imgs[1])
 	end
-	return {vutype=entry.vutype, imageFrames=imgs, displayResizing=makeResizingParams(resizeRequired), jsData=entry.jsData}
+	return {
+		vutype=entry.vutype,
+		imageFrames=imgs,
+		displayResizing=makeResizingParams(resizeRequired),
+		jsData=entry.jsData,
+		rtzp=visSettings.framesVU_RTZP
+	}
 end
 
 

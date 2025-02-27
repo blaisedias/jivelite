@@ -21,6 +21,33 @@ local appletManager = appletManager
 module(...)
 oo.class(_M, Icon)
 
+RTZP_VALUES = {
+	-- cap value decreases one level for each frame rendered - legacy jivelite behaviour
+	-1,
+	-- sampled volume level is rendered
+	0,
+
+	-- if the following values are set then measured (dynamic) FPS value
+	-- is to calculate the decrease in volume cap
+	1,
+--	1.1,
+	1.25,
+--	1.2,
+--	1.3,
+--	1.4,
+	1.5,
+--	1.6,
+	1.75,
+--	1.8,
+--	1.9,
+	2,
+--	0.9,
+--	0.8,
+--	0.7,
+--	0.6,
+--	0.5,
+}
+
 
 -- VU meter metadata globals read by NowPlaying
 -- frames per second
@@ -170,24 +197,34 @@ local function drawCompose1Static(params, surface)
 end
 
 
-local function drawVUMeterFrames(params, surface, vol)
+-- set params.cap as required for frames and discrete frames type VU meters
+local function setVUFramesCapValue(params, vol)
 	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
+	local v_rtzp = params.rtzp
+	if v_rtzp == 0 then
+		params.cap = val
+		return
+	end
 	if val >= params.cap then
 		params.cap = val
 	elseif params.cap > 0 then
-		params.cap = math.max(0, params.cap - (params.framecount/FPS))
+		if v_rtzp > 0 then
+			params.cap = math.max(0, params.cap - ((params.framecount/FPS) / v_rtzp))
+		else
+			-- negative values are number of levels to drop for each frame rendered
+			params.cap = math.max(0, params.cap + v_rtzp)
+	 end
 	end
-	params.img:blitClip(math.floor(params.cap) * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
+end
+
+local function drawVUMeterFrames(params, surface, vol)
+	setVUFramesCapValue(params, vol)
+	params.img:blitClip(math.floor(params.cap + 0.5) * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
 end
 
 local function drawVUMeterDiscreteFrames(params, surface, vol)
-	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
-	if val >= params.cap then
-		params.cap = val
-	elseif params.cap > 0 then
-		params.cap = math.max(0, params.cap - (params.framecount/FPS))
-	end
-	params.image_frames[math.floor(params.cap) + params.firstframe_index]:blit(surface, params.x, params.y)
+	setVUFramesCapValue(params, vol)
+	params.image_frames[math.floor(params.cap + 0.5) + params.firstframe_index]:blit(surface, params.x, params.y)
 end
 
 local function nullDraw(_, _, _)
@@ -296,10 +333,13 @@ function _layout(self)
 				end
 				self.left  = { img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
+								rtzp = self.vutbl.rtzp,
 							}
 				self.right = { img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
+								rtzp = self.vutbl.rtzp,
 							}
+				log:debug("rtzp : ", self.left.rtzp)
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
 							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
@@ -360,11 +400,14 @@ function _layout(self)
 				self.left  = { image_frames=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
 								firstframe_index = ffindx_left,
+								rtzp = self.vutbl.rtzp,
 							}
 				self.right = { image_frames=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
 								framecount = self.vutbl.jsData.framecount,
 								firstframe_index = ffindex_right,
+								rtzp = self.vutbl.rtzp,
 							}
+				log:debug("rtzp : ", self.left.rtzp)
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
 							self.left.src_y, " w:", self.left.w, " h:", self.left.h)
@@ -401,6 +444,8 @@ function draw(self, surface)
 		d.c = d.c + 1
 		local vuname = visImage:getCurrentVuMeterName()
 		local resized = visImage:concurrentResizeVuMeter(vuname, w, h)
+		-- reset the frame counter for more accurate FPS calculations
+		FC = 0
 		if resized == true then
 			self:_layout(self)
 		end
@@ -423,7 +468,7 @@ function draw(self, surface)
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
 		FPS = (math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000)))
-		if self.left.framecount/FPS > 1.1 then
+		if self.left.framecount/FPS > 1.1 and FPS < FRAME_RATE then
 			log:warn("FPS LOW ", FPS, " step:", self.left.framecount/FPS)
 		end
 		if FPS > FRAME_RATE then
