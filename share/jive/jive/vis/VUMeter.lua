@@ -199,6 +199,9 @@ end
 
 -- set params.cap as required for frames and discrete frames type VU meters
 local function setVUFramesCapValue(params, vol)
+	-- lua array indices start with 1 - decrement by 1 to get 0 as the minimum value.
+	-- frame offsets are 0 based
+	vol =  vol - 1
 	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
 	local v_rtzp = params.rtzp
 	if v_rtzp == 0 then
