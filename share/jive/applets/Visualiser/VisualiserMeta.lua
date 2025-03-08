@@ -154,6 +154,28 @@ function registerApplet(self)
         )
     )
 
+    node = {
+        id = 'visualiserVUMeterSettings',
+        iconStyle = 'hm_settings',
+        node = 'visualiserSettings',
+        text = self:string('VUMETER_SETTINGS'),
+        windowStyle = 'text_only',
+        weight=15,
+    }
+    jiveMain:addNode(node)
+
+
+    node = {
+        id = 'visualiserVUMeterRTZP',
+        iconStyle = 'hm_settings',
+        node = 'visualiserVUMeterSettings',
+        text = self:string('VUMETER_RTZ_FROM_PEAK'),
+        windowStyle = 'text_only',
+        weight=15,
+    }
+    jiveMain:addNode(node)
+
+
     jiveMain:addItem(
         self:menuItem(
             'appletSpectrumMeterSelection',
@@ -170,19 +192,9 @@ function registerApplet(self)
         id = 'visualiserSpectrumSettings',
         iconStyle = 'hm_settings',
         node = 'visualiserSettings',
-        text = 'Spectrum Meter Settings',
+        text = self:string('SPECTRUM_METER_SETTINGS'),
         windowStyle = 'text_only',
         weight=30,
-    }
-    jiveMain:addNode(node)
-
-    node = {
-        id = 'visualiserVUMeterRTZP',
-        iconStyle = 'hm_settings',
-        node = 'visualiserSettings',
-        text = 'Frames VU Meter RTZ from Peak',
-        windowStyle = 'text_only',
-        weight=31,
     }
     jiveMain:addNode(node)
 
