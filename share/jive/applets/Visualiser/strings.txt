@@ -6,7 +6,7 @@ SELECT_VUMETER
 	EN	VU Meter Selection
 
 SELECT_SPECTRUM
-	EN	Spectrum Analyzer Selection 
+	EN	Spectrum Meter Selection 
 
 SPECTRUM_BARS_FORMAT
 	EN	Bars Format
@@ -88,5 +88,14 @@ SAVE_RESIZED
 
 SAVE_AS_PNG
 	EN	Save as PNG
+
+SPECTRUM_METER_SETTINGS
+	EN	Spectrum Meter Settings
+
+VUMETER_SETTINGS
+	EN	VU Meter Settings
+
+VUMETER_RTZ_FROM_PEAK
+	EN	Frames VU Meter RTZ from Peak
 
 
