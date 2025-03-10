@@ -4,6 +4,7 @@ local AppletMeta    = require("jive.AppletMeta")
 
 local appletManager = appletManager
 local jiveMain      = jiveMain
+local Checkbox    	= require("jive.ui.Checkbox")
 
 
 module(...)
@@ -18,11 +19,19 @@ function defaultSettings(self)
 	return {
 		scrollText = true,
 		scrollTextOnce = false,
+		goNowPlayingAtStart = false,
+		goNowPlayingAtStartTimer = 5000,
 		views = {},
 	}
 end
 
 function registerApplet(self)
+	local settings = self:getSettings()
+	if settings.goNowPlayingAtStartTimer == nil then
+		settings.goNowPlayingAtStartTimer = 5000
+		self:storeSettings()
+	end
+
 	local node = { id = 'nowPlayingScrollSettings', iconStyle = 'hm_settings', node = 'screenSettingsNowPlaying',
 					text = self:string('SCROLL_SETTINGS'), windowStyle = 'text_only', weight=30  }
 	jiveMain:addNode(node)
@@ -84,6 +93,23 @@ function registerApplet(self)
 			end,
 			50
 		)
+	)
+
+	local settings = self:getSettings()
+	jiveMain:addItem(
+		{
+			id = 'goNowPlayingAtStart',
+			node = 'screenSettingsNowPlaying',
+			text = self:string("GO_NOWPLAYING_ON_START"),
+			style = 'item_choice',
+			weight = 55,
+			check =  Checkbox("checkbox", function(_, checked)
+				local cb_settings = self:getSettings()
+				cb_settings.goNowPlayingAtStart = checked
+				self:storeSettings()
+			end,
+			settings.goNowPlayingAtStart)
+		}
 	)
 
 	self:registerService('goNowPlaying')
