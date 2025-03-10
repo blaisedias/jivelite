@@ -242,7 +242,14 @@ function init(self)
 	self.scrollText     = settings["scrollText"]
 	self.scrollTextOnce = settings["scrollTextOnce"]
 	_setScrollParameters(settings)
-
+	if settings.goNowPlayingAtStart then
+		local startupTimer = Timer(settings.goNowPlayingAtStartTimer,
+			function()
+				Framework:pushAction('go_now_playing')
+			end, true
+			)
+		startupTimer:start()
+	end
 end
 
 -- style names are grabbed from the skin
