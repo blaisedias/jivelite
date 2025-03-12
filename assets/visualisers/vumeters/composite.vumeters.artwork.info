@@ -1,3 +1,49 @@
+1)
+Description:	Community squeezebox controller 3rd party image.
+Author:		Alex Aust
+
+LED2/bar-off.png
+LED2/bar-on.png
+LED2/bar-peak-off.png
+LED2/bar-peak-on.png
+LED2/center.png
+LED2/left-trail.png
+LED2/left.png
+LED2/meta.json
+LED2/right-trail.png
+LED2/right.png
+LED3/bar-off.png
+LED3/bar-on.png
+LED3/bar-peak-off.png
+LED3/bar-peak-on.png
+LED3/center.png
+LED3/left-trail.png
+LED3/left.png
+LED3/meta.json
+LED3/right-trail.png
+LED3/right.png
+VFD2/bar-off.png
+VFD2/bar-on.png
+VFD2/bar-peak-off.png
+VFD2/bar-peak-on.png
+VFD2/center.png
+VFD2/left-trail.png
+VFD2/left.png
+VFD2/meta.json
+VFD2/right-trail.png
+VFD2/right.png
+VFD3/bar-off.png
+VFD3/bar-on.png
+VFD3/bar-peak-off.png
+VFD3/bar-peak-on.png
+VFD3/center.png
+VFD3/left-trail.png
+VFD3/left.png
+VFD3/meta.json
+VFD3/right-trail.png
+VFD3/right.png
+
+2)
 Description:	Community squeezebox controller 3rd party image.
 Version:	1.0.0
 Author:		blaisedias
