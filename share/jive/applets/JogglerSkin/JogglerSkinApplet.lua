@@ -4749,6 +4749,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10 - 20
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
+		AUDIO_METADATA_Y = screenHeight - 110 - AUDIO_METADATA_FONT_HEIGHT
 
 --		mini_visu_H = 320
 --		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
@@ -4847,6 +4848,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 					img = false,
 				},
 			},
+			npaudiometadata = {
+				y = AUDIO_METADATA_Y,
+				align = "center",
+			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 
@@ -4933,6 +4938,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 					padding = 0,
 					img = false,
 				},
+			},
+			npaudiometadata = {
+				y = AUDIO_METADATA_Y,
+				align = "center",
 			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
