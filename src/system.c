@@ -26,7 +26,7 @@ static SDL_mutex* background_exec_lock = NULL;
 static SDL_sem* background_exec_sem;
 int fn_thread_background_exec(void *ptr);
 static volatile unsigned background_exec_run = 1;
-static bool debug_background_exec = 0;
+static bool debug_background_exec = 1;
 
 // public API
 const char * system_get_machine(void) {
