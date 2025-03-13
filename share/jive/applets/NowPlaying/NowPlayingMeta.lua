@@ -32,6 +32,12 @@ function registerApplet(self)
 		self:storeSettings()
 	end
 
+-- for vis beta 2 remove for release {
+-- force display of visualiser meta data
+	settings.showVisualiserData=true
+	self:storeSettings()
+-- }
+
 	local node = { id = 'nowPlayingScrollSettings', iconStyle = 'hm_settings', node = 'screenSettingsNowPlaying',
 					text = self:string('SCROLL_SETTINGS'), windowStyle = 'text_only', weight=30  }
 	jiveMain:addNode(node)
