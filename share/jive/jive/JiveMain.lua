@@ -341,15 +341,16 @@ function JiveMain:__init()
 				if (Framework:isValidIRCode(event)) then
 					Framework.mostRecentInputType = "ir"
 				end
-			end
-			if (bit.band(type, EVENT_KEY_ALL)) > 0 then
+			elseif (bit.band(type, EVENT_KEY_ALL)) > 0 then
 				Framework.mostRecentInputType = "key"
-			end
-			if (bit.band(type, EVENT_SCROLL)) > 0 then
+			elseif (bit.band(type, EVENT_SCROLL)) > 0 then
 				Framework.mostRecentInputType = "scroll"
-			end
-			if (bit.band(type, EVENT_MOUSE_ALL)) > 0 then
+			elseif (bit.band(type, EVENT_MOUSE_ALL)) > 0 then
 				Framework.mostRecentInputType = "mouse"
+			elseif (bit.band(type, EVENT_CHAR_PRESS)) > 0 then
+				Framework.mostRecentInputType = "key"
+			else
+				log:warn("... ??? ", type)
 			end
 			--not sure what to do about char, since it is a bit of a hybrid input type. So far usages don't care.
 			
