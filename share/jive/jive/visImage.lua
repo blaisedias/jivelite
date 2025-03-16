@@ -1008,7 +1008,7 @@ local function addCompose1VUMeter(jsData, path)
 	cvu.step = jsData.step
 	cvu.maxVU = 50
 	if jsData.maxVolumeUnits ~= nil and type(jsData.maxVolumeUnits) == 'number' then
-		cvu.maxVU = jsData.jsData.maxVolumeUnits
+		cvu.maxVU = jsData.maxVolumeUnits
 	end
 
 	compositeVuMeters[cvu.name] = cvu
@@ -1273,7 +1273,7 @@ local function getCompose1VUmeter(name, w, h)
 	local dh = ch + (bh * 2)
 --	local barwidth = math.floor((cw - lw)/49)
 	local barwidth = cvu.step
-	local calcbw = (cw - lw - tw)/49
+	local calcbw = (cw - lw - tw)/(cvu.maxVU -1)
 	if calcbw ~= barwidth then
 		log:warn("  barwidth:", barwidth, " calcbw:", calcbw)
 	end
@@ -1302,7 +1302,7 @@ local function getCompose1VUmeter(name, w, h)
 		-- cw = math.floor((cw * sf))
 		-- scales at odds with the smaller bits.
 --	  	log:debug("delta calc vs sf ", (calcbw *49) + lw + tw - cw)
-		cw = (calcbw *49) + lw + tw
+		cw = (calcbw * (cvu.maxVU -1)) + lw + tw
 		ch = math.floor((ch * sf))
 		-- c1vu.bar_rxo= barwidth - bw
 		c1vu.left.on = _resizedCompose1Element(c1vu.left.on, bar_on, bw, bh)
