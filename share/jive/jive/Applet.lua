@@ -20,6 +20,7 @@ local coroutine, package, pairs = coroutine, package, pairs
 
 local oo               = require("loop.base")
 local lfs              = require("lfs")
+local log              = require("jive.utils.log").logger("jivelite.applets")
 
 local AppletManager    = require("jive.AppletManager")
 
@@ -199,6 +200,11 @@ end
 -- used by jive.AppletManager to persist the applet settings
 function storeSettings(self)
 	AppletManager._storeSettings(self._entry)
+	if AppletManager:hasService("updatePersistentStore") == true then
+		log:info("calling updatePersistentStore")
+		AppletManager:callService("updatePersistentStore")
+		log:info("updatePersistentStore done.")
+	end
 end
 
 
