@@ -472,10 +472,11 @@ function draw(self, surface)
 		-- self corrects next time around
 		FPS = (math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000)))
 		if NF > 0 then
-			if FPS > FRAME_RATE then
-				log:warn("FPS HIGH ", FPS, " step:", self.left.framecount/FPS,
-							" FC:", FC, " deltaTicks:", ((ticks - self.lastSampleTicks)/1000))
-			elseif self.left.framecount/FPS > 1.1 and FPS < FRAME_RATE then
+--			if FPS > (FRAME_RATE * 1.1) then
+--				log:warn("FPS HIGH ", FPS, " step:", self.left.framecount/FPS,
+--							" FC:", FC, " deltaTicks:", ((ticks - self.lastSampleTicks)/1000))
+--			end
+			if self.left.framecount/FPS > 1.1 and FPS < FRAME_RATE then
 				log:warn("FPS LOW ", FPS, " step:", self.left.framecount/FPS,
 							" FC:", FC, " deltaTicks:", ((ticks - self.lastSampleTicks)/1000))
 			end
