@@ -260,6 +260,9 @@ SCROLL_SETTINGS
 SHOW_AUDIO_METADATA
 	EN	Show Audio Metadata
 
+SHOW_VISUALISER_DATA
+	EN	Show Visualiser Data
+
 GO_NOWPLAYING_ON_START
 	EN	Startup NowPlaying
 

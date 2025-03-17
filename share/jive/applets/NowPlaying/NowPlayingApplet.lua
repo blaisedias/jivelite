@@ -174,36 +174,66 @@ end
 
 local function getAudioStreamMetadata(self)
 	local settings = self:getSettings()
+	self.audiometadatatxt = ""
+	self.audiometadatatbl = {}
 	if settings.showaudiometa == true then
 		local server = self.player:getSlimServer()
 		local cmd = {'status', '-' , 1, 'tags:IgGkoQrRTuyw'}
 		server:userRequest(function(chunk,err)
-			local bitrate, contentType, samplerate, samplesize
 			if err then
 				log:warn(err)
 			else
+--				for k,v in pairs(chunk) do
+--					log:info("stream meta data: chunk: ", k, " -|", v, "|-")
+--				end
+--				for k,v in pairs(chunk.data) do
+--					log:info("stream meta data: chunk.data:  ", k, " -|", v, "|-")
+--				end
+--				for k,v in pairs(chunk.ext) do
+--					log:info("stream meta data: chunk.ext:   ", k, " -|", v, "|-")
+--				end
+--				for k,v in pairs(chunk.data.playlist_loop) do
+--					log:info("stream meta data: chunk.data.playlist_loop:	", k, " -|", v, "|-")
+--				end
+
 				local statusLoopData = chunk.data.playlist_loop[1]
 				if statusLoopData then
-					contentType = statusLoopData.type
-					bitrate = statusLoopData.bitrate
-					samplerate = statusLoopData.samplerate
-					samplesize = statusLoopData.samplesize
+					self.audiometadatatbl.pl_tracks = chunk.data.playlist_tracks
+					self.audiometadatatbl.pl_cur_index = chunk.data.playlist_cur_index
+--					for k,v in pairs(statusLoopData) do
+--						log:info("stream meta data: chunk.data.playlist_loop: ", k, " = ",v)
+--					end
+					self.audiometadatatbl.contentType = statusLoopData.type
+					self.audiometadatatbl.bitrate = statusLoopData.bitrate
+					self.audiometadatatbl.samplerate = statusLoopData.samplerate
+					self.audiometadatatbl.samplesize = statusLoopData.samplesize
+					self.audiometadatatbl.year = statusLoopData.year
+					self.audiometadatatbl.genre = statusLoopData.genre
 
-					local stream_metadata = " " .. contentType
-					if bitrate then
-						stream_metadata = stream_metadata .. " • " .. bitrate
+					local stream_metadata = " " .. self.audiometadatatbl.contentType
+					if self.audiometadatatbl.bitrate and self.audiometadatatbl.bitrate ~= "0" then
+						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.bitrate
 					end
-					if samplerate then
-						stream_metadata = stream_metadata .. " • " .. samplerate .. " Hz"
+					if self.audiometadatatbl.samplerate then
+						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.samplerate .. " Hz"
 					end
-					if samplesize then
-						stream_metadata = stream_metadata .. " • " .. samplesize .. " bits"
+					if self.audiometadatatbl.samplesize then
+						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.samplesize .. " bits"
+					end
+					if self.audiometadatatbl.pl_tracks and self.audiometadatatbl.pl_tracks > 1 and self.audiometadatatbl.pl_cur_index then
+						stream_metadata = stream_metadata .. " • " .. (self.audiometadatatbl.pl_cur_index +1) .. " of " .. self.audiometadatatbl.pl_tracks
+					end
+					if self.audiometadatatbl.year and self.audiometadatatbl.year ~= '0' then
+						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.year
+					end
+					if self.audiometadatatbl.genre then
+						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.genre
 					end
 					self.audiometadatatxt = stream_metadata
 					self.audiometadata:setValue(stream_metadata .. " ")
 					log:info("audio stream metadata " .. stream_metadata)
 				else
-					log:info("no audio stream metadata")
+					log:warn("no audio stream metadata")
 				end
 			end
 		end,
@@ -225,6 +255,7 @@ function init(self)
 	if settings.showaudiometa == nil then
 		settings.showaudiometa = true
 	end
+
 	jiveMain:addItem({
 		id = "showaudiometa",
 		node = 'screenSettingsNowPlaying',
@@ -237,6 +268,20 @@ function init(self)
 			self:storeSettings()
 			end,
 			settings.showaudiometa)
+	})
+
+	jiveMain:addItem({
+		id = "showvisualiserdata",
+		node = 'screenSettingsNowPlaying',
+		text = self:string("SHOW_VISUALISER_DATA"),
+		style = 'item_choice',
+		weight = 55,
+		check = Checkbox("checkbox", function(_, checked)
+			local cb_settings = self:getSettings()
+			cb_settings.showVisualiserData = checked
+			self:storeSettings()
+			end,
+			settings.showVisualiserData)
 	})
 
 	self.scrollText     = settings["scrollText"]
@@ -1295,11 +1340,16 @@ function _updatePosition(self)
 			self.progressSlider:setValue(elapsed)
 		end
 	end
-	if self.showVUMetadata then
-		self.audiometadata:setValue("VU:fc=" .. VUMeter.FC .. ", fps=" .. VUMeter.FPS .. ", nf=" .. VUMeter.NF .. " •••  AUDIO:" .. self.audiometadatatxt)
+	if self.showVUData then
+		if VUMeter.NF > 0 then
+			self.audiometadata:setValue(
+				"(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS .. ", VU frames=" .. VUMeter.NF .. " •••  " .. self.audiometadatatxt)
+		else
+			self.audiometadata:setValue("(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS .. " ••• " .. self.audiometadatatxt)
+		end
 	end
-	if self.showSPMetadata then
-		self.audiometadata:setValue("SP:fc=" .. SpectrumMeter.FC .. ", fps=" .. SpectrumMeter.FPS .. " •••  AUDIO:" .. self.audiometadatatxt)
+	if self.showSPData then
+		self.audiometadata:setValue("(" .. SpectrumMeter.FC .. ") fps=" .. SpectrumMeter.FPS .. " ••• " .. self.audiometadatatxt)
 	end
 end
 
@@ -1794,10 +1844,10 @@ function _createUI(self)
 	)
 
 	-- Visualizer: Spectrum Visualizer - only load if needed
-	self.showSPMetadata = false
+	self.showSPData = false
 	if npStyleHasSpectrum(self.windowStyle) then
 		local settings = self:getSettings()
-		self.showSPMetadata = settings.showVisualiserMeta
+		self.showSPData = settings.showVisualiserData
 		self.currentVisualiser = SpectrumMeter("spectrum", self.windowStyle)
 		self.visuGroup = Button(
 			Group('npvisu', {
@@ -1811,11 +1861,11 @@ function _createUI(self)
 		)
 	end
 
-	self.showVUMetadata = false
+	self.showVUData = false
 	-- Visualizer: Analog VU Meter - only load if needed
 	if npStyleHasVuMeter(self.windowStyle) then
 		local settings = self:getSettings()
-		self.showVUMetadata = settings.showVisualiserMeta
+		self.showVUData = settings.showVisualiserData
 		self.currentVisualiser = VUMeter("vumeter_analog")
 		self.visuGroup = Button(
 			Group('npvisu', {
