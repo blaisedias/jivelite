@@ -535,7 +535,7 @@ JiveTile *jive_tile_load_tiles(char *path[9]) {
 	free(fullpath);
 
 	if (!found) {
-		LOG_ERROR(log_ui_draw, "No images found - no tile created");
+		LOG_ERROR(log_ui_draw, "No images found - no tile created for '%s'", path);
 		free(tile);
 		return NULL;
 	}
