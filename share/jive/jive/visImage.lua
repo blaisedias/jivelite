@@ -127,7 +127,7 @@ local function loadJsonFile(jsPath)
 	local jsonData = nil
 
 	if (lfs.attributes(jsPath, "mode") ~= "file") then
-		log:warn("loadJson: not a file ", jsPath, " ", lfs.attributes(jsPath, "mode"))
+		log:info("loadJson: unable to find file ", jsPath)
 		return jsonData
 	end
 
