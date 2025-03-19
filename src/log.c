@@ -5,6 +5,9 @@
 */
 
 #include "common.h"
+#include <stdio.h>
+#include <stdarg.h>
+
 #include <time.h>
 #ifdef HAVE_SYSLOG
 #include <syslog.h>
@@ -86,6 +89,29 @@ int gettimeofday(struct timeval *tv, struct timezone *tz)
   return 0;
 }
 #endif
+
+void logfprintf(char *format, ...) {
+	va_list args;
+	struct timeval t;
+	struct tm tm;
+	gettimeofday(&t, NULL);
+	gmtime_r(&t.tv_sec, &tm);
+
+#if defined(WIN32)
+		fprintf(stderr, "%02d.%03ld ", t.tv_sec, (long)(t.tv_usec / 1000));
+#else
+		fprintf(stderr, "%04d%02d%02d %02d:%02d:%02d.%03ld ",
+				tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday,
+				tm.tm_hour, tm.tm_min, tm.tm_sec,
+				(long)(t.tv_usec / 1000));
+
+#endif
+
+	va_start(args, format);
+	vfprintf(stderr, format, args);
+	va_end(args);
+	fflush(stderr);
+}
 
 void log_init() {
 #ifdef HAVE_SYSLOG
@@ -173,6 +199,7 @@ void log_category_vlog(struct log_category *category, enum log_priority priority
 		       tm.tm_hour, tm.tm_min, tm.tm_sec,
 		       (long)(t.tv_usec / 1000),
 		       log_priority_to_string(priority), category->name, buf);
+		fflush(stdout);
 
 #endif
 	}
@@ -483,7 +510,7 @@ int jive_log_init(lua_State *L) {
 
 	/* load environment */
 	if (luaL_loadfile(L, log_path) != 0) {
-		fprintf(stderr, "error loading logconf: %s\n", lua_tostring(L, -1));
+		logfprintf("error loading logconf: %s\n", lua_tostring(L, -1));
 		return 0;
 	}
 
@@ -491,7 +518,7 @@ int jive_log_init(lua_State *L) {
 	lua_newtable(L);
 	lua_setfenv(L, -2);
 	if (lua_pcall(L, 0, 1, 0) != 0) {
-		fprintf(stderr, "error in logconf: %s\n", lua_tostring(L, -1));
+		logfprintf("error in logconf: %s\n", lua_tostring(L, -1));
 		return 0;
 	}
 

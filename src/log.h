@@ -73,6 +73,7 @@ static __inline void log_category_log(struct log_category *category, enum log_pr
 	}
 }
 
+void logfprintf(char *format, ...);
 
 /*
  * Log using these defines in the C code, this will allow switching to a

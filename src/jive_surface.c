@@ -2834,9 +2834,8 @@ static void debug_printf(char *format, ...) {
 	if (debug_resize_enabled) {
 		va_list args;
 		va_start(args, format);
-		vfprintf(stderr, format, args);
+		logfprintf(format, args);
 		va_end(args);
-		fflush(stderr);
 	}
 }
 
