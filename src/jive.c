@@ -29,6 +29,8 @@ extern int luaopen_jive_debug(lua_State *L);
 extern int luaopen_visualizer(lua_State *L);
 #endif
 
+extern void stop_background_exec(void);
+
 /* LUA_DEFAULT_SCRIPT
 ** The default script this program runs, unless another script is given
 ** on the command line
@@ -588,7 +590,10 @@ int main (int argc, char **argv) {
 	
 	// report on any error
 	report(L, status);
-	
+
+	// stop background exec thread
+	stop_background_exec();
+
 	// close state
 	lua_close(L);
 

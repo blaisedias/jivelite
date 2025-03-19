@@ -21,6 +21,13 @@ static int hardware_rev;
 static char *homedir;
 static char *resource_path = NULL;
 
+static SDL_Thread* background_exec_thread = NULL;
+static SDL_mutex* background_exec_lock = NULL;
+static SDL_sem* background_exec_sem;
+int fn_thread_background_exec(void *ptr);
+static volatile unsigned background_exec_run = 1;
+static bool debug_background_exec = 0;
+
 // public API
 const char * system_get_machine(void) {
 	return machine;
@@ -380,9 +387,112 @@ static int system_atomic_write(lua_State *L)
 	}
 #endif
 
+	if (background_exec_thread == NULL) { 
+		debug_background_exec =  getenv("JIVE_DEBUG_BACKGROUND_EXEC") != NULL;
+		background_exec_sem = SDL_CreateSemaphore(0);
+		if (background_exec_sem == NULL) {
+			logfprintf("failed to create background exec semaphore\n");
+			return 0;
+		}
+		background_exec_lock = SDL_CreateMutex();
+		if (background_exec_lock == NULL) {
+			logfprintf("failed to initialise background exec lock\n");
+			return 0;
+		}
+		background_exec_thread = SDL_CreateThread(fn_thread_background_exec, NULL);
+		if (background_exec_thread != NULL) {
+			logfprintf("started background_exec thread\n");
+		} else {
+			logfprintf("failed to create background thread\n");
+		}
+	}
+
 	return 0;
 }
 
+typedef struct background_request {
+	struct background_request* next;
+	char* cmd;
+} background_request, *background_request_ptr;
+
+static background_request_ptr background_request_list_head;
+
+static void debug_printf(char *format, ...) {
+	if (debug_background_exec) {
+		va_list args;
+		va_start(args, format);
+		logfprintf(format, args);
+		va_end(args);
+	}
+}
+
+void stop_background_exec(void) {
+	int th_status = 0;
+	background_exec_run = 0;
+	logfprintf("waiting for background exec thread to terminate\n");
+	SDL_WaitThread(background_exec_thread, &th_status);
+}
+
+int fn_thread_background_exec(void *ptr) {
+	debug_printf("background_exec_thread: START\n");
+	while(background_exec_run) {
+		if(SDL_SemWaitTimeout(background_exec_sem, 2000) != -1) {
+			if (SDL_LockMutex(background_exec_lock) >= 0) {
+				while(background_request_list_head != NULL) {
+					background_request_ptr req = background_request_list_head;
+					background_request_list_head = background_request_list_head->next;
+					debug_printf("background_exec_thread: executing command %s\n", req->cmd); 
+					system(req->cmd);
+					debug_printf("background_exec_thread: memory free %p\n", req); 
+					free(req);
+				}
+				if (SDL_UnlockMutex(background_exec_lock) < 0) {
+					logfprintf("background_exec_thread: failed to unlock background exec mutex\n");
+				}
+			}
+			else {
+				logfprintf("background_exec_thread: failed to lock background exec mutex\n");
+			}
+		}
+	}
+	debug_printf("background_exec_thread: END\n");
+	return 0;
+}
+
+static int system_background_exec(lua_State *L) {
+	const char *cmd = lua_tostring(L, 2);
+	background_request_ptr new_req;
+	size_t reqlen = sizeof(*new_req) + ((strlen(cmd) + 1 + sizeof(uintptr_t))/sizeof(uintptr_t)) * sizeof(uintptr_t);
+
+	debug_printf("system_background_exec: %s\n", cmd);
+	if (background_exec_thread == NULL) {
+		logfprintf("background_exec_thread == NULL\n");
+		return -1;
+	}
+	new_req = calloc(1, reqlen);
+	if (new_req != NULL) {
+		new_req->cmd = (char *)(new_req + 1);
+		strcpy(new_req->cmd, cmd);
+		if (SDL_LockMutex(background_exec_lock) >= 0) {
+			background_request_ptr* ptr = &background_request_list_head;
+			debug_printf("system_background_exec: memory allocated %p %d\n", new_req, reqlen);
+			while(*ptr != NULL) {
+				ptr = &(*ptr)->next;
+			}
+			*ptr = new_req;
+			if (SDL_UnlockMutex(background_exec_lock) < 0) {
+				logfprintf("system_background_exec: failed to unlock background exec mutex\n");
+			}
+			if (SDL_SemPost(background_exec_sem) == 0) {
+				logfprintf("system_background_exec: background execition scheduled for %s\n", cmd);
+				return 0;
+			}
+		} else {
+			logfprintf("system_background_exec: failed	lock background_exec_lock\n");
+		}
+	}
+	return -1;
+}
 
 static const struct luaL_Reg jive_system_methods[] = {
 	{ "getArch", system_lua_get_arch },
@@ -395,6 +505,7 @@ static const struct luaL_Reg jive_system_methods[] = {
 	{ "findFile", system_find_file },
 	{ "atomicWrite", system_atomic_write },
 	{ "init", system_init },
+	{ "backgroundExec", system_background_exec },
 	{ NULL, NULL }
 };
 
