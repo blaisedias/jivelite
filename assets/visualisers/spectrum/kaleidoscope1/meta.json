@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Kaleidoscope1",
     "foreground": "kaleidoscope-2926569_1920.jpg",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "muzaffr ahmed",
+        "https://pixabay.com/users/doomrabbit-836348/",
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/kaleidoscope-kaleidoscope-background-2926569/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

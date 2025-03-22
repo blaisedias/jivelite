@@ -9,6 +9,18 @@
         "frames": [
             "vu_analog_25seq_Kolossos_Oval.png"
         ]
+    },
+    "Authors":  [
+        {
+            "Name": "Arie Kool"
+        }
+    ],
+    "Source": {
+        "Description":	"Community squeezebox controller 3rd party VU image.",
+        "Version": "0.1.0",
+        "Original-site": "https://github.com/ralph-irving/jivelite.git",
+        "Copying-policy": "Public Domain",
+        "Extension_by":	"piCorePlayer team: https://www.picoreplayer.org",
+        "Further-Modifications": "cropping and transparent surround modification by blaisedias https://github.com/blaisedias"
     }
 }
-

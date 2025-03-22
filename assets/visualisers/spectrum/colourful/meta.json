@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Colourful",
     "foreground": "colorful-background-2084164.png",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "Speedy McVroom",
+        "https://pixabay.com/users/viscious-speed-1744878/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/colorful-background-2084164/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

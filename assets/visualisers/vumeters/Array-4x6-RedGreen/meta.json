@@ -10,5 +10,12 @@
             "vu-Array-4x6-RedGreen-left.png",
             "vu-Array-4x6-RedGreen-right.png"
         ]
-    }
+    },
+    "Authors":  [
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/"
+        }
+    ],
+    "License": "CC-BY-SA-4.0"
 }
