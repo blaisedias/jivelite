@@ -9,6 +9,21 @@
         "frames": [
             "vu_analog_25seq_daab_Tube.png"
         ]
-    }
+    },
+    "Authors":  [
+        {
+            "Name": "https://github.com/project-owner",
+            "url":  "https://github.com/project-owner/PeppyMeter.doc/wiki"
+        },
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/",
+            "Comments": [
+                "recreated with calibration to match jivelite",
+                "repackaged as squeezebox controller 3rd party VU image"
+            ]
+        }
+    ],
+    "License": "GNU General Public License v3.0"
 }
 
