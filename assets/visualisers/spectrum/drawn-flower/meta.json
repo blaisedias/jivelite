@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "DrawnFlower",
     "foreground": "background-1783718.png",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "Anne-marie Ridderhof",
+        "https://pixabay.com/users/ridderhof-3351731/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/background-flower-green-yellow-1783718/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

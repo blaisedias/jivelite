@@ -9,5 +9,18 @@
         "frames": [
             "vu_analog_25seq_Jstraw_Vintage.png"
         ]
+    },
+    "Authors":  [
+        {
+            "Name": "jstraw"
+        }
+    ],
+    "Source": {
+        "Description":	"Community squeezebox controller 3rd party VU image.",
+        "Version": "0.1.0",
+        "Original-site": "http://forums.slimdevices.com/showthread.php?77117-Analogue-digital-VU/",
+        "Copying-policy": "Public Domain",
+        "Extension_by":	"piCorePlayer team: https://www.picoreplayer.org",
+        "Further-Modifications": "cropping by blaisedias https://github.com/blaisedias"
     }
 }

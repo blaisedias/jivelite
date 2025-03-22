@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Rhombuish",
     "foreground": "background-1466091.png",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "Speedy McVroom",
+        "https://pixabay.com/users/viscious-speed-1744878/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/background-colorful-geometric-1466091/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

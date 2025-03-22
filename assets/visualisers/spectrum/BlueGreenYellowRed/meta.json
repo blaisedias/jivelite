@@ -7,5 +7,12 @@
     "turbine": {
         "foreground": "turbineBlueGreenYellowRed.png",
         "desaturated": "turbineTspBlueGreenYellowRed.png"
-    }
+    },
+    "Authors":  [
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/"
+        }
+    ],
+    "License": "CC-BY-SA-4.0"
 }

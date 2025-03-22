@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Psychedelic1",
     "foreground": "background-5421678_1920.png",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "Gordon Johnson",
+        "https://pixabay.com/users/gdj-1086657/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/vectors/background-pattern-wallpaper-5421678/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

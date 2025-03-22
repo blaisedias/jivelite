@@ -9,6 +9,12 @@
         "frames": [
             "vu_analog_25seq_daab_Float_White.png"
         ]
-    }
+    },
+    "Authors":  [
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/"
+        }
+    ],
+    "License": "CC-BY-SA-4.0"
 }
-

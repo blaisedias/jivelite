@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Hypnotic",
     "foreground": "hypnotic-747183_1920.jpg",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "David Zydd",
+        "https://pixabay.com/users/davidzydd-985081/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/hypnotic-fractal-multicolored-star-747183/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

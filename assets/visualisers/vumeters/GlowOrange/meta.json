@@ -9,5 +9,12 @@
         "frames": [
             "vu_analog_25seq_daab_Orange_Glow.png"
         ]
-    }
+    },
+    "Authors":  [
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/"
+        }
+    ],
+    "License": "CC-BY-SA-4.0"
 }

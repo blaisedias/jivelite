@@ -25,5 +25,10 @@
             "right-trail.png"
         ]
     },
-    "step": 35
+    "step": 35,
+    "Authors":  [
+        {
+            "Name": "https://forums.lyrion.org/member/75364-superlusche"
+        }
+    ]
 }

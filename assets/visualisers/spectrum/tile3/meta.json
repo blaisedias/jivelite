@@ -2,5 +2,15 @@
     "kind": "spectrum-meter",
     "name" : "Tile3",
     "foreground": "tile-1179386-4.png",
-    "sptype": "backlit"
+    "sptype": "backlit",
+    "Authors": [
+        "Willy van Rencin",
+        "https://pixabay.com/users/krencin-42035/"
+    ],
+    "Source": {
+        "Original-site": "https://pixabay.com/illustrations/tile-background-image-wallpaper-1179386/",
+        "Copying-policy": "https://pixabay.com/service/license-summary/",
+        "License": "Creative Commons Zero (CC0)",
+        "License-URL": "https://pixabay.com/service/terms/"
+    }
 }

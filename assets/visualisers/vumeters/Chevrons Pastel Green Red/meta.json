@@ -25,5 +25,12 @@
             "right-trail.png"
         ]
     },
-    "step": 36
+    "step": 36,
+    "Authors":  [
+        {
+            "Name": "blaisedias",
+            "Github": "https://github.com/blaisedias/"
+        }
+    ],
+    "License": "CC-BY-SA-4.0"
 }
