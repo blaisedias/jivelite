@@ -29,5 +29,6 @@
         "Copying-policy": "GPLv3",
         "Modifications": "cropping by blaisedias https://github.com/blaisedias",
         "Extension_by":	"piCorePlayer team: https://www.picoreplayer.org"
-    }
+    },
+    "License": "GPLv3"
 }
