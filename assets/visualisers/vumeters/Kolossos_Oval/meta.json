@@ -22,5 +22,6 @@
         "Copying-policy": "Public Domain",
         "Extension_by":	"piCorePlayer team: https://www.picoreplayer.org",
         "Further-Modifications": "cropping and transparent surround modification by blaisedias https://github.com/blaisedias"
-    }
+    },
+    "License": "Public Domain"
 }
