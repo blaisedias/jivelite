@@ -45,11 +45,16 @@ function defaultSettings(self)
 		shuffleMode = false,
 		volDown = true,
 		volSlider = true,
-		volUp = true
+		volUp = true,
 	}
 end
 
 function registerApplet(self)
+	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
+	if scale_up == nil then
+		-- default to scaling up
+		Framework:setGlobalSetting("jogglerScaleUp", true)
+	end
 
 	self:registerService('getNowPlayingScreenButtons')
 	self:registerService('setNowPlayingScreenButtons')

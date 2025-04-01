@@ -58,10 +58,10 @@ local imgpath = "applets/PiGridSkin/images/"
 function param(self)
 	local params = JogglerSkinApplet.param(self)
 	
-	params.THUMB_SIZE = 100
-	params.THUMB_SIZE_MENU = 100
-	params.THUMB_SIZE_LINEAR = 40
-	params.THUMB_SIZE_PLAYLIST = 40
+	params.THUMB_SIZE = JogglerSkinApplet:scaleText(100)
+	params.THUMB_SIZE_MENU = JogglerSkinApplet:scaleText(100)
+	params.THUMB_SIZE_LINEAR = JogglerSkinApplet:scaleText(40)
+	params.THUMB_SIZE_PLAYLIST = JogglerSkinApplet:scaleText(40)
 	
 	return params
 end
