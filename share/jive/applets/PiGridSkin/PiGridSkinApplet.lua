@@ -39,11 +39,13 @@ local autotable              = require("jive.utils.autotable")
 
 local log                    = require("jive.utils.log").logger("applet.PiGridSkin")
 local JogglerSkinApplet      = require("applets.JogglerSkin.JogglerSkinApplet")
+local jogglerScaler          = require("applets.JogglerSkin.JogglerScaler")
 
 local WH_FILL                = jive.ui.WH_FILL
 
 local jiveMain               = jiveMain
 local appletManager          = appletManager
+local math                   = math
 local math                   = math
 
 
@@ -53,21 +55,38 @@ oo.class(_M, JogglerSkinApplet)
 
 -- Define useful variables for this skin
 local imgpath = "applets/PiGridSkin/images/"
+local scaled_imgpath = "applets/PiGridSkin/images/"
 
+function skinName(self)
+	return "PiGridSkin"
+end
 
 function param(self)
+	if self._CACHED["GS_PARAM"] ~= nil then
+		return table.clone(self._CACHED["GS_PARAM"])
+	end
 	local params = JogglerSkinApplet.param(self)
-	
-	params.THUMB_SIZE = 100
-	params.THUMB_SIZE_MENU = 100
-	params.THUMB_SIZE_LINEAR = 40
-	params.THUMB_SIZE_PLAYLIST = 40
-	
-	return params
+	local scaledValues = self._CACHED["GS_SCALED_VALUES"]
+	if scaledValues == nil then
+		self._CACHED["GS_SCALED_VALUES"] = jogglerScaler.getGridSkinParams(params.FIVE_ITEM_HEIGHT)
+		scaledValues = self._CACHED["GS_SCALED_VALUES"]
+	end
+
+	params.THUMB_SIZE_LINEAR = params.THUMB_SIZE
+	params.THUMB_SIZE_PLAYLIST = params.THUMB_SIZE
+	params.THUMB_SIZE = scaledValues.THUMB_SIZE
+	params.THUMB_SIZE_MENU = scaledValues.THUMB_SIZE
+
+	self._CACHED["GS_PARAM"] = params
+	return table.clone(self._CACHED["GS_PARAM"])
 end
 
 local function _loadImage(self, file)
 	return Surface:loadImage(imgpath .. file)
+end
+
+local function _loadScaledImage(self, file)
+	return Surface:loadImage(scaled_imgpath .. file)
 end
 
 
@@ -104,7 +123,7 @@ end
 
 -- define a local function that makes it easier to set bold fonts
 local function _boldfont(fontSize)
-    return Font:boldFont(fontSize)
+	return Font:boldFont(fontSize)
 end
 
 -- defines a new style that inherrits from an existing style
@@ -140,29 +159,35 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	-- skin
 	local skinSuffix = c.skinSuffix
+	local scaledValues = jogglerScaler.getGridSkinParams(c.FIVE_ITEM_HEIGHT)
+	self._CACHED["GS_SCALED_VALUES"] = scaledValues
+	scaled_imgpath = scaledValues.imgPath
+	if scaledValues.scalingRequired == true then
+		jogglerScaler.scaleUIImages("./share/jive/applets/JogglerSkin/images/FULLSIZE", scaledValues)
+	end
 
 	local gridItemSelectionBox    = _loadTile(self, {
-		imgpath .. "grid_list/button_titlebar.png",
+		scaled_imgpath .. "grid_list/button_titlebar.png",
 		imgpath .. "grid_list/button_titlebar_tl.png",
 		imgpath .. "grid_list/button_titlebar_t.png",
 		imgpath .. "grid_list/button_titlebar_tr.png",
-		imgpath .. "grid_list/button_titlebar_r.png",
+		scaled_imgpath .. "grid_list/button_titlebar_r.png",
 		imgpath .. "grid_list/button_titlebar_br.png",
 		imgpath .. "grid_list/button_titlebar_b.png",
 		imgpath .. "grid_list/button_titlebar_bl.png",
-		imgpath .. "grid_list/button_titlebar_l.png",
+		scaled_imgpath .. "grid_list/button_titlebar_l.png",
 	})
 
 	local THUMB_SIZE_G = self:param().THUMB_SIZE
 	local THUMB_SIZE_L = self:param().THUMB_SIZE_LINEAR
 
 	-- alternatives for grid view
-	local ALBUMMENU_FONT_SIZE_G = 18
-	local ALBUMMENU_SMALL_FONT_SIZE_G = 16
+	local ALBUMMENU_FONT_SIZE_G = scaledValues.ALBUMMENU_FONT_SIZE_G
+	local ALBUMMENU_SMALL_FONT_SIZE_G = scaledValues.ALBUMMENU_SMALL_FONT_SIZE_G
 	local MENU_ITEM_ICON_PADDING_G = { 0, 0, 0, 0 }
-	local GRID_ITEM_HEIGHT = 174		-- defined by the artwork assets used to "select" the items (grid_list/*)
+	local GRID_ITEM_HEIGHT = scaledValues.GRID_ITEM_HEIGHT		-- defined by the artwork assets used to "select" the items (grid_list/*)
 
-	local ITEMS_PER_LINE = screenWidth / 160
+	local ITEMS_PER_LINE = scaledValues.ITEMS_PER_LINE
 
 	local smallSpinny = c.smallSpinny
 
@@ -170,18 +195,19 @@ function skin(self, s, reload, useDefaultSize, w, h)
 --------- DEFAULT WIDGET STYLES ---------
 	--
 	-- These are the default styles for the widgets 
-	s.menu.h = math.floor((screenHeight - c.TITLE_HEIGHT) / c.FIVE_ITEM_HEIGHT) * c.FIVE_ITEM_HEIGHT
+--	s.menu.h = math.floor((screenHeight - c.TITLE_HEIGHT) / c.FIVE_ITEM_HEIGHT) * c.FIVE_ITEM_HEIGHT
+	s.menu.h = scaledValues.GRID_MENU_H
 
 	s.itemG = {
 		order = { "icon", "text" },
 		orientation = 1,
-		padding = { 8, 4, 8, 0 },
+		padding = { 8, scaledValues.ITEM_G_YPAD, 8, 0 },
 		text = {
 			padding = { 0, 2, 0, 4 },
 			align = "center",
 			w = WH_FILL,
 			h = WH_FILL,
-			font = _boldfont(28),
+			font = _boldfont(scaledValues.ITEM_FONT_SIZE_G),
 			fg = c.TEXT_COLOR,
 			sh = c.TEXT_SH_COLOR,
 		},
@@ -203,17 +229,17 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			itemsPerLine = ITEMS_PER_LINE,
 			item = _uses(s.itemG, {
 				icon = {
-					img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix)
+					img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix)
 				},
 			}),
 			item_play = _uses(s.itemG, {
 				icon = {
-					img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix)
+					img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix)
 				},
 			}),
 			item_add = _uses(s.itemG, {
 				icon = {
-					img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix)
+					img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix)
 				},
 			}),
 			item_choice = _uses(s.itemG, {
@@ -229,20 +255,20 @@ function skin(self, s, reload, useDefaultSize, w, h)
 					sh = c.TEXT_SH_COLOR,
 				},
 				icon = {
-					img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+					img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 				},
 			}),
 			pressed = {
 				item = _uses(s.itemG, {
 					icon = {
-						img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+						img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 					},
 				}),
 			},
 			selected = {
 				item = _uses(s.itemG, {
 					icon = {
-						img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+						img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 					},
 					bgImg = gridItemSelectionBox,
 				}),
@@ -250,7 +276,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 			locked = {
 				item = _uses(s.itemG, {
 					icon = {
-						img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+						img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 					},
 				}),
 			},
@@ -278,7 +304,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	s.home_menu.menu.pressed = s.home_menu.menu.selected
 
 	s.home_menu.menu.item.icon_no_artwork = {
-		img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix ),
+		img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix ),
 		h   = THUMB_SIZE,
 		padding = c.MENU_ITEM_ICON_PADDING,
 		align = 'center',
@@ -421,26 +447,26 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	-- XXX - where are these even used?
 	s.region_US = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_region_americas" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_region_americas" .. skinSuffix),
 	})
 	s.region_XX = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_region_other" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_region_other" .. skinSuffix),
 	})
 	s.icon_help = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_help" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_help" .. skinSuffix),
 	})
 	s.wlan = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_wireless" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_wireless" .. skinSuffix),
 	})
 	s.wired = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ethernet" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ethernet" .. skinSuffix),
 	})
 
 
 --------- ICONS --------
 
-	local no_artwork_iconG = _loadImage(self, "IconsResized/icon_album_noart" .. skinSuffix ):resize(THUMB_SIZE_G, THUMB_SIZE_G)
-	local no_artwork_iconL = _loadImage(self, "IconsResized/icon_album_noart" .. skinSuffix ):resize(THUMB_SIZE_L, THUMB_SIZE_L)
+	local no_artwork_iconG = _loadScaledImage(self, "IconsResized/icon_album_noart" .. skinSuffix ):resize(THUMB_SIZE_G, THUMB_SIZE_G)
+	local no_artwork_iconL = _loadScaledImage(self, "IconsResized/icon_album_noart" .. skinSuffix ):resize(THUMB_SIZE_L, THUMB_SIZE_L)
 
 	-- icon for albums with no artwork
 	s.icon_no_artwork = {
@@ -460,92 +486,92 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	-- misc home menu icons
 	s.hm_appletImageViewer = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_image_viewer" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_image_viewer" .. skinSuffix),
 	})
 	s.hm_eject = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_eject" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_eject" .. skinSuffix),
 	})
 	s.hm_sdcard = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_device_SDcard" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_device_SDcard" .. skinSuffix),
 	})
 	s.hm_usbdrive = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_device_USB" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_device_USB" .. skinSuffix),
 	})
 	s.hm_appletNowPlaying = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_nowplaying" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_nowplaying" .. skinSuffix),
 	})
 	s.hm_settings = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings" .. skinSuffix),
 	})
 	s.hm_advancedSettings = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_adv" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_adv" .. skinSuffix),
 	})
 	s.hm_settings_pcp = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
 	})
 	s.hm_radio = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_tunein" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),
 	})
 	s.hm_radios = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_tunein" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),
 	})
 	s.hm_myApps = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_my_apps" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_my_apps" .. skinSuffix),
 	})
 	s.hm_myMusic = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_mymusic" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_mymusic" .. skinSuffix),
 	})
 	s.hm__myMusic = _uses(s.hm_myMusic)
    	s.hm_otherLibrary = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_ml_other_library" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_ml_other_library" .. skinSuffix),
         })
 	s.hm_myMusicSelector = _uses(s.hm_myMusic)
 
 	s.hm_favorites = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_favorites" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_favorites" .. skinSuffix),
 	})
 	s.hm_settingsAlarm = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_alarm" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_alarm" .. skinSuffix),
 	})
 	s.hm_settingsPlayerNameChange = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_name" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_name" .. skinSuffix),
 	})
 	s.hm_settingsBrightness = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_brightness" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_brightness" .. skinSuffix),
 	})
 	s.hm_settingsSync = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_sync" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_sync" .. skinSuffix),
 	})
 	s.hm_selectPlayer = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_choose_player" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_choose_player" .. skinSuffix),
 	})
 	s.hm_quit = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_power_off" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_power_off" .. skinSuffix),
 	})
 	s.hm_playerpower = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_power_off" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_power_off" .. skinSuffix),
 	})
 	s.hm_myMusicArtists = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_artist" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_artist" .. skinSuffix),
 	})
 	s.hm_myMusicAlbums = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_albums" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_albums" .. skinSuffix),
 	})
 	s.hm_myMusicGenres = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_genres" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_genres" .. skinSuffix),
 	})
 	s.hm_myMusicYears = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_years" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_years" .. skinSuffix),
 	})
 
 	s.hm_myMusicNewMusic = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_new_music" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_new_music" .. skinSuffix),
 	})
 	s.hm_myMusicPlaylists = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_playlist" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_playlist" .. skinSuffix),
 	})
 	s.hm_myMusicSearch = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_search" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_search" .. skinSuffix),
 	})
 	s.hm_myMusicSearchArtists   = _uses(s.hm_myMusicSearch)
 	s.hm_myMusicSearchAlbums    = _uses(s.hm_myMusicSearch)
@@ -556,44 +582,44 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	s.hm_globalSearch           = _uses(s.hm_myMusicSearch)
 
 	s.hm_myMusicMusicFolder = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_folder" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_folder" .. skinSuffix),
 	})
 	s.hm_randomplay = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_random" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_random" .. skinSuffix),
 	})
 	s.hm_skinTest = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_blank" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_blank" .. skinSuffix),
 	})
 
         s.hm_settingsRepeat = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_repeat" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_repeat" .. skinSuffix),
         })
         s.hm_settingsShuffle = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_shuffle" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_shuffle" .. skinSuffix),
         })
         s.hm_settingsSleep = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_sleep" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_sleep" .. skinSuffix),
         })
         s.hm_settingsScreen = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_screen" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_screen" .. skinSuffix),
         })
         s.hm_appletCustomizeHome = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_home" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_home" .. skinSuffix),
         })
         s.hm_settingsAudio = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_audio" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_audio" .. skinSuffix),
         })
         s.hm_linein = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_linein" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_linein" .. skinSuffix),
         })
 
         -- ??
         s.hm_loading = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
         })
         -- ??
         s.hm_settingsPlugin = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_plugin" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_plugin" .. skinSuffix),
         })
 
 	-- indicator icons, on right of menus

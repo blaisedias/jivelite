@@ -55,6 +55,7 @@ local autotable              = require("jive.utils.autotable")
 local log                    = require("jive.utils.log").logger("applet.JogglerSkin")
 
 local visImage               = require("jive.visImage")
+local jogglerScaler          = require("applets.JogglerSkin.JogglerScaler")
 
 local EVENT_ACTION           = jive.ui.EVENT_ACTION
 local EVENT_CONSUME          = jive.ui.EVENT_CONSUME
@@ -83,6 +84,7 @@ oo.class(_M, Applet)
 
 -- Define useful variables for this skin
 local imgpath = "applets/JogglerSkin/images/"
+local scaled_imgpath = "applets/JogglerSkin/images/"
 
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
@@ -114,6 +116,20 @@ function init(self)
 	self.vTiles = {}
 	self.tiles = {}
 
+	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
+	jiveMain:addItem({
+		id = "scaleUp",
+		node = 'screenSettings',
+		text = self:string("SCALEUP"),
+		style = 'item_choice',
+		weight = 55,
+		check = Checkbox("checkbox", function(_, checked)
+			Framework:setGlobalSetting("jogglerScaleUp", checked)
+			jiveMain:reloadSkin()
+			end,
+			scale_up)
+	})
+
 	jiveMain:addItem(self:buttonSettingsMenuItem())
 
 	jiveMain:addItem({
@@ -131,17 +147,31 @@ function init(self)
 end
 
 
+function skinName(self)
+	return 'JogglerSkin'
+end
+
 function param(self)
+	if self._CACHED["PARAM"] ~= nil then
+		return table.clone(self._CACHED["PARAM"])
+	end
+	local scaledValues = self._CACHED["SCALED_VALUES"]
+	if scaledValues == nil then
+		self._CACHED["SCALED_VALUES"] = jogglerScaler.getJogglerSkinParams(self:skinName())
+		scaledValues = self._CACHED["SCALED_VALUES"]
+	end
 	local npSS = {}
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
-	local midArtwork = tostring(screenHeight - 180) .. 'x' .. tostring(screenHeight - 180)
+	local maw = screenHeight - scaledValues.TITLE_HEIGHT - 18 - (100)
+	local midArtwork = tostring(maw) .. 'x' .. tostring(maw)
 	local screenAR = screenWidth/screenHeight
 	local portraitMode = screenWidth == 720 and screenHeight == 1280
-	local portraitArtworkWidth = math.floor(screenWidth/20) * 12
-	local portraitArtwork = tostring(portraitArtworkWidth) .. 'x' .. tostring(portraitArtworkWidth)
+	local portraitArtworkWidth
 
 	if portraitMode then
+		portraitArtworkWidth = math.floor(screenWidth/20) * 12
+		local portraitArtwork = tostring(portraitArtworkWidth) .. 'x' .. tostring(portraitArtworkWidth)
 		npSS = {
 			{
 				style = 'nowplaying_spectrum_text_art',
@@ -324,24 +354,31 @@ function param(self)
 		}
 	end
 
-	return {
-		THUMB_SIZE = 40,
-		THUMB_SIZE_MENU = 40,
+	self._CACHED['PARAM'] = {
+		THUMB_SIZE = scaledValues.THUMB_SIZE,
+		THUMB_SIZE_MENU = scaledValues.THUMB_SIZE,
 		NOWPLAYING_MENU = false,
 		-- NOWPLAYING_TRACKINFO_LINES used in assisting scroll behavior animation on NP
 		-- 3 is for a three line track, artist, and album (e.g., SBtouch)
 		-- 2 is for a two line track, artist+album (e.g., SBradio, SBcontroller)
 		NOWPLAYING_TRACKINFO_LINES = 3,
-		POPUP_THUMB_SIZE = 120,
+		POPUP_THUMB_SIZE = scaledValues.POPUP_THUMB_SIZE,
+		FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT,
+
 		piCorePlayerStyle = 'hm_settings_pcp',
 		nowPlayingScreenStyles = npSS,
 		portraitMode = portraitMode,
 		portraitArtworkWidth = portraitArtworkWidth,
 	}
+	return table.clone(self._CACHED["PARAM"])
 end
 
 local function _loadImage(self, file)
 	return Surface:loadImage(imgpath .. file)
+end
+
+local function _loadScaledImage(self, file)
+	return Surface:loadImage(scaled_imgpath .. file)
 end
 
 
@@ -491,26 +528,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
+	self._CACHED = {}
+	-- initialise scaler after setVideoMode
+	jogglerScaler.initialise()
+	local scaledValues = jogglerScaler.getJogglerSkinParams(self:skinName())
+	self._CACHED["SCALED_VALUES"] = scaledValues
+
+	scaled_imgpath = scaledValues.imgPath
+	if scaledValues.scalingRequired == true then
+		jogglerScaler.scaleUIImages("./share/jive/applets/JogglerSkin/images/FULLSIZE", scaledValues)
+	end
 
 	--init lastInputType so selected item style is not shown on skin load
 	Framework.mostRecentInputType = "mouse"
 
-	local V_blackBackground = nil
-	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
-	local V_titleBox = nil
-	local V_touchToolbarBackground = nil
-	local V_titlebarButtonBox = nil
-	local V_titlebar_shadow_png_path = nil
-	local V_titlebar_png_path = nil
-	if BLACK_BACKGROUND then
-		V_blackBackground = blackBackground
-		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
-		V_titleBox = titleBox
-		V_touchToolbarBackground = touchToolbarBackground
-		V_titlebarButtonBox = titlebarButtonBox
-		V_titlebar_shadow_png_path = "Titlebar/titlebar_shadow.png"
-		V_titlebar_png_path = "Titlebar/titlebar.png"
-	end
 	-- skin
 	local thisSkin = 'touch'
 	local skinSuffix = "_" .. thisSkin .. ".png"
@@ -535,23 +566,41 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	local blackBackground   = Tile:fillColor(0x000000ff)
 
+	local V_blackBackground = nil
+	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
+	local V_titleBox = nil
+	local V_touchToolbarBackground = nil
+	local V_titlebarButtonBox = nil
+	local V_titlebar_shadow_png_path = nil
+	local V_titlebar_png_path = nil
+	if BLACK_BACKGROUND then
+		V_blackBackground = blackBackground
+		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
+--		V_titleBox = titleBox
+		V_touchToolbarBackground = touchToolbarBackground
+--		V_titlebarButtonBox = titlebarButtonBox
+		V_titlebar_shadow_png_path = "Titlebar/titlebar_shadow.png"
+		V_titlebar_png_path = "Titlebar/titlebar.png"
+	end
+
 	--FIXME, _r asset here doesn't work...it's supposed to have a fadeout effect and it doesn't appear on screen
 	local fiveItemBox             = _loadHTile(self, {
-		 imgpath .. "5_line_lists/tch_5line_divider_l.png",
-		 imgpath .. "5_line_lists/tch_5line_divider.png",
-		 imgpath .. "5_line_lists/tch_5line_divider_r.png",
+		 scaled_imgpath .. "5_line_lists/tch_5line_divider_l.png",
+		 scaled_imgpath .. "5_line_lists/tch_5line_divider.png",
+		 scaled_imgpath .. "5_line_lists/tch_5line_divider_r.png",
 	})
 	local fiveItemSelectionBox    = _loadHTile(self, {
 		 nil,
-		 imgpath .. "5_line_lists/menu_sel_box_5line.png",
-		 imgpath .. "5_line_lists/menu_sel_box_5line_r.png",
+		 scaled_imgpath .. "5_line_lists/menu_sel_box_5line.png",
+		 scaled_imgpath .. "5_line_lists/menu_sel_box_5line_r.png",
 	})
 	local fiveItemPressedBox      = _loadHTile(self, {
 		 nil,
-		 imgpath .. "5_line_lists/menu_sel_box_5line_press.png",
-		 imgpath .. "5_line_lists/menu_sel_box_5line_press_r.png",
+		 scaled_imgpath .. "5_line_lists/menu_sel_box_5line_press.png",
+		 scaled_imgpath .. "5_line_lists/menu_sel_box_5line_press_r.png",
 	})
 
+	-- three item component vertical dimension is 72 for *ALL* skins
 	local threeItemSelectionBox            = _loadHTile(self, {
 		 imgpath .. "3_line_lists/menu_sel_box_3line_l.png",
 		 imgpath .. "3_line_lists/menu_sel_box_3line.png",
@@ -840,29 +889,34 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	local pressedTitlebarButtonBox =
 		_loadTile(self, {
-					imgpath .. "Buttons/button_titlebar_press.png",
+					scaled_imgpath .. "Buttons/button_titlebar_press.png",
 					imgpath .. "Buttons/button_titlebar_tl_press.png",
 					imgpath .. "Buttons/button_titlebar_t_press.png",
 					imgpath .. "Buttons/button_titlebar_tr_press.png",
-					imgpath .. "Buttons/button_titlebar_r_press.png",
+					scaled_imgpath .. "Buttons/button_titlebar_r_press.png",
 					imgpath .. "Buttons/button_titlebar_br_press.png",
 					imgpath .. "Buttons/button_titlebar_b_press.png",
 					imgpath .. "Buttons/button_titlebar_bl_press.png",
-					imgpath .. "Buttons/button_titlebar_l_press.png",
+					scaled_imgpath .. "Buttons/button_titlebar_l_press.png",
 				})
 
 	local titlebarButtonBox =
 		_loadTile(self, {
-					imgpath .. "Buttons/button_titlebar.png",
+					scaled_imgpath .. "Buttons/button_titlebar.png",
 					imgpath .. "Buttons/button_titlebar_tl.png",
 					imgpath .. "Buttons/button_titlebar_t.png",
 					imgpath .. "Buttons/button_titlebar_tr.png",
-					imgpath .. "Buttons/button_titlebar_r.png",
+					scaled_imgpath .. "Buttons/button_titlebar_r.png",
 					imgpath .. "Buttons/button_titlebar_br.png",
 					imgpath .. "Buttons/button_titlebar_b.png",
 					imgpath .. "Buttons/button_titlebar_bl.png",
-					imgpath .. "Buttons/button_titlebar_l.png",
+					scaled_imgpath .. "Buttons/button_titlebar_l.png",
 				})
+
+	if BLACK_BACKGROUND then
+		V_titleBox = titleBox
+		V_titlebarButtonBox = titlebarButtonBox
+	end
 
 	local popupBox = 
 		_loadTile(self, {
@@ -922,9 +976,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local CHECKBOX_RADIO_PADDING  = { 2, 0, 0, 0 }
 
 	local MENU_ITEM_ICON_PADDING = { 0, 0, 8, 0 }
-	local MENU_PLAYLISTITEM_TEXT_PADDING = { 16, 1, 9, 1 }
+--	local MENU_PLAYLISTITEM_TEXT_PADDING = { 16, 1, 9, 1 }
 
-	local MENU_CURRENTALBUM_TEXT_PADDING = { 6, 20, 0, 10 }
+--	local MENU_CURRENTALBUM_TEXT_PADDING = { 6, 20, 0, 10 }
 	local TEXTAREA_PADDING = { 13, 8, 8, 0 }
 
 	local TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
@@ -932,36 +986,37 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local TEXT_SH_COLOR = { 0x37, 0x37, 0x37 }
 	local TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
 
-	local SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
-	local SELECT_SH_COLOR = { }
+--	local SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
+--	local SELECT_SH_COLOR = { }
 
-	local TITLE_HEIGHT = 65
-	local TITLE_FONT_SIZE = 20
-	local TITLEBAR_FONT_SIZE = 28
-	local ALBUMMENU_FONT_SIZE = 20
-	local ALBUMMENU_SMALL_FONT_SIZE = 16
-	local TEXTMENU_FONT_SIZE = 25
-	local POPUP_TEXT_SIZE_1 = 26
-	local POPUP_TEXT_SIZE_2 = 26
-	local TRACK_FONT_SIZE = 18
-	local TEXTAREA_FONT_SIZE = 18
-	local CENTERED_TEXTAREA_FONT_SIZE = 28
+	local TITLE_HEIGHT = scaledValues.TITLE_HEIGHT
+	local TITLE_FONT_SIZE = scaledValues.TITLE_FONT_SIZE
+	local TITLEBAR_FONT_SIZE = scaledValues.TITLEBAR_FONT_SIZE
+	local ALBUMMENU_FONT_SIZE = scaledValues.ALBUMMENU_FONT_SIZE
+	local ALBUMMENU_SMALL_FONT_SIZE = scaledValues.ALBUMMENU_SMALL_FONT_SIZE
+	local TEXTMENU_FONT_SIZE = scaledValues.TEXTMENU_FONT_SIZE
+	local POPUP_TEXT_SIZE_1 = scaledValues.POPUP_TEXT_SIZE_1
+	local POPUP_TEXT_SIZE_2 = scaledValues.POPUP_TEXT_SIZE_2
+--	local TRACK_FONT_SIZE = scaledValues.TRACK_FONT_SIZE
+	local TEXTAREA_FONT_SIZE = scaledValues.TEXTAREA_FONT_SIZE
+--	local CENTERED_TEXTAREA_FONT_SIZE = scaleValues.CENTERED_TEXTAREA_FONT_SIZE
 
-	local CM_MENU_HEIGHT = 45
+	local CM_MENU_HEIGHT = scaledValues.CM_MENU_HEIGHT
 
-	local TEXTINPUT_FONT_SIZE = 60
-	local TEXTINPUT_SELECTED_FONT_SIZE = 68
+	local TEXTINPUT_FONT_SIZE = scaledValues.TEXTINPUT_FONT_SIZE
+	local TEXTINPUT_SELECTED_FONT_SIZE = scaledValues.TEXTINPUT_SELECTED_FONT_SIZE
 
-	local HELP_FONT_SIZE = 18
-	local UPDATE_SUBTEXT_SIZE = 20
+	local HELP_FONT_SIZE = scaledValues.HELP_FONT_SIZE
+	local UPDATE_SUBTEXT_SIZE = scaledValues.UPDATE_SUBTEXT_SIZE
 
-	local ITEM_ICON_ALIGN   = 'center'
-	local ITEM_LEFT_PADDING = 12
-	local THREE_ITEM_HEIGHT = 72
-	local FIVE_ITEM_HEIGHT = 45
-	local TITLE_BUTTON_WIDTH = 76
+--	local ITEM_ICON_ALIGN   = 'center'
+	local ITEM_ICON_ALIGN   = scaledValues.ITEM_ICON_ALIGN
+	local ITEM_LEFT_PADDING = scaledValues.ITEM_LEFT_PADDING
+	local THREE_ITEM_HEIGHT = scaledValues.THREE_ITEM_HEIGHT
+	local FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT
+	local TITLE_BUTTON_WIDTH = scaledValues.TITLE_BUTTON_WIDTH
 
-	local AUDIO_METADATA_FONT_HEIGHT = 14
+	local AUDIO_METADATA_FONT_HEIGHT = scaledValues.AUDIO_METADATA_FONT_HEIGHT
 	local AUDIO_METADATA_Y = screenHeight - AUDIO_METADATA_FONT_HEIGHT
 	local AUDIO_METADATA_X = 0
 	local AUDIO_METADATA_W = screenWidth
@@ -982,20 +1037,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local portraitMode = self:param().portraitMode
 
 	visImage:initialise()
+	local NP_SPACING_FACTOR = scaledValues.NP_SPACING_FACTOR
 
-	local yScaleFactor = 1
-	local ySpacingFactor = 1.6
-	if portraitMode then
-		yScaleFactor = math.min(screenHeight/480, 1.4)
-		ySpacingFactor = 1.7
-	elseif h < 480 and screenAR < 3 then
-		yScaleFactor = math.max(screenHeight/480, 0.8)
-		ySpacingFactor = 1.6
-	elseif w >= 1280 and h > 600  then
-		yScaleFactor = math.min(screenHeight/480, 1.4)
-		ySpacingFactor = 1.9
-	end
-	log:info("vertical scaling factor:", yScaleFactor)
 
 
 	local smallSpinny = {
@@ -1164,20 +1207,21 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.text_block_black = {
 		bgImg = blackBackground,
 		position = LAYOUT_NORTH,
-		h = 300,
+		h = scaledValues.TEXT_BLOCK_BLACK_H,
 		order = { 'text' },
 		text = {
 			w = WH_FILL,
-			h = 300,
+			h = scaledValues.TEXT_BLOCK_BLACK_H,
                         padding = { 10, 160, 10, 0 },
                         align = "center",
-                        font = _font(120),
+                        font = _font(scaledValues.TEXT_BLOCK_BLACK_FONT_SIZE),
                         fg = TEXT_COLOR,
                         sh = TEXT_SH_COLOR,
                 },
 	}
 
 	s.menu = {
+		h = math.floor((screenHeight - TITLE_HEIGHT) / FIVE_ITEM_HEIGHT) * FIVE_ITEM_HEIGHT,
 		position = LAYOUT_CENTER,
 		padding = { 0, 0, 0, 0 },
 		itemHeight = FIVE_ITEM_HEIGHT,
@@ -1265,15 +1309,15 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			w = WH_FILL,
 			h = WH_FILL,
 			padding = { 0, 6, 0, 6 },
-			font = _font(14),
+			font = _font(scaledValues.ITEM_INFO_FONT_SIZE),
 			line = {
 				{
-					font = _font(14),
-					height = 14,
+					font = _font(scaledValues.ITEM_INFO_FONT_SIZE),
+					height = scaledValues.ITEM_INFO_FONT_SIZE,
 				},
 				{
-					font = _boldfont(18),
-					height = 18,
+					font = _boldfont(scaledValues.ITEM_INFO_BOLD_FONT_SIZE),
+					height = scaledValues.ITEM_INFO_BOLD_FONT_SIZE,
 				},
 			},
 		},
@@ -1407,8 +1451,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.multiline_text = {
 		w = WH_FILL,
 		padding = { 10, 0, 2, 10 },
-		font = _font(18),
-		height = 21,
+		font = _font(scaledValues.MULTILINE_TEXT_FONT_SIZE),
+		height = scaledValues.MULTILINE_TEXT_H,
 		fg = { 0xe6, 0xe6, 0xe6 },
 		sh = { },
 		align = "left",
@@ -1819,14 +1863,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			line = {
 				{
 					font = _boldfont(TITLEBAR_FONT_SIZE),
-					height = 32,
+					height = scaledValues.TITLEBAR_H,
 				},
 				{
-					font = _font(14),
+					font = _font(scaledValues.TEXT_LIST_TITLE_FONT_SIZE),
 					fg   = { 0xB3, 0xB3, 0xB3 },
 				},
 			},
-                },
+		},
 	})
 
 	s.text_list.title.textButton = _uses(s.text_list.title.text, {
@@ -1963,20 +2007,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		menu = {
 			item = _uses(s.item, {
 				icon = {
-					img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix)
+					img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix)
 				},
 			}),
 			selected = {
 				item = _uses(s.selected.item, {
 					icon = {
-						img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+						img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 					},
 				}),
 			},
 			locked = {
 				item = _uses(s.locked.item, {
 					icon = {
-						img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+						img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
 					},
 				}),
 			},
@@ -1984,7 +2028,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.home_menu.menu.item.icon_no_artwork = {
-		img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix ),
+		img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix ),
 		h   = THUMB_SIZE,
 		padding = MENU_ITEM_ICON_PADDING,
 		align = 'center',
@@ -2006,7 +2050,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 					line = {
 						{
 							font = _boldfont(ALBUMMENU_FONT_SIZE),
-							height = 22,
+							height = scaledValues.ALBUMMENU_H,
 						},
 						{
 							font = _font(ALBUMMENU_SMALL_FONT_SIZE),
@@ -2311,16 +2355,16 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 		multiline_text = {
             w = WH_FILL,
-            h = 172,
+            h = scaledValues.CM_ML_TXT_HEIGHT,
             padding = { 18, 2, 14, 18 },
             border = { 0, 0, 6, 15 },
-            lineHeight = 22,
-            font = _font(18),
+            lineHeight = scaledValues.CM_ML_TXT_LINE_HEIGHT,
+            font = _font(scaledValues.CM_ML_TXT_FONT_SIZE),
             fg = { 0xe6, 0xe6, 0xe6 },
             sh = { },
             align = "top-left",
             scrollbar = {
-                h = 164,
+                h = scaledValues.CM_ML_TXT_SCROLLBAR_H,
                 border = {0, 2, 2, 10},
             },
         },
@@ -2372,7 +2416,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 					line = {
 						{
 							font = _boldfont(ALBUMMENU_FONT_SIZE),
-							height = 22,
+							height = scaledValues.ALBUMMENU_H,
 						},
 						{
 							font = _font(ALBUMMENU_SMALL_FONT_SIZE),
@@ -2397,7 +2441,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 						line = {
 							{
 								font = _boldfont(ALBUMMENU_FONT_SIZE),
-								height = 22,
+								height = scaledValues.ALBUMMENU_H,
 							},
 							{
 								font = _font(ALBUMMENU_SMALL_FONT_SIZE),
@@ -2623,7 +2667,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			border = 0,
 			padding = 0,
 			align = 'center',
-			font = _font(16),
+			font = _font(scaledValues.BASE_BUTTON_FONT_SIZE),
 			fg = { 0xdc,0xdc, 0xdc },
 		},
 	}
@@ -2722,19 +2766,19 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	}
 
 	s.region_US = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_region_americas" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_region_americas" .. skinSuffix),
 	})
 	s.region_XX = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_region_other" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_region_other" .. skinSuffix),
 	})
 	s.icon_help = _uses(_buttonicon, { 
-		img = _loadImage(self, "IconsResized/icon_help" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_help" .. skinSuffix),
 	})
 	s.wlan = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_wireless" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_wireless" .. skinSuffix),
 	})
 	s.wired = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ethernet" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ethernet" .. skinSuffix),
 	})
 
 
@@ -2757,7 +2801,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- icon for albums with no artwork
 	s.icon_no_artwork = {
-		img = _loadImage(self, "IconsResized/icon_album_noart" .. skinSuffix ),
+		img = _loadScaledImage(self, "IconsResized/icon_album_noart" .. skinSuffix ),
 		h   = THUMB_SIZE,
 		padding = MENU_ITEM_ICON_PADDING,
 		align = 'center',
@@ -2782,11 +2826,11 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_software_update = _uses(_icon, {
-		img = _loadImage(self, "IconsResized/icon_firmware_update" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_firmware_update" .. skinSuffix),
 	})
 
 	s.icon_restart = _uses(_icon, {
-		img = _loadImage(self, "IconsResized/icon_restart" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_restart" .. skinSuffix),
 	})
 
 	s.icon_popup_pause = _uses(_popupicon, {
@@ -2808,7 +2852,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		img = _loadImage(self, "Icons/icon_popup_box_stop.png"),
 	})
 	s.icon_popup_lineIn = _uses(_popupicon, {
-		img = _loadImage(self, "IconsResized/icon_linein_134.png"),
+		img = _loadScaledImage(self, "IconsResized/icon_linein_134.png"),
 	})
 
 	s.icon_popup_volume = {
@@ -2871,7 +2915,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_power = _uses(_icon, {
-		img = _loadImage(self, "IconsResized/icon_restart" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_restart" .. skinSuffix),
 	})
 
 	s.icon_locked = _uses(_icon, {
@@ -2889,133 +2933,133 @@ function skin0(self, s, reload, useDefaultSize, w, h)
         })
 
 	s.player_transporter = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_transporter" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_transporter" .. skinSuffix),
 	})
 	s.player_squeezebox = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_SB1n2" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_SB1n2" .. skinSuffix),
 	})
 	s.player_squeezebox2 = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_SB1n2" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_SB1n2" .. skinSuffix),
 	})
 	s.player_squeezebox3 = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_SB3" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_SB3" .. skinSuffix),
 	})
 	s.player_boom = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_boom" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_boom" .. skinSuffix),
 	})
 	s.player_slimp3 = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_slimp3" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_slimp3" .. skinSuffix),
 	})
 	s.player_softsqueeze = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_softsqueeze" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_softsqueeze" .. skinSuffix),
 	})
 	s.player_controller = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_controller" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_controller" .. skinSuffix),
 	})
 	s.player_receiver = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_receiver" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_receiver" .. skinSuffix),
 	})
 	s.player_squeezeplay = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_squeezeplay" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_squeezeplay" .. skinSuffix),
 	})
 	s.player_http = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_tunein_url" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_tunein_url" .. skinSuffix),
 	})
 	s.player_baby = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_baby" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_baby" .. skinSuffix),
 	})
 	s.player_fab4 = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_fab4" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_fab4" .. skinSuffix),
 	})
 
 	-- misc home menu icons
 	s.hm_appletImageViewer = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_image_viewer" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_image_viewer" .. skinSuffix),
 	})
 	s.hm_eject = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_eject" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_eject" .. skinSuffix),
 	})
 	s.hm_sdcard = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_device_SDcard" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_device_SDcard" .. skinSuffix),
 	})
 	s.hm_usbdrive = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_device_USB" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_device_USB" .. skinSuffix),
 	})
 	s.hm_appletNowPlaying = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_nowplaying" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_nowplaying" .. skinSuffix),
 	})
 	s.hm_settings = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings" .. skinSuffix),
 	})
 	s.hm_advancedSettings = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_adv" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_adv" .. skinSuffix),
 	})
 	s.hm_settings_pcp = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
 	})
 	s.hm_radio = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_tunein" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),
 	})
 	s.hm_radios = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_tunein" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),
 	})
 	s.hm_myApps = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_my_apps" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_my_apps" .. skinSuffix),
 	})
 	s.hm_myMusic = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_mymusic" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_mymusic" .. skinSuffix),
 	})
 	s.hm__myMusic = _uses(s.hm_myMusic)
    	s.hm_otherLibrary = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_ml_other_library" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_ml_other_library" .. skinSuffix),
         })
 	s.hm_myMusicSelector = _uses(s.hm_myMusic)
 
 	s.hm_favorites = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_favorites" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_favorites" .. skinSuffix),
 	})
 	s.hm_settingsAlarm = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_alarm" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_alarm" .. skinSuffix),
 	})
 	s.hm_settingsPlayerNameChange = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_name" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_name" .. skinSuffix),
 	})
 	s.hm_settingsBrightness = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_settings_brightness" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_settings_brightness" .. skinSuffix),
 	})
 	s.hm_settingsSync = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_sync" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_sync" .. skinSuffix),
 	})
 	s.hm_selectPlayer = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_choose_player" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_choose_player" .. skinSuffix),
 	})
 	s.hm_quit = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_power_off" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_power_off" .. skinSuffix),
 	})
 	s.hm_playerpower = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_power_off" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_power_off" .. skinSuffix),
 	})
 	s.hm_myMusicArtists = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_artist" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_artist" .. skinSuffix),
 	})
 	s.hm_myMusicAlbums = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_albums" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_albums" .. skinSuffix),
 	})
 	s.hm_myMusicGenres = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_genres" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_genres" .. skinSuffix),
 	})
 	s.hm_myMusicYears = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_years" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_years" .. skinSuffix),
 	})
 
 	s.hm_myMusicNewMusic = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_new_music" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_new_music" .. skinSuffix),
 	})
 	s.hm_myMusicPlaylists = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_playlist" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_playlist" .. skinSuffix),
 	})
 	s.hm_myMusicSearch = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_search" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_search" .. skinSuffix),
 	})
 	s.hm_myMusicSearchArtists   = _uses(s.hm_myMusicSearch)
 	s.hm_myMusicSearchAlbums    = _uses(s.hm_myMusicSearch)
@@ -3026,44 +3070,44 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.hm_globalSearch           = _uses(s.hm_myMusicSearch)
 
 	s.hm_myMusicMusicFolder = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_folder" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_folder" .. skinSuffix),
 	})
 	s.hm_randomplay = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_ml_random" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_ml_random" .. skinSuffix),
 	})
 	s.hm_skinTest = _uses(_buttonicon, {
-		img = _loadImage(self, "IconsResized/icon_blank" .. skinSuffix),
+		img = _loadScaledImage(self, "IconsResized/icon_blank" .. skinSuffix),
 	})
 
         s.hm_settingsRepeat = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_repeat" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_repeat" .. skinSuffix),
         })
         s.hm_settingsShuffle = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_shuffle" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_shuffle" .. skinSuffix),
         })
         s.hm_settingsSleep = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_sleep" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_sleep" .. skinSuffix),
         })
         s.hm_settingsScreen = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_screen" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_screen" .. skinSuffix),
         })
         s.hm_appletCustomizeHome = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_home" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_home" .. skinSuffix),
         })
         s.hm_settingsAudio = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_audio" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_audio" .. skinSuffix),
         })
         s.hm_linein = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_linein" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_linein" .. skinSuffix),
         })
 
         -- ??
         s.hm_loading = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_loading" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix),
         })
         -- ??
         s.hm_settingsPlugin = _uses(_buttonicon, {
-                img = _loadImage(self, "IconsResized/icon_settings_plugin" .. skinSuffix),
+                img = _loadScaledImage(self, "IconsResized/icon_settings_plugin" .. skinSuffix),
         })
 
 	-- indicator icons, on right of menus
@@ -3103,8 +3147,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- BEGIN NowPlaying skin code
 
-	local NP_TRACK_FONT_SIZE = math.floor(36 * yScaleFactor)
-	local NP_ARTISTALBUM_FONT_SIZE =  math.floor(28 * yScaleFactor)
+	local NP_TRACK_FONT_SIZE = scaledValues.NP_TRACK_FONT_SIZE
+	local NP_ARTISTALBUM_FONT_SIZE = scaledValues.NP_ARTISTALBUM_FONT_SIZE
 
 	local controlHeight = CONTROLS_DIMENSIONS
 	local controlWidth = CONTROLS_DIMENSIONS
@@ -3276,7 +3320,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor + 5),
+			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR + 5),
 			h          = math.floor(NP_TRACK_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
@@ -3294,7 +3338,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + math.floor(NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor),
+			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR),
 			h          = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			npalbum = {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -3651,7 +3695,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			text = {
 				border = { screenHeight - 72, 0, 0, 0 },
 				padding = { 10, 12, 10, 15 },
-				font = _boldfont(24),
+				font = _boldfont(scaledValues.NP_LARGE_ART_TITLE_FONT_SIZE),
 			},
 			button_back = {
 				bgImg = false
@@ -4115,7 +4159,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
+		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
 		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
@@ -4167,7 +4211,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	-- Visualizer: large art Spectrum Visualizer
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
+	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
 	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
@@ -4413,7 +4457,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
+		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
 		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
@@ -4453,7 +4497,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	-- Visualizer: VuMeter Visualizer large art
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + (NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5
+	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
 	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
@@ -4782,7 +4826,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npX = 30
 		local portraitArtworkWidth = self:param().portraitArtworkWidth
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
-		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * ySpacingFactor) + math.floor(NP_ARTISTALBUM_FONT_SIZE * ySpacingFactor * 2) + 5 + 6
+		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5 + 6
 		mini_visu_X = npX
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
@@ -5199,6 +5243,14 @@ end
 
 function skin1280x720(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 1280, 720)
+end
+
+function skin1280x1024(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1280, 1024)
+end
+
+function skin1920x1080(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1920, 1080)
 end
 
 function skin720x1280(self, s, reload, useDefaultSize)

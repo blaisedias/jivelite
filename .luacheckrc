@@ -92,13 +92,33 @@ files["share/jive/applets/Visualiser/VisualiserMeta.lua"] = {
        "_M", "jive", "appletManager", "jiveMain", "jnt",
    }
 }
-
 files["share/jive/applets/Visualiser/VisualiserApplet.lua"] = {
    globals = {
        "init",
    },
    read_globals = {
        "_M", "appletManager", "jiveMain",
+   }
+}
+files["share/jive/applets/JogglerSkin/JogglerSkinApplet.lua"] = {
+   globals = {
+       "init", "scaleText",
+   },
+   read_globals = {
+       "_M", "appletManager", "jiveMain",
+   }
+}
+files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
+   globals = {
+       "initialise",
+       "scaleUIImages",
+       "scaleTextValue",
+       "scaleGridTextValue",
+       "scaleImageValue",
+       "getJogglerSkinParams",
+       "getGridSkinParams",
+   },
+   read_globals = {
    }
 }
 
