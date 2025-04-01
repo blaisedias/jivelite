@@ -45,11 +45,16 @@ function defaultSettings(self)
 		shuffleMode = false,
 		volDown = true,
 		volSlider = true,
-		volUp = true
+		volUp = true,
 	}
 end
 
 function registerApplet(self)
+	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
+	if scale_up == nil then
+		-- default to scaling up
+		Framework:setGlobalSetting("jogglerScaleUp", true)
+	end
 
 	self:registerService('getNowPlayingScreenButtons')
 	self:registerService('setNowPlayingScreenButtons')
@@ -64,6 +69,8 @@ function registerApplet(self)
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1480_320"), "JogglerSkin", "skin1480x320", "JogglerSkin_1480x320")
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1600_720"), "JogglerSkin", "skin1600x720", "JogglerSkin_1600x720")
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_720_1280"), "JogglerSkin", "skin720x1280", "JogglerSkin_720x1280")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_1024"), "JogglerSkin", "skin1280x1024", "JogglerSkin_1280x1024")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1920_1080"), "JogglerSkin", "skin1920x1080", "JogglerSkin_1920x1080")
 		local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
 		local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
 		if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
