@@ -114,6 +114,21 @@ function init(self)
 	self.vTiles = {}
 	self.tiles = {}
 
+	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
+	log:warn("#### init:", scale_up)
+	jiveMain:addItem({
+		id = "scaleUp",
+		node = 'screenSettings',
+		text = self:string("SCALEUP"),
+		style = 'item_choice',
+		weight = 55,
+		check = Checkbox("checkbox", function(_, checked)
+			Framework:setGlobalSetting("jogglerScaleUp", checked)
+			jiveMain:reloadSkin()
+			end,
+			scale_up)
+	})
+
 	jiveMain:addItem(self:buttonSettingsMenuItem())
 
 	jiveMain:addItem({
@@ -130,6 +145,17 @@ function init(self)
 	})
 end
 
+
+function scaleText(self, v)
+	if Framework:getGlobalSetting("jogglerScaleUp") then
+		local screenWidth, screenHeight = Framework:getScreenSize()
+		local portraitMode = screenWidth == 720 and screenHeight == 1280
+		if screenWidth >= 800 and screenHeight >= 480 and portraitMode == false then
+			return math.floor((v * screenHeight)/480)
+		end
+	end
+	return v
+end
 
 function param(self)
 	local npSS = {}
@@ -325,14 +351,14 @@ function param(self)
 	end
 
 	return {
-		THUMB_SIZE = 40,
-		THUMB_SIZE_MENU = 40,
+		THUMB_SIZE = scaleText(self, 40),
+		THUMB_SIZE_MENU = scaleText(self, 40),
 		NOWPLAYING_MENU = false,
 		-- NOWPLAYING_TRACKINFO_LINES used in assisting scroll behavior animation on NP
 		-- 3 is for a three line track, artist, and album (e.g., SBtouch)
 		-- 2 is for a two line track, artist+album (e.g., SBradio, SBcontroller)
 		NOWPLAYING_TRACKINFO_LINES = 3,
-		POPUP_THUMB_SIZE = 120,
+		POPUP_THUMB_SIZE = scaleText(self, 120),
 		piCorePlayerStyle = 'hm_settings_pcp',
 		nowPlayingScreenStyles = npSS,
 		portraitMode = portraitMode,
@@ -935,31 +961,31 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
 	local SELECT_SH_COLOR = { }
 
-	local TITLE_HEIGHT = 65
-	local TITLE_FONT_SIZE = 20
-	local TITLEBAR_FONT_SIZE = 28
-	local ALBUMMENU_FONT_SIZE = 20
-	local ALBUMMENU_SMALL_FONT_SIZE = 16
-	local TEXTMENU_FONT_SIZE = 25
-	local POPUP_TEXT_SIZE_1 = 26
-	local POPUP_TEXT_SIZE_2 = 26
-	local TRACK_FONT_SIZE = 18
-	local TEXTAREA_FONT_SIZE = 18
-	local CENTERED_TEXTAREA_FONT_SIZE = 28
+	local TITLE_HEIGHT = scaleText(self, 65)
+	local TITLE_FONT_SIZE = scaleText(self, 20)
+	local TITLEBAR_FONT_SIZE = scaleText(self, 28)
+	local ALBUMMENU_FONT_SIZE = scaleText(self, 20)
+	local ALBUMMENU_SMALL_FONT_SIZE = scaleText(self, 16)
+	local TEXTMENU_FONT_SIZE = scaleText(self, 25)
+	local POPUP_TEXT_SIZE_1 = scaleText(self, 26)
+	local POPUP_TEXT_SIZE_2 = scaleText(self, 26)
+	local TRACK_FONT_SIZE = scaleText(self, 18)
+	local TEXTAREA_FONT_SIZE = scaleText(self, 18)
+	local CENTERED_TEXTAREA_FONT_SIZE = scaleText(self, 28)
 
-	local CM_MENU_HEIGHT = 45
+	local CM_MENU_HEIGHT = scaleText(self, 45)
 
-	local TEXTINPUT_FONT_SIZE = 60
-	local TEXTINPUT_SELECTED_FONT_SIZE = 68
+	local TEXTINPUT_FONT_SIZE = scaleText(self, 60)
+	local TEXTINPUT_SELECTED_FONT_SIZE = scaleText(self, 68)
 
-	local HELP_FONT_SIZE = 18
-	local UPDATE_SUBTEXT_SIZE = 20
+	local HELP_FONT_SIZE = scaleText(self, 18)
+	local UPDATE_SUBTEXT_SIZE = scaleText(self, 20)
 
 	local ITEM_ICON_ALIGN   = 'center'
-	local ITEM_LEFT_PADDING = 12
-	local THREE_ITEM_HEIGHT = 72
-	local FIVE_ITEM_HEIGHT = 45
-	local TITLE_BUTTON_WIDTH = 76
+	local ITEM_LEFT_PADDING = scaleText(self, 12)
+	local THREE_ITEM_HEIGHT = scaleText(self, 72)
+	local FIVE_ITEM_HEIGHT = scaleText(self, 45)
+	local TITLE_BUTTON_WIDTH = scaleText(self, 76)
 
 	local AUDIO_METADATA_FONT_HEIGHT = 14
 	local AUDIO_METADATA_Y = screenHeight - AUDIO_METADATA_FONT_HEIGHT
@@ -991,11 +1017,17 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	elseif h < 480 and screenAR < 3 then
 		yScaleFactor = math.max(screenHeight/480, 0.8)
 		ySpacingFactor = 1.6
+	elseif Framework:getGlobalSetting("jogglerScaleUp") then
+		if w >= 800 and h >= 480  then
+			yScaleFactor = screenHeight/480
+			ySpacingFactor = 1.9
+		end
 	elseif w >= 1280 and h > 600  then
 		yScaleFactor = math.min(screenHeight/480, 1.4)
 		ySpacingFactor = 1.9
 	end
 	log:info("vertical scaling factor:", yScaleFactor)
+	log:warn("vertical scaling factor:", yScaleFactor, " scaleUp:",  Framework:getGlobalSetting("jogglerScaleUp"))
 
 
 	local smallSpinny = {
