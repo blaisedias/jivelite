@@ -87,6 +87,25 @@ local imgpath = "applets/JogglerSkin/images/"
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
 
+-- use global settings for large controls size flag,
+-- because applet settings do not work consistently when the skin is derived from JogglerSkin
+local function getLargeControls()
+	local largeNPButtons = Framework:getGlobalSetting("jogglerLargeNPButtons")
+	if largeNPButtons == nil then
+		local screenWidth, screenHeight = Framework:getScreenSize()
+		if screenWidth > 1024 and screenHeight > 600 then
+			return true
+		end
+		return false
+	end
+	return largeNPButtons
+end
+
+local function setLargeControls(value)
+	Framework:setGlobalSetting("jogglerLargeNPButtons", value)
+end
+
+
 function init(self)
 	self.images = {}
 
@@ -96,6 +115,19 @@ function init(self)
 	self.tiles = {}
 
 	jiveMain:addItem(self:buttonSettingsMenuItem())
+
+	jiveMain:addItem({
+		id = "largeNPButtons",
+		node = 'screenSettingsNowPlaying',
+		text = self:string("NOW_PLAYING_LARGE_BUTTONS"),
+		style = 'item_choice',
+		weight = 21,
+		check = Checkbox("checkbox", function(_, checked)
+			setLargeControls(checked)
+			jiveMain:reloadSkin()
+			end,
+			getLargeControls())
+	})
 end
 
 
@@ -449,10 +481,13 @@ end
 -- skin
 -- The meta arranges for this to be called to skin the interface.
 function skin0(self, s, reload, useDefaultSize, w, h)
+	local CONTROLS_DIMENSIONS = 70
+	if getLargeControls() == true then
+		CONTROLS_DIMENSIONS = 100
+	end
 
-    local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
---    CONTROLS_THEME_PATH = "UNOFFICIAL/AlexAust/Rectangles"
-
+	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
+	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
@@ -657,7 +692,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	local controlKeyMiddlePressed = _loadTile(self, {
-		imgpath .. CONTROLS_THEME_PATH .. "/Buttons/control_keyboard_button_press.png",
+--		imgpath .. CONTROLS_THEME_PATH .. "/Buttons/control_keyboard_button_press.png",
+		imgpath .. CONTROLS_ICONS_PATH .. "/control_keyboard_button_press.png",
 		nil,
 		nil,
 		nil,
@@ -2655,12 +2691,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.button_playlist.padding = { 2, 0, 0, 2 }
 
 	s.button_volume_min = {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_down.png"),
 		border = { 5, 0, 5, 0 },
 	}
 
 	s.button_volume_max = {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_up.png"),
 		border = { 5, 0, 5, 0 },
 	}
 
@@ -2754,18 +2790,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_popup_pause = _uses(_popupicon, {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_pause.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_pause.png"),
 	})
 
 	s.icon_popup_play = _uses(_popupicon, {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_play.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_play.png"),
 	})
 
 	s.icon_popup_fwd = _uses(_popupicon, {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_fwd.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_fwd.png"),
 	})
 	s.icon_popup_rew = _uses(_popupicon, {
-		img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_rew.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_rew.png"),
 	})
 
 	s.icon_popup_stop = _uses(_popupicon, {
@@ -2788,27 +2824,27 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	s.icon_popup_shuffle0 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle_off.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_shuffle_off.png"),
         })
 
         s.icon_popup_shuffle1 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_shuffle.png"),
         })
 
         s.icon_popup_shuffle2 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_shuffle_album.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_shuffle_album.png"),
         })
 
 	s.icon_popup_repeat0 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat_off.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_repeat_off.png"),
         })
 
         s.icon_popup_repeat1 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat_song.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_repeat_song.png"),
         })
 
         s.icon_popup_repeat2 = _uses(_popupicon, {
-                img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_popup_box_repeat.png"),
+                img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_repeat.png"),
         })
 
 	s.icon_popup_sleep_15 = {
@@ -3070,9 +3106,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local NP_TRACK_FONT_SIZE = math.floor(36 * yScaleFactor)
 	local NP_ARTISTALBUM_FONT_SIZE =  math.floor(28 * yScaleFactor)
 
+	local controlHeight = CONTROLS_DIMENSIONS
+	local controlWidth = CONTROLS_DIMENSIONS
 	local progressBarHeight = 50
-	local controlHeight = 70
-	local controlWidth = 70
 	-- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
 	-- with screenWidth == 800 the value is 240,
 	-- however volumeBarWidth is adjusted upwards if space permits, so this is the minimum value
@@ -3333,49 +3369,49 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			divVolSpace = _uses(_transportControlBorder),
 
 			rew   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_rew.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_rew.png"),
 			}),
 			play  = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_play.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_play.png"),
 			}),
 			pause = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_pause.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_pause.png"),
 			}),
 			fwd   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_ffwd.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_ffwd.png"),
 			}),
 			twiddle   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_twiddle.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_twiddle.png"),
 			}),
 			shuffleMode   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_off.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_off.png"),
 			}),
 			shuffleOff   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_off.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_off.png"),
 			}),
 			shuffleSong  = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_on.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_on.png"),
 			}),
 			shuffleAlbum = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_album_on.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_album_on.png"),
 			}),
 			repeatMode   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_off.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_repeat_off.png"),
 			}),
 			repeatOff   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_off.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_repeat_off.png"),
 			}),
 			repeatPlaylist = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_on.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_repeat_on.png"),
 			}),
 			repeatSong = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_repeat_song_on.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_repeat_song_on.png"),
 			}),
 			volDown   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_down.png"),
 			}),
 			volUp   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_up.png"),
 			}),
 			thumbsUp   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_thumbup.png"),
@@ -3396,13 +3432,13 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				img = _loadImage(self, "Icons/icon_toolbar_love_off.png"),
 			}),
 			fwdDisabled   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_ffwd_dis.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_ffwd_dis.png"),
 			}),
 			rewDisabled   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_rew_dis.png"),
 			}),
 			shuffleDisabled   = _uses(_transportControlButton, {
-				img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_shuffle_dis.png"),
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_dis.png"),
 			}),
 			repeatDisabled   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_repeat_dis.png"),
@@ -3484,6 +3520,11 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		img = _songProgressBarDisabled,
 	})
 
+	local volume_y_padding = 5
+	if controlHeight == 100 then
+		volume_y_padding = 20
+	end
+
 	s.npvolumeB = {
 		w = volumeBarWidth,
 		border = { 5, 20, 5, 0 },
@@ -3491,7 +3532,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		--	  set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
 		--	  note: this does not shift the slider background!
 		--	  set right padding to 16 otherwise slider is too close to screen edge at max value
-		padding = { 6, 5, 16, 5 },
+		padding = { 6, volume_y_padding, 16, volume_y_padding },
                 position = LAYOUT_SOUTH,
                 horizontal = 1,
                 bgImg = _modernVolumeSliderBackground,
@@ -3569,8 +3610,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
     local layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
 
-    if not layout.fitted then
-        -- try with smallControlWidth
+   	-- try with with smallControlWidth only if controls dimension is 70
+    if not layout.fitted and CONTROLS_DIMENSIONS == 70 then
         largeArtSmallTbButtons = true
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
     end
@@ -3593,8 +3634,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
     end
 
-    -- try with with smallControlWidth
-    if not layout.fitted then
+    -- try with with smallControlWidth only if controls dimension is 70
+    if not layout.fitted and CONTROLS_DIMENSIONS == 70 then
         largeArtSmallTbButtons = true
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
     end
@@ -3943,7 +3984,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = 50,
-			y = screenHeight - 100,
+			y = screenHeight - (100 + CONTROLS_DIMENSIONS - 70),
 			h = 30,
 			padding = { 0, 10, 0, 0 },
 			elapsed = {
@@ -3991,7 +4032,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogressNB = {
 			x = 50, -- + screenWidth - 2*50 - 2*60,
 			-- y = screenHeight - 100, text location within the progress bar group is lowered somehow :(
-			y = screenHeight - 87,
+			y = screenHeight - (100 + CONTROLS_DIMENSIONS - 70),
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_SOUTH,
 		},
@@ -4003,7 +4044,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
 	local SP_yFudge = 7
-	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - 100 - SP_yFudge*2
+	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + CONTROLS_DIMENSIONS - 70)- SP_yFudge*2
 	if activeNowPlayingScreenStyles['nowplaying_spectrum_text'] == true then
 		visImage:registerSpectrumResolution(screenWidth, SP_H)
 		-- Visualizer: Spectrum Visualizer
@@ -4332,7 +4373,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 
 
-	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - 100
+	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + CONTROLS_DIMENSIONS - 70)
 	if activeNowPlayingScreenStyles['nowplaying_vuanalog_text'] == true then
 		visImage:registerVUMeterResolution(screenWidth, VU_H)
 		-- Visualizer: Analog VU Meter
@@ -5017,20 +5058,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	s.settings_volume_group = _uses(s.brightness_group, {
 		down = {
-			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down.png"),
+			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_down.png"),
 		},
 		up = {
-			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up.png"),
+			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_up.png"),
 		},
 	})
 	s.settings_volume_group.pressed = {
 		down = _uses(s.settings_volume_group.down, { 
 			bgImg = sliderButtonPressed,
-			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_down_dis.png"),
+			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_down_dis.png"),
 		}),
 		up = _uses(s.settings_volume_group.up, { 
 			bgImg = sliderButtonPressed,
-			img = _loadImage(self, CONTROLS_THEME_PATH .. "/Icons/icon_toolbar_vol_up_dis.png"),
+			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_up_dis.png"),
 		}),
 	}
 
