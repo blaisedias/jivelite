@@ -1836,7 +1836,7 @@ function _createUI(self)
 			end
 			)
 
-	if self.player:getDigitalVolumeControl() ~= 0 then
+	if self.player:useVolumeControl() ~= 0 then
 		self.volSlider = Slider('npvolumeB', 0, 100, 0,
 				--function(slider, value, done)
 				function(_, value, _)
@@ -1876,7 +1876,7 @@ function _createUI(self)
 		end)
 	end
 
-	if self.player:getDigitalVolumeControl() ~= 0 then
+	if self.player:useVolumeControl() ~= 0 then
 		window:addActionListener("page_down", self,
 				function()
 					local e = Event:new(EVENT_SCROLL, 1)
@@ -1919,7 +1919,7 @@ function _createUI(self)
 			end
 	)
 
-	if self.player:getDigitalVolumeControl() == 0 then
+	if self.player:useVolumeControl() == 0 then
 		self.controlsGroup = Group('npcontrols', {
 				div1 = Icon('div1'),
 				div2 = Icon('div2'),
