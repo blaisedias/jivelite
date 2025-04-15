@@ -3230,9 +3230,25 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		divVolSpacing = 0
 	end
 
-	-- FIXME: rendered volume slider  is larger then volumeBarWidth, for now define and use a fudge factor
-	local volumeBarWidthFudge = 10
-	volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
+	-- FIXME: drop controls if they do not fit according to a priority
+	-- for now it suffices to check and drop the volume slider
+	-- volume bar width is negative then drop it
+	if volumeBarWidth <= 20 then
+		volumeBarWidth = screenWidth
+		local tmp = buttonOrder
+		buttonOrder = {}
+		for _,v in ipairs(tmp) do
+			if v ~= 'volSlider' then
+				if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
+					table.insert(buttonOrder, v)
+				end
+			end
+		end
+	else
+		-- FIXME: rendered volume slider is larger then volumeBarWidth, for now define and use a fudge factor
+		local volumeBarWidthFudge = 10
+		volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
+	end
 
 	s.nowplaying = _uses(s.window, {
 		--title bar
