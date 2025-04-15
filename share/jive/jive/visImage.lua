@@ -94,14 +94,16 @@ local function _parseImagePath(imgpath)
 end
 
 local function pathsAreImageFiles(root_path, path_lst)
+    local res = true
 	for _, pth in ipairs(path_lst) do
 		local src = root_path .. "/" .. pth
 		local mode = lfs.attributes(src, "mode")
 		if mode ~= "file" or _parseImagePath(src) == nil then
-		 return false
-end
+            log:warn("could not find: ", pth, " in ", root_path)
+			res = false
+		end
 	end
-	return true
+	return res
 end
 
 local function dumpTable(tbl, indent)
