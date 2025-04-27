@@ -536,7 +536,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	scaled_imgpath = scaledValues.imgPath
 	if scaledValues.scalingRequired == true then
-		jogglerScaler.scaleUIImages("./share/jive/applets/JogglerSkin/images/FULLSIZE", scaledValues)
+		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
 	end
 
 	--init lastInputType so selected item style is not shown on skin load
