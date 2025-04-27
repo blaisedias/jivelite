@@ -163,7 +163,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	self._CACHED["GS_SCALED_VALUES"] = scaledValues
 	scaled_imgpath = scaledValues.imgPath
 	if scaledValues.scalingRequired == true then
-		jogglerScaler.scaleUIImages("./share/jive/applets/JogglerSkin/images/FULLSIZE", scaledValues)
+		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
 	end
 
 	local gridItemSelectionBox    = _loadTile(self, {

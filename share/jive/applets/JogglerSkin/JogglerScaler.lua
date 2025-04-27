@@ -18,12 +18,14 @@ local pairs = pairs
 -- local tonumber = tonumber
 local pcall = pcall
 -- local type = type
+local coroutine, package	= coroutine, package
 
 -- lua package imports
 local math  = require("math")
 local lfs   = require("lfs")
 local os    = require("os")
 local io    = require("io")
+local string      = require("string")
 
 -- jive package imports
 local Surface = require("jive.ui.Surface")
@@ -240,22 +242,59 @@ local function scaleImageInPath(image_name, src_path, dest_path, w, h)
             end
 end
 
+local function str_endswith(str, ending)
+    return ending == "" or string.sub(str, -#ending) == ending
+end
+
+local function pathIter(rpath)
+	local hist = {}
+	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
+		if hist[dir] == nil then
+			hist[dir] = true
+			-- only search in the jivelite lua source tree
+			-- we could pass in a filter function but this is good enough
+--			if dir ~= "./" and str_endswith(dir, '/jivelite/share/jive/') then
+			if str_endswith(dir, '/jivelite/share/jive/') then
+				dir = dir .. rpath
+				local mode = lfs.attributes(dir, "mode")
+				if mode == "directory" then
+					coroutine.yield(dir)
+				end
+			end
+		end
+	end
+end
+
+local function findPaths(rpath)
+	local co = coroutine.create(function() pathIter(rpath) end)
+	return function()
+		local _, res = coroutine.resume(co)
+		return res
+	end
+end
+
+
 -- global function scale images required for Joggler based skins
-function scaleUIImages(images_path, params)
+function scaleUIImages(imgs_path, params)
     local resizedPath = System.getUserDir() .. '/' .. params.imgPath
     os.execute("mkdir -p " .. resizedPath .. '/grid_list')
     os.execute("mkdir -p " .. resizedPath .. '/5_line_lists')
     os.execute("mkdir -p " .. resizedPath .. '/IconsResized')
     os.execute("mkdir -p " .. resizedPath .. '/Buttons')
-    log:info("scaleUIImages ", images_path , " -> ", resizedPath)
-    if (lfs.attributes(images_path, "mode") ~= "directory") then
-        log:warn("scaleUIImages: ", images_path, " is not a directory")
+
+    local fq_imgs_path = nil
+    for pth in findPaths(imgs_path) do
+        fq_imgs_path = pth
+    end
+    log:info("scaleUIImages ", imgs_path, " == ", fq_imgs_path , " -> ", resizedPath)
+    if (lfs.attributes(fq_imgs_path, "mode") ~= "directory") then
+        log:warn("scaleUIImages: ", fq_imgs_path, " is not a directory")
         return
     end
 
     if params.GRID_ITEM_HEIGHT ~= nil then
         scaleImagesInPath(
-            images_path .. "/grid_list",
+            fq_imgs_path .. "/grid_list",
             resizedPath .. '/grid_list',
             nil,
             params.GRID_ITEM_HEIGHT
@@ -264,7 +303,7 @@ function scaleUIImages(images_path, params)
 
     if params.FIVE_ITEM_HEIGHT ~= nil then
         scaleImagesInPath(
-            images_path .. "/5_line_lists",
+            fq_imgs_path .. "/5_line_lists",
             resizedPath .. '/5_line_lists',
             nil,
             params.FIVE_ITEM_HEIGHT
@@ -272,14 +311,14 @@ function scaleUIImages(images_path, params)
     end
 
     scaleImagesInPath(
-        images_path .. "/IconsResized",
+        fq_imgs_path .. "/IconsResized",
         resizedPath .. '/IconsResized',
         params.THUMB_SIZE,
         params.THUMB_SIZE
     )
 
     scaleImagesInPath(
-        images_path .. "/Buttons",
+        fq_imgs_path .. "/Buttons",
         resizedPath .. '/Buttons',
         nil,
         params.TITLE_HEIGHT - 18
