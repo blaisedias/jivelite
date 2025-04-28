@@ -340,12 +340,17 @@ local function _getJogglerCoreParams(skinName, skinValues)
         if skinName == "PiGridSkin" then
             if rows % 3 ~= 0 then
                 -- grid item height = 3 * fiveItemHeight,
-                -- increase the number of rows to be a multiple of 3 == to a single row in the GridSkin
-                -- then derive fiveItemHeight using the adjusted number of rows
-                rows = math.floor((rows+2)/3)*3
+                if skinValues.ADJUST_FOR_GRID_ROWS == "roundup" then
+                -- increase the number of rows to be a multiple of 3
+                    rows = math.floor((rows+2)/3)*3
+                elseif skinValues.ADJUST_FOR_GRID_ROWS == "rounddown" then
+                -- decrease the number of rows to be a multiple of 3
+                    rows = math.floor(rows/3)*3
+                end
                 log:info("fiveItemHeight adjusted for PiGridSkin requirements ",
                             fiveItemHeight, ' -> ', math.floor(availHeight/rows)
                         )
+                -- recalculate fiveItemHeight using the adjusted number of rows
                 fiveItemHeight = math.floor(availHeight/rows)
             end
         end
@@ -411,6 +416,11 @@ function getJogglerSkinParams(skinName)
     local skinValues = {
         TITLE_HEIGHT = scaleTextValue(65),
         TEXTMENU_FONT_SIZE = scaleTextValue(25),
+        -- hint for adjusting FIVE_ITEM_HEIGHT for PiGridSkin
+        --  rounddown -> increase FIVE_ITEM_HEIGHT to reduce the number of Grid Item Rows
+        --  roundup -> decrease FIVE_ITEM_HEIGHT to increase the number of Grid Item Rows
+        --  * -> no adjustment - bottom Grid Item Row may be rendered partially
+        ADJUST_FOR_GRID_ROWS = "rounddown",
     }
     -- before scaling update values from json config
     if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
