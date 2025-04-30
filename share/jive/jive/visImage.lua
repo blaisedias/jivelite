@@ -375,12 +375,13 @@ end
 
 function deleteResizedImages(_)
 	log:info("deleteResizedImages ")
-	for k,v in pairs(resizedImagesTable) do
-		log:info("deleteResizedImages ", k, " ", v)
-		os.execute('rm  ' .. '"'.. v .. '"')
-		resizedImagesTable[k] = nil
-	end
---	resizedImagesTable = {}
+--	for k,v in pairs(resizedImagesTable) do
+--		log:warn("deleteResizedImages ", k, " ", v)
+--		os.execute('rm  ' .. '"'.. v .. '"')
+--		resizedImagesTable[k] = nil
+--	end
+	os.execute('rm  -f ' .. '"'.. resizedCachePath .. '"/*')
+	resizedImagesTable = {}
 	imCacheClear()
 	-- The resize queue is not cleared after a resize op is completed,
 	-- this prevents repeating the same resize op if requested again.
