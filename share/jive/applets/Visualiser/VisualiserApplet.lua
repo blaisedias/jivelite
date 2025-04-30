@@ -332,6 +332,24 @@ local function inputWorkSpace(self)
     return window
 end
 
+function deleteResizedImages(_)
+        local popup = Popup("toast_popup_mixed")
+
+        popup:setAllowScreensaver(false)
+        popup:setAlwaysOnTop(true)
+        popup:setAutoHide(false)
+
+--        local icon = Icon("icon_connecting")
+        local text = Label("text", "Deleting resized images ...")
+
+--        popup:addWidget(icon)
+        popup:addWidget(text)
+        popup:addTimer(1000, function()
+            visImage:deleteResizedImages()
+            popup:hide(Window.transitionFadeOut)
+        end)
+        popup:show()
+end
 
 --function imagesMenu(self, menuItem)
 function imagesMenu(self, _)
@@ -390,7 +408,7 @@ function imagesMenu(self, _)
     menu:addItem({ text = "Delete Resized Images",
 --        callback = function(event, menuItem)
         callback = function(_, _)
-            visImage:deleteResizedImages()
+            self:deleteResizedImages()
             refreshNowPlaying()
         end,
         weight=70
