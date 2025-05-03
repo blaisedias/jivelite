@@ -3501,7 +3501,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - CONTROLS_DIMENSIONS - 18,
+			y = screenHeight - CONTROLS_DIMENSIONS - 18 - 10,
 			padding = { 0, 11, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3561,7 +3561,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - CONTROLS_DIMENSIONS - 18,
+			y = screenHeight - CONTROLS_DIMENSIONS - 3 - 10,
 			elapsed = {
 				w = WH_FILL,
 				align = "left",
@@ -3979,7 +3979,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		},
 		npprogressNB = {
 			x = 50 + screenWidth - 2*50 - 2*60,
-			y = screenHeight - CONTROLS_DIMENSIONS - 18,
+			y = screenHeight - CONTROLS_DIMENSIONS - 3,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_NONE,
 		},
@@ -4100,7 +4100,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogressNB = {
 			x = 50, -- + screenWidth - 2*50 - 2*60,
 			-- y = screenHeight - 100, text location within the progress bar group is lowered somehow :(
-			y = screenHeight - (100 + CONTROLS_DIMENSIONS - 70),
+			y = screenHeight - (85 + CONTROLS_DIMENSIONS - 70),
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_SOUTH,
 		},
@@ -4184,9 +4184,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR)
+		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
-		mini_visu_H = math.floor(mini_visu_H)
+		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer
 		s.nowplaying_spectrum_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4236,7 +4236,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: large art Spectrum Visualizer
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (18 * NP_SPACING_FACTOR)
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_SPACING_FACTOR)
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
@@ -4482,9 +4482,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
+--		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
+		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
-		mini_visu_H = math.floor(mini_visu_H)
+		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer
 		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_visualizer_mini, {
@@ -4522,7 +4523,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: VuMeter Visualizer large art
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (18 * NP_SPACING_FACTOR)
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_SPACING_FACTOR)
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
@@ -4649,7 +4650,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		mini_visu_W = screenWidth - mini_visu_X - 15
 		local tw = (screenRem/2) - 30
 		mini_visu_Y = TITLE_HEIGHT + 5
-		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - 10 - 20
+		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 
@@ -4858,7 +4859,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
-		AUDIO_METADATA_Y = screenHeight - 110 - AUDIO_METADATA_FONT_HEIGHT
+		AUDIO_METADATA_Y = screenHeight - CONTROLS_DIMENSIONS - 18 - AUDIO_METADATA_FONT_HEIGHT
 
 --		mini_visu_H = 320
 --		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
