@@ -374,5 +374,5 @@ LARGE_SPECTRUM_ANALYZER
 LARGE_VU_METER
 	EN	Large VU Meter
 
-SCALEUP
-	EN	Scale Up
+SCALE_UI
+	EN	Scale User Interface
