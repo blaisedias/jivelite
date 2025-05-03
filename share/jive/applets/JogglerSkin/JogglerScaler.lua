@@ -67,6 +67,14 @@ end
 local function _writeScaledData(obj, jsPath)
     local data = {}
     data[resolutionKey] = obj
+    data["comments"] = {
+        ADJUST_FOR_GRID_ROWS = {
+            "values are:",
+            " - rounddown -> reduced number of grid rows to fit",
+            " - roundup   -> increase number of grid rows to fit",
+            " - anything-else  -> display partial grid row"
+        }
+    }
     local jsonString = json.stringify(data)
     local fh = io.open(jsPath, "w")
     if fh then
@@ -523,11 +531,24 @@ local function _getJogglerCoreParams(skinName, skinValues)
        elseif screenHeight < 480 then
             local thumbSize = scaleImageValue(BASE_ICON_SIZE)
             fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
+            if screenWidth/screenHeight >= 3 then
+                return {
+                    THUMB_SIZE=thumbSize,
+                    POPUP_THUMB_SIZE=popupThumbSize,
+                    FIVE_ITEM_HEIGHT=fiveItemHeight,
+                    NP_TEXT_SCALE_FACTOR = 1,
+                    NP_SPACING_FACTOR = 1.9,
+                    CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
+                    CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
+                    imgPath = jogglerImgpath .. thumbSize .. "/",
+                    scalingRequired=true 
+                }
+            end
             return {
                 THUMB_SIZE=thumbSize,
                 POPUP_THUMB_SIZE=popupThumbSize,
                 FIVE_ITEM_HEIGHT=fiveItemHeight,
-                NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 0.8),
+                NP_TEXT_SCALE_FACTOR = math.max(screenHeight/480, 0.8),
                 NP_SPACING_FACTOR = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                 CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
@@ -655,6 +676,12 @@ function getJogglerSkinParams(skinName)
 --    params.NP_TRACK_FONT_SIZE = math.floor(36 * params.NP_TEXT_SCALE_FACTOR)
     params.NP_TRACK_FONT_SIZE = params.TITLEBAR_FONT_SIZE
     params.NP_ARTISTALBUM_FONT_SIZE = math.floor(28 * params.NP_TEXT_SCALE_FACTOR)
+    if true then
+        local screenWidth, screenHeight = Framework:getScreenSize()
+        if screenWidth/screenHeight >= 3 then
+            params.NP_ARTISTALBUM_FONT_SIZE = 1.5 * params.NP_ARTISTALBUM_FONT_SIZE
+        end
+    end
     params.textScaleFactor = textScaleFactor
     params.imageScaleFactor = imageScaleFactor
     params.gridTextScaleFactor = gridTextScaleFactor
