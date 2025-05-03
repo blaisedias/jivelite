@@ -39,6 +39,7 @@ local table         = require("jive.utils.table")
 local textScaleFactor
 local imageScaleFactor
 local gridTextScaleFactor
+local controlsScaleFactor
 local jsonData
 local resolutionKey
 
@@ -81,8 +82,10 @@ function initialise()
     textScaleFactor = nil
     imageScaleFactor = nil
     gridTextScaleFactor = nil
+    controlsScaleFactor = nil
     jsonData = nil
     resolutionKey = nil
+
     local screenWidth, screenHeight = Framework:getScreenSize()
     resolutionKey = screenWidth .. 'x' .. screenHeight
     jsonData = _loadJsonData(System.getUserDir() .. '/Joggler.json')
@@ -91,6 +94,7 @@ function initialise()
         if jd ~= nil then
             textScaleFactor = jd.textScaleFactor
             imageScaleFactor = jd.imageScaleFactor
+            controlsScaleFactor = jd.controlsScaleFactor
             -- remove fields that are derived values
             jd.imgPath = nil
             jd.scalingRequired = nil
@@ -173,8 +177,33 @@ function scaleImageValue(v)
     return math.floor(imageScaleFactor * v)
 end
 
+-- function scale an controls image size value to match the display dimensions
+local function scaleControlsImageValue(v)
+    if controlsScaleFactor == nil then
+        -- default to scaling of 1
+        controlsScaleFactor = 1
+        local screenWidth, screenHeight = Framework:getScreenSize()
+        if Framework:getGlobalSetting("jogglerScaleUp") then
+            -- landscape
+            if screenWidth > screenHeight then
+                controlsScaleFactor = screenHeight / 480
+            end
+            -- portrait
+--            if screenWidth < screenHeight then
+--                controlsScaleFactor = screenWidth / 800
+--            end
+--            for now only explicitly support portrait mode 720x1280
+            if screenWidth == 720 and screenHeight == 1280 then
+                controlsScaleFactor = 1.7
+            end
+        end
+    end
+    return math.floor(controlsScaleFactor * v)
+end
+
 -- private function scales an image to match input width and height
--- if either one but not both are nil, then src dimension is used.
+-- if either one but not both are nil, then the corresponding source image dimension is used.
+-- if either one but not both are 0, then the value used for the dimension retains the source aspect ratio
 local function scaleImage(imgPath, w, h)
     log:debug("scaleImage imagePath:", imgPath, " w:", w, " h:", h)
     local img = Surface:altLoadImage(imgPath)
@@ -183,13 +212,20 @@ local function scaleImage(imgPath, w, h)
         return nil
     end
     local srcW, srcH = img:getSize()
+    -- validate input parameters and bail out gracefully
+    if (w == nil or h == 0) and ( h == nil or h == 0) then
+        log:warn("scaleImage: invalid parameters ", imgPath)
+        return nil
+    end
     if w == nil then
---        w = math.floor(srcW * h/srcH)
         w = srcW
+    elseif w == 0 then
+        w = math.floor(srcW * h/srcH)
     end
     if h == nil then
---        h = math.floor(srcH * h/srcW)
         h = srcH
+    elseif h == 0 then
+        h = math.floor(srcH * h/srcW)
     end
     if srcW == w and h == srcH then
         log:debug("scaleImage no scaling", img)
@@ -224,21 +260,23 @@ local function scaleImagesInPath(src_path, dest_path, w, h)
     end
 end
 
--- private function scales a single image found in a path, to match input width and height
--- images discovery is not recursive.
-local function scaleImageInPath(image_name, src_path, dest_path, w, h)
-            local mode = lfs.attributes(src_path .. "/" .. image_name, "mode")
+-- private function scales a image in a file and saves as an image in another file
+local function scaleImageFile(src_path, dest_path, w, h)
+            local mode = lfs.attributes(src_path, "mode")
             if mode == "file" then
-                mode = lfs.attributes(dest_path .. "/" .. image_name, "mode")
+                mode = lfs.attributes(dest_path, "mode")
                 if mode ~= "file"  then
-                    local img = scaleImage(src_path .. "/" .. image_name, w, h)
+                    log:info(src_path .. ' -> ' .. dest_path)
+                    local img = scaleImage(src_path, w, h)
                     if img ~= nil then
-                        img:savePNG(dest_path .. '/' .. image_name)
+                        img:savePNG(dest_path)
                         img:release()
                     else
-                        log:warn("failed to scale ", src_path .. '/' .. image_name)
+                        log:warn("failed to scale ", src_path)
                     end
                 end
+            else
+                log:warn("image file not found: ", src_path)
             end
 end
 
@@ -273,6 +311,99 @@ local function findPaths(rpath)
 	end
 end
 
+function scaleControlsImages(params)
+    local controls_resize_map = {
+        {
+            -- control popup images
+            dim = params.CONTROL_POPUP_DIMENSIONS,
+            imgs = {
+                { src="skip-next.png", dest="icon_popup_box_fwd.png"},
+                { src="pause-circle.png", dest="icon_popup_box_pause.png"},
+                { src="play-circle.png", dest="icon_popup_box_play.png"},
+                { src="repeat-off-5-variant.png", dest="icon_popup_box_repeat_off.png"},
+                { src="repeat-variant.png", dest="icon_popup_box_repeat.png"},
+                { src="repeat-once-variant.png", dest="icon_popup_box_repeat_song.png"},
+                { src="skip-previous.png", dest="icon_popup_box_rew.png"},
+                { src="shuffle-album.png", dest="icon_popup_box_shuffle_album.png"},
+                { src="shuffle-disabled.png", dest="icon_popup_box_shuffle_off.png"},
+                { src="shuffle.png", dest="icon_popup_box_shuffle.png"},
+            },
+        },
+        {
+            -- button pressed background
+            dim = params.CONTROLS_DIMENSIONS,
+            imgs = {
+                { src="control_keyboard_button_press.png", dest="control_keyboard_button_press.png"}
+            },
+        },
+        {
+            -- control buttons
+            dim = math.ceil(params.CONTROLS_DIMENSIONS * 0.64),
+            imgs = {
+                { src="skip-next.png", dest="icon_toolbar_ffwd.png", },
+                { src="DIS-skip-next.png", dest="icon_toolbar_ffwd_dis.png", },
+                { src="pause-circle.png", dest="icon_toolbar_pause.png", },
+                { src="play-circle.png", dest="icon_toolbar_play.png", },
+                { src="repeat-off-5-variant.png", dest="icon_toolbar_repeat_off.png", },
+                { src="repeat-variant.png", dest="icon_toolbar_repeat_on.png", },
+                { src="repeat-once-variant.png", dest="icon_toolbar_repeat_song_on.png", },
+                { src="skip-previous.png", dest="icon_toolbar_rew.png", },
+                { src="shuffle-album.png", dest="icon_toolbar_shuffle_album_on.png", },
+                { src="DIS-shuffle-disabled.png", dest="icon_toolbar_shuffle_dis.png", },
+                { src="shuffle-disabled.png", dest="icon_toolbar_shuffle_off.png", },
+                { src="shuffle.png", dest="icon_toolbar_shuffle_on.png", },
+                { src="next-visualiser.png", dest="icon_toolbar_twiddle.png", },
+            },
+        },
+        {
+            -- volume control buttons
+            dim = math.ceil(params.CONTROLS_DIMENSIONS * 0.5),
+            imgs = {
+                { src="DIS-volume-minus.png", dest="icon_toolbar_vol_down_dis.png", },
+                { src="volume-minus.png", dest="icon_toolbar_vol_down.png", },
+                { src="DIS-volume-plus.png", dest="icon_toolbar_vol_up_dis.png", },
+                { src="volume-plus.png", dest="icon_toolbar_vol_up.png", },
+            },
+        }
+    }
+
+    local src_path = nil
+    for pth in findPaths("applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/1k") do
+        src_path = pth
+    end
+
+    if src_path == nil or (lfs.attributes(src_path, "mode") ~= "directory") then
+        log:error("scaleControlsImages: ", src_path, " is not a directory")
+        return
+    end
+
+    local dest_path = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/' .. params.CONTROLS_DIMENSIONS
+    os.execute("mkdir -p " .. dest_path)
+    for _, v in pairs(controls_resize_map) do
+        local dim = v.dim
+        for _, imgnames in pairs(v.imgs) do
+            scaleImageFile(src_path .. "/" .. imgnames.src, dest_path .. "/" .. imgnames.dest, dim, dim)
+        end
+    end
+
+    -- scale volume bar components
+    local vol_dim = math.ceil(params.CONTROLS_DIMENSIONS * 0.5)
+    for pth in findPaths("applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/1k") do
+        src_path = pth
+    end
+
+    if src_path == nil or (lfs.attributes(src_path, "mode") ~= "directory") then
+        log:error("scaleControlsImages: ", src_path, " is not a directory")
+        return
+    end
+    dest_path = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/' .. params.CONTROLS_DIMENSIONS
+    os.execute("mkdir -p " .. dest_path)
+    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill_l.png', dest_path .. '/' .. 'tch_volumebar_fill_l.png', 0, vol_dim)
+    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill_r.png', dest_path .. '/' .. 'tch_volumebar_fill_r.png', 0, vol_dim)
+    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill.png', dest_path .. '/' .. 'tch_volumebar_fill.png', vol_dim*9, vol_dim)
+    scaleImageFile(src_path .. '/' .. 'tch_volumebar_slider.png', dest_path .. '/' .. 'tch_volumebar_slider.png', 0, vol_dim)
+end
+
 
 -- global function scale images required for Joggler based skins
 function scaleUIImages(imgs_path, params)
@@ -287,8 +418,8 @@ function scaleUIImages(imgs_path, params)
         fq_imgs_path = pth
     end
     log:info("scaleUIImages ", imgs_path, " == ", fq_imgs_path , " -> ", resizedPath)
-    if (lfs.attributes(fq_imgs_path, "mode") ~= "directory") then
-        log:warn("scaleUIImages: ", fq_imgs_path, " is not a directory")
+    if fq_imgs_path == nil or (lfs.attributes(fq_imgs_path, "mode") ~= "directory") then
+        log:error("scaleUIImages: ", fq_imgs_path, " is not a directory")
         return
     end
 
@@ -325,13 +456,15 @@ function scaleUIImages(imgs_path, params)
     )
 end
 
-
 local BASE_ICON_SIZE = 40
 local BASE_POPUP_THUMBSIZE = 120
 local jogglerImgpath = "applets/JogglerSkin/images/"
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
+    if controlsScaleFactor == nil then
+        controlsScaleFactor = skinValues.TITLE_HEIGHT/70
+    end
     if Framework:getGlobalSetting("jogglerScaleUp") then
         -- padding at the bottom is nominally 16
         local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16
@@ -364,18 +497,16 @@ local function _getJogglerCoreParams(skinName, skinValues)
             local thumbSize = 72
             return {
                     THUMB_SIZE=thumbSize,
---                  POPUP_THUMB_SIZE=192,
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
                     NP_SPACING_FACTOR = 1.7,
+                    CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
+                    CONTROL_POPUP_DIMENSIONS = math.floor(screenWidth * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
                     scalingRequired=true
-            }
-        end
-
-        -- screenHeight < 480 => scale down TBD
-        if screenWidth > screenHeight and screenHeight >=480 then
+                }
+        elseif screenWidth > screenHeight and screenHeight >480 then
             local thumbSize = scaleImageValue(BASE_ICON_SIZE)
             return {
                     THUMB_SIZE=thumbSize,
@@ -383,22 +514,27 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_TEXT_SCALE_FACTOR = scaleTextValue(1),
                     NP_SPACING_FACTOR = 1.9,
+                    CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
+                    CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    scalingRequired=true 
+                }
+       -- screenHeight < 480 => scale down
+       elseif screenHeight < 480 then
+            local thumbSize = scaleImageValue(BASE_ICON_SIZE)
+            fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
+            return {
+                THUMB_SIZE=thumbSize,
+                POPUP_THUMB_SIZE=popupThumbSize,
+                FIVE_ITEM_HEIGHT=fiveItemHeight,
+                NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 0.8),
+                NP_SPACING_FACTOR = 1.6,
+                CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
+                CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
+                imgPath = jogglerImgpath .. thumbSize .. "/",
+                scalingRequired=true 
             }
         end
-    end
-    local screenAR = screenWidth/screenHeight
-    if screenHeight < 480 and screenAR < 3 then
-    return {
-            THUMB_SIZE=BASE_ICON_SIZE,
-            POPUP_THUMB_SIZE=BASE_POPUP_THUMBSIZE,
-            FIVE_ITEM_HEIGHT=45,
-            NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 0.8),
-            NP_SPACING_FACTOR = 1.6,
-            imgPath = jogglerImgpath,
-            scalingRequired=false
-        }
     end
 
     return {
@@ -407,6 +543,8 @@ local function _getJogglerCoreParams(skinName, skinValues)
             FIVE_ITEM_HEIGHT=45,
             NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
             NP_SPACING_FACTOR = 1.7,
+            CONTROLS_DIMENSIONS = 70,
+            CONTROL_POPUP_DIMENSIONS = 146,
             imgPath = jogglerImgpath,
             scalingRequired=false
         }
@@ -449,6 +587,12 @@ function getJogglerSkinParams(skinName)
     params.TEXT_COLOR_BLACK = { 0x00, 0x00, 0x00 }
     params.TEXT_SH_COLOR = { 0x37, 0x37, 0x37 }
     params.TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
+    params.TEXT_COLOR_DC = { 0xDC, 0xDC, 0xDC }
+    params.TEXT_COLOR_BB = { 0xBB, 0xBB, 0xBB }
+--    params.TEXT_COLOR_B3 = { 0xB3, 0xB3, 0xB3 }
+    params.TEXT_COLOR_DISABLED = { 0x66, 0x66, 0x66 }
+    params.TEXT_COLOR_YELLOW = { 0xbe, 0xbe, 0 }
+    params.TEXT_COLOR_PURPLE = { 0xbe, 0, 0xbe }
 
 ----	params.SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
 ----	params.SELECT_SH_COLOR = { }
@@ -513,6 +657,8 @@ function getJogglerSkinParams(skinName)
     params.NP_ARTISTALBUM_FONT_SIZE = math.floor(28 * params.NP_TEXT_SCALE_FACTOR)
     params.textScaleFactor = textScaleFactor
     params.imageScaleFactor = imageScaleFactor
+    params.gridTextScaleFactor = gridTextScaleFactor
+    params.controlsScaleFactor = controlsScaleFactor
 
     -- after scaling update params values from json - if they exist
     if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then

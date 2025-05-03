@@ -118,9 +118,9 @@ function init(self)
 
 	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
 	jiveMain:addItem({
-		id = "scaleUp",
+		id = "scaleUI",
 		node = 'screenSettings',
-		text = self:string("SCALEUP"),
+		text = self:string("SCALE_UI"),
 		style = 'item_choice',
 		weight = 55,
 		check = Checkbox("checkbox", function(_, checked)
@@ -132,18 +132,18 @@ function init(self)
 
 	jiveMain:addItem(self:buttonSettingsMenuItem())
 
-	jiveMain:addItem({
-		id = "largeNPButtons",
-		node = 'screenSettingsNowPlaying',
-		text = self:string("NOW_PLAYING_LARGE_BUTTONS"),
-		style = 'item_choice',
-		weight = 21,
-		check = Checkbox("checkbox", function(_, checked)
-			setLargeControls(checked)
-			jiveMain:reloadSkin()
-			end,
-			getLargeControls())
-	})
+--	jiveMain:addItem({
+--		id = "largeNPButtons",
+--		node = 'screenSettingsNowPlaying',
+--		text = self:string("NOW_PLAYING_LARGE_BUTTONS"),
+--		style = 'item_choice',
+--		weight = 21,
+--		check = Checkbox("checkbox", function(_, checked)
+--			setLargeControls(checked)
+--			jiveMain:reloadSkin()
+--			end,
+--			getLargeControls())
+--	})
 end
 
 
@@ -163,8 +163,8 @@ function param(self)
 	local npSS = {}
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
-	local maw = screenHeight - scaledValues.TITLE_HEIGHT - 18 - (100)
-	local midArtwork = tostring(maw) .. 'x' .. tostring(maw)
+	local midArtWorkDim = screenHeight - scaledValues.TITLE_HEIGHT - 18 - (scaledValues.CONTROLS_DIMENSIONS)
+	local midArtwork = tostring(midArtWorkDim) .. 'x' .. tostring(midArtWorkDim)
 	local screenAR = screenWidth/screenHeight
 	local portraitMode = screenWidth == 720 and screenHeight == 1280
 	local portraitArtworkWidth
@@ -518,13 +518,6 @@ end
 -- skin
 -- The meta arranges for this to be called to skin the interface.
 function skin0(self, s, reload, useDefaultSize, w, h)
-	local CONTROLS_DIMENSIONS = 70
-	if getLargeControls() == true then
-		CONTROLS_DIMENSIONS = 100
-	end
-
-	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
-	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
@@ -534,10 +527,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local scaledValues = jogglerScaler.getJogglerSkinParams(self:skinName())
 	self._CACHED["SCALED_VALUES"] = scaledValues
 
+	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
+	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
+	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
 	scaled_imgpath = scaledValues.imgPath
 	if scaledValues.scalingRequired == true then
 		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
 	end
+	jogglerScaler.scaleControlsImages(scaledValues)
 
 	--init lastInputType so selected item style is not shown on skin load
 	Framework.mostRecentInputType = "mouse"
@@ -567,7 +564,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local blackBackground   = Tile:fillColor(0x000000ff)
 
 	local V_blackBackground = nil
-	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
+--	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
+	local V_npartistalbumFg = scaledValues.TEXT_COLOR
 	local V_titleBox = nil
 	local V_touchToolbarBackground = nil
 	local V_titlebarButtonBox = nil
@@ -575,7 +573,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local V_titlebar_png_path = nil
 	if BLACK_BACKGROUND then
 		V_blackBackground = blackBackground
-		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
+--		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
+		V_npartistalbumFg = scaledValues.TEXT_COLOR_BB
 --		V_titleBox = titleBox
 		V_touchToolbarBackground = touchToolbarBackground
 --		V_titlebarButtonBox = titlebarButtonBox
@@ -1039,8 +1038,6 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	visImage:initialise()
 	local NP_SPACING_FACTOR = scaledValues.NP_SPACING_FACTOR
 
-
-
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
 		frameRate = 8,
@@ -1143,12 +1140,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	})
 
 	local _modernVolumeSliderBar = _loadHTile(self, {
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill_l.png",
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill.png",
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_fill_r.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_r.png",
 	})
 
-	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/tch_volumebar_slider.png")
+	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_slider.png")
 
 
 --------- DEFAULT WIDGET STYLES ---------
@@ -1190,7 +1187,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			padding = TITLE_PADDING,
 			align = "center",
 			font = _boldfont(TITLEBAR_FONT_SIZE),
-			fg = TEXT_COLOR,
+			fg = scaledValues.TEXT_COLOR,
 		}
 	}
 
@@ -1225,7 +1222,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		position = LAYOUT_CENTER,
 		padding = { 0, 0, 0, 0 },
 		itemHeight = FIVE_ITEM_HEIGHT,
-		fg = {0xbb, 0xbb, 0xbb },
+--		fg = {0xbb, 0xbb, 0xbb },
+		fg = scaledValues.TEXT_COLOR_BB,
 		font = _boldfont(120),
 	}
 
@@ -1453,7 +1451,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		padding = { 10, 0, 2, 10 },
 		font = _font(scaledValues.MULTILINE_TEXT_FONT_SIZE),
 		height = scaledValues.MULTILINE_TEXT_H,
-		fg = { 0xe6, 0xe6, 0xe6 },
+--		fg = { 0xe6, 0xe6, 0xe6 },
+		fg = scaledValues.TEXT_COLOR,
 		sh = { },
 		align = "left",
 	}
@@ -1513,9 +1512,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	}
 
 	s.keyboard.key = {
-        	font = _boldfont(48),
-        	fg = { 0xDC, 0xDC, 0xDC },
-        	align = 'center',
+		font = _boldfont(48),
+--		fg = { 0xDC, 0xDC, 0xDC },
+		fg = scaledValues.TEXT_COLOR_DC,
+		align = 'center',
 		bgImg = keyMiddle,
 	}
 
@@ -1533,7 +1533,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.keyboard.key_bottom_small      = _uses(s.keyboard.key_bottom, { font = _boldfont(36) } )
 	s.keyboard.key_bottomRight_small = _uses(s.keyboard.key_bottomRight, { 
 			font = _boldfont(36), 
-			fg = { 0xe7, 0xe7, 0xe7 },
+--			fg = { 0xe7, 0xe7, 0xe7 },
+			fg = scaledValues.TEXT_COLOR,
 	} )
 	s.keyboard.key_bottomLeft_small  = _uses(s.keyboard.key_bottomLeft, { font = _boldfont(36) } )
 	s.keyboard.key_left_small        = _uses(s.keyboard.key_left, { font = _boldfont(36) } )
@@ -1575,7 +1576,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.keyboard.done = {
 		text = _uses(s.keyboard.key_bottomRight_small, {
 			text = self:string("ENTER_SMALL"),
-			fg = { 0x00, 0xbe, 0xbe },
+--			fg = { 0x00, 0xbe, 0xbe },
+			fg = scaledValues.TEXT_COLOR_TEAL,
 			sh = { },
 			h = WH_FILL,
 			padding = { 0, 0, 0, 1 },
@@ -1585,7 +1587,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	s.keyboard.doneDisabled =  _uses(s.keyboard.done, {
 		text = {
-			fg = { 0x66, 0x66, 0x66 },
+--			fg = { 0x66, 0x66, 0x66 },
+			fg = scaledValues.TEXT_COLOR_DISABLED,
 		}
 	})
 
@@ -1757,7 +1760,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				bgImg = false,
 				text = {
 					font = _boldfont(45),
-					fg = { 0xe6, 0xe6, 0xe6 },
+--					fg = { 0xe6, 0xe6, 0xe6 },
+					fg = scaledValues.TEXT_COLOR,
 					sh = { },
 					align = 'right',
 					padding = { 2, 4, 8, 0 },
@@ -1770,7 +1774,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				bgImg = false,
 				text = {
 					font = _boldfont(45),
-					fg = { 0xe6, 0xe6, 0xe6 },
+--					fg = { 0xe6, 0xe6, 0xe6 },
+					fg = scaledValues.TEXT_COLOR,
 					sh = { },
 					align = 'right',
 					padding = { 2, 4, 8, 0 },
@@ -1867,7 +1872,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				},
 				{
 					font = _font(scaledValues.TEXT_LIST_TITLE_FONT_SIZE),
-					fg   = { 0xB3, 0xB3, 0xB3 },
+--					fg   = { 0xB3, 0xB3, 0xB3 },
+					fg = scaledValues.TEXT_COLOR_BB,
 				},
 			},
 		},
@@ -2360,7 +2366,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
             border = { 0, 0, 6, 15 },
             lineHeight = scaledValues.CM_ML_TXT_LINE_HEIGHT,
             font = _font(scaledValues.CM_ML_TXT_FONT_SIZE),
-            fg = { 0xe6, 0xe6, 0xe6 },
+--            fg = { 0xe6, 0xe6, 0xe6 },
+            fg = scaledValues.TEXT_COLOR,
             sh = { },
             align = "top-left",
             scrollbar = {
@@ -2668,7 +2675,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			padding = 0,
 			align = 'center',
 			font = _font(scaledValues.BASE_BUTTON_FONT_SIZE),
-			fg = { 0xdc,0xdc, 0xdc },
+--			fg = { 0xdc,0xdc, 0xdc },
+			fg = scaledValues.TEXT_COLOR_DC,
 		},
 	}
 	local _pressed_button = _uses(_button, {
@@ -3493,7 +3501,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - 125,
+			y = screenHeight - CONTROLS_DIMENSIONS - 18,
 			padding = { 0, 11, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3501,32 +3509,40 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
 --				w = screenWidth - _tracklayout.x - 2*80 - 25,
@@ -3545,14 +3561,15 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
---			y = TITLE_HEIGHT + 29 + 26 + 32 + 32 + 23 + 84 + 40,
-			y = screenHeight - 110,
+			y = screenHeight - CONTROLS_DIMENSIONS - 18,
 			elapsed = {
 				w = WH_FILL,
 				align = "left",
 				font = _boldfont(18),
-				fg = { 0xe7, 0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7, 0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 		},
 
@@ -3564,24 +3581,15 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		img = _songProgressBarDisabled,
 	})
 
-	local volume_y_padding = 5
-	if controlHeight == 100 then
-		volume_y_padding = 20
-	end
-
 	s.npvolumeB = {
 		w = volumeBarWidth,
-		border = { 5, 20, 5, 0 },
-		-- for Material skin volume bar:
-		--	  set vertical padding to 5 and not 0, this aligns the slider with Softer/Louder buttons
-		--	  note: this does not shift the slider background!
-		--	  set right padding to 16 otherwise slider is too close to screen edge at max value
-		padding = { 6, volume_y_padding, 16, volume_y_padding },
-                position = LAYOUT_SOUTH,
-                horizontal = 1,
-                bgImg = _modernVolumeSliderBackground,
-                img = _modernVolumeSliderBar,
-                pillImg = _modernVolumeSliderPill,
+		border = { 5, 0, 5, controlHeight},
+		padding = { 6, controlHeight/6, 16, 0 },
+		position = LAYOUT_CENTER,
+		horizontal = 1,
+		bgImg = _modernVolumeSliderBackground,
+		img = _modernVolumeSliderBar,
+		pillImg = _modernVolumeSliderPill,
 	}
 	s.npvolumeB_disabled = _uses(s.npvolumeB, {
 		pillImg = false,
@@ -3917,39 +3925,47 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = 50,
-			y = screenHeight - 160,
+			y = screenHeight - CONTROLS_DIMENSIONS - 18,
 			padding = { 0, 10, 0, 0 },
 			elapsed = {
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
 				w = screenWidth - 2*50 - 2*60,
@@ -3963,7 +3979,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		},
 		npprogressNB = {
 			x = 50 + screenWidth - 2*50 - 2*60,
-			y = screenHeight - 160,
+			y = screenHeight - CONTROLS_DIMENSIONS - 18,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_NONE,
 		},
@@ -4036,32 +4052,40 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
 				font = _boldfont(18),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
 				font = _boldfont(14),
-				fg = { 0xe7,0xe7, 0xe7 },
-				sh = { 0x37, 0x37, 0x37 },
+--				fg = { 0xe7,0xe7, 0xe7 },
+--				sh = { 0x37, 0x37, 0x37 },
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
 				w = screenWidth - 2*50 - 2*60,
@@ -4160,7 +4184,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-		mini_visu_H = screenHeight - 120 - mini_visu_Y - 10
+		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR)
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
@@ -4212,7 +4236,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: large art Spectrum Visualizer
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (18 * NP_SPACING_FACTOR)
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
@@ -4498,7 +4522,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 	-- Visualizer: VuMeter Visualizer large art
 	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - controlHeight - progressBarHeight - large_art_visu_Y - 10
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (18 * NP_SPACING_FACTOR)
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
@@ -4831,7 +4855,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
 		mini_visu_Y = y_artwork + portraitArtworkWidth + 44
-		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10 - 20
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 		AUDIO_METADATA_Y = screenHeight - 110 - AUDIO_METADATA_FONT_HEIGHT
