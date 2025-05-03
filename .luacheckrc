@@ -117,6 +117,7 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
        "scaleImageValue",
        "getJogglerSkinParams",
        "getGridSkinParams",
+       "scaleControlsImages",
    },
    read_globals = {
    }
