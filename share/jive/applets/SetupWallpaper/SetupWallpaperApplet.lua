@@ -268,7 +268,8 @@ function _readFile(self, img, screenWidth, screenHeight)
 
 		-- black now handled by special case so ignored
 		if not self.wallpapers[name] and stringToken ~= 'BLACK' and 
-			( not pattern or ( pattern and string.match(patternMatch, pattern) ) ) then
+--			( not pattern or ( pattern and string.match(patternMatch, pattern) ) ) then
+			( string.match(patternMatch, 'PCP_' ) or  string.match(patternMatch, 'HD_' ) ) then
 			self.wallpapers[name] = {
 				token    = stringToken,
 				name     = splitFurther[#splitFurther],
@@ -442,29 +443,18 @@ function showBackground(self, wallpaper, playerId, force)
 
 		-- get the absolute file path for whatever we have
 		wallpaper = System:findFile(wallpaper)
-		if wallpaper ~= nil then 
-			sw,sh = Framework:getScreenSize()
-			img = Surface:loadImage(wallpaper)
-			w,h = img:getSize()
-            --  scale the wallpaper to fit the screen
-            sfw = sw/w
-            sfh = sh/h
-            ww = (w*sfw)
-            wh = (h*sfw)
-            hw = (w*sfh)
-            hh = (h*sfh)
-            if ww >= sw and wh >= sh then
-                srf = Surface:loadImage(wallpaper):resize(ww, wh)
-            elseif hw >= sw and hh >= sh then
-                srf = Surface:loadImage(wallpaper):resize(hw, hh)
-            elseif w > sw or h > sh then
-				local x = math.max(0, math.floor((w - sw)/2))
-				local y = math.max(0, math.floor((h - sh)/2))
-				srf = Surface:newRGBA(sw, sh)
-				img:blitClip(x, y, sw, sh, srf, 0, 0)
-			else
+		if wallpaper ~= nil then
+			local sw,sh = Framework:getScreenSize()
+			local img = Surface:loadImage(wallpaper)
+			local w,h = img:getSize()
+			local sf = math.max(sw/w, sh/h)
+			if sf == 1 then
 				srf = img
+			else
+				--  scale the wallpaper to fit the screen
+				srf = img:resize(w*sf, h*sf)
 			end
+			img:release()
 --			srf = Tile:loadImage(wallpaper)
 		end
 	end
