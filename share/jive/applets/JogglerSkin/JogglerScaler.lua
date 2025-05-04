@@ -478,10 +478,12 @@ local function _getJogglerCoreParams(skinName, skinValues)
         local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16
         local fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
         local rows =  math.floor(availHeight/fiveItemHeight)
+        local TEXTMENU_FONT_SIZE = skinValues.TEXTMENU_FONT_SIZE
         if skinName == "PiGridSkin" then
             if rows % 3 ~= 0 then
                 -- grid item height = 3 * fiveItemHeight,
-                if skinValues.ADJUST_FOR_GRID_ROWS == "roundup" then
+                -- For now: PiGridSkin scrolling needs more than 1 row so force roundup
+                if skinValues.ADJUST_FOR_GRID_ROWS == "roundup" or (math.floor(rows/3)*3) == 3 then
                 -- increase the number of rows to be a multiple of 3
                     rows = math.floor((rows+2)/3)*3
                 elseif skinValues.ADJUST_FOR_GRID_ROWS == "rounddown" then
@@ -493,16 +495,21 @@ local function _getJogglerCoreParams(skinName, skinValues)
                         )
                 -- recalculate fiveItemHeight using the adjusted number of rows
                 fiveItemHeight = math.floor(availHeight/rows)
+                -- change associated text menu size to match updated fiveItemHeight
+                TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
             end
         end
         -- visually, fuzzy padding at the bottom is better, sacrifice up to X pixels,
         -- if we can increment fiveItemHeight by 1
         if availHeight%(rows * fiveItemHeight) + 7 >= rows then
             fiveItemHeight = fiveItemHeight + 1
+            -- change associated text menu size to match updated fiveItemHeight
+            TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
         end
         local popupThumbSize = scaleImageValue(BASE_POPUP_THUMBSIZE)
         if screenWidth == 720 and screenHeight == 1280 then
             local thumbSize = 72
+            skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             return {
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
@@ -516,6 +523,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 }
         elseif screenWidth > screenHeight and screenHeight >480 then
             local thumbSize = scaleImageValue(BASE_ICON_SIZE)
+            skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             return {
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
@@ -525,12 +533,12 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true 
+                    scalingRequired=true
                 }
        -- screenHeight < 480 => scale down
        elseif screenHeight < 480 then
             local thumbSize = scaleImageValue(BASE_ICON_SIZE)
-            fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
+            skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             if screenWidth/screenHeight >= 3 then
                 return {
                     THUMB_SIZE=thumbSize,
@@ -541,7 +549,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true 
+                    scalingRequired=true
                 }
             end
             return {
@@ -553,7 +561,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                 CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                 imgPath = jogglerImgpath .. thumbSize .. "/",
-                scalingRequired=true 
+                scalingRequired=true
             }
         end
     end
@@ -723,10 +731,17 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
                     imgPath = grid_imgpath .. thumbSize .. "/",
                     scalingRequired=true
             }
-        end
-
-        -- screenHeight < 480 => scale down TBD
-        if screenWidth > screenHeight and screenHeight >=480 then
+        elseif screenWidth > screenHeight and screenHeight >480 then
+            return {
+                    THUMB_SIZE = thumbSize,
+                    GRID_ITEM_HEIGHT =  gridItemHeight,
+                    ITEMS_PER_LINE = math.floor(screenWidth/scaleImageValue(160)),
+                    ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
+                    GRID_MENU_H = gridMenuHeight,
+                    imgPath = grid_imgpath .. thumbSize .. "/",
+                    scalingRequired=true
+            }
+        elseif screenWidth/screenHeight >=3 and screenHeight <480 then
             return {
                     THUMB_SIZE = thumbSize,
                     GRID_ITEM_HEIGHT =  gridItemHeight,
