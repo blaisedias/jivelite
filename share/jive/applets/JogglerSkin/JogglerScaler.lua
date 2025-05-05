@@ -680,6 +680,8 @@ function getJogglerSkinParams(skinName)
 
     params.TEXT_LIST_TITLE_FONT_SIZE = scaleTextValue(14)
     params.NP_LARGE_ART_TITLE_FONT_SIZE = scaleTextValue(24)
+    params.NP_TRACKLAYOUT_ALIGN = 'center'
+    params.NP_PROGRESSNB_ALIGN = 'left'
 
 --    params.NP_TRACK_FONT_SIZE = math.floor(36 * params.NP_TEXT_SCALE_FACTOR)
     params.NP_TRACK_FONT_SIZE = params.TITLEBAR_FONT_SIZE
