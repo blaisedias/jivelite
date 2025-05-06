@@ -126,6 +126,21 @@ function registerApplet(self)
 			)
 		)
 	end
+
+	jiveMain:addItem(
+		self:menuItem(
+			'deleteScaledUIImages',
+			'jogglerScalerSettings',
+			'DEL_SCALED_UI_IMAGES',
+			function()
+				jogglerScaler.deleteAllScaledUIImages()
+				jiveMain:reloadSkin()
+			end,
+			100
+		)
+	)
+
+
 end
 --[[
 
