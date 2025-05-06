@@ -27,6 +27,7 @@ SqueezeboxSkin overrides the following methods:
 
 -- stuff we use
 local ipairs, pairs, setmetatable, type, tostring, tonumber = ipairs, pairs, setmetatable, type, tostring, tonumber
+local pcall = pcall
 
 local oo                     = require("loop.simple")
 local string                 = require("jive.utils.string")
@@ -47,6 +48,10 @@ local Surface                = require("jive.ui.Surface")
 local Textarea               = require("jive.ui.Textarea")
 local Tile                   = require("jive.ui.Tile")
 local Window                 = require("jive.ui.Window")
+
+local Textinput         = require("jive.ui.Textinput")
+local Keyboard          = require("jive.ui.Keyboard")
+local Group             = require("jive.ui.Group")
 
 local table                  = require("jive.utils.table")
 local debug                  = require("jive.utils.debug")
@@ -119,10 +124,10 @@ function init(self)
 	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
 	jiveMain:addItem({
 		id = "scaleUI",
-		node = 'screenSettings',
+		node = 'jogglerScalerSettings',
 		text = self:string("SCALE_UI"),
 		style = 'item_choice',
-		weight = 55,
+		weight = 1,
 		check = Checkbox("checkbox", function(_, checked)
 			Framework:setGlobalSetting("jogglerScaleUp", checked)
 			jiveMain:reloadSkin()
@@ -1036,7 +1041,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	local portraitMode = self:param().portraitMode
 
 	visImage:initialise()
-	local NP_SPACING_FACTOR = scaledValues.NP_SPACING_FACTOR
+	local NP_LINE_SPACING = scaledValues.NP_LINE_SPACING
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
@@ -3328,7 +3333,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR + 5),
+			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5),
 			h          = math.floor(NP_TRACK_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
@@ -3345,7 +3350,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR),
+			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
 			h          = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			npalbum = {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -4182,8 +4187,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR) - 10
+		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_LINE_SPACING) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
@@ -4234,8 +4239,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	-- Visualizer: large art Spectrum Visualizer
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_SPACING_FACTOR)
+	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING)
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
@@ -4480,9 +4485,9 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
+		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
 --		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
-		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_SPACING_FACTOR) - 10
+		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_LINE_SPACING) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -4521,8 +4526,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	end
 
 	-- Visualizer: VuMeter Visualizer large art
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + (NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_SPACING_FACTOR)
+	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING)
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
@@ -4850,7 +4855,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		npX = 30
 		local portraitArtworkWidth = self:param().portraitArtworkWidth
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
-		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_SPACING_FACTOR) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_SPACING_FACTOR * 2) + 5 + 6
+		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5 + 6
 		mini_visu_X = npX
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
@@ -5309,6 +5314,49 @@ function free(self)
 	return true
 end
 
+function inputScalingFactor(self, key, skin, titleString)
+	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
+	if scale_up == false then
+		return
+	end
+
+	local window = Window("text_list", self:string(titleString))
+
+	local currentValue = jogglerScaler.getJogglerSkinParams(self:skinName())[key]
+
+	local v = '' .. currentValue
+	local input = Textinput("textinput", v,
+			function(_, value)
+				log:info("inputScalingFactor: got ", value)
+				if value == '' then
+					log:debug("resetting scaling for ", key)
+					jogglerScaler.updateJsonConfig(key, skin, nil)
+					jiveMain:reloadSkin()
+				else
+					local status, fpval = pcall(tonumber, value)
+					if status and fpval ~= nil then
+						log:debug("setting scaling for ", key, " to ", fpval)
+						jogglerScaler.updateJsonConfig(key, skin, fpval)
+						jiveMain:reloadSkin()
+					else
+						log:warn('failed to convert ', value, " to a number")
+					end
+				end
+				window:hide()
+			end
+	)
+
+	local keyboard = Keyboard("keyboard", "ip", input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+
+	self:tieAndShowWindow(window)
+	return window
+end
 --[[
 
 =head1 LICENSE

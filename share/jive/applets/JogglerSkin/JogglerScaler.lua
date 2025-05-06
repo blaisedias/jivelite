@@ -84,6 +84,28 @@ local function _writeScaledData(obj, jsPath)
     end
 end
 
+function updateJsonConfig(key, skin, value)
+    local jsPath = System.getUserDir() .. '/Joggler.json'
+    local json_data = _loadJsonData(jsPath)
+    if json_data == nil then
+        json_data = { }
+    end
+    if json_data[resolutionKey] == nil then
+        json_data[resolutionKey] = {
+            jogglerSkin = {},
+            gridSkin = {}
+        }
+    end
+    json_data[resolutionKey][skin][key] = value
+    local jsonString = json.stringify(json_data)
+    local fh = io.open(jsPath, "w")
+    if fh then
+        fh:write(jsonString)
+        fh:close()
+        log:debug("wrote scaled data json ", jsPath)
+    end
+end
+
 -- reset static variables so that determination of scaling values
 -- proceeds afresh
 function initialise()
@@ -515,7 +537,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
-                    NP_SPACING_FACTOR = 1.7,
+                    NP_LINE_SPACING = 1.7,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenWidth * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -529,7 +551,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_TEXT_SCALE_FACTOR = scaleTextValue(1),
-                    NP_SPACING_FACTOR = 1.9,
+                    NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -545,7 +567,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_TEXT_SCALE_FACTOR = 1,
-                    NP_SPACING_FACTOR = 1.9,
+                    NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                     imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -557,7 +579,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 POPUP_THUMB_SIZE=popupThumbSize,
                 FIVE_ITEM_HEIGHT=fiveItemHeight,
                 NP_TEXT_SCALE_FACTOR = math.max(screenHeight/480, 0.8),
-                NP_SPACING_FACTOR = 1.6,
+                NP_LINE_SPACING = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                 CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
                 imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -571,7 +593,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
             POPUP_THUMB_SIZE=BASE_POPUP_THUMBSIZE,
             FIVE_ITEM_HEIGHT=45,
             NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
-            NP_SPACING_FACTOR = 1.7,
+            NP_LINE_SPACING = 1.7,
             CONTROLS_DIMENSIONS = 70,
             CONTROL_POPUP_DIMENSIONS = 146,
             imgPath = jogglerImgpath,
@@ -692,6 +714,9 @@ function getJogglerSkinParams(skinName)
             params.NP_ARTISTALBUM_FONT_SIZE = 1.5 * params.NP_ARTISTALBUM_FONT_SIZE
         end
     end
+    -- NP_TEXT_SCALE_FACTOR is purely internal.
+    params.NP_TEXT_SCALE_FACTOR = nil
+
     params.textScaleFactor = textScaleFactor
     params.imageScaleFactor = imageScaleFactor
     params.gridTextScaleFactor = gridTextScaleFactor
