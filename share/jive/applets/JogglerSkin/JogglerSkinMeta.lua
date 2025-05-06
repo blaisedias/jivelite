@@ -16,7 +16,7 @@ See L<jive.AppletMeta> for a description of standard applet meta functions.
 --]]
 
 
-local tostring, tonumber  = tostring, tonumber
+local tostring, tonumber, ipairs  = tostring, tonumber, ipairs
 
 local oo            = require("loop.simple")
 local os            = require("os")
@@ -26,7 +26,7 @@ local AppletMeta    = require("jive.AppletMeta")
 local appletManager = appletManager
 local jiveMain      = jiveMain
 local Framework     = require("jive.ui.Framework")
-
+local jogglerScaler = require("applets.JogglerSkin.JogglerScaler")
 
 module(...)
 oo.class(_M, AppletMeta)
@@ -35,6 +35,7 @@ oo.class(_M, AppletMeta)
 function jiveVersion(self)
 	return 1, 1
 end
+
 
 function defaultSettings(self)
 	return {
@@ -79,9 +80,53 @@ function registerApplet(self)
 			log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
 		end
 	end
+
+	local node = {
+		id = 'jogglerScalerSettings',
+		iconstyle = 'hm_settings',
+		node = 'screenSettings',
+		text = self:string("SCALING"),
+		windowStyle = 'text_only',
+	}
+	jiveMain:addNode(node)
+
+	local scalingMenuItems = {
+		{ key='textScaleFactor', titleString='TEXT_SCALING', skin='jogglerSkin'},
+		{ key='imageScaleFactor', titleString='IMAGE_SCALING', skin='jogglerSkin'},
+		{ key='controlsScaleFactor', titleString='CONTROLS_SCALING', skin='jogglerSkin'},
+		{ key='gridTextScaleFactor', titleString='GRID_TEXT_SCALING', skin='gridSkin'},
+	}
+
+	jiveMain:addItem(
+		self:menuItem(
+			'resetScalingFactor',
+			'jogglerScalerSettings',
+			'RESET_SCALING',
+			function()
+				for _, entry in ipairs(scalingMenuItems) do
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+					jiveMain:reloadSkin()
+				end
+			end,
+			10
+		)
+	)
+
+	for i, entry in ipairs(scalingMenuItems) do
+		local weight = 10 + i * 10
+		jiveMain:addItem(
+			self:menuItem(
+				entry.key,
+				'jogglerScalerSettings',
+				entry.titleString,
+				function(applet)
+					applet:inputScalingFactor(entry.key, entry.skin, entry.titleString)
+				end,
+				weight
+			)
+		)
+	end
 end
-
-
 --[[
 
 =head1 LICENSE
