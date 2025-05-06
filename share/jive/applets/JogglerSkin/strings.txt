@@ -395,3 +395,6 @@ CONTROLS_SCALING
 SCALING
 	EN	Joggler UI Scaling
 
+DEL_SCALED_UI_IMAGES
+	EN	Delete all scaled UI images
+

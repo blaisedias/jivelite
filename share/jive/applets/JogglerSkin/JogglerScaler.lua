@@ -43,6 +43,11 @@ local controlsScaleFactor
 local jsonData
 local resolutionKey
 
+local BASE_ICON_SIZE = 40
+local BASE_POPUP_THUMBSIZE = 120
+local jogglerImgpath = "applets/JogglerSkin/images/"
+local gridImgpath = "applets/PiGridSkin/images/"
+
 module(...)
 
 local function _loadJsonData(jsPath)
@@ -104,6 +109,15 @@ function updateJsonConfig(key, skin, value)
         fh:close()
         log:debug("wrote scaled data json ", jsPath)
     end
+end
+
+function deleteAllScaledUIImages()
+    local dest_path = System.getUserDir() .. '/' .. jogglerImgpath
+    log:debug('rm -rf ' .. dest_path)
+    os.execute('rm -rf ' .. dest_path)
+    dest_path = System.getUserDir() .. '/' ..  gridImgpath
+    log:debug('rm -rf ' .. dest_path)
+    os.execute('rm -rf ' .. dest_path)
 end
 
 -- reset static variables so that determination of scaling values
@@ -485,10 +499,6 @@ function scaleUIImages(imgs_path, params)
         params.TITLE_HEIGHT - 18
     )
 end
-
-local BASE_ICON_SIZE = 40
-local BASE_POPUP_THUMBSIZE = 120
-local jogglerImgpath = "applets/JogglerSkin/images/"
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
