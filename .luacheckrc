@@ -102,10 +102,12 @@ files["share/jive/applets/Visualiser/VisualiserApplet.lua"] = {
 }
 files["share/jive/applets/JogglerSkin/JogglerSkinApplet.lua"] = {
    globals = {
-       "init", "scaleText",
+       "init", "skinName", "param",
+       "skin0", "skin", "free",
+       "reloadSkin", "inputScalingFactor"
    },
    read_globals = {
-       "_M", "appletManager", "jiveMain",
+       "_M", "appletManager", "jiveMain", "jive",
    }
 }
 files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
