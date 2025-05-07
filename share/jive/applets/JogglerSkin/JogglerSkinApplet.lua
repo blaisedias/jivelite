@@ -4702,20 +4702,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				x = npX,
 				nptrack = {
 					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE),
 				},
 			},
 			npartistgroup = {
 				x = npX,
 				npartist = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
 				}
 			},
 			npalbumgroup = {
 				x = npX,
 				npalbum = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
 				}
 			},
@@ -4789,20 +4789,20 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				x = npX,
 				nptrack = {
 					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE),
 				},
 			},
 			npartistgroup = {
 				x = npX,
 				npartist = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
 				}
 			},
 			npalbumgroup = {
 				x = npX,
 				npalbum = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
 				}
 			},
