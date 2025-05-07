@@ -18,7 +18,7 @@ birdslikewires.co.uk
 
 =head1 FUNCTIONS
 
-Applet related methods are described in L<jive.Applet>. 
+Applet related methods are described in L<jive.Applet>.
 SqueezeboxSkin overrides the following methods:
 
 =cut
@@ -49,6 +49,7 @@ local Textarea               = require("jive.ui.Textarea")
 local Tile                   = require("jive.ui.Tile")
 local Window                 = require("jive.ui.Window")
 
+local Popup             = require("jive.ui.Popup")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local Group             = require("jive.ui.Group")
@@ -94,25 +95,6 @@ local scaled_imgpath = "applets/JogglerSkin/images/"
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
 
--- use global settings for large controls size flag,
--- because applet settings do not work consistently when the skin is derived from JogglerSkin
-local function getLargeControls()
-	local largeNPButtons = Framework:getGlobalSetting("jogglerLargeNPButtons")
-	if largeNPButtons == nil then
-		local screenWidth, screenHeight = Framework:getScreenSize()
-		if screenWidth > 1024 and screenHeight > 600 then
-			return true
-		end
-		return false
-	end
-	return largeNPButtons
-end
-
-local function setLargeControls(value)
-	Framework:setGlobalSetting("jogglerLargeNPButtons", value)
-end
-
-
 function init(self)
 	self.images = {}
 
@@ -136,19 +118,6 @@ function init(self)
 	})
 
 	jiveMain:addItem(self:buttonSettingsMenuItem())
-
---	jiveMain:addItem({
---		id = "largeNPButtons",
---		node = 'screenSettingsNowPlaying',
---		text = self:string("NOW_PLAYING_LARGE_BUTTONS"),
---		style = 'item_choice',
---		weight = 21,
---		check = Checkbox("checkbox", function(_, checked)
---			setLargeControls(checked)
---			jiveMain:reloadSkin()
---			end,
---			getLargeControls())
---	})
 end
 
 
@@ -378,11 +347,13 @@ function param(self)
 	return table.clone(self._CACHED["PARAM"])
 end
 
-local function _loadImage(self, file)
+-- local function _loadImage(self, file)
+ local function _loadImage(_, file)
 	return Surface:loadImage(imgpath .. file)
 end
 
-local function _loadScaledImage(self, file)
+-- local function _loadScaledImage(self, file)
+local function _loadScaledImage(_, file)
 	return Surface:loadImage(scaled_imgpath .. file)
 end
 
@@ -452,17 +423,17 @@ local function _loadImageTile(self, file)
 end
 
 
--- define a local function to make it easier to create icons.
-local function _icon(x, y, img)
-	local var = {}
-	var.x = x
-	var.y = y
-	var.img = _loadImage(self, img)
-	var.layer = LAYER_FRAME
-	var.position = LAYOUT_SOUTH
-
-	return var
-end
+-- -- define a local function to make it easier to create icons.
+-- local function _icon(x, y, img)
+-- 	local var = {}
+-- 	var.x = x
+-- 	var.y = y
+-- 	var.img = _loadImage(self, img)
+-- 	var.layer = LAYER_FRAME
+-- 	var.position = LAYOUT_SOUTH
+--
+-- 	return var
+-- end
 
 -- define a local function that makes it easier to set fonts
 local function _font(fontSize)
@@ -493,7 +464,7 @@ local function _uses(parent, value)
 	return style
 end
 
-function layoutLargeArtControls(candidates, screenWidth, controlWidth, divWidth, volumeBarWidth)
+local function layoutLargeArtControls(candidates, screenWidth, controlWidth, divWidth, volumeBarWidth)
 	local avail = screenWidth
 	local iDiv = 1
 	local fitted = true
@@ -522,7 +493,8 @@ end
 
 -- skin
 -- The meta arranges for this to be called to skin the interface.
-function skin0(self, s, reload, useDefaultSize, w, h)
+-- function skin0(self, s, reload, useDefaultSize, w, h)
+function skin0(self, s, _, _, w, h)
 	Framework:setVideoMode(w, h, 0, false)
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
@@ -611,7 +583,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		 imgpath .. "3_line_lists/menu_sel_box_3line_r.png",
 	})
 	local threeItemPressedBox = _loadImageTile(self, imgpath .. "3_line_lists/menu_sel_box_3item_press.png")
-	
+
 	local contextMenuPressedBox    = _loadTile(self, {
 		imgpath .. "Popup_Menu/button_cm_press.png",
 		imgpath .. "Popup_Menu/button_cm_tl_press.png",
@@ -623,7 +595,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		imgpath .. "Popup_Menu/button_cm_bl_press.png",
 		imgpath .. "Popup_Menu/button_cm_l_press.png",
 	})
-	
+
 	local keyTopLeft = _loadTile(self, {
 		imgpath .. "Text_Entry/Keyboard_Touch/keyboard_bkgrd.png",
 		imgpath .. "Text_Entry/Keyboard_Touch/keyboard_bkgrd_tl.png",
@@ -878,7 +850,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				 nil,
 		})
 
-	local textinputBackground     = 
+	local textinputBackground     =
 		_loadTile(self, {
 				 imgpath .. "Text_Entry/Keyboard_Touch/titlebar_box.png",
 				 imgpath .. "Text_Entry/Keyboard_Touch/text_entry_titlebar_box_tl.png",
@@ -922,7 +894,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		V_titlebarButtonBox = titlebarButtonBox
 	end
 
-	local popupBox = 
+	local popupBox =
 		_loadTile(self, {
 				       imgpath .. "Popup_Menu/popup_box.png",
 				       imgpath .. "Popup_Menu/popup_box_tl.png",
@@ -935,7 +907,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				       imgpath .. "Popup_Menu/popup_box_l.png",
 			       })
 
-	local contextMenuBox = 
+	local contextMenuBox =
 		_loadTile(self, {
 				       imgpath .. "Popup_Menu/cm_popup_box.png",
 				       imgpath .. "Popup_Menu/cm_popup_box_tl.png",
@@ -950,14 +922,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 
 
-	local scrollBackground = 
+	local scrollBackground =
 		_loadVTile(self, {
 					imgpath .. "Scroll_Bar/scrollbar_bkgrd_t.png",
 					imgpath .. "Scroll_Bar/scrollbar_bkgrd.png",
 					imgpath .. "Scroll_Bar/scrollbar_bkgrd_b.png",
 			       })
 
-	local scrollBar = 
+	local scrollBar =
 		_loadVTile(self, {
 					imgpath .. "Scroll_Bar/scrollbar_body_t.png",
 					imgpath .. "Scroll_Bar/scrollbar_body.png",
@@ -1060,19 +1032,19 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		padding = { 0, 0, 0, 10 }
 	}
 	-- convenience method for removing a button from the window
-	local noButton = { 
-		img = false, 
-		bgImg = false, 
-		w = 0 
+	local noButton = {
+		img = false,
+		bgImg = false,
+		w = 0
 	}
 
-	local playArrow = { 
+	local playArrow = {
 		img = _loadImage(self, "Icons/selection_play_3line_on.png"),
 	}
-	local addArrow  = { 
+	local addArrow  = {
 		img = _loadImage(self, "Icons/selection_add_3line_on.png"),
 	}
-	local favItem  = { 
+	local favItem  = {
 		img = _loadImage(self, "Icons/icon_toolbar_fav.png"),
 	}
 
@@ -1155,7 +1127,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 
 --------- DEFAULT WIDGET STYLES ---------
 	--
-	-- These are the default styles for the widgets 
+	-- These are the default styles for the widgets
 
 	s.window = {
 		w = screenWidth,
@@ -1235,7 +1207,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.menu_hidden = _uses(s.menu, {
 		hidden = 1,
 	})
-	
+
 	s.item = {
 		order = { "icon", "text", "arrow" },
 		padding = { ITEM_LEFT_PADDING, 0, 8, 0 },
@@ -1253,18 +1225,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			align = 'center',
 		},
 		arrow = {
-	      		align = ITEM_ICON_ALIGN,
-	      		img = _loadImage(self, "Icons/selection_right_5line.png"),
+			align = ITEM_ICON_ALIGN,
+			img = _loadImage(self, "Icons/selection_right_5line.png"),
 			padding = { 0, 0, 0, 0 },
 		},
 		bgImg = fiveItemBox,
 	}
 
-	s.item_play = _uses(s.item, { 
+	s.item_play = _uses(s.item, {
 		arrow = { img = false },
 	})
-	s.item_add = _uses(s.item, { 
-		arrow = addArrow 
+	s.item_add = _uses(s.item, {
+		arrow = addArrow
 	})
 
 	-- Checkbox
@@ -1301,7 +1273,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			align = ITEM_ICON_ALIGN,
 			padding = CHECK_PADDING,
 			img = _loadImage(self, "Icons/icon_check_5line.png")
-	      	}
+		}
 	})
 
 	s.item_info = _uses(s.item, {
@@ -1534,10 +1506,10 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.keyboard.key_bottom      = _uses(s.keyboard.key, { bgImg = keyBottom })
 	s.keyboard.key_bottomRight = _uses(s.keyboard.key, { bgImg = keyBottomRight })
 
-	-- styles for keys that use smaller font 
+	-- styles for keys that use smaller font
 	s.keyboard.key_bottom_small      = _uses(s.keyboard.key_bottom, { font = _boldfont(36) } )
-	s.keyboard.key_bottomRight_small = _uses(s.keyboard.key_bottomRight, { 
-			font = _boldfont(36), 
+	s.keyboard.key_bottomRight_small = _uses(s.keyboard.key_bottomRight, {
+			font = _boldfont(36),
 --			fg = { 0xe7, 0xe7, 0xe7 },
 			fg = scaledValues.TEXT_COLOR,
 	} )
@@ -1604,7 +1576,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
                         img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
 			frameRate = 8,
 			frameWidth = 26,
-			w = WH_FILL, 
+			w = WH_FILL,
 			h = WH_FILL,
 			align = 'center',
 		}),
@@ -1735,7 +1707,6 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		-- img = _loadImage(self, "UNOFFICIAL/menu_box_fixed_2c.png"),
 		w = 242,
 		x = 278,
-	
 	})
 
 	-- time input window
@@ -1923,7 +1894,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		bgImg = threeItemPressedBox,
 	})
 	s.multiline_text_list.menu.pressed.item_no_arrow = _uses(s.multiline_text_list.menu.pressed.item)
- 
+
 	-- popup "spinny" window
 	s.waiting_popup = _uses(s.popup, {
 		text = {
@@ -1990,7 +1961,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			font = _font(POPUP_TEXT_SIZE_1),
 			lineHeight = POPUP_TEXT_SIZE_1 + 8,
 			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,		
+			sh = TEXT_SH_COLOR,
 		},
 		subtext = {
 			w = WH_FILL,
@@ -2088,18 +2059,18 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			img = _loadImage(self, "Icons/icon_check_5line.png")
 		},
 	})
-	s.icon_list.menu.item_play = _uses(s.icon_list.menu.item, { 
+	s.icon_list.menu.item_play = _uses(s.icon_list.menu.item, {
 		arrow = { img = false },
 	})
 	s.icon_list.menu.albumcurrent = _uses(s.icon_list.menu.item_play, {
-		arrow = { 
+		arrow = {
 			img = _loadImage(self, "Icons/icon_nplay_3line_off.png"),
 		},
 		text = { padding = 0, },
 		-- Bug 11482c#13, don't know why the bgImg has to be redefined again here, but this fixes the issue
 		bgImg = fiveItemBox,
 	})
-	s.icon_list.menu.item_add  = _uses(s.icon_list.menu.item, { 
+	s.icon_list.menu.item_add  = _uses(s.icon_list.menu.item, {
 		arrow = addArrow,
 	})
 	s.icon_list.menu.item_no_arrow = _uses(s.icon_list.menu.item, {
@@ -2114,7 +2085,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			bgImg = fiveItemSelectionBox
 		}),
                 albumcurrent       = _uses(s.icon_list.menu.albumcurrent, {
-			arrow = { 
+			arrow = {
 				img = _loadImage(self, "Icons/icon_nplay_3line_sel.png"),
 			},
 			bgImg = fiveItemSelectionBox,
@@ -2136,26 +2107,26 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		}),
         }
         s.icon_list.menu.pressed = {
-                item = _uses(s.icon_list.menu.item, { 
-			bgImg = fiveItemPressedBox 
+                item = _uses(s.icon_list.menu.item, {
+			bgImg = fiveItemPressedBox
 		}),
                 albumcurrent       = _uses(s.icon_list.menu.albumcurrent, {
 			bgImg = fiveItemSelectionBox
 		}),
-                item_checked = _uses(s.icon_list.menu.item_checked, { 
-			bgImg = fiveItemPressedBox 
+                item_checked = _uses(s.icon_list.menu.item_checked, {
+			bgImg = fiveItemPressedBox
 		}),
-                item_play = _uses(s.icon_list.menu.item_play, { 
-			bgImg = fiveItemPressedBox 
+                item_play = _uses(s.icon_list.menu.item_play, {
+			bgImg = fiveItemPressedBox
 		}),
-                item_add = _uses(s.icon_list.menu.item_add, { 
-			bgImg = fiveItemPressedBox 
+                item_add = _uses(s.icon_list.menu.item_add, {
+			bgImg = fiveItemPressedBox
 		}),
-                item_no_arrow = _uses(s.icon_list.menu.item_no_arrow, { 
-			bgImg = fiveItemPressedBox 
+                item_no_arrow = _uses(s.icon_list.menu.item_no_arrow, {
+			bgImg = fiveItemPressedBox
 		}),
-                item_checked_no_arrow = _uses(s.icon_list.menu.item_checked_no_arrow, { 
-			bgImg = fiveItemPressedBox 
+                item_checked_no_arrow = _uses(s.icon_list.menu.item_checked_no_arrow, {
+			bgImg = fiveItemPressedBox
 		}),
         }
 	s.icon_list.menu.locked = {
@@ -2253,7 +2224,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		group = {
 			padding = 10,
 			order = { 'icon', 'text' },
-			text = { 
+			text = {
 				padding = { 10, 12, 12, 12 } ,
 				align = 'top-left',
 				w = WH_FILL,
@@ -2261,8 +2232,8 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				font = _font(HELP_FONT_SIZE),
 				lineHeight = HELP_FONT_SIZE + 5,
 			},
-			icon = { 
-				align = 'top-left', 
+			icon = {
+				align = 'top-left',
 				border = { 12, 12, 0, 0 },
 				img = _loadImage(self, "UNOFFICIAL/menu_album_noartwork_64.png"),
 				h = WH_FILL,
@@ -2412,7 +2383,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			h = CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
 			border = { 7, 0, 7, 0 },
 			padding = { 0, 0, 0, 100 },
-			scrollbar = { 
+			scrollbar = {
 				h = CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
 			},
 			item = {
@@ -2566,7 +2537,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			border = 0,
 			itemHeight = CM_MENU_HEIGHT,
 			position = LAYOUT_NORTH,
-			scrollbar = { 
+			scrollbar = {
 				h = CM_MENU_HEIGHT * 5 - 8,
 				border = {0,4,0,0},
 			},
@@ -2762,7 +2733,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		w = 96,
 		h = 66,
 		padding = { 14, 0, 0, 0 },
-		border = { 0, 2, 9, 5}, 
+		border = { 0, 2, 9, 5},
 		img = _loadImage(self, "Icons/icon_delete_tch_text_entry.png"),
 		bgImg = deleteKeyBackground,
 	}
@@ -2778,13 +2749,13 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		img = false,
 	}
 
-	s.region_US = _uses(_buttonicon, { 
+	s.region_US = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_region_americas" .. skinSuffix),
 	})
-	s.region_XX = _uses(_buttonicon, { 
+	s.region_XX = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_region_other" .. skinSuffix),
 	})
-	s.icon_help = _uses(_buttonicon, { 
+	s.icon_help = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_help" .. skinSuffix),
 	})
 	s.wlan = _uses(_buttonicon, {
@@ -3324,7 +3295,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight - 5,
 				fg         = _tracklayout.fg,
-				font       = _boldfont(NP_TRACK_FONT_SIZE), 
+				font       = _boldfont(NP_TRACK_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
 			},
 		},
@@ -3404,7 +3375,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	
 		--transport controls
 		npcontrols = {
---			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode', 
+--			order = { 'rew', 'div1', 'play', 'div2', 'fwd', 'div3', 'repeatMode', 'div4', 'shuffleMode',
 --					'div5', 'twiddle',
 --					'div6', 'volDown', 'div7', 'volSlider', 'div8', 'volUp' },
 			order = buttonOrder,
@@ -3661,12 +3632,12 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			table.insert(candidateButtons, v)
 		end
 	end
-    
+
 	local smallControlWidth = controlWidth - 14
 
     local layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
 
-   	-- try with with smallControlWidth only if controls dimension is 70
+	-- try with with smallControlWidth only if controls dimension is 70
     if not layout.fitted and CONTROLS_DIMENSIONS == 70 then
         largeArtSmallTbButtons = true
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
@@ -3675,13 +3646,13 @@ function skin0(self, s, reload, useDefaultSize, w, h)
     if not layout.fitted then
         -- drop volSlider
         candidateButtons = {}
-    	for k,v in ipairs(tbButtons) do
+    	for _,v in ipairs(tbButtons) do
             if v ~= 'volSlider' then
-    	    	if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
-        			table.insert(candidateButtons, v)
-        		end
+				if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
+					table.insert(candidateButtons, v)
+				end
             end
-    	end
+		end
     end
 
     -- try with with full control width
@@ -3717,7 +3688,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			x = npX,
 			nptrack = {
 				w = screenWidth - npX - 10,
-				font = _boldfont(NP_TRACK_FONT_SIZE * 0.9), 
+				font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
 			},
 		},
 		npartistgroup = {
@@ -3725,14 +3696,14 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 			npartist = {
 				font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
 				w = screenWidth - npX - 10,
-			} 
+			}
 		},
 		npalbumgroup = {
 			x = npX,
 			npalbum = {
 				font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
 				w = screenWidth - npX - 10,
-			} 
+			}
 		},
 		npcontrols = {
 			order = largeArtButtonOrder,
@@ -3901,21 +3872,21 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
 	s.nowplaying_text_only = _uses(s.nowplaying, {
-		nptitle          = { 
+		nptitle          = {
                         x          = 40,
                         y          = TITLE_HEIGHT + 50,
                         nptrack =  {
                                 w          = screenWidth - 140,
                         },
 		},
-		npartistgroup    = { 
+		npartistgroup    = {
                         x          = 40,
                         y          = TITLE_HEIGHT + 50 + 65,
                         npartist =  {
                                 w          = screenWidth - 65,
                         },
 		},
-		npalbumgroup     = { 
+		npalbumgroup     = {
                         x          = 40,
                         y          = TITLE_HEIGHT + 50 + 60 + 55,
                         npalbum =  {
@@ -4015,7 +3986,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		}),
 
 		-- Drawn over regular text between buttons
-		nptitle = { 
+		nptitle = {
 			zOrder = 2,
 			position = LAYOUT_NONE,
 			x = 80,
@@ -4112,7 +4083,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.nowplaying_visualizer_common.npprogress.npprogressB_disabled = s.nowplaying_visualizer_common.npprogress.npprogressB
 
 	-- attempt to improve spacing between components
-	-- the bottom end of spectrum meter is close to 
+	-- the bottom end of spectrum meter is close to
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
 	local SP_yFudge = 7
@@ -4334,7 +4305,7 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 				}
 			},
 			-- Drawn over regular text between buttons
-			nptitle = { 
+			nptitle = {
 				zOrder = 2,
 				position = LAYOUT_NONE,
 				x = 80,
@@ -5119,11 +5090,11 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 	s.settings_slider = _uses(s.brightness_slider, {
 	})
 	s.settings_slider_group.pressed = {
-		down = _uses(s.settings_slider_group.down, { 
+		down = _uses(s.settings_slider_group.down, {
 			bgImg = sliderButtonPressed,
 			img = _loadImage(self, "Icons/icon_toolbar_minus_dis.png"),
 		}),
-		up = _uses(s.settings_slider_group.up, { 
+		up = _uses(s.settings_slider_group.up, {
 			bgImg = sliderButtonPressed,
 			img = _loadImage(self, "Icons/icon_toolbar_plus_dis.png"),
 		}),
@@ -5138,11 +5109,11 @@ function skin0(self, s, reload, useDefaultSize, w, h)
 		},
 	})
 	s.settings_volume_group.pressed = {
-		down = _uses(s.settings_volume_group.down, { 
+		down = _uses(s.settings_volume_group.down, {
 			bgImg = sliderButtonPressed,
 			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_down_dis.png"),
 		}),
-		up = _uses(s.settings_volume_group.up, { 
+		up = _uses(s.settings_volume_group.up, {
 			bgImg = sliderButtonPressed,
 			img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_vol_up_dis.png"),
 		}),
@@ -5201,7 +5172,7 @@ function npButtonSelectorShow(self)
 		menu:addItem( {
 			text = self:string("NOW_PLAYING_BUTTON_" .. string.upper(v)),
 			style = 'item_choice',
-			check = Checkbox("checkbox", 
+			check = Checkbox("checkbox",
 				function(object, isSelected)
 					appletManager:callService("setNowPlayingScreenButtons", v, isSelected)
 					jiveMain:reloadSkin()
@@ -5241,7 +5212,7 @@ function buttonSettingsMenuItem(self)
 		sound = "WINDOWSHOW",
 		weight = 20,
 		callback = function(event, menuItem)
-			return self:npButtonSelectorShow() 
+			return self:npButtonSelectorShow()
 		end
 	}
 end
@@ -5314,6 +5285,26 @@ function free(self)
 	return true
 end
 
+function reloadSkin()
+		local popup = Popup("toast_popup_mixed")
+
+		popup:ignoreAllInputExcept()
+		popup:setAllowScreensaver(false)
+		popup:setAlwaysOnTop(true)
+		popup:setAutoHide(false)
+
+--		local icon = Icon("icon_connecting")
+		local text = Label("text", "Reloading skin\nPlease wait ...")
+
+--		popup:addWidget(icon)
+		popup:addWidget(text)
+		popup:addTimer(1000, function()
+			jiveMain:reloadSkin()
+			popup:hide(Window.transitionFadeOut)
+		end)
+		popup:show()
+	end
+
 function inputScalingFactor(self, key, skin, titleString)
 	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
 	if scale_up == false then
@@ -5331,13 +5322,13 @@ function inputScalingFactor(self, key, skin, titleString)
 				if value == '' then
 					log:debug("resetting scaling for ", key)
 					jogglerScaler.updateJsonConfig(key, skin, nil)
-					jiveMain:reloadSkin()
+					reloadSkin()
 				else
 					local status, fpval = pcall(tonumber, value)
 					if status and fpval ~= nil then
 						log:debug("setting scaling for ", key, " to ", fpval)
 						jogglerScaler.updateJsonConfig(key, skin, fpval)
-						jiveMain:reloadSkin()
+						reloadSkin()
 					else
 						log:warn('failed to convert ', value, " to a number")
 					end

@@ -102,11 +102,11 @@ function registerApplet(self)
 			'resetScalingFactor',
 			'jogglerScalerSettings',
 			'RESET_SCALING',
-			function()
+			function(applet)
 				for _, entry in ipairs(scalingMenuItems) do
 					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
-					jiveMain:reloadSkin()
 				end
+				applet:reloadSkin()
 			end,
 			10
 		)
@@ -132,9 +132,9 @@ function registerApplet(self)
 			'deleteScaledUIImages',
 			'jogglerScalerSettings',
 			'DEL_SCALED_UI_IMAGES',
-			function()
+			function(applet)
 				jogglerScaler.deleteAllScaledUIImages()
-				jiveMain:reloadSkin()
+				applet:reloadSkin()
 			end,
 			100
 		)
