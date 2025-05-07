@@ -502,10 +502,17 @@ end
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
-    if controlsScaleFactor == nil then
-        controlsScaleFactor = skinValues.TITLE_HEIGHT/70
-    end
     if Framework:getGlobalSetting("jogglerScaleUp") then
+        if controlsScaleFactor == nil then
+            controlsScaleFactor = skinValues.TITLE_HEIGHT/70
+        end
+        -- Heuristic for "ultra wide" screens with height < 480
+        if skinName == "PiGridSkin" and screenHeight < 480 and screenWidth/screenHeight >= 3 then
+            if imageScaleFactor == nil then
+                log:debug("PiGridSkin: ultra wide screen with height < 480,  override imageScaleFactor to 1")
+                imageScaleFactor = 1
+            end
+        end
         -- padding at the bottom is nominally 16
         local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16
         local fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
@@ -721,7 +728,13 @@ function getJogglerSkinParams(skinName)
     if true then
         local screenWidth, screenHeight = Framework:getScreenSize()
         if screenWidth/screenHeight >= 3 then
-            params.NP_ARTISTALBUM_FONT_SIZE = 1.5 * params.NP_ARTISTALBUM_FONT_SIZE
+            local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16 - 50
+            -- When screen apect ratio is > 3 then visualisers are positioned to the right
+            -- instead of below.
+            -- Increase size of fonts used for track information to use empty space below.
+            -- Heuristic
+            params.NP_ARTISTALBUM_FONT_SIZE = math.floor(availHeight/5.5)
+            params.NP_TRACK_FONT_SIZE = math.floor(availHeight/5.5)
         end
     end
     -- NP_TEXT_SCALE_FACTOR is purely internal.
