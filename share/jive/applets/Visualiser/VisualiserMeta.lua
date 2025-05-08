@@ -116,9 +116,9 @@ function registerApplet(self)
         settings.desatAlpha = 160
     end
 
-    -- if frames VU RTZP is not set - fall back to legacy beahviour
+    -- if frames VU RTZP is not set - default to the recommended 1 second
     if settings.framesVU_RTZP == nil then
-        settings.framesVU_RTZP = -1
+        settings.framesVU_RTZP = 1
     end
 
 
