@@ -205,6 +205,11 @@ function _predefinedKeyboards(self)
 					self:_go(default.width_large),
 				},
 		},
+		['alphaLower']  = {
+				{ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p' },
+				{ self:_spacer(), 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', self:_spacer() },
+				{ self:_arrow('left', 'bottom'), 'z', 'x', 'c', 'v', 'b', 'n', 'm', self:_arrow('right', 'bottom'), self:_go() },
+		},
 
 		['email']  = { 
 				{ 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p' },
