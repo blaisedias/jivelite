@@ -377,8 +377,8 @@ LARGE_VU_METER
 SCALE_UI
 	EN	Scale User Interface
 
-RESET_SCALING
-	EN	Reset Scaling
+RESET_LAYOUT_VALUES
+	EN	Reset Values
 
 TEXT_SCALING
 	EN	Scale Text By
@@ -396,5 +396,19 @@ SCALING
 	EN	Joggler UI Scaling
 
 DEL_SCALED_UI_IMAGES
-	EN	Delete all scaled UI images
+	EN	Delete All Scaled UI Images
 
+CUSTOMISE_LAYOUT
+	EN	Customise Layout
+
+TRACK_FONT_SIZE
+	EN	NowPlaying Track Font Size
+
+ARTISTALBUM_FONT_SIZE
+	EN	NowPlaying Artist/Album Font Size
+
+LINE_SPACING
+	EN	NowPlaying Line Spacing
+
+TRACKLAYOUT_ALIGN
+	EN	NowPlaying Track Alignment

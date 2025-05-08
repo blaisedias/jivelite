@@ -82,65 +82,89 @@ function registerApplet(self)
 	end
 
 	local node = {
-		id = 'jogglerScalerSettings',
+		id = 'jogglerLayout',
 		iconstyle = 'hm_settings',
 		node = 'screenSettings',
-		text = self:string("SCALING"),
+		text = self:string("CUSTOMISE_LAYOUT"),
 		windowStyle = 'text_only',
 	}
 	jiveMain:addNode(node)
 
 	local scalingMenuItems = {
-		{ key='textScaleFactor', titleString='TEXT_SCALING', skin='jogglerSkin'},
-		{ key='imageScaleFactor', titleString='IMAGE_SCALING', skin='jogglerSkin'},
-		{ key='controlsScaleFactor', titleString='CONTROLS_SCALING', skin='jogglerSkin'},
-		{ key='gridTextScaleFactor', titleString='GRID_TEXT_SCALING', skin='gridSkin'},
+		{ key='textScaleFactor', titleString='TEXT_SCALING', skin='jogglerSkin', value_type='float'},
+		{ key='imageScaleFactor', titleString='IMAGE_SCALING', skin='jogglerSkin', value_type='float'},
+		{ key='controlsScaleFactor', titleString='CONTROLS_SCALING', skin='jogglerSkin', value_type='float'},
+		{ key='gridTextScaleFactor', titleString='GRID_TEXT_SCALING', skin='gridSkin', value_type='float'},
+	}
+	local npMenuItems = {
+		{ key='NP_TRACK_FONT_SIZE', titleString='TRACK_FONT_SIZE', skin='jogglerSkin', value_type='integer'},
+		{ key='NP_ARTISTALBUM_FONT_SIZE', titleString='ARTISTALBUM_FONT_SIZE', skin='jogglerSkin', value_type='integer'},
+		{ key='NP_LINE_SPACING', titleString='LINE_SPACING', skin='jogglerSkin', value_type='float'},
+		{ key='NP_TRACKLAYOUT_ALIGN', titleString='TRACKLAYOUT_ALIGN', skin='jogglerSkin', value_type='alpha'},
 	}
 
+	local weight = 10
 	jiveMain:addItem(
 		self:menuItem(
-			'resetScalingFactor',
-			'jogglerScalerSettings',
-			'RESET_SCALING',
+			'resetLayoutValues',
+			'jogglerLayout',
+			'RESET_LAYOUT_VALUES',
 			function(applet)
 				for _, entry in ipairs(scalingMenuItems) do
 					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
 				end
+				for _, entry in ipairs(npMenuItems) do
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+				end
 				applet:reloadSkin()
 			end,
-			10
+			weight
 		)
 	)
 
-	for i, entry in ipairs(scalingMenuItems) do
-		local weight = 10 + i * 10
+	for _, entry in ipairs(scalingMenuItems) do
+		weight = weight + 10
 		jiveMain:addItem(
 			self:menuItem(
 				entry.key,
-				'jogglerScalerSettings',
+				'jogglerLayout',
 				entry.titleString,
 				function(applet)
-					applet:inputScalingFactor(entry.key, entry.skin, entry.titleString)
+					applet:inputLayoutValue(entry.key, entry.skin, entry.titleString, entry.value_type)
 				end,
 				weight
 			)
 		)
 	end
 
+	weight = weight + 10
 	jiveMain:addItem(
 		self:menuItem(
 			'deleteScaledUIImages',
-			'jogglerScalerSettings',
+			'jogglerLayout',
 			'DEL_SCALED_UI_IMAGES',
 			function(applet)
 				jogglerScaler.deleteAllScaledUIImages()
 				applet:reloadSkin()
 			end,
-			100
+			weight
 		)
 	)
 
-
+	for _, entry in ipairs(npMenuItems) do
+		weight = weight + 10
+		jiveMain:addItem(
+			self:menuItem(
+				entry.key,
+				'jogglerLayout',
+				entry.titleString,
+				function(applet)
+					applet:inputLayoutValue(entry.key, entry.skin, entry.titleString, entry.value_type)
+				end,
+				weight
+			)
+		)
+	end
 end
 --[[
 

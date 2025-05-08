@@ -5300,12 +5300,16 @@ function reloadSkin()
 		popup:addWidget(text)
 		popup:addTimer(1000, function()
 			jiveMain:reloadSkin()
+			local np = appletManager:getAppletInstance("NowPlaying")
+			if np ~= nil then
+				np:invalidateWindow(nil)
+			end
 			popup:hide(Window.transitionFadeOut)
 		end)
 		popup:show()
 	end
 
-function inputScalingFactor(self, key, skin, titleString)
+function inputLayoutValue(self, key, skin, titleString, value_type)
 	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
 	if scale_up == false then
 		return
@@ -5318,26 +5322,36 @@ function inputScalingFactor(self, key, skin, titleString)
 	local v = '' .. currentValue
 	local input = Textinput("textinput", v,
 			function(_, value)
-				log:info("inputScalingFactor: got ", value)
+				log:info("inputLayoutValue: got ", value)
 				if value == '' then
-					log:debug("resetting scaling for ", key)
+					log:debug("resetting value for ", key)
 					jogglerScaler.updateJsonConfig(key, skin, nil)
 					reloadSkin()
-				else
-					local status, fpval = pcall(tonumber, value)
-					if status and fpval ~= nil then
-						log:debug("setting scaling for ", key, " to ", fpval)
-						jogglerScaler.updateJsonConfig(key, skin, fpval)
+				elseif value_type == 'integer' or value_type == 'float' then
+					local status, numvalue = pcall(tonumber, value)
+					if status and numvalue ~= nil then
+						log:debug("setting value for ", key, " to ", numvalue)
+						jogglerScaler.updateJsonConfig(key, skin, numvalue)
 						reloadSkin()
 					else
 						log:warn('failed to convert ', value, " to a number")
 					end
+				elseif value_type == 'alpha' then
+					jogglerScaler.updateJsonConfig(key, skin, value)
+					reloadSkin()
 				end
 				window:hide()
 			end
 	)
-
-	local keyboard = Keyboard("keyboard", "ip", input)
+	local kbd_type
+	if value_type == 'alpha' then
+		kbd_type = 'alphaLower'
+	elseif value_type == 'integer' then
+		kbd_type = 'integer'
+	elseif value_type == 'float' then
+		kbd_type = 'ip'
+	end
+	local keyboard = Keyboard("keyboard", kbd_type, input)
 	local backspace = Keyboard.backspace()
 		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
 
@@ -5348,6 +5362,7 @@ function inputScalingFactor(self, key, skin, titleString)
 	self:tieAndShowWindow(window)
 	return window
 end
+
 --[[
 
 =head1 LICENSE
