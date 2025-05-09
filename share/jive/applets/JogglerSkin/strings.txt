@@ -377,23 +377,23 @@ LARGE_VU_METER
 SCALE_UI
 	EN	Scale User Interface
 
-RESET_LAYOUT_VALUES
-	EN	Reset Values
+RESET_LAYOUT_CUSTOMISATION
+	EN	Reset Customisations
 
 TEXT_SCALING
 	EN	Scale Text By
 
+NP_TEXT_SCALING
+	EN	Scale NowPlaying Text By
+
 GRID_TEXT_SCALING
 	EN	Scale Grid Text By
 
-IMAGE_SCALING
-	EN	Scale Images By
+THUMBNAIL_SCALING
+	EN	Scale Thumbnail Images By
 
 CONTROLS_SCALING
 	EN	Scale Controls By
-
-SCALING
-	EN	Joggler UI Scaling
 
 DEL_SCALED_UI_IMAGES
 	EN	Delete All Scaled UI Images

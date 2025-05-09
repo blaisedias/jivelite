@@ -87,12 +87,14 @@ function registerApplet(self)
 		node = 'screenSettings',
 		text = self:string("CUSTOMISE_LAYOUT"),
 		windowStyle = 'text_only',
+		weight = 900,
 	}
 	jiveMain:addNode(node)
 
 	local scalingMenuItems = {
 		{ key='textScaleFactor', titleString='TEXT_SCALING', skin='jogglerSkin', value_type='float'},
-		{ key='imageScaleFactor', titleString='IMAGE_SCALING', skin='jogglerSkin', value_type='float'},
+		{ key='npTextScaleFactor', titleString='NP_TEXT_SCALING', skin='jogglerSkin', value_type='float'},
+		{ key='thumbnailScaleFactor', titleString='THUMBNAIL_SCALING', skin='jogglerSkin', value_type='float'},
 		{ key='controlsScaleFactor', titleString='CONTROLS_SCALING', skin='jogglerSkin', value_type='float'},
 		{ key='gridTextScaleFactor', titleString='GRID_TEXT_SCALING', skin='gridSkin', value_type='float'},
 	}
@@ -106,9 +108,9 @@ function registerApplet(self)
 	local weight = 10
 	jiveMain:addItem(
 		self:menuItem(
-			'resetLayoutValues',
+			'resetCustomLayout',
 			'jogglerLayout',
-			'RESET_LAYOUT_VALUES',
+			'RESET_LAYOUT_CUSTOMISATION',
 			function(applet)
 				for _, entry in ipairs(scalingMenuItems) do
 					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
