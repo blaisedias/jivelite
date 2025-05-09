@@ -37,7 +37,8 @@ local table         = require("jive.utils.table")
 
 -- package global variables
 local textScaleFactor
-local imageScaleFactor
+local npTextScaleFactor
+local thumbnailScaleFactor
 local gridTextScaleFactor
 local controlsScaleFactor
 local jsonData
@@ -124,7 +125,7 @@ end
 -- proceeds afresh
 function initialise()
     textScaleFactor = nil
-    imageScaleFactor = nil
+    thumbnailScaleFactor = nil
     gridTextScaleFactor = nil
     controlsScaleFactor = nil
     jsonData = nil
@@ -137,7 +138,8 @@ function initialise()
         local jd = jsonData[resolutionKey]['jogglerSkin']
         if jd ~= nil then
             textScaleFactor = jd.textScaleFactor
-            imageScaleFactor = jd.imageScaleFactor
+            npTextScaleFactor = jd.npTextScaleFactor
+            thumbnailScaleFactor = jd.thumbnailScaleFactor
             controlsScaleFactor = jd.controlsScaleFactor
             -- remove fields that are derived values
             jd.imgPath = nil
@@ -177,6 +179,36 @@ function scaleTextValue(v)
     return math.floor(textScaleFactor * v)
 end
 
+--  function scale a NowPlaying screen text size value to match the display dimensions
+function scaleNPTextValue(v)
+    if npTextScaleFactor == nil then
+        -- default to scaling of 1
+        npTextScaleFactor = 1
+        local screenWidth, screenHeight = Framework:getScreenSize()
+        if Framework:getGlobalSetting("jogglerScaleUp") and screenHeight > 480 then
+            -- landscape
+            if screenWidth > screenHeight then
+                if screenHeight >= 480 then
+                    npTextScaleFactor = screenHeight / 480
+                else
+                    if screenWidth/screenHeight >= 3 then
+                        npTextScaleFactor = 1
+                    else
+                        npTextScaleFactor =  math.max(screenHeight/480, 0.8)
+                    end
+                end
+            end
+            -- portrait
+--            for now only explicitly support portrait mode 720x1280
+            if screenWidth == 720 and screenHeight == 1280 then
+                npTextScaleFactor = 1.4
+            end
+        end
+    end
+    return math.floor(npTextScaleFactor * v)
+end
+
+
 -- global function scale a text size value to match the display dimensions for grid items
 function scaleGridTextValue(v)
     if gridTextScaleFactor == nil then
@@ -188,7 +220,7 @@ function scaleGridTextValue(v)
                 if screenWidth > screenHeight then
                     gridTextScaleFactor = ((screenHeight * 0.0008333333333333334) + 0.6)
                 else
-                    -- portrait mode
+                    -- portrait mode the same for now
                     gridTextScaleFactor = ((screenWidth * 0.0008333333333333334) + 0.6)
                 end
             end
@@ -198,27 +230,27 @@ function scaleGridTextValue(v)
 end
 
 -- global function scale an image size value to match the display dimensions
-function scaleImageValue(v)
-    if imageScaleFactor == nil then
+function scaleThumbsizeValue(v)
+    if thumbnailScaleFactor == nil then
         -- default to scaling of 1
-        imageScaleFactor = 1
+        thumbnailScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleUp") then
             -- landscape
             if screenWidth > screenHeight then
-                imageScaleFactor = screenHeight / 480
+                thumbnailScaleFactor = screenHeight / 480
             end
             -- portrait
 --            if screenWidth < screenHeight then
---                imageScaleFactor = screenWidth / 800
+--                thumbnailScaleFactor = screenWidth / 800
 --            end
 --            for now only explicitly support portrait mode 720x1280
             if screenWidth == 720 and screenHeight == 1280 then
-                imageScaleFactor = screenWidth / 480
+                thumbnailScaleFactor = screenWidth / 480
             end
         end
     end
-    return math.floor(imageScaleFactor * v)
+    return math.floor(thumbnailScaleFactor * v)
 end
 
 -- function scale an controls image size value to match the display dimensions
@@ -228,17 +260,16 @@ local function scaleControlsImageValue(v)
         controlsScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleUp") then
-            -- landscape
-            if screenWidth > screenHeight then
-                controlsScaleFactor = screenHeight / 480
-            end
-            -- portrait
---            if screenWidth < screenHeight then
---                controlsScaleFactor = screenWidth / 800
---            end
---            for now only explicitly support portrait mode 720x1280
-            if screenWidth == 720 and screenHeight == 1280 then
-                controlsScaleFactor = 1.7
+            -- By default do not scale controls down
+            if screenHeight >= 480 then
+                -- landscape
+                if screenWidth > screenHeight then
+                    controlsScaleFactor = screenHeight / 480
+                end
+                -- portrait
+                if screenWidth < screenHeight then
+                    controlsScaleFactor = (screenWidth / 800) * 1.6666666666666665
+                end
             end
         end
     end
@@ -503,14 +534,14 @@ end
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
     if Framework:getGlobalSetting("jogglerScaleUp") then
-        if controlsScaleFactor == nil then
-            controlsScaleFactor = skinValues.TITLE_HEIGHT/70
-        end
+--        if controlsScaleFactor == nil then
+--            controlsScaleFactor = skinValues.TITLE_HEIGHT/70
+--        end
         -- Heuristic for "ultra wide" screens with height < 480
         if skinName == "PiGridSkin" and screenHeight < 480 and screenWidth/screenHeight >= 3 then
-            if imageScaleFactor == nil then
-                log:debug("PiGridSkin: ultra wide screen with height < 480,  override imageScaleFactor to 1")
-                imageScaleFactor = 1
+            if thumbnailScaleFactor == nil then
+                log:debug("PiGridSkin: ultra wide screen with height < 480,  override thumbnailScaleFactor to 1")
+                thumbnailScaleFactor = 1
             end
         end
         -- padding at the bottom is nominally 16
@@ -545,7 +576,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
             -- change associated text menu size to match updated fiveItemHeight
             TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
         end
-        local popupThumbSize = scaleImageValue(BASE_POPUP_THUMBSIZE)
+        local popupThumbSize = scaleThumbsizeValue(BASE_POPUP_THUMBSIZE)
         if screenWidth == 720 and screenHeight == 1280 then
             local thumbSize = 72
             skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
@@ -553,7 +584,6 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
-                    NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
                     NP_LINE_SPACING = 1.7,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenWidth * 0.20),
@@ -561,13 +591,12 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     scalingRequired=true
                 }
         elseif screenWidth > screenHeight and screenHeight >480 then
-            local thumbSize = scaleImageValue(BASE_ICON_SIZE)
+            local thumbSize = scaleThumbsizeValue(BASE_ICON_SIZE)
             skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             return {
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
-                    NP_TEXT_SCALE_FACTOR = scaleTextValue(1),
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
@@ -576,14 +605,13 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 }
        -- screenHeight < 480 => scale down
        elseif screenHeight < 480 then
-            local thumbSize = scaleImageValue(BASE_ICON_SIZE)
+            local thumbSize = scaleThumbsizeValue(BASE_ICON_SIZE)
             skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             if screenWidth/screenHeight >= 3 then
                 return {
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
-                    NP_TEXT_SCALE_FACTOR = 1,
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
@@ -595,7 +623,6 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 THUMB_SIZE=thumbSize,
                 POPUP_THUMB_SIZE=popupThumbSize,
                 FIVE_ITEM_HEIGHT=fiveItemHeight,
-                NP_TEXT_SCALE_FACTOR = math.max(screenHeight/480, 0.8),
                 NP_LINE_SPACING = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                 CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
@@ -609,7 +636,6 @@ local function _getJogglerCoreParams(skinName, skinValues)
             THUMB_SIZE=BASE_ICON_SIZE,
             POPUP_THUMB_SIZE=BASE_POPUP_THUMBSIZE,
             FIVE_ITEM_HEIGHT=45,
-            NP_TEXT_SCALE_FACTOR = math.min(screenHeight/480, 1.4),
             NP_LINE_SPACING = 1.7,
             CONTROLS_DIMENSIONS = 70,
             CONTROL_POPUP_DIMENSIONS = 146,
@@ -722,9 +748,10 @@ function getJogglerSkinParams(skinName)
     params.NP_TRACKLAYOUT_ALIGN = 'center'
     params.NP_PROGRESSNB_ALIGN = 'left'
 
---    params.NP_TRACK_FONT_SIZE = math.floor(36 * params.NP_TEXT_SCALE_FACTOR)
-    params.NP_TRACK_FONT_SIZE = params.TITLEBAR_FONT_SIZE
-    params.NP_ARTISTALBUM_FONT_SIZE = math.floor(28 * params.NP_TEXT_SCALE_FACTOR)
+--    params.NP_TRACK_FONT_SIZE = params.TITLEBAR_FONT_SIZE
+--    params.NP_TRACK_FONT_SIZE =  scaleNPTextValue(28)
+    params.NP_TRACK_FONT_SIZE = scaleNPTextValue(36)
+    params.NP_ARTISTALBUM_FONT_SIZE = scaleNPTextValue(28)
     if true then
         local screenWidth, screenHeight = Framework:getScreenSize()
         if screenWidth/screenHeight >= 3 then
@@ -737,11 +764,10 @@ function getJogglerSkinParams(skinName)
             params.NP_TRACK_FONT_SIZE = math.floor(availHeight/5.5)
         end
     end
-    -- NP_TEXT_SCALE_FACTOR is purely internal.
-    params.NP_TEXT_SCALE_FACTOR = nil
 
     params.textScaleFactor = textScaleFactor
-    params.imageScaleFactor = imageScaleFactor
+    params.npTextScaleFactor = npTextScaleFactor
+    params.thumbnailScaleFactor = thumbnailScaleFactor
     params.gridTextScaleFactor = gridTextScaleFactor
     params.controlsScaleFactor = controlsScaleFactor
 
@@ -765,7 +791,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
     local gridMenuHeight = math.floor((screenHeight - skinValues.TITLE_HEIGHT)/fiveItemHeight) * fiveItemHeight
     if Framework:getGlobalSetting("jogglerScaleUp") then
-        local thumbSize = scaleImageValue(BASE_GRID_ICON_SIZE)
+        local thumbSize = scaleThumbsizeValue(BASE_GRID_ICON_SIZE)
         local gridItemHeight = 3 * fiveItemHeight
         local gridTxtHeight = math.ceil((skinValues.ALBUMMENU_FONT_SIZE_G + skinValues.ALBUMMENU_SMALL_FONT_SIZE_G)*1.5)
         if gridItemHeight < thumbSize + gridTxtHeight then
@@ -775,7 +801,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
             return {
                     THUMB_SIZE=thumbSize,
                     GRID_ITEM_HEIGHT = gridItemHeight,
-                    ITEMS_PER_LINE = math.floor(screenWidth/scaleImageValue(160)),
+                    ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
                     imgPath = grid_imgpath .. thumbSize .. "/",
@@ -785,7 +811,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
             return {
                     THUMB_SIZE = thumbSize,
                     GRID_ITEM_HEIGHT =  gridItemHeight,
-                    ITEMS_PER_LINE = math.floor(screenWidth/scaleImageValue(160)),
+                    ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
                     imgPath = grid_imgpath .. thumbSize .. "/",
@@ -795,7 +821,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
             return {
                     THUMB_SIZE = thumbSize,
                     GRID_ITEM_HEIGHT =  gridItemHeight,
-                    ITEMS_PER_LINE = math.floor(screenWidth/scaleImageValue(160)),
+                    ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
                     imgPath = grid_imgpath .. thumbSize .. "/",
