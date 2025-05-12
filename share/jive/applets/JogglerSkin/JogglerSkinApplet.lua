@@ -103,18 +103,17 @@ function init(self)
 	self.vTiles = {}
 	self.tiles = {}
 
-	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
 	jiveMain:addItem({
-		id = "scaleUI",
-		node = 'jogglerScalerSettings',
-		text = self:string("SCALE_UI"),
+		id = "enableCustomisation",
+		node = 'jogglerLayout',
+		text = self:string("ENABLE_LAYOUT_CUSTOMISATION"),
 		style = 'item_choice',
 		weight = 1,
 		check = Checkbox("checkbox", function(_, checked)
-			Framework:setGlobalSetting("jogglerScaleUp", checked)
+			Framework:setGlobalSetting("jogglerScaleAndCustomise", checked)
 			jiveMain:reloadSkin()
 			end,
-			scale_up)
+			Framework:getGlobalSetting("jogglerScaleAndCustomise"))
 	})
 
 	jiveMain:addItem(self:buttonSettingsMenuItem())
@@ -5286,32 +5285,54 @@ function free(self)
 end
 
 function reloadSkin()
-		local popup = Popup("toast_popup_mixed")
+	local popup = Popup("toast_popup_mixed")
 
-		popup:ignoreAllInputExcept()
-		popup:setAllowScreensaver(false)
-		popup:setAlwaysOnTop(true)
-		popup:setAutoHide(false)
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
 
---		local icon = Icon("icon_connecting")
-		local text = Label("text", "Reloading skin\nPlease wait ...")
+--	local icon = Icon("icon_connecting")
+	local text = Label("text", "Reloading skin\nPlease wait ...")
 
---		popup:addWidget(icon)
-		popup:addWidget(text)
-		popup:addTimer(1000, function()
-			jiveMain:reloadSkin()
-			local np = appletManager:getAppletInstance("NowPlaying")
-			if np ~= nil then
-				np:invalidateWindow(nil)
-			end
+--	popup:addWidget(icon)
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		jiveMain:reloadSkin()
+		local np = appletManager:getAppletInstance("NowPlaying")
+		if np ~= nil then
+			np:invalidateWindow(nil)
+		end
+		popup:hide(Window.transitionFadeOut)
+	end)
+	popup:show()
+end
+
+function messageBox(self, txt, count)
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+--	local icon = Icon("icon_connecting")
+	local text = Label("text", txt)
+
+--	popup:addWidget(icon)
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		count = count - 1000
+		if count < 1 then
 			popup:hide(Window.transitionFadeOut)
-		end)
-		popup:show()
-	end
+		end
+	end)
+	popup:show()
+end
 
 function inputLayoutValue(self, key, skin, titleString, value_type)
-	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
-	if scale_up == false then
+	if Framework:getGlobalSetting("jogglerScaleAndCustomise") ~= true then
+		self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
 		return
 	end
 

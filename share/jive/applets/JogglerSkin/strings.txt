@@ -374,8 +374,8 @@ LARGE_SPECTRUM_ANALYZER
 LARGE_VU_METER
 	EN	Large VU Meter
 
-SCALE_UI
-	EN	Scale User Interface
+ENABLE_LAYOUT_CUSTOMISATION
+	EN	Enable Scaling & Customisation
 
 RESET_LAYOUT_CUSTOMISATION
 	EN	Reset Customisations
@@ -398,8 +398,8 @@ CONTROLS_SCALING
 DEL_SCALED_UI_IMAGES
 	EN	Delete All Scaled UI Images
 
-CUSTOMISE_LAYOUT
-	EN	Customise Layout
+LAYOUT
+	EN	Layout
 
 TRACK_FONT_SIZE
 	EN	NowPlaying Track Font Size
