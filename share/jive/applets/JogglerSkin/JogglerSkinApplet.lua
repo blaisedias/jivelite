@@ -3558,7 +3558,7 @@ function skin0(self, s, _, _, w, h)
 
 	s.npvolumeB = {
 		w = volumeBarWidth,
-		border = { 5, 0, 5, controlHeight},
+		border = { 5, 0, 5, 0},
 		padding = { 6, controlHeight/6, 16, 0 },
 		position = LAYOUT_CENTER,
 		horizontal = 1,
