@@ -51,10 +51,9 @@ function defaultSettings(self)
 end
 
 function registerApplet(self)
-	local scale_up = Framework:getGlobalSetting("jogglerScaleUp")
-	if scale_up == nil then
-		-- default to scaling up
-		Framework:setGlobalSetting("jogglerScaleUp", true)
+	if Framework:getGlobalSetting("jogglerScaleAndCustomise") == nil then
+		-- default to enabling scaling and customisation
+		Framework:setGlobalSetting("jogglerScaleAndCustomise", true)
 	end
 
 	self:registerService('getNowPlayingScreenButtons')
@@ -85,7 +84,7 @@ function registerApplet(self)
 		id = 'jogglerLayout',
 		iconstyle = 'hm_settings',
 		node = 'screenSettings',
-		text = self:string("CUSTOMISE_LAYOUT"),
+		text = self:string("LAYOUT"),
 		windowStyle = 'text_only',
 		weight = 900,
 	}
@@ -112,13 +111,17 @@ function registerApplet(self)
 			'jogglerLayout',
 			'RESET_LAYOUT_CUSTOMISATION',
 			function(applet)
-				for _, entry in ipairs(scalingMenuItems) do
-					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+				if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
+					for _, entry in ipairs(scalingMenuItems) do
+						jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+					end
+					for _, entry in ipairs(npMenuItems) do
+						jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+					end
+					applet:reloadSkin()
+				else
+					applet:messageBox("Scaling & Customisation,\nis not enabled", 2000)
 				end
-				for _, entry in ipairs(npMenuItems) do
-					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
-				end
-				applet:reloadSkin()
 			end,
 			weight
 		)
@@ -146,8 +149,12 @@ function registerApplet(self)
 			'jogglerLayout',
 			'DEL_SCALED_UI_IMAGES',
 			function(applet)
-				jogglerScaler.deleteAllScaledUIImages()
-				applet:reloadSkin()
+				if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
+					jogglerScaler.deleteAllScaledUIImages()
+					applet:reloadSkin()
+				else
+					applet:messageBox("Scaling & Customisation,\nis not enabled", 2000)
+				end
 			end,
 			weight
 		)

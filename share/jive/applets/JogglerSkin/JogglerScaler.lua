@@ -161,7 +161,7 @@ function scaleTextValue(v)
         -- default to scaling of 1
         textScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleUp") and screenHeight > 480 then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") and screenHeight > 480 then
             -- landscape
             if screenWidth > screenHeight then
                 textScaleFactor = screenHeight / 480
@@ -185,7 +185,7 @@ function scaleNPTextValue(v)
         -- default to scaling of 1
         npTextScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleUp") and screenHeight > 480 then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") and screenHeight > 480 then
             -- landscape
             if screenWidth > screenHeight then
                 if screenHeight >= 480 then
@@ -214,7 +214,7 @@ function scaleGridTextValue(v)
     if gridTextScaleFactor == nil then
         -- default to scaling of 1
         gridTextScaleFactor = 1
-        if Framework:getGlobalSetting("jogglerScaleUp") then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             local screenWidth, screenHeight = Framework:getScreenSize()
             if screenHeight > 480 then
                 if screenWidth > screenHeight then
@@ -234,8 +234,8 @@ function scaleThumbsizeValue(v)
     if thumbnailScaleFactor == nil then
         -- default to scaling of 1
         thumbnailScaleFactor = 1
-        local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleUp") then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
+            local screenWidth, screenHeight = Framework:getScreenSize()
             -- landscape
             if screenWidth > screenHeight then
                 thumbnailScaleFactor = screenHeight / 480
@@ -259,7 +259,7 @@ local function scaleControlsImageValue(v)
         -- default to scaling of 1
         controlsScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleUp") then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             -- By default do not scale controls down
             if screenHeight >= 480 then
                 -- landscape
@@ -533,7 +533,7 @@ end
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
-    if Framework:getGlobalSetting("jogglerScaleUp") then
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
 --        if controlsScaleFactor == nil then
 --            controlsScaleFactor = skinValues.TITLE_HEIGHT/70
 --        end
@@ -655,12 +655,14 @@ function getJogglerSkinParams(skinName)
         ADJUST_FOR_GRID_ROWS = "rounddown",
     }
     -- before scaling update values from json config
-    if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
-        local jd = jsonData[resolutionKey].jogglerSkin
-        for k,_ in pairs(skinValues) do
-            if jd[k] then
-                log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
-                skinValues[k] = jd[k]
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
+        if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
+            local jd = jsonData[resolutionKey].jogglerSkin
+            for k,_ in pairs(skinValues) do
+                if jd[k] then
+                    log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
+                    skinValues[k] = jd[k]
+                end
             end
         end
     end
@@ -772,10 +774,12 @@ function getJogglerSkinParams(skinName)
     params.controlsScaleFactor = controlsScaleFactor
 
     -- after scaling update params values from json - if they exist
-    if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
-        for k,v in pairs(jsonData[resolutionKey].jogglerSkin) do
-            log:info("config: setting value of ", k , " to ", v)
-            params[k] = v
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
+        if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
+            for k,v in pairs(jsonData[resolutionKey].jogglerSkin) do
+                log:info("config: setting value of ", k , " to ", v)
+                params[k] = v
+            end
         end
     end
     _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/JogglerSkin.json')
@@ -790,7 +794,7 @@ local BASE_GRID_ICON_SIZE = 100
 local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
     local gridMenuHeight = math.floor((screenHeight - skinValues.TITLE_HEIGHT)/fiveItemHeight) * fiveItemHeight
-    if Framework:getGlobalSetting("jogglerScaleUp") then
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
         local thumbSize = scaleThumbsizeValue(BASE_GRID_ICON_SIZE)
         local gridItemHeight = 3 * fiveItemHeight
         local gridTxtHeight = math.ceil((skinValues.ALBUMMENU_FONT_SIZE_G + skinValues.ALBUMMENU_SMALL_FONT_SIZE_G)*1.5)
@@ -848,12 +852,14 @@ function getGridSkinParams(fiveItemHeight)
         ALBUMMENU_SMALL_FONT_SIZE_G = scaleGridTextValue(16),
     }
     -- before scaling update values from json config
-    if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].gridSkin then
-        local jd = jsonData[resolutionKey].gridSkin
-        for k,_ in pairs(skinValues) do
-            if jd[k] then
-                log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
-                skinValues[k] = jd[k]
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
+        if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].gridSkin then
+            local jd = jsonData[resolutionKey].gridSkin
+            for k,_ in pairs(skinValues) do
+                if jd[k] then
+                    log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
+                    skinValues[k] = jd[k]
+                end
             end
         end
     end
@@ -864,10 +870,12 @@ function getGridSkinParams(fiveItemHeight)
     end
     params.gridTextScaleFactor = gridTextScaleFactor
     -- after scaling update params values from json - if they exist
-    if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].gridSkin then
-        for k, v in pairs(jsonData[resolutionKey].gridSkin) do
-            log:info("config: setting value of ", k , " to ", v)
-            params[k] = v
+    if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
+        if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].gridSkin then
+            for k, v in pairs(jsonData[resolutionKey].gridSkin) do
+                log:info("config: setting value of ", k , " to ", v)
+                params[k] = v
+            end
         end
     end
     _writeScaledData({gridSkin = params}, System.getUserDir() .. '/cache/PiGridSkin.json')
