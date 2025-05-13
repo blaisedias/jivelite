@@ -153,6 +153,15 @@ function initialise()
             jd.scalingRequired = nil
         end
     end
+    if jsonData == nil then
+        jsonData = {}
+    end
+    if jsonData[resolutionKey] == nil then
+        jsonData[resolutionKey] = {
+            jogglerSkin = {},
+            gridSkin = {}
+        }
+    end
 end
 
 -- global function scale a text size value to match the display dimensions
