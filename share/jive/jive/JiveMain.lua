@@ -545,7 +545,7 @@ function JiveMain:skinIterator()
 	return function(_s,_var)
 		local skinId, entry = _f(_s,_var)
 		if skinId then
-			return skinId, entry[2]
+			return skinId, entry[2], entry[1]
 		else
 			return nil
 		end

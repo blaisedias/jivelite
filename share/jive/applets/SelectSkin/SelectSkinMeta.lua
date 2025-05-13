@@ -51,6 +51,10 @@ end
 
 
 function configureApplet(meta)
+	if (not meta:getSettings().selectableSkins) then
+		meta:getSettings().selectableSkins = {'JogglerSkin', 'PiGridSkin'}
+		meta:storeSettings()
+	end
 	if (not meta:getSettings().skin) then
 		meta:getSettings().skin = jiveMain:getDefaultSkin()
 	end
