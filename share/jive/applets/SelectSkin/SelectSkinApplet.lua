@@ -118,8 +118,26 @@ function selectSkin(self, title, skinType, previouslySelectedSkin, setupNext)
 
 	local group = RadioGroup()
 
+	-- filter skins to be presented for selection
+	local skinFilter = self:getSettings().selectableSkins
+	local filteredSkins = {}
+	for skinId, name, appName in JiveMain:skinIterator() do
+		local entry = {skinId=skinId, name=name}
+		if skinFilter == nil or #skinFilter == 0 then
+			table.insert(filteredSkins, entry)
+		else
+			for _, v in pairs(skinFilter) do
+				if appName == v then
+					table.insert(filteredSkins, entry)
+				end
+			end
+		end
+	end
+
 	-- add skins
-	for skinId, name in JiveMain:skinIterator() do
+	for _,v in pairs(filteredSkins) do
+		local name = v.name
+		local skinId = v.skinId
 		menu:addItem({
 			text = name,
 			style = 'item_choice',
