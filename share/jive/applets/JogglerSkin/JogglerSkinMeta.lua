@@ -102,6 +102,9 @@ function registerApplet(self)
 		{ key='NP_ARTISTALBUM_FONT_SIZE', titleString='ARTISTALBUM_FONT_SIZE', skin='jogglerSkin', value_type='integer'},
 		{ key='NP_LINE_SPACING', titleString='LINE_SPACING', skin='jogglerSkin', value_type='float'},
 		{ key='NP_TRACKLAYOUT_ALIGN', titleString='TRACKLAYOUT_ALIGN', skin='jogglerSkin', value_type='alpha'},
+		{ key='midArtworkSize', titleString='MID_ARTWORK_SIZE', skin='jogglerSkin', value_type='integer'},
+		{ key='TITLEBAR_FONT_SIZE', titleString='TITLEBAR_FONT_SIZE', skin='jogglerSkin', value_type='integer'},
+		{ key='TITLE_FONT_SIZE', titleString='TITLE_FONT_SIZE', skin='jogglerSkin', value_type='integer'},
 	}
 
 	local weight = 10
