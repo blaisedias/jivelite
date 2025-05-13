@@ -136,25 +136,21 @@ function param(self)
 	local npSS = {}
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
-	local midArtWorkDim = screenHeight - scaledValues.TITLE_HEIGHT - 18 - (scaledValues.CONTROLS_DIMENSIONS)
-	local midArtwork = tostring(midArtWorkDim) .. 'x' .. tostring(midArtWorkDim)
+	local midArtwork = tostring(scaledValues.midArtworkSize) .. 'x' .. tostring(scaledValues.midArtworkSize)
 	local screenAR = screenWidth/screenHeight
 	local portraitMode = screenWidth == 720 and screenHeight == 1280
-	local portraitArtworkWidth
 
 	if portraitMode then
-		portraitArtworkWidth = math.floor(screenWidth/20) * 12
-		local portraitArtwork = tostring(portraitArtworkWidth) .. 'x' .. tostring(portraitArtworkWidth)
 		npSS = {
 			{
 				style = 'nowplaying_spectrum_text_art',
-				artworkSize = portraitArtwork,
+				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
 			},
 			{
 				style = 'nowplaying_vumeter_text_art',
-				artworkSize = portraitArtwork,
+				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("VU_METER_TEXT_ART"),
 			},
@@ -341,7 +337,6 @@ function param(self)
 		piCorePlayerStyle = 'hm_settings_pcp',
 		nowPlayingScreenStyles = npSS,
 		portraitMode = portraitMode,
-		portraitArtworkWidth = portraitArtworkWidth,
 	}
 	return table.clone(self._CACHED["PARAM"])
 end
@@ -996,12 +991,6 @@ function skin0(self, s, _, _, w, h)
 	local AUDIO_METADATA_X = 0
 	local AUDIO_METADATA_W = screenWidth
 	local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
-
-	local mini_visu_H
-	local mini_visu_Y
-	-- see _tracklayout
-	local mini_visu_X = screenHeight - 160 + 5
-	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
 	local large_art_visu_X = screenHeight + 15
 	local large_art_visu_W = math.floor((screenWidth - large_art_visu_X - 10)/2)*2
@@ -3168,10 +3157,14 @@ function skin0(self, s, _, _, w, h)
 		align = scaledValues.NP_TRACKLAYOUT_ALIGN,
 		lineHeight = NP_TRACK_FONT_SIZE,
 		fg = TEXT_COLOR,
-		x = screenHeight - 160 + 5,
+--		x = screenHeight - 160 + 5,
+		x =  scaledValues.midArtworkSize + 20,
 	}
-	
-	local maxArtwork = screenHeight - 180
+
+	local mini_visu_H
+	local mini_visu_Y
+	local mini_visu_X = _tracklayout.x
+	local mini_visu_W = math.floor((screenWidth - mini_visu_X - 10)/2)*2
 
 	local buttonOrder = {}
 	local iDiv = 1
@@ -3355,15 +3348,15 @@ function skin0(self, s, _, _, w, h)
 	
 		-- cover art
 		npartwork = {
-			w = maxArtwork,
+			w = scaledValues.midArtworkSize,
 			position = LAYOUT_NONE,
 			x = 10,
-			y = TITLE_HEIGHT + 18,
+			y = TITLE_HEIGHT + 18 + scaledValues.midArtworkYoffset,
 			align = "center",
-			h = maxArtwork,
+			h = scaledValues.midArtworkSize,
 
 			artwork = {
-				w = maxArtwork,
+				w = scaledValues.midArtworkSize,
 				align = "center",
 				padding = 0,
 				img = false,
@@ -4823,7 +4816,7 @@ function skin0(self, s, _, _, w, h)
 
 	if portraitMode then
 		npX = 30
-		local portraitArtworkWidth = self:param().portraitArtworkWidth
+		local portraitArtworkWidth = scaledValues.midArtworkSize
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
 		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5 + 6
 		mini_visu_X = npX

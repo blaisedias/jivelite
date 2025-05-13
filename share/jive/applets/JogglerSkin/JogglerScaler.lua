@@ -637,7 +637,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
             POPUP_THUMB_SIZE=BASE_POPUP_THUMBSIZE,
             FIVE_ITEM_HEIGHT=45,
             NP_LINE_SPACING = 1.7,
-            CONTROLS_DIMENSIONS = 70,
+            CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
             CONTROL_POPUP_DIMENSIONS = 146,
             imgPath = jogglerImgpath,
             scalingRequired=false
@@ -754,8 +754,8 @@ function getJogglerSkinParams(skinName)
 --    params.NP_TRACK_FONT_SIZE =  scaleNPTextValue(28)
     params.NP_TRACK_FONT_SIZE = scaleNPTextValue(36)
     params.NP_ARTISTALBUM_FONT_SIZE = scaleNPTextValue(28)
+    local screenWidth, screenHeight = Framework:getScreenSize()
     if true then
-        local screenWidth, screenHeight = Framework:getScreenSize()
         if screenWidth/screenHeight >= 3 then
             local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16 - 50
             -- When screen apect ratio is > 3 then visualisers are positioned to the right
@@ -782,6 +782,25 @@ function getJogglerSkinParams(skinName)
             end
         end
     end
+
+    -- midArtworkYoffset is ALWAYS calculated json values are ignored
+    params.midArtworkYoffset = 0
+    if screenWidth == 720 and screenHeight == 1280 then
+        -- portrait mode
+        if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+            params.midArtworkSize = math.floor(screenWidth/20) * 11
+        end
+    else
+        local calculatedSize = screenHeight - params.TITLE_HEIGHT - (params.CONTROLS_DIMENSIONS) - 18
+        if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+            params.midArtworkSize = calculatedSize
+        else
+            -- calculate offset for centering artwork vertically for custom midArtworkYoffset values
+            params.midArtworkYoffset = (calculatedSize -params.midArtworkSize)/2 - (18/2)
+        end
+    end
+
+
     _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/JogglerSkin.json')
     log:debug("skin params:", table.stringify(params))
     return params
