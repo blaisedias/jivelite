@@ -412,3 +412,14 @@ LINE_SPACING
 
 TRACKLAYOUT_ALIGN
 	EN	NowPlaying Track Alignment
+
+MID_ARTWORK_SIZE
+	EN	Mid Artwork Size
+
+TITLE_FONT_SIZE
+	EN	Title Font Size
+
+TITLEBAR_FONT_SIZE
+	EN	Titlebar Font Size
+
+
