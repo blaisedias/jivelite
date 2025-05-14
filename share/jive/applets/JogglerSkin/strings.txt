@@ -257,6 +257,9 @@ NOW_PLAYING_BUTTON_VOLDOWNUP
 NOW_PLAYING_BUTTON_TWIDDLE
 	EN	Next Visualiser
 
+NOW_PLAYING_BUTTON_HIDE
+	EN	Hide All Buttons
+
 LARGE_ART_AND_TEXT
 	DE	Grosse Plattenhülle und Text
 	EN	Large Artwork and Text

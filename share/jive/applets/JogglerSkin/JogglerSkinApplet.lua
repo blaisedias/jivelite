@@ -3139,6 +3139,14 @@ function skin0(self, s, _, _, w, h)
 		padding = buttonPadding,
 	}
 
+	local hideControls = Framework:getGlobalSetting("jogglerHideControls")
+	if hideControls then
+		controlHeight = math.ceil(TITLE_HEIGHT/2.5)
+	end
+
+	local midArtworkYoffset = math.floor((screenHeight - (TITLE_HEIGHT + 18 + controlHeight) - scaledValues.midArtworkSize)/2)
+	log:warn("############## ", midArtworkYoffset)
+
 	local _transportControlBorder = _uses(_transportControlButton, {
 		w = 2,
 		padding = 0,
@@ -3351,7 +3359,7 @@ function skin0(self, s, _, _, w, h)
 			w = scaledValues.midArtworkSize,
 			position = LAYOUT_NONE,
 			x = 10,
-			y = TITLE_HEIGHT + 18 + scaledValues.midArtworkYoffset,
+			y = TITLE_HEIGHT + 18 + midArtworkYoffset,
 			align = "center",
 			h = scaledValues.midArtworkSize,
 
@@ -3467,7 +3475,7 @@ function skin0(self, s, _, _, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - CONTROLS_DIMENSIONS - 18 - 10,
+			y = screenHeight - controlHeight - 18 - 10,
 			padding = { 0, 11, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
@@ -3527,7 +3535,7 @@ function skin0(self, s, _, _, w, h)
 			order = { "elapsed" },
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2,
-			y = screenHeight - CONTROLS_DIMENSIONS - 3 - 10,
+			y = screenHeight - controlHeight - 3 - 10,
 			elapsed = {
 				w = WH_FILL,
 --				align = "left",
@@ -3630,7 +3638,7 @@ function skin0(self, s, _, _, w, h)
     local layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, controlWidth, _transportControlBorder.w, volumeBarWidth)
 
 	-- try with with smallControlWidth only if controls dimension is 70
-    if not layout.fitted and CONTROLS_DIMENSIONS == 70 then
+    if not layout.fitted and controlWidth == 70 then
         largeArtSmallTbButtons = true
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
     end
@@ -3654,7 +3662,7 @@ function skin0(self, s, _, _, w, h)
     end
 
     -- try with with smallControlWidth only if controls dimension is 70
-    if not layout.fitted and CONTROLS_DIMENSIONS == 70 then
+    if not layout.fitted and controlWidth == 70 then
         largeArtSmallTbButtons = true
         layout = layoutLargeArtControls(candidateButtons, screenWidth - screenHeight, smallControlWidth, _transportControlBorder.w, volumeBarWidth)
     end
@@ -3892,7 +3900,7 @@ function skin0(self, s, _, _, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = 50,
-			y = screenHeight - CONTROLS_DIMENSIONS - 18,
+			y = screenHeight - controlHeight - 18,
 			padding = { 0, 10, 0, 0 },
 			elapsed = {
 				w = 60,
@@ -3946,7 +3954,7 @@ function skin0(self, s, _, _, w, h)
 		},
 		npprogressNB = {
 			x = 50 + screenWidth - 2*50 - 2*60,
-			y = screenHeight - CONTROLS_DIMENSIONS - 3,
+			y = screenHeight - controlHeight - 3,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_NONE,
 		},
@@ -4011,7 +4019,7 @@ function skin0(self, s, _, _, w, h)
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = 50,
-			y = screenHeight - (100 + CONTROLS_DIMENSIONS - 70),
+			y = screenHeight - (100 + controlHeight - 70),
 			h = 30,
 			padding = { 0, 10, 0, 0 },
 			elapsed = {
@@ -4067,7 +4075,7 @@ function skin0(self, s, _, _, w, h)
 		npprogressNB = {
 			x = 50, -- + screenWidth - 2*50 - 2*60,
 			-- y = screenHeight - 100, text location within the progress bar group is lowered somehow :(
-			y = screenHeight - (85 + CONTROLS_DIMENSIONS - 70),
+			y = screenHeight - (85 + controlHeight - 70),
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_SOUTH,
 		},
@@ -4079,7 +4087,7 @@ function skin0(self, s, _, _, w, h)
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
 	local SP_yFudge = 7
-	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + CONTROLS_DIMENSIONS - 70)- SP_yFudge*2
+	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)- SP_yFudge*2
 	if activeNowPlayingScreenStyles['nowplaying_spectrum_text'] == true then
 		visImage:registerSpectrumResolution(screenWidth, SP_H)
 		-- Visualizer: Spectrum Visualizer
@@ -4151,7 +4159,7 @@ function skin0(self, s, _, _, w, h)
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_LINE_SPACING) - 10
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
@@ -4408,7 +4416,7 @@ function skin0(self, s, _, _, w, h)
 
 
 
-	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + CONTROLS_DIMENSIONS - 70)
+	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)
 	if activeNowPlayingScreenStyles['nowplaying_vuanalog_text'] == true then
 		visImage:registerVUMeterResolution(screenWidth, VU_H)
 		-- Visualizer: Analog VU Meter
@@ -4450,7 +4458,7 @@ function skin0(self, s, _, _, w, h)
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
 		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
 --		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
-		mini_visu_H = screenHeight - mini_visu_Y - CONTROLS_DIMENSIONS - (10 * NP_LINE_SPACING) - 10
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -4826,7 +4834,7 @@ function skin0(self, s, _, _, w, h)
 		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
-		AUDIO_METADATA_Y = screenHeight - CONTROLS_DIMENSIONS - 18 - AUDIO_METADATA_FONT_HEIGHT
+		AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - AUDIO_METADATA_FONT_HEIGHT
 
 --		mini_visu_H = 320
 --		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
@@ -5126,6 +5134,11 @@ function skin0(self, s, _, _, w, h)
                 sh = TEXT_SH_COLOR,
         }
 
+	if hideControls then
+		for _,v  in pairs(self:param().nowPlayingScreenStyles) do
+			s[v.style].npcontrols = { hidden = 1}
+		end
+	end
 
 	-- inheritable properties for child skins
 	s.CONSTANTS = {
@@ -5160,7 +5173,22 @@ function npButtonSelectorShow(self)
 	local menu = SimpleMenu("menu")
 	local settings = self:getSettings()
 
-	for i, v in ipairs(tbButtonsUIList) do
+		menu:addItem( {
+			text = self:string("NOW_PLAYING_BUTTON_HIDE"),
+			style = 'item_choice',
+			check = Checkbox("checkbox",
+				function(_, checked)
+					Framework:setGlobalSetting("jogglerHideControls", checked)
+					jiveMain:reloadSkin()
+					local np = appletManager:getAppletInstance("NowPlaying")
+					if np ~= nil then
+						np:invalidateWindow(nil)
+					end
+				end,
+			Framework:getGlobalSetting("jogglerHideControls")),
+		} )
+
+	for _, v in ipairs(tbButtonsUIList) do
 		menu:addItem( {
 			text = self:string("NOW_PLAYING_BUTTON_" .. string.upper(v)),
 			style = 'item_choice',
@@ -5168,10 +5196,10 @@ function npButtonSelectorShow(self)
 				function(object, isSelected)
 					appletManager:callService("setNowPlayingScreenButtons", v, isSelected)
 					jiveMain:reloadSkin()
-                    local np = appletManager:getAppletInstance("NowPlaying")
-                    if np ~= nil then
-                        np:invalidateWindow(nil)
-                    end
+					local np = appletManager:getAppletInstance("NowPlaying")
+					if np ~= nil then
+						np:invalidateWindow(nil)
+					end
 				end,
 			settings[v]),
 		} )

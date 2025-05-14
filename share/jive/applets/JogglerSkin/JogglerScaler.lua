@@ -792,20 +792,12 @@ function getJogglerSkinParams(skinName)
         end
     end
 
-    -- midArtworkYoffset is ALWAYS calculated json values are ignored
-    params.midArtworkYoffset = 0
-    if screenWidth == 720 and screenHeight == 1280 then
-        -- portrait mode
-        if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+    if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+        if screenWidth == 720 and screenHeight == 1280 then
+            -- portrait mode
             params.midArtworkSize = math.floor(screenWidth/20) * 11
-        end
-    else
-        local calculatedSize = screenHeight - params.TITLE_HEIGHT - (params.CONTROLS_DIMENSIONS) - 18
-        if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
-            params.midArtworkSize = calculatedSize
         else
-            -- calculate offset for centering artwork vertically for custom midArtworkYoffset values
-            params.midArtworkYoffset = (calculatedSize -params.midArtworkSize)/2 - (18/2)
+            params.midArtworkSize = screenHeight - params.TITLE_HEIGHT - (params.CONTROLS_DIMENSIONS) - 18
         end
     end
 
