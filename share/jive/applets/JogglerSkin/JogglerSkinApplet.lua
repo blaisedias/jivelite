@@ -501,8 +501,8 @@ function skin0(self, s, _, _, w, h)
 	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
 	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
 	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
-	scaled_imgpath = scaledValues.imgPath
-	if scaledValues.scalingRequired == true then
+	scaled_imgpath = scaledValues.state.imgPath
+	if scaledValues.state.scalingRequired == true then
 		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
 	end
 	jogglerScaler.scaleControlsImages(scaledValues)
@@ -3141,11 +3141,10 @@ function skin0(self, s, _, _, w, h)
 
 	local hideControls = Framework:getGlobalSetting("jogglerHideControls")
 	if hideControls then
-		controlHeight = math.ceil(TITLE_HEIGHT/2.5)
+		controlHeight = scaledValues.state.hiddenControlHeight
 	end
 
 	local midArtworkYoffset = math.floor((screenHeight - (TITLE_HEIGHT + 18 + controlHeight) - scaledValues.midArtworkSize)/2)
-	log:warn("############## ", midArtworkYoffset)
 
 	local _transportControlBorder = _uses(_transportControlButton, {
 		w = 2,

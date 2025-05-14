@@ -70,9 +70,20 @@ local function _loadJsonData(jsPath)
     return nil
 end
 
+
 local function _writeScaledData(obj, jsPath)
     local data = {}
-    data[resolutionKey] = obj
+    -- do not write transient state
+    local objCopy = {}
+    for topIndex,nestedObj in pairs(obj) do
+        objCopy[topIndex] = {}
+        for k,v in pairs(nestedObj) do
+            if k ~= 'state' then
+                objCopy[topIndex][k] = v
+            end
+        end
+    end
+    data[resolutionKey] = objCopy
     data["comments"] = {
         ADJUST_FOR_GRID_ROWS = {
             "values are:",
@@ -141,16 +152,14 @@ function initialise()
             npTextScaleFactor = jd.npTextScaleFactor
             thumbnailScaleFactor = jd.thumbnailScaleFactor
             controlsScaleFactor = jd.controlsScaleFactor
-            -- remove fields that are derived values
-            jd.imgPath = nil
-            jd.scalingRequired = nil
+            -- zap derived fields
+            jd.state = nil
         end
         jd = jsonData[resolutionKey]['gridSkin']
         if jd ~= nil then
             gridTextScaleFactor = jd.gridTextScaleFactor
-            -- remove fields that are derived values
-            jd.imgPath = nil
-            jd.scalingRequired = nil
+            -- zap derived fields
+            jd.state = nil
         end
     end
     if jsonData == nil then
@@ -491,7 +500,7 @@ end
 
 -- global function scale images required for Joggler based skins
 function scaleUIImages(imgs_path, params)
-    local resizedPath = System.getUserDir() .. '/' .. params.imgPath
+    local resizedPath = System.getUserDir() .. '/' .. params.state.imgPath
     os.execute("mkdir -p " .. resizedPath .. '/grid_list')
     os.execute("mkdir -p " .. resizedPath .. '/5_line_lists')
     os.execute("mkdir -p " .. resizedPath .. '/IconsResized')
@@ -542,10 +551,9 @@ end
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
+    -- TODO scaling of enclosing boix for control popup -- for now clamp at 150
+    local MAX_CONTROL_POPUP_DIMENSIONS = 150
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
---        if controlsScaleFactor == nil then
---            controlsScaleFactor = skinValues.TITLE_HEIGHT/70
---        end
         -- Heuristic for "ultra wide" screens with height < 480
         if skinName == "PiGridSkin" and screenHeight < 480 and screenWidth/screenHeight >= 3 then
             if thumbnailScaleFactor == nil then
@@ -595,9 +603,11 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.7,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.floor(screenWidth * 0.20),
-                    imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenWidth * 0.20)),
+                    state = {
+                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
                 }
         elseif screenWidth > screenHeight and screenHeight >480 then
             local thumbSize = scaleThumbsizeValue(BASE_ICON_SIZE)
@@ -608,9 +618,11 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
-                    imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                    state = {
+                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
                 }
        -- screenHeight < 480 => scale down
        elseif screenHeight < 480 then
@@ -623,9 +635,11 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
-                    imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                    state = {
+                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
                 }
             end
             return {
@@ -634,9 +648,11 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 FIVE_ITEM_HEIGHT=fiveItemHeight,
                 NP_LINE_SPACING = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                CONTROL_POPUP_DIMENSIONS = math.floor(screenHeight * 0.20),
-                imgPath = jogglerImgpath .. thumbSize .. "/",
-                scalingRequired=true
+                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                state = {
+                    imgPath = jogglerImgpath .. thumbSize .. "/",
+                    scalingRequired=true
+                }
             }
         end
     end
@@ -648,8 +664,10 @@ local function _getJogglerCoreParams(skinName, skinValues)
             NP_LINE_SPACING = 1.7,
             CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
             CONTROL_POPUP_DIMENSIONS = 146,
-            imgPath = jogglerImgpath,
-            scalingRequired=false
+            state = {
+                imgPath = jogglerImgpath,
+                scalingRequired=false
+            }
         }
 end
 
@@ -798,6 +816,10 @@ function getJogglerSkinParams(skinName)
             params.midArtworkSize = math.floor(screenWidth/20) * 11
         else
             params.midArtworkSize = screenHeight - params.TITLE_HEIGHT - (params.CONTROLS_DIMENSIONS) - 18
+            if Framework:getGlobalSetting("jogglerHideControls") then
+                params.state.hiddenControlHeight = math.floor(params.TITLE_HEIGHT/2.5)
+                params.midArtworkSize = screenHeight - params.TITLE_HEIGHT - math.floor(params.TITLE_HEIGHT/2.5) - 18
+            end
         end
     end
 
@@ -828,8 +850,10 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
                     ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
-                    imgPath = grid_imgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    state =  {
+                        imgPath = grid_imgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
             }
         elseif screenWidth > screenHeight and screenHeight >480 then
             return {
@@ -838,8 +862,10 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
                     ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
-                    imgPath = grid_imgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    state = {
+                        imgPath = grid_imgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
             }
         elseif screenWidth/screenHeight >=3 and screenHeight <480 then
             return {
@@ -848,8 +874,10 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
                     ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
-                    imgPath = grid_imgpath .. thumbSize .. "/",
-                    scalingRequired=true
+                    state = {
+                        imgPath = grid_imgpath .. thumbSize .. "/",
+                        scalingRequired=true
+                    }
             }
         end
     end
@@ -859,8 +887,10 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
             ITEMS_PER_LINE = screenWidth/160,
             ITEM_G_YPAD = 4,
             GRID_MENU_H = gridMenuHeight,
-            imgPath = grid_imgpath,
-            scalingRequired=false
+            state = {
+                imgPath = grid_imgpath,
+                scalingRequired=false
+            }
         }
 end
 

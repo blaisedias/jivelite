@@ -161,8 +161,8 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	local skinSuffix = c.skinSuffix
 	local scaledValues = jogglerScaler.getGridSkinParams(c.FIVE_ITEM_HEIGHT)
 	self._CACHED["GS_SCALED_VALUES"] = scaledValues
-	scaled_imgpath = scaledValues.imgPath
-	if scaledValues.scalingRequired == true then
+	scaled_imgpath = scaledValues.state.imgPath
+	if scaledValues.state.scalingRequired == true then
 		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
 	end
 
