@@ -53,6 +53,7 @@ local Popup             = require("jive.ui.Popup")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local Group             = require("jive.ui.Group")
+local Choice            = require("jive.ui.Choice")
 
 local table                  = require("jive.utils.table")
 local debug                  = require("jive.utils.debug")
@@ -95,28 +96,178 @@ local scaled_imgpath = "applets/JogglerSkin/images/"
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
 
-function init(self)
-	self.images = {}
+local layoutMenuNodeName = 'jogglerLayout'
+local scalingMenuItems = {
+	{ key='textScaleFactor', titleString='TEXT_SCALING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
+	{ key='npTextScaleFactor', titleString='NP_TEXT_SCALING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
+	{ key='thumbnailScaleFactor', titleString='THUMBNAIL_SCALING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
+	{ key='controlsScaleFactor', titleString='CONTROLS_SCALING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
+	{ key='gridTextScaleFactor', titleString='GRID_TEXT_SCALING', skin='gridSkin', value_type='float', nodename = layoutMenuNodeName},
+}
 
-	self.imageTiles = {}
-	self.hTiles = {}
-	self.vTiles = {}
-	self.tiles = {}
+local npMenuItems = {
+	{ key='NP_TRACK_FONT_SIZE', titleString='TRACK_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+	{ key='NP_ARTISTALBUM_FONT_SIZE', titleString='ARTISTALBUM_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+	{ key='NP_LINE_SPACING', titleString='LINE_SPACING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
+	{ key='NP_TRACKLAYOUT_ALIGN', titleString='TRACKLAYOUT_ALIGN', skin='jogglerSkin', value_type='fieldalign', nodename = layoutMenuNodeName},
+	{ key='midArtworkSize', titleString='MID_ARTWORK_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+	{ key='TITLEBAR_FONT_SIZE', titleString='TITLEBAR_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+	{ key='TITLE_FONT_SIZE', titleString='TITLE_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+}
 
-	jiveMain:addItem({
-		id = "enableCustomisation",
-		node = 'jogglerLayout',
-		text = self:string("ENABLE_LAYOUT_CUSTOMISATION"),
-		style = 'item_choice',
-		weight = 1,
-		check = Checkbox("checkbox", function(_, checked)
-			Framework:setGlobalSetting("jogglerScaleAndCustomise", checked)
-			jiveMain:reloadSkin()
+local function addLayoutMenuItems(self)
+	local weight = 30
+	for _, entry in ipairs(scalingMenuItems) do
+		weight = weight + 10
+		jiveMain:addItem(self:layoutMenuItem(entry, weight))
+	end
+
+	for _, entry in ipairs(npMenuItems) do
+		weight = weight + 10
+		jiveMain:addItem(self:layoutMenuItem(entry, weight))
+	end
+end
+
+function reloadSkin()
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+--	local icon = Icon("icon_connecting")
+	local text = Label("text", "Reloading skin\nPlease wait ...")
+
+--	popup:addWidget(icon)
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		jiveMain:reloadSkin()
+		local np = appletManager:getAppletInstance("NowPlaying")
+		if np ~= nil then
+			np:invalidateWindow(nil)
+		end
+		popup:hide(Window.transitionFadeOut)
+	end)
+	popup:show()
+end
+
+function messageBox(self, txt, count)
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+	local text = Label("text", txt)
+
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		count = count - 1000
+		if count < 1 then
+			popup:hide(Window.transitionFadeOut)
+		end
+	end)
+	popup:show()
+end
+
+function inputLayoutValue(self, entry)
+	if Framework:getGlobalSetting("jogglerScaleAndCustomise") ~= true then
+		self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
+		return
+	end
+
+	local window = Window("text_list", self:string(entry.titleString))
+
+	local currentValue = jogglerScaler.getJogglerSkinParams(self:skinName())[entry.key]
+
+	local v = '' .. currentValue
+	local input = Textinput("textinput", v,
+			function(_, value)
+				log:info("inputLayoutValue: got ", value)
+				if value == '' then
+					log:debug("resetting value for ", entry.key)
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+					reloadSkin()
+				elseif entry.value_type == 'integer' or entry.value_type == 'float' then
+					local status, numvalue = pcall(tonumber, value)
+					if status and numvalue ~= nil then
+						log:debug("setting value for ", entry.key, " to ", numvalue)
+						jogglerScaler.updateJsonConfig(entry.key, entry.skin, numvalue)
+						reloadSkin()
+					else
+						log:warn('failed to convert ', value, " to a number")
+					end
+				elseif entry.value_type == 'alpha' then
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, value)
+					reloadSkin()
+				end
+				window:hide()
+			end
+	)
+	local kbd_type
+	if entry.value_type == 'alpha' then
+		kbd_type = 'alphaLower'
+	elseif entry.value_type == 'integer' then
+		kbd_type = 'integer'
+	elseif entry.value_type == 'float' then
+		kbd_type = 'ip'
+	end
+	local keyboard = Keyboard("keyboard", kbd_type, input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+
+	self:tieAndShowWindow(window)
+	return window
+end
+
+function layoutMenuItem(self, entry, weight)
+	if entry.value_type == 'fieldalign' then
+		local alignments = {"left", "center", "right"}
+
+		local currentValue = jogglerScaler.getJogglerSkinParams(self:skinName())[entry.key]
+		local currentIndex = 1
+		for i,v in ipairs(alignments) do
+			if v == currentValue then
+				currentIndex = i
+				break
+			end
+		end
+
+		return {
+			id = entry.key,
+			node = entry.nodename,
+			text = self:string(entry.titleString),
+			style = 'item_choice',
+			weight = weight,
+			check = Choice('choice', alignments,
+			function(obj, indx)
+				if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, alignments[indx])
+					reloadSkin()
+				else
+					obj:setSelectedIndex(currentIndex)
+					self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
+				end
 			end,
-			Framework:getGlobalSetting("jogglerScaleAndCustomise"))
-	})
-
-	jiveMain:addItem(self:buttonSettingsMenuItem())
+			currentIndex)
+		}
+	else
+		return {
+			id = entry.key,
+			node = entry.nodename,
+			text = self:string(entry.titleString),
+			weight = weight,
+			callback = function(_,_)
+				self:inputLayoutValue(entry)
+			end
+		}
+	end
 end
 
 
@@ -497,6 +648,9 @@ function skin0(self, s, _, _, w, h)
 	jogglerScaler.initialise()
 	local scaledValues = jogglerScaler.getJogglerSkinParams(self:skinName())
 	self._CACHED["SCALED_VALUES"] = scaledValues
+	-- add layout menuitems which change state here then when the skin is (re)loaded
+	-- the correct values of configuration items are then reflected in the UI
+	addLayoutMenuItems(self)
 
 	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
 	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
@@ -5304,105 +5458,81 @@ function free(self)
 	return true
 end
 
-function reloadSkin()
-	local popup = Popup("toast_popup_mixed")
+function init(self)
+	self.images = {}
 
-	popup:ignoreAllInputExcept()
-	popup:setAllowScreensaver(false)
-	popup:setAlwaysOnTop(true)
-	popup:setAutoHide(false)
+	self.imageTiles = {}
+	self.hTiles = {}
+	self.vTiles = {}
+	self.tiles = {}
 
---	local icon = Icon("icon_connecting")
-	local text = Label("text", "Reloading skin\nPlease wait ...")
+	jiveMain:addItem(self:buttonSettingsMenuItem())
 
---	popup:addWidget(icon)
-	popup:addWidget(text)
-	popup:addTimer(1000, function()
-		jiveMain:reloadSkin()
-		local np = appletManager:getAppletInstance("NowPlaying")
-		if np ~= nil then
-			np:invalidateWindow(nil)
-		end
-		popup:hide(Window.transitionFadeOut)
-	end)
-	popup:show()
-end
+	local node = {
+		id = layoutMenuNodeName,
+		iconstyle = 'hm_settings',
+		node = 'screenSettings',
+		text = self:string("LAYOUT"),
+		windowStyle = 'text_only',
+		weight = 900,
+	}
+	jiveMain:addNode(node)
 
-function messageBox(self, txt, count)
-	local popup = Popup("toast_popup_mixed")
 
-	popup:ignoreAllInputExcept()
-	popup:setAllowScreensaver(false)
-	popup:setAlwaysOnTop(true)
-	popup:setAutoHide(false)
 
---	local icon = Icon("icon_connecting")
-	local text = Label("text", txt)
+	local weight = 1
+	jiveMain:addItem({
+		id = "enableCustomisation",
+		node = layoutMenuNodeName,
+		text = self:string("ENABLE_LAYOUT_CUSTOMISATION"),
+		style = 'item_choice',
+		weight = weight,
+		check = Checkbox("checkbox", function(_, checked)
+			Framework:setGlobalSetting("jogglerScaleAndCustomise", checked)
+			reloadSkin()
+			end,
+		Framework:getGlobalSetting("jogglerScaleAndCustomise"))
+	})
 
---	popup:addWidget(icon)
-	popup:addWidget(text)
-	popup:addTimer(1000, function()
-		count = count - 1000
-		if count < 1 then
-			popup:hide(Window.transitionFadeOut)
-		end
-	end)
-	popup:show()
-end
 
-function inputLayoutValue(self, key, skin, titleString, value_type)
-	if Framework:getGlobalSetting("jogglerScaleAndCustomise") ~= true then
-		self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
-		return
-	end
-
-	local window = Window("text_list", self:string(titleString))
-
-	local currentValue = jogglerScaler.getJogglerSkinParams(self:skinName())[key]
-
-	local v = '' .. currentValue
-	local input = Textinput("textinput", v,
-			function(_, value)
-				log:info("inputLayoutValue: got ", value)
-				if value == '' then
-					log:debug("resetting value for ", key)
-					jogglerScaler.updateJsonConfig(key, skin, nil)
-					reloadSkin()
-				elseif value_type == 'integer' or value_type == 'float' then
-					local status, numvalue = pcall(tonumber, value)
-					if status and numvalue ~= nil then
-						log:debug("setting value for ", key, " to ", numvalue)
-						jogglerScaler.updateJsonConfig(key, skin, numvalue)
-						reloadSkin()
-					else
-						log:warn('failed to convert ', value, " to a number")
-					end
-				elseif value_type == 'alpha' then
-					jogglerScaler.updateJsonConfig(key, skin, value)
-					reloadSkin()
+	weight = weight + 10
+	jiveMain:addItem({
+		id = 'resetCustomLayout',
+		node = layoutMenuNodeName,
+		text = self:string('RESET_LAYOUT_CUSTOMISATION'),
+		weight = weight,
+		callback = function(_, _)
+			if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
+				for _, entry in ipairs(scalingMenuItems) do
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
 				end
-				window:hide()
+				for _, entry in ipairs(npMenuItems) do
+					jogglerScaler.updateJsonConfig(entry.key, entry.skin, nil)
+				end
+				reloadSkin()
+			else
+				self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
 			end
-	)
-	local kbd_type
-	if value_type == 'alpha' then
-		kbd_type = 'alphaLower'
-	elseif value_type == 'integer' then
-		kbd_type = 'integer'
-	elseif value_type == 'float' then
-		kbd_type = 'ip'
-	end
-	local keyboard = Keyboard("keyboard", kbd_type, input)
-	local backspace = Keyboard.backspace()
-		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+		end,
+	})
 
-	window:addWidget(group)
-	window:addWidget(keyboard)
-	window:focusWidget(group)
-
-	self:tieAndShowWindow(window)
-	return window
+	weight = weight + 10
+	jiveMain:addItem({
+		id = 'deleteScaledUIImages',
+		node = layoutMenuNodeName,
+		text = self:string('DEL_SCALED_UI_IMAGES'),
+		weight = weight,
+		callback = function(_,_)
+			if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
+				jogglerScaler.deleteAllScaledUIImages()
+				reloadSkin()
+			else
+				self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
+			end
+		end
+	})
 end
+
 
 --[[
 
