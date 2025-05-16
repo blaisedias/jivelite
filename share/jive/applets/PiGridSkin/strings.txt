@@ -231,3 +231,39 @@ LARGE_SPECTRUM_ANALYZER
 
 LARGE_VU_METER
 	EN	Large VU Meter
+
+TEXT_SCALING
+	EN	Scale Text By
+
+NP_TEXT_SCALING
+	EN	Scale NowPlaying Text By
+
+GRID_TEXT_SCALING
+	EN	Scale Grid Text By
+
+THUMBNAIL_SCALING
+	EN	Scale Thumbnail Images By
+
+CONTROLS_SCALING
+	EN	Scale Controls By
+
+TRACK_FONT_SIZE
+	EN	NowPlaying Track Font Size
+
+ARTISTALBUM_FONT_SIZE
+	EN	NowPlaying Artist/Album Font Size
+
+LINE_SPACING
+	EN	NowPlaying Line Spacing
+
+TRACKLAYOUT_ALIGN
+	EN	NowPlaying Track Alignment
+
+MID_ARTWORK_SIZE
+	EN	Mid Artwork Size
+
+TITLE_FONT_SIZE
+	EN	Title Font Size
+
+TITLEBAR_FONT_SIZE
+	EN	Titlebar Font Size

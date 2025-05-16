@@ -424,5 +424,3 @@ TITLE_FONT_SIZE
 
 TITLEBAR_FONT_SIZE
 	EN	Titlebar Font Size
-
-
