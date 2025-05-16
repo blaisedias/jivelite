@@ -104,7 +104,8 @@ files["share/jive/applets/JogglerSkin/JogglerSkinApplet.lua"] = {
    globals = {
        "init", "skinName", "param",
        "skin0", "skin", "free",
-       "reloadSkin", "inputLayoutValue"
+       "reloadSkin", "inputLayoutValue", "layoutMenuItem",
+       "messageBox"
    },
    read_globals = {
        "_M", "appletManager", "jiveMain", "jive",
