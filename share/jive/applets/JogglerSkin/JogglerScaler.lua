@@ -733,6 +733,7 @@ function getJogglerSkinParams(skinName)
     params.NP_TITLE_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.NP_ARTIST_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.NP_ALBUM_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_ARTISTALBUM_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.NP_TITLE_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.NP_AUDIOMETADATA_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.NP_PROGRESS_TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }

@@ -689,8 +689,6 @@ function skin0(self, s, _, _, w, h)
 	local blackBackground   = Tile:fillColor(0x000000ff)
 
 	local V_blackBackground = nil
---	local V_npartistalbumFg = { 0xe7, 0xe7, 0xe7 }
-	local V_npartistalbumFg = scaledValues.TEXT_COLOR
 	local V_titleBox = nil
 	local V_touchToolbarBackground = nil
 	local V_titlebarButtonBox = nil
@@ -698,8 +696,6 @@ function skin0(self, s, _, _, w, h)
 	local V_titlebar_png_path = nil
 	if BLACK_BACKGROUND then
 		V_blackBackground = blackBackground
---		V_npartistalbumFg = { 0xb3, 0xb3, 0xb3 }
-		V_npartistalbumFg = scaledValues.TEXT_COLOR_BB
 --		V_titleBox = titleBox
 		V_touchToolbarBackground = touchToolbarBackground
 --		V_titlebarButtonBox = titlebarButtonBox
@@ -4165,7 +4161,7 @@ function skin0(self, s, _, _, w, h)
 			h = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			bgImg = V_titleBox,
 			align = "center",
-			fg = V_npartistalbumFg,
+			fg = scaledValues.NP_ARTISTALBUM_COLOR,
 			sh = TEXT_SH_COLOR,
 			padding = { 100, 0, 100, 0 },
 			font = _font(NP_ARTISTALBUM_FONT_SIZE),
