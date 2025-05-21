@@ -101,6 +101,25 @@ function contains(table, value)
 	return false
 end
 
+--[[
+
+=head2 table.indexof(table, value)
+
+Returns index of values in the table if it contains the value, nil otherwise
+
+=cut
+--]]
+function indexof(table, value)
+	for i, v in ipairs(table) do
+		if v == value then
+			return i
+		end
+	end
+
+	return nil
+end
+
+
 
 --[[
 
