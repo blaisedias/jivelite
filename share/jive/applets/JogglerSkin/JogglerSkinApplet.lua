@@ -1343,7 +1343,7 @@ function skin0(self, s, _, _, w, h)
 		itemHeight = FIVE_ITEM_HEIGHT,
 --		fg = {0xbb, 0xbb, 0xbb },
 		fg = scaledValues.TEXT_COLOR_BB,
-		font = _boldfont(120),
+		font = _boldfont(scaledValues.MENU_FONT_SIZE),
 	}
 
 	s.menu_hidden = _uses(s.menu, {
@@ -1631,7 +1631,7 @@ function skin0(self, s, _, _, w, h)
 	}
 
 	s.keyboard.key = {
-		font = _boldfont(48),
+		font = _boldfont(scaledValues.KEYBOARD_FONT_SIZE),
 --		fg = { 0xDC, 0xDC, 0xDC },
 		fg = scaledValues.TEXT_COLOR_DC,
 		align = 'center',
@@ -1649,14 +1649,14 @@ function skin0(self, s, _, _, w, h)
 	s.keyboard.key_bottomRight = _uses(s.keyboard.key, { bgImg = keyBottomRight })
 
 	-- styles for keys that use smaller font
-	s.keyboard.key_bottom_small      = _uses(s.keyboard.key_bottom, { font = _boldfont(36) } )
+	s.keyboard.key_bottom_small      = _uses(s.keyboard.key_bottom, { font = _boldfont(scaledValues.KEYBOARD_SMALL_FONT_SIZE) } )
 	s.keyboard.key_bottomRight_small = _uses(s.keyboard.key_bottomRight, {
 			font = _boldfont(36),
 --			fg = { 0xe7, 0xe7, 0xe7 },
 			fg = scaledValues.TEXT_COLOR,
 	} )
-	s.keyboard.key_bottomLeft_small  = _uses(s.keyboard.key_bottomLeft, { font = _boldfont(36) } )
-	s.keyboard.key_left_small        = _uses(s.keyboard.key_left, { font = _boldfont(36) } )
+	s.keyboard.key_bottomLeft_small  = _uses(s.keyboard.key_bottomLeft, { font = _boldfont(scaledValues.KEYBOARD_SMALL_FONT_SIZE) } )
+	s.keyboard.key_left_small        = _uses(s.keyboard.key_left, { font = _boldfont(scaledValues.KEYBOARD_SMALL_FONT_SIZE) } )
 
 
 	s.keyboard.spacer_topLeft     = _uses(s.keyboard.key_topLeft)
@@ -1866,7 +1866,7 @@ function skin0(self, s, _, _, w, h)
 			order = { 'text' },
 			text = {
 				align = 'right',
-				font = _boldfont(45),
+				font = _boldfont(scaledValues.INPUT_TIME_FONT_SIZE),
 				padding = { 2, 4, 8, 0 },
 				fg = { 0xb3, 0xb3, 0xb3 },
 				sh = { },
@@ -1877,7 +1877,7 @@ function skin0(self, s, _, _, w, h)
 				order = { 'text' },
 				bgImg = false,
 				text = {
-					font = _boldfont(45),
+					font = _boldfont(scaledValues.INPUT_TIME_FONT_SIZE),
 --					fg = { 0xe6, 0xe6, 0xe6 },
 					fg = scaledValues.TEXT_COLOR,
 					sh = { },
@@ -1891,7 +1891,7 @@ function skin0(self, s, _, _, w, h)
 				order = { 'text' },
 				bgImg = false,
 				text = {
-					font = _boldfont(45),
+					font = _boldfont(scaledValues.INPUT_TIME_FONT_SIZE),
 --					fg = { 0xe6, 0xe6, 0xe6 },
 					fg = scaledValues.TEXT_COLOR,
 					sh = { },
@@ -1909,14 +1909,14 @@ function skin0(self, s, _, _, w, h)
 		item = {
 			text = {
 				padding = { 0, 2, 8, 0 },
-				font = _boldfont(26),
+				font = _boldfont(scaledValues.INPUT_TIME_SMALL_FONT_SIZE),
 			},
 		},
 		selected = {
 			item = {
 				text = {
 					padding = { 0, 4, 8, 0 },
-					font = _boldfont(26),
+					font = _boldfont(scaledValues.INPUT_TIME_SMALL_FONT_SIZE),
 				},
 			},
 		},
@@ -1924,7 +1924,7 @@ function skin0(self, s, _, _, w, h)
 			item = {
 				text = {
 					padding = { 0, 4, 8, 0 },
-					font = _boldfont(26),
+					font = _boldfont(scaledValues.INPUT_TIME_SMALL_FONT_SIZE),
 				},
 			},
 		},
@@ -2649,7 +2649,7 @@ function skin0(self, s, _, _, w, h)
 		fg = TEXT_COLOR,
 		sh = TEXT_SH_COLOR,
 		align = "center",
-		font = _boldfont(62),
+		font = _boldfont(scaledValues.ALARM_TIME_FONT_SIZE),
 	}
 
 	s.preview_text = _uses(s.alarm_time, {
@@ -2725,7 +2725,7 @@ function skin0(self, s, _, _, w, h)
 			w = WH_FILL,
 		      border = 10,
 		      fg = TEXT_COLOR,
-		      font = _boldfont(32),
+		      font = _boldfont(scaledValues.SLIDER_POPUP_FONT_SIZE),
 			padding = { 4, 16, 4, 0 },
 		      align = "center",
 		      bgImg = false,
@@ -3425,7 +3425,7 @@ function skin0(self, s, _, _, w, h)
 				bgImg   = V_titlebarButtonBox,
 			},
 			rbutton  = {
-				font    = _font(14),
+				font    = _font(scaledValues.RBUTTON_FONT_SIZE),
 				fg      = TEXT_COLOR,
 				bgImg   = V_titlebarButtonBox,
 				w       = TITLE_BUTTON_WIDTH,
@@ -3635,7 +3635,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -3645,7 +3645,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -3655,7 +3655,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -3665,7 +3665,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -3693,7 +3693,7 @@ function skin0(self, s, _, _, w, h)
 				w = WH_FILL,
 --				align = "left",
 				align = scaledValues.NP_PROGRESSNB_ALIGN,
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7, 0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4059,7 +4059,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4069,7 +4069,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4079,7 +4079,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4089,7 +4089,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4179,7 +4179,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4189,7 +4189,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
-				font = _boldfont(18),
+				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4199,7 +4199,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -4209,7 +4209,7 @@ function skin0(self, s, _, _, w, h)
 				w = 60,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
-				font = _boldfont(14),
+				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
 				fg = scaledValues.TEXT_COLOR,
@@ -5277,7 +5277,7 @@ function skin0(self, s, _, _, w, h)
 	}
 
         s.demo_text = {
-                font = _boldfont(18),
+                font = _boldfont(scaledValues.DEMO_FONT_SIZE),
                 position = LAYOUT_SOUTH,
                 w = screenWidth,
 		h = 50,
