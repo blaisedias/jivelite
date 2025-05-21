@@ -1105,10 +1105,10 @@ function skin0(self, s, _, _, w, h)
 --	local MENU_CURRENTALBUM_TEXT_PADDING = { 6, 20, 0, 10 }
 	local TEXTAREA_PADDING = { 13, 8, 8, 0 }
 
-	local TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
-	local TEXT_COLOR_BLACK = { 0x00, 0x00, 0x00 }
-	local TEXT_SH_COLOR = { 0x37, 0x37, 0x37 }
-	local TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
+	local TEXT_COLOR = scaledValues.TEXT_COLOR
+	local TEXT_COLOR_BLACK = scaledValues.TEXT_COLOR_BLACK
+	local TEXT_SH_COLOR = scaledValues.TEXT_SH_COLOR
+--	local TEXT_COLOR_TEAL = scaledValues.TEXT_COLOR_TEAL
 
 --	local SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
 --	local SELECT_SH_COLOR = { }
@@ -1306,7 +1306,7 @@ function skin0(self, s, _, _, w, h)
 			padding = TITLE_PADDING,
 			align = "center",
 			font = _boldfont(TITLEBAR_FONT_SIZE),
-			fg = scaledValues.TEXT_COLOR,
+			fg = scaledValues.TITLE_TEXT_COLOR,
 		}
 	}
 
@@ -1342,7 +1342,7 @@ function skin0(self, s, _, _, w, h)
 		padding = { 0, 0, 0, 0 },
 		itemHeight = FIVE_ITEM_HEIGHT,
 --		fg = {0xbb, 0xbb, 0xbb },
-		fg = scaledValues.TEXT_COLOR_BB,
+		fg = scaledValues.TEXT_COLOR_MENU,
 		font = _boldfont(scaledValues.MENU_FONT_SIZE),
 	}
 
@@ -1633,7 +1633,7 @@ function skin0(self, s, _, _, w, h)
 	s.keyboard.key = {
 		font = _boldfont(scaledValues.KEYBOARD_FONT_SIZE),
 --		fg = { 0xDC, 0xDC, 0xDC },
-		fg = scaledValues.TEXT_COLOR_DC,
+		fg = scaledValues.TEXT_COLOR_KEYBOARD,
 		align = 'center',
 		bgImg = keyMiddle,
 	}
@@ -1696,7 +1696,7 @@ function skin0(self, s, _, _, w, h)
 		text = _uses(s.keyboard.key_bottomRight_small, {
 			text = self:string("ENTER_SMALL"),
 --			fg = { 0x00, 0xbe, 0xbe },
-			fg = scaledValues.TEXT_COLOR_TEAL,
+			fg = scaledValues.TEXT_COLOR_KEYBOARD_DONE,
 			sh = { },
 			h = WH_FILL,
 			padding = { 0, 0, 0, 1 },
@@ -1991,7 +1991,7 @@ function skin0(self, s, _, _, w, h)
 				{
 					font = _font(scaledValues.TEXT_LIST_TITLE_FONT_SIZE),
 --					fg   = { 0xB3, 0xB3, 0xB3 },
-					fg = scaledValues.TEXT_COLOR_BB,
+					fg = scaledValues.TEXT_COLOR_LIST_TITLE,
 				},
 			},
 		},
@@ -2065,7 +2065,7 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	s.waiting_popup.subtext_connected = _uses(s.waiting_popup.subtext, {
-		fg = TEXT_COLOR_TEAL,
+		fg = scaledValues.TEXT_COLOR_WAITING_POPUP,
 	})
 
 	s.black_popup = _uses(s.waiting_popup)
@@ -2517,7 +2517,7 @@ function skin0(self, s, _, _, w, h)
 				padding = {0,0,20,0},
 				align = "center",
 				font = _boldfont(TITLE_FONT_SIZE),
-				fg = TEXT_COLOR,
+				fg = scaledValues.TITLE_TEXT_COLOR,
 			},
 		},
 
@@ -2794,7 +2794,7 @@ function skin0(self, s, _, _, w, h)
 			align = 'center',
 			font = _font(scaledValues.BASE_BUTTON_FONT_SIZE),
 --			fg = { 0xdc,0xdc, 0xdc },
-			fg = scaledValues.TEXT_COLOR_DC,
+			fg = scaledValues.TEXT_COLOR_BASE_BUTTON,
 		},
 	}
 	local _pressed_button = _uses(_button, {
@@ -3447,7 +3447,8 @@ function skin0(self, s, _, _, w, h)
 				h          = WH_FILL,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight - 5,
-				fg         = _tracklayout.fg,
+--				fg         = _tracklayout.fg,
+				fg         = scaledValues.NP_TITLE_COLOR,
 				font       = _boldfont(NP_TRACK_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
 			},
@@ -3464,7 +3465,8 @@ function skin0(self, s, _, _, w, h)
 				w          = screenWidth - _tracklayout.x - 10,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
-				fg         = _tracklayout.fg,
+--				fg         = _tracklayout.fg,
+				fg         = scaledValues.NP_ARTIST_COLOR,
 				font       = _font(NP_ARTISTALBUM_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
 			},
@@ -3481,7 +3483,8 @@ function skin0(self, s, _, _, w, h)
 				padding    = { 0, 6, 0, 0 },
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
-				fg         = _tracklayout.fg,
+--				fg         = _tracklayout.fg,
+				fg         = scaledValues.NP_ALBUM_COLOR,
 				font       = _font(NP_ARTISTALBUM_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
 			},
@@ -3499,8 +3502,7 @@ function skin0(self, s, _, _, w, h)
 			h = AUDIO_METADATA_H,
 			bgImg = nil,
 			align = "right",
-			fg = TEXT_COLOR,
---			fg = TEXT_COLOR_TEAL,
+			fg = scaledValues.NP_AUDIOMETADATA_COLOR,
 			sh = TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
 			font = _boldfont(AUDIO_METADATA_FONT_HEIGHT),
@@ -3638,7 +3640,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
@@ -3648,7 +3650,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
@@ -3658,7 +3660,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
@@ -3668,7 +3670,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
@@ -3696,7 +3698,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7, 0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESSNB_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 		},
@@ -4062,7 +4064,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
@@ -4072,7 +4074,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
@@ -4082,7 +4084,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
@@ -4092,7 +4094,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
@@ -4182,7 +4184,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
@@ -4192,7 +4194,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
@@ -4202,7 +4204,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
@@ -4212,7 +4214,7 @@ function skin0(self, s, _, _, w, h)
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
 --				fg = { 0xe7,0xe7, 0xe7 },
 --				sh = { 0x37, 0x37, 0x37 },
-				fg = scaledValues.TEXT_COLOR,
+				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
@@ -4541,8 +4543,7 @@ function skin0(self, s, _, _, w, h)
 				h = AUDIO_METADATA_H,
 				bgImg = nil,
 				align = "right",
-				fg = TEXT_COLOR,
---			fg = TEXT_COLOR_TEAL,
+				fg = scaledValues.NP_AUDIOMETADATA_COLOR,
 				sh = TEXT_SH_COLOR,
 				padding = { 5, 0, 0, 5 },
 				font = _font(AUDIO_METADATA_FONT_HEIGHT),
