@@ -709,17 +709,34 @@ function getJogglerSkinParams(skinName)
     params.TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.TEXT_COLOR_BLACK = { 0x00, 0x00, 0x00 }
     params.TEXT_SH_COLOR = { 0x37, 0x37, 0x37 }
-    params.TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
-    params.TEXT_COLOR_DC = { 0xDC, 0xDC, 0xDC }
+    params.TEXT_COLOR_KEYBOARD_DONE = { 0, 0xbe, 0xbe }
+    params.TEXT_COLOR_WAITING_POPUP = { 0, 0xbe, 0xbe }
+    params.TEXT_COLOR_KEYBOARD = { 0xDC, 0xDC, 0xDC }
+    params.TEXT_COLOR_BASE_BUTTON = { 0xDC, 0xDC, 0xDC }
     params.TEXT_COLOR_BB = { 0xBB, 0xBB, 0xBB }
+    params.TEXT_COLOR_MENU = { 0xBB, 0xBB, 0xBB }
+    params.TEXT_COLOR_LIST_TITLE = { 0xBB, 0xBB, 0xBB }
 --    params.TEXT_COLOR_B3 = { 0xB3, 0xB3, 0xB3 }
     params.TEXT_COLOR_DISABLED = { 0x66, 0x66, 0x66 }
-    params.TEXT_COLOR_YELLOW = { 0xbe, 0xbe, 0 }
-    params.TEXT_COLOR_PURPLE = { 0xbe, 0, 0xbe }
+
+--    params.TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
+--    params.TEXT_COLOR_YELLOW = { 0xbe, 0xbe, 0 }
+--    params.TEXT_COLOR_PURPLE = { 0xbe, 0, 0xbe }
+--    params.TEXT_COLOR_RED = { 0xbe, 0, 0 }
+--    params.TEXT_COLOR_GREEN = { 0, 0xbe, 0 }
 
 ----	params.SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
 ----	params.SELECT_SH_COLOR = { }
 
+    params.TITLE_TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
+
+    params.NP_TITLE_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_ARTIST_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_ALBUM_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_TITLE_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_AUDIOMETADATA_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_PROGRESS_TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
+    params.NP_PROGRESSNB_TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
 
     params.TITLE_HEIGHT = skinValues.TITLE_HEIGHT
     params.TITLE_FONT_SIZE = scaleTextValue(20)
