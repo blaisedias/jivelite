@@ -1,6 +1,7 @@
 --local setmetatable, = setmetatable
 local _assert = _assert
 local pairs, ipairs, tostring, type, tonumber = pairs, ipairs, tostring, type, tonumber
+local next = next
 
 local math             = require("math")
 local table            = require("jive.utils.table")
@@ -15,7 +16,7 @@ local Framework        = require("jive.ui.Framework")
 local System           = require("jive.System")
 local Icon             = require("jive.ui.Icon")
 local Button           = require("jive.ui.Button")
---local Choice           = require("jive.ui.Choice")
+local Choice           = require("jive.ui.Choice")
 local Label            = require("jive.ui.Label")
 --local Textarea         = require("jive.ui.Textarea")
 local Group            = require("jive.ui.Group")
@@ -172,17 +173,63 @@ local function _setScrollParameters(settings)
 	Label:setScrollParameters(scroll_step_minimum, scroll_fps, font_scroll_factor)
 end
 
+local function appendMetadataString(audioMetadataText, value, annotation, addedText)
+	if value == nil then
+		return audioMetadataText
+	end
+	if annotation ~= nil and annotation.ignoreValues ~= nil then
+		for _, v in pairs(annotation.ignoreValues) do
+			if v == value then
+				return audioMetadataText
+			end
+		end
+	end
+
+	if #audioMetadataText > 0 then
+		-- add separator
+		audioMetadataText = audioMetadataText .. " • "
+	end
+	if annotation ~= nil and annotation.prefix ~= nil  then
+		audioMetadataText = audioMetadataText .. annotation.prefix
+	end
+	audioMetadataText = audioMetadataText .. value
+	if annotation ~= nil and annotation.suffix ~= nil  then
+		audioMetadataText = audioMetadataText .. annotation.suffix
+	end
+	if addedText ~= nil then
+		audioMetadataText = audioMetadataText .. addedText
+	end
+	return audioMetadataText
+end
+
+-- ordered list of audio metadata tags
+local audioMetadataTags =  {
+	'type', 'bitrate', 'samplerate', 'samplesize',
+	'replay_gain', 'tracknum', 'disc', 'disccount',
+	'genre', 'year',
+	'playlist_index',
+}
+
+-- list of audio metadata tags shown by default
+local defaultVisibleAudioMetadataTags = {
+	'type', 'bitrate', 'samplerate', 'samplesize'
+}
+
+--function getAudioMetadataTags(self)
+--	return table.clone(audioMetadataTags), table.clone(defaultVisibleAudioMetadataTags)
+--end
+
 local function getAudioStreamMetadata(self)
 	local settings = self:getSettings()
 	self.audiometadatatxt = ""
 	self.audiometadatatbl = {}
-	if settings.showaudiometa == true then
+	if settings.audioMetadataFields ~= nil then
 		local server = self.player:getSlimServer()
-		local cmd = {'status', '-' , 1, 'tags:IgGkoQrRTuyw'}
+		local cmd = {'status', '-' , 1, 'tags:giImoqrtyTXY'}
 		server:userRequest(function(chunk,err)
 			if err then
-				log:warn(err)
-			else
+			log:warn(err)
+		else
 --				for k,v in pairs(chunk) do
 --					log:info("stream meta data: chunk: ", k, " -|", v, "|-")
 --				end
@@ -198,40 +245,61 @@ local function getAudioStreamMetadata(self)
 
 				local statusLoopData = chunk.data.playlist_loop[1]
 				if statusLoopData then
-					self.audiometadatatbl.pl_tracks = chunk.data.playlist_tracks
-					self.audiometadatatbl.pl_cur_index = chunk.data.playlist_cur_index
---					for k,v in pairs(statusLoopData) do
---						log:info("stream meta data: chunk.data.playlist_loop: ", k, " = ",v)
---					end
-					self.audiometadatatbl.contentType = statusLoopData.type
+					self.audiometadatatbl.playlist_tracks = chunk.data.playlist_tracks
+					for k,v in pairs(statusLoopData) do
+						log:debug("stream meta data: chunk.data.playlist_loop: ", k, " = ",v)
+					end
+					self.audiometadatatbl.type = statusLoopData.type
 					self.audiometadatatbl.bitrate = statusLoopData.bitrate
 					self.audiometadatatbl.samplerate = statusLoopData.samplerate
 					self.audiometadatatbl.samplesize = statusLoopData.samplesize
 					self.audiometadatatbl.year = statusLoopData.year
 					self.audiometadatatbl.genre = statusLoopData.genre
+					self.audiometadatatbl.tracknum = statusLoopData.tracknum
+					self.audiometadatatbl.replay_gain = statusLoopData.replay_gain
+					self.audiometadatatbl.disc = statusLoopData.disc
+					self.audiometadatatbl.disccount = statusLoopData.disccount
+					self.audiometadatatbl.playlist_index = statusLoopData['playlist index'] + 1
 
-					local stream_metadata = " " .. self.audiometadatatbl.contentType
-					if self.audiometadatatbl.bitrate and self.audiometadatatbl.bitrate ~= "0" then
-						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.bitrate
+					local printtbl = {}
+					for k, v in pairs(settings.audioMetadataFields) do
+						if v.show then
+							printtbl[k] = self.audiometadatatbl[k]
+						end
 					end
-					if self.audiometadatatbl.samplerate then
-						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.samplerate .. " Hz"
+					printtbl.playlist_tracks = self.audiometadatatbl.playlist_tracks
+
+					local amd_txt = ""
+					local tagAnnotations =  {
+						bitrate = { ignoreValues={'0'}},
+						samplerate= { suffix=' Hz'},
+						samplesize= { suffix=' bits'},
+						replay_gain= { suffix=' dB'},
+						tracknum= { prefix='Track '},
+						disc= { prefix='Disc ', ignoreValues={'0'}},
+						disccount= { prefix='Discs ', ignoreValues={'0'}},
+						year= { ignoreValues={'0'}},
+					}
+					for seq = 1, #audioMetadataTags, 1 do
+						for _, tag in pairs(audioMetadataTags) do
+							if seq == settings.audioMetadataFields[tag].seq then
+								if tag == 'playlist_index' then
+									if printtbl.playlist_tracks and printtbl.playlist_tracks > 1 and printtbl.playlist_index then
+										amd_txt = appendMetadataString(amd_txt, printtbl[tag], tagAnnotations[tag], '/' .. printtbl.playlist_tracks)
+									end
+								elseif tag == 'disc' and printtbl.disccount then
+									-- this only works if disccount is after disc in tag ordering, a reasonable expectation
+									amd_txt = appendMetadataString(amd_txt, printtbl[tag], tagAnnotations[tag], '/' .. printtbl.disccount)
+									printtbl.disccount = nil
+								else
+									amd_txt = appendMetadataString(amd_txt, printtbl[tag], tagAnnotations[tag])
+								end
+							end
+						end
 					end
-					if self.audiometadatatbl.samplesize then
-						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.samplesize .. " bits"
-					end
-					if self.audiometadatatbl.pl_tracks and self.audiometadatatbl.pl_tracks > 1 and self.audiometadatatbl.pl_cur_index then
-						stream_metadata = stream_metadata .. " • " .. (self.audiometadatatbl.pl_cur_index +1) .. " of " .. self.audiometadatatbl.pl_tracks
-					end
-					if self.audiometadatatbl.year and self.audiometadatatbl.year ~= '0' then
-						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.year
-					end
-					if self.audiometadatatbl.genre then
-						stream_metadata = stream_metadata .. " • " .. self.audiometadatatbl.genre
-					end
-					self.audiometadatatxt = stream_metadata
-					self.audiometadata:setValue(stream_metadata .. " ")
-					log:info("audio stream metadata " .. stream_metadata)
+					self.audiometadatatxt = amd_txt
+					self.audiometadata:setValue(amd_txt .. " ")
+					log:info("audio stream metadata " .. amd_txt)
 				else
 					log:warn("no audio stream metadata")
 				end
@@ -243,6 +311,107 @@ local function getAudioStreamMetadata(self)
 	end
 end
 
+function audioMetadataSequenceSelector(self)
+	local window = Window("text_list", self:string('AUDIO_METADATA_SEQUENCE') )
+	local menu = SimpleMenu("menu")
+	local settings = self:getSettings()
+
+	local choices = {}
+	for i, _ in ipairs(audioMetadataTags) do
+		table.insert(choices, i)
+	end
+
+	for _, v in ipairs(audioMetadataTags) do
+		local currIndex = table.indexof(choices, settings.audioMetadataFields[v].seq)
+		menu:addItem({
+			text = v,
+			style = 'item_choice',
+			check = Choice('choice', choices,
+				function(_, index)
+					local cb_settings = self:getSettings()
+					cb_settings.audioMetadataFields[v].seq = choices[index]
+					self:storeSettings()
+					local np = appletManager:getAppletInstance("NowPlaying")
+					if np ~= nil then
+						np:invalidateWindow(nil)
+					end
+				end,
+			currIndex
+			),
+		})
+	end
+
+	window:addWidget(menu)
+	window:show()
+end
+
+function sanitiseAudioMetadataSettings(self)
+	local settings = self:getSettings()
+
+	if settings.audioMetadataFields == nil or next(settings.audioMetadataFields) == nil then
+		-- if no settings then setup default settings
+		settings.audioMetadataFields = {}
+		for i, v in ipairs(audioMetadataTags) do
+			settings.audioMetadataFields[v] = { show=table.contains(defaultVisibleAudioMetadataTags, v), seq=i }
+		end
+	else
+		-- ensure that sequence numbers are in the valid range
+		for _, v in ipairs(audioMetadataTags) do
+			if settings.audioMetadataFields[v].seq > #audioMetadataTags then
+				settings.audioMetadataFields[v].seq =  #audioMetadataTags
+			end
+			if settings.audioMetadataFields[v].seq < 1 then
+				settings.audioMetadataFields[v].seq = 1
+			end
+		end
+		-- remove tags that are not supported, from the settings
+		local amf = {}
+		for k, v in pairs(settings.audioMetadataFields) do
+			if table.contains(audioMetadataTags, k) then
+				amf[k] = v
+			end
+		end
+		settings.audioMetadataFields = amf
+	end
+	self:storeSettings()
+end
+
+function audioMetadataSelectorShow(self)
+	local window = Window("text_list", self:string('AUDIO_METADATA') )
+	local menu = SimpleMenu("menu")
+	local settings = self:getSettings()
+
+	self:sanitiseAudioMetadataSettings()
+
+	menu:addItem({
+		text = self:string("AUDIO_METADATA_SEQUENCE"),
+--		callback = function(event, menuItem)
+		callback = function()
+			return self:audioMetadataSequenceSelector()
+		end
+	})
+
+	for _, v in ipairs(audioMetadataTags) do
+		menu:addItem({
+			text =  v,
+			style = 'item_choice',
+			check = Checkbox("checkbox", function(_, checked)
+					local cb_settings = self:getSettings()
+					cb_settings.audioMetadataFields[v].show = checked
+					self:storeSettings()
+					local np = appletManager:getAppletInstance("NowPlaying")
+					if np ~= nil then
+						np:invalidateWindow(nil)
+					end
+				end,
+			settings.audioMetadataFields[v].show
+			),
+		})
+	end
+
+	window:addWidget(menu)
+	window:show()
+end
 
 function init(self)
 
@@ -250,24 +419,20 @@ function init(self)
 	self.player = false
 	self.lastVolumeSliderAdjustT = 0
 	self.cumulativeScrollTicks = 0
+    self:sanitiseAudioMetadataSettings()
 
 	local settings      = self:getSettings()
-	if settings.showaudiometa == nil then
-		settings.showaudiometa = true
-	end
 
 	jiveMain:addItem({
-		id = "showaudiometa",
-		node = 'screenSettingsNowPlaying',
-		text = self:string("SHOW_AUDIO_METADATA"),
-		style = 'item_choice',
+		id = "audioMetadataSelector",
+		iconStyle = "hm_advancedSettings",
+		node = "screenSettingsNowPlaying",
+		text = self:string("AUDIO_METADATA"),
 		weight = 50,
-		check = Checkbox("checkbox", function(_, checked)
-			local cb_settings = self:getSettings()
-			cb_settings.showaudiometa = checked
-			self:storeSettings()
-			end,
-			settings.showaudiometa)
+--		callback = function(event, menuItem)
+		callback = function()
+			return self:audioMetadataSelectorShow()
+		end
 	})
 
 	jiveMain:addItem({
