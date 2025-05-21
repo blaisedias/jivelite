@@ -54,6 +54,8 @@ files["share/jive/applets/NowPlaying/NowPlayingApplet.lua"] = {
        "getNPStyles",
        "invalidateWindow", "adjustVolume", "twiddleVisualiser",
        "free", "freeAndClear",
+       "sanitiseAudioMetadataSettings",
+       "audioMetadataSelectorShow", "audioMetadataSequenceSelector",
 
 -- possibly make local always accessed use self:
        "npviewsSettingsShow", "scrollSettingsShow", "setScrollBehavior", "_setVolumeSliderStyle",
