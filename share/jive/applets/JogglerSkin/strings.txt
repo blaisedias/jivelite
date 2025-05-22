@@ -399,7 +399,7 @@ CONTROLS_SCALING
 	EN	Scale Controls By
 
 DEL_SCALED_UI_IMAGES
-	EN	Delete All Scaled UI Images
+	EN	Delete Scaled UI Images
 
 LAYOUT
 	EN	Layout
