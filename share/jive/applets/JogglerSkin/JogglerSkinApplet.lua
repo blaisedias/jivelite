@@ -5521,7 +5521,7 @@ function init(self)
 		weight = weight,
 		callback = function(_,_)
 			if Framework:getGlobalSetting("jogglerScaleAndCustomise") == true then
-				jogglerScaler.deleteAllScaledUIImages()
+				jogglerScaler.deleteScaledUIImages()
 				reloadSkin()
 			else
 				self:messageBox("Scaling & Customisation,\nis not enabled", 2000)

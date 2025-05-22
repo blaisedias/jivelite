@@ -48,6 +48,8 @@ local BASE_ICON_SIZE = 40
 local BASE_POPUP_THUMBSIZE = 120
 local jogglerImgpath = "applets/JogglerSkin/images/"
 local gridImgpath = "applets/PiGridSkin/images/"
+local iconsImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/Icons/'
+local volbarImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/VolumeBar/'
 
 module(...)
 
@@ -123,13 +125,18 @@ function updateJsonConfig(key, skin, value)
     end
 end
 
-function deleteAllScaledUIImages()
-    local dest_path = System.getUserDir() .. '/' .. jogglerImgpath
-    log:debug('rm -rf ' .. dest_path)
-    os.execute('rm -rf ' .. dest_path)
-    dest_path = System.getUserDir() .. '/' ..  gridImgpath
-    log:debug('rm -rf ' .. dest_path)
-    os.execute('rm -rf ' .. dest_path)
+function deleteScaledUIImages()
+    local jsParams=getJogglerSkinParams('JogglerSkin')
+    local gsParams=getGridSkinParams(jsParams.FIVE_ITEM_HEIGHT)
+    for _, rm_path in pairs({
+        System.getUserDir() .. '/' .. jogglerImgpath .. jsParams.THUMB_SIZE,
+        System.getUserDir() .. '/' .. iconsImgpath .. jsParams.CONTROLS_DIMENSIONS,
+        System.getUserDir() .. '/' .. volbarImgpath .. jsParams.CONTROLS_DIMENSIONS,
+        System.getUserDir() .. '/' .. gridImgpath .. gsParams.THUMB_SIZE
+    }) do
+        log:debug('rm -rf ' .. rm_path .. '/*')
+        os.execute('rm -rf ' .. rm_path .. '/*' )
+    end
 end
 
 -- reset static variables so that determination of scaling values
@@ -382,10 +389,7 @@ local function pathIter(rpath)
 	for dir in package.path:gmatch("([^;]*)%?[^;]*;") do
 		if hist[dir] == nil then
 			hist[dir] = true
-			-- only search in the jivelite lua source tree
-			-- we could pass in a filter function but this is good enough
---			if dir ~= "./" and str_endswith(dir, '/jivelite/share/jive/') then
-			if str_endswith(dir, '/jivelite/share/jive/') then
+			if dir ~= "./" and dir ~= "../" then
 				dir = dir .. rpath
 				local mode = lfs.attributes(dir, "mode")
 				if mode == "directory" then
@@ -396,7 +400,7 @@ local function pathIter(rpath)
 	end
 end
 
-local function findPaths(rpath)
+local function enumerateMatchingPaths(rpath)
 	local co = coroutine.create(function() pathIter(rpath) end)
 	return function()
 		local _, res = coroutine.resume(co)
@@ -404,8 +408,18 @@ local function findPaths(rpath)
 	end
 end
 
+local function findFQPath(relPath)
+    local res
+    for pth in enumerateMatchingPaths(relPath) do
+        if res == nil then
+            res = pth
+        end
+    end
+    return res
+end
+
 function scaleControlsImages(params)
-    local controls_resize_map = {
+    local tbl_control = {
         {
             -- control popup images
             dim = params.CONTROL_POPUP_DIMENSIONS,
@@ -460,93 +474,66 @@ function scaleControlsImages(params)
         }
     }
 
-    local src_path = nil
-    for pth in findPaths("applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/1k") do
-        src_path = pth
-    end
-
-    if src_path == nil or (lfs.attributes(src_path, "mode") ~= "directory") then
-        log:error("scaleControlsImages: ", src_path, " is not a directory")
+--    local src_root =  findFQPath("applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/1k")
+    local src_root =  findFQPath(iconsImgpath .. "1k")
+    if src_root == nil or (lfs.attributes(src_root, "mode") ~= "directory") then
+        log:error("scaleControlsImages: ", src_root, " is not a directory")
         return
     end
 
-    local dest_path = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/' .. params.CONTROLS_DIMENSIONS
-    os.execute("mkdir -p " .. dest_path)
-    for _, v in pairs(controls_resize_map) do
+--    local dest_root = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/' .. params.CONTROLS_DIMENSIONS
+    local dest_root = System.getUserDir() .. '/' .. iconsImgpath .. params.CONTROLS_DIMENSIONS
+    os.execute("mkdir -p " .. dest_root)
+    for _, v in pairs(tbl_control) do
         local dim = v.dim
         for _, imgnames in pairs(v.imgs) do
-            scaleImageFile(src_path .. "/" .. imgnames.src, dest_path .. "/" .. imgnames.dest, dim, dim)
+            scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest, dim, dim)
         end
     end
 
     -- scale volume bar components
     local vol_dim = math.ceil(params.CONTROLS_DIMENSIONS * 0.5)
-    for pth in findPaths("applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/1k") do
-        src_path = pth
-    end
 
-    if src_path == nil or (lfs.attributes(src_path, "mode") ~= "directory") then
-        log:error("scaleControlsImages: ", src_path, " is not a directory")
+--    src_root = findFQPath("applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/1k")
+    src_root = findFQPath(volbarImgpath .. "1k")
+    if src_root == nil or (lfs.attributes(src_root, "mode") ~= "directory") then
+        log:error("scaleControlsImages: ", src_root, " is not a directory")
         return
     end
-    dest_path = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/' .. params.CONTROLS_DIMENSIONS
-    os.execute("mkdir -p " .. dest_path)
-    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill_l.png', dest_path .. '/' .. 'tch_volumebar_fill_l.png', 0, vol_dim)
-    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill_r.png', dest_path .. '/' .. 'tch_volumebar_fill_r.png', 0, vol_dim)
-    scaleImageFile(src_path .. '/' .. 'tch_volumebar_fill.png', dest_path .. '/' .. 'tch_volumebar_fill.png', vol_dim*9, vol_dim)
-    scaleImageFile(src_path .. '/' .. 'tch_volumebar_slider.png', dest_path .. '/' .. 'tch_volumebar_slider.png', 0, vol_dim)
+--    dest_root = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/' .. params.CONTROLS_DIMENSIONS
+    dest_root = System.getUserDir() .. '/' .. volbarImgpath .. params.CONTROLS_DIMENSIONS
+    os.execute("mkdir -p " .. dest_root)
+    local tbl_vol = {
+        { relPath='tch_volumebar_fill_l.png', w=0,         h=vol_dim },
+        { relPath='tch_volumebar_fill_r.png', w=0,         h=vol_dim },
+        { relPath='tch_volumebar_fill.png',   w=vol_dim*9, h=vol_dim },
+        { relPath='tch_volumebar_slider.png', w=0,         h=vol_dim },
+    }
+
+    for _, entry in pairs(tbl_vol) do
+        scaleImageFile(src_root .. '/' .. entry.relPath, dest_root .. '/' .. entry.relPath, entry.w, entry.h)
+    end
 end
 
 
 -- global function scale images required for Joggler based skins
 function scaleUIImages(imgs_path, params)
     local resizedPath = System.getUserDir() .. '/' .. params.state.imgPath
-    os.execute("mkdir -p " .. resizedPath .. '/grid_list')
-    os.execute("mkdir -p " .. resizedPath .. '/5_line_lists')
-    os.execute("mkdir -p " .. resizedPath .. '/IconsResized')
-    os.execute("mkdir -p " .. resizedPath .. '/Buttons')
+    local tbl_ui = {
+        { relPath="grid_list",     w=nil,               h=params.GRID_ITEM_HEIGHT },
+        { relPath="5_line_lists",  w=nil,               h=params.FIVE_ITEM_HEIGHT },
+        { relPath="IconsResized",  w=params.THUMB_SIZE, h=params.THUMB_SIZE },
+        { relPath="Buttons",       w=nil,               h=params.TITLE_HEIGHT - 18 },
+    }
 
-    local fq_imgs_path = nil
-    for pth in findPaths(imgs_path) do
-        fq_imgs_path = pth
+    for _, entry in pairs(tbl_ui) do
+        local src_path = findFQPath(imgs_path .. '/' .. entry.relPath)
+        local dest_path =  resizedPath .. '/' .. entry.relPath
+        os.execute("mkdir -p " .. resizedPath .. '/' .. entry.relPath)
+        if entry.w ~= nil or entry.h ~= nil then
+            scaleImagesInPath(src_path, dest_path, entry.w, entry.h)
+        end
     end
-    log:info("scaleUIImages ", imgs_path, " == ", fq_imgs_path , " -> ", resizedPath)
-    if fq_imgs_path == nil or (lfs.attributes(fq_imgs_path, "mode") ~= "directory") then
-        log:error("scaleUIImages: ", fq_imgs_path, " is not a directory")
-        return
-    end
-
-    if params.GRID_ITEM_HEIGHT ~= nil then
-        scaleImagesInPath(
-            fq_imgs_path .. "/grid_list",
-            resizedPath .. '/grid_list',
-            nil,
-            params.GRID_ITEM_HEIGHT
-         )
-    end
-
-    if params.FIVE_ITEM_HEIGHT ~= nil then
-        scaleImagesInPath(
-            fq_imgs_path .. "/5_line_lists",
-            resizedPath .. '/5_line_lists',
-            nil,
-            params.FIVE_ITEM_HEIGHT
-         )
-    end
-
-    scaleImagesInPath(
-        fq_imgs_path .. "/IconsResized",
-        resizedPath .. '/IconsResized',
-        params.THUMB_SIZE,
-        params.THUMB_SIZE
-    )
-
-    scaleImagesInPath(
-        fq_imgs_path .. "/Buttons",
-        resizedPath .. '/Buttons',
-        nil,
-        params.TITLE_HEIGHT - 18
-    )
 end
 
 local function _getJogglerCoreParams(skinName, skinValues)
@@ -716,7 +703,6 @@ function getJogglerSkinParams(skinName)
     params.TEXT_COLOR_BB = { 0xBB, 0xBB, 0xBB }
     params.TEXT_COLOR_MENU = { 0xBB, 0xBB, 0xBB }
     params.TEXT_COLOR_LIST_TITLE = { 0xBB, 0xBB, 0xBB }
---    params.TEXT_COLOR_B3 = { 0xB3, 0xB3, 0xB3 }
     params.TEXT_COLOR_DISABLED = { 0x66, 0x66, 0x66 }
 
 --    params.TEXT_COLOR_TEAL = { 0, 0xbe, 0xbe }
