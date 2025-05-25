@@ -843,6 +843,7 @@ function getJogglerSkinParams(skinName)
     end
 
 
+    os.execute("mkdir -p " .. System.getUserDir() .. '/cache')
     _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/JogglerSkin.json')
     log:debug("skin params:", table.stringify(params))
     return params
@@ -947,6 +948,7 @@ function getGridSkinParams(fiveItemHeight)
             end
         end
     end
+    os.execute("mkdir -p " .. System.getUserDir() .. '/cache')
     _writeScaledData({gridSkin = params}, System.getUserDir() .. '/cache/PiGridSkin.json')
     log:debug("grid skin params:", table.stringify(params))
     return params
