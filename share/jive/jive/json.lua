@@ -112,31 +112,40 @@ end
 
 -- Public values and functions.
 
-function json.stringify(obj, as_key)
+function json.stringify(obj, as_key, indent, indent_in)
+  if not indent then
+      indent = '    '
+      indent_in = ''
+  end
   local s = {}  -- We'll build the string as an array of strings to be concatenated.
   local kind = kind_of(obj)  -- This is 'array' if it's an array or type(obj) otherwise.
   if kind == 'array' then
     if as_key then error('Can\'t encode array as key.') end
-    s[#s + 1] = '['
+    s[#s + 1] = '[\n' .. indent
     for i, val in ipairs(obj) do
-      if i > 1 then s[#s + 1] = ', ' end
-      s[#s + 1] = json.stringify(val)
+      if i > 1 then s[#s + 1] = ',\n'..indent end
+      s[#s + 1] = json.stringify(val, nil, indent .. '    ', indent)
     end
-    s[#s + 1] = ']'
+    s[#s + 1] = '\n' .. indent_in .. ']'
   elseif kind == 'table' then
     if as_key then error('Can\'t encode table as key.') end
-    s[#s + 1] = '{'
-    for k, v in pairs(obj) do
-      if #s > 1 then s[#s + 1] = ', ' end
-      s[#s + 1] = json.stringify(k, true)
-      s[#s + 1] = ':'
-      s[#s + 1] = json.stringify(v)
+    s[#s + 1] = '{\n' .. indent
+    local sorted_keys = {}
+    for k,_ in pairs(obj) do table.insert(sorted_keys, k) end
+    table.sort(sorted_keys)
+--    for k, v in pairs(obj) do
+    for _, k in ipairs(sorted_keys) do
+      local v = obj[k]
+      if #s > 1 then s[#s + 1] = ',\n'..indent end
+      s[#s + 1] = json.stringify(k, true, indent .. '    ', indent)
+      s[#s + 1] = ': '
+      s[#s + 1] = json.stringify(v, nil, indent .. '    ', indent)
     end
-    s[#s + 1] = '}'
+    s[#s + 1] = '\n' .. indent_in .. '}'
   elseif kind == 'string' then
     return '"' .. escape_str(obj) .. '"'
   elseif kind == 'number' then
-    if as_key then return '"' .. tostring(obj) .. '"' end
+    if as_key then return indent .. '"' .. tostring(obj) .. '"' end
     return tostring(obj)
   elseif kind == 'boolean' then
     return tostring(obj)
