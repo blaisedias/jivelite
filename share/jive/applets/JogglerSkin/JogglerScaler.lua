@@ -692,6 +692,7 @@ function getJogglerSkinParams(skinName)
 
 ----	params.MENU_CURRENTALBUM_TEXT_PADDING = { 6, 20, 0, 10 }
 --    params.TEXTAREA_PADDING = { 13, 8, 8, 0 }
+    params.ADJUST_FOR_GRID_ROWS = skinValues.ADJUST_FOR_GRID_ROWS
 
     params.TEXT_COLOR = { 0xE7, 0xE7, 0xE7 }
     params.TEXT_COLOR_BLACK = { 0x00, 0x00, 0x00 }
