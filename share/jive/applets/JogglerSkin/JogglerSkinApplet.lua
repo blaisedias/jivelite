@@ -424,7 +424,7 @@ function param(self)
 			},
 			{
 				style = 'nowplaying_spectrum_text_art',
-				artworkSize = maxArtwork,
+				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
 			},
@@ -449,7 +449,7 @@ function param(self)
 			},
 			{
 				style = 'nowplaying_vumeter_text_art',
-				artworkSize = maxArtwork,
+				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("VU_METER_TEXT_ART"),
 			},
@@ -4770,10 +4770,17 @@ function skin0(self, s, _, _, w, h)
 		-- previously
 		-- npX = screenHeight + 15
 		-- so l,r border = 15 pixels
-		local screenRem = screenWidth - screenHeight
-		mini_visu_X = npX + (screenRem/2)
+		local x_artwork = 0
+		local y_artwork = 0
+		if scaledValues.midArtworkSize ~= screenHeight then
+			x_artwork = 10
+			npX = scaledValues.midArtworkSize + 15 + x_artwork
+			y_artwork = (screenHeight - scaledValues.midArtworkSize)/2
+		end
+--		local screenRem = screenWidth - npX - 15
+		local tw = screenHeight - 30
+		mini_visu_X = npX + screenHeight
 		mini_visu_W = screenWidth - mini_visu_X - 15
-		local tw = (screenRem/2) - 30
 		mini_visu_Y = TITLE_HEIGHT + 5
 		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
 		mini_visu_Y = math.floor(mini_visu_Y)
@@ -4842,7 +4849,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npcontrols = {
 				order = largeArtButtonOrder,
-				x = screenHeight,
+				x = scaledValues.midArtworkSize + x_artwork,
 			},
 			npprogress = {
 				x = npX,
@@ -4860,11 +4867,11 @@ function skin0(self, s, _, _, w, h)
 				x = npX,
 			},
 			npartwork = {
-				w = screenHeight,
-				x = 0,
-				y = 0,
+				w = scaledValues.midArtworkSize,
+				x = x_artwork,
+				y = y_artwork,
 				align = "center",
-				h = WH_FILL,
+				h = scaledValues.midArtworkSize,
 				artwork = {
 					w = WH_FILL,
 					h = WH_FILL,
@@ -4929,7 +4936,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npcontrols = {
 				order = largeArtButtonOrder,
-				x = screenHeight,
+				x = scaledValues.midArtworkSize + x_artwork,
 			},
 			npprogress = {
 				x = npX,
@@ -4947,11 +4954,11 @@ function skin0(self, s, _, _, w, h)
 				x = npX,
 			},
 			npartwork = {
-				w = screenHeight,
-				x = 0,
-				y = 0,
+				w = scaledValues.midArtworkSize,
+				x = x_artwork,
+				y = y_artwork,
 				align = "center",
-				h = WH_FILL,
+				h = scaledValues.midArtworkSize,
 				artwork = {
 					w = WH_FILL,
 					h = WH_FILL,
