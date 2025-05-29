@@ -259,12 +259,12 @@ function init(self)
 	-- initialize SDL
 	self:initSDL()
 
-        local dispw, disph = self:getDisplaySize()
-        local wmAvailable = self:getWmAvailable()
-        log:info("#######################################")
-        log:info("wmAvailable: ", wmAvailable)
-        log:info("display WxH: ", dispw, ' x ', disph)
-        log:info("#######################################")
+		local dispw, disph = self:getDisplaySize()
+		local wmAvailable = self:getWmAvailable()
+		log:info("#######################################")
+		log:info("wmAvailable: ", wmAvailable)
+		log:info("display WxH: ", dispw, ' x ', disph)
+		log:info("#######################################")
 
 	-- action mapping listener, should be last listener in chain to 
 	-- allow for direct access to keys/other input types if needed.
@@ -440,10 +440,10 @@ Returns I<w, h, wm> the current DisplaySize size.
 --]]
 function getDisplaySize(self)
 	local bounds = screen.bounds
-    if bounds[5] > 1920 and bounds[6] > 1080 then
-        log:info("capping display resolution to 1920x1080 from ", bounds[5],'x',bounds[6])
-        return 1920, 1080
-    end
+	if bounds[5] > 1920 and bounds[6] > 1080 and bounds[7] ~= 0 then
+		log:info("Window manager available: capping display resolution to 1920x1080 from ", bounds[5],'x',bounds[6])
+		return 1920, 1080
+	end
 	return bounds[5], bounds[6]
 end
 
@@ -457,7 +457,7 @@ Returns B<wm> the current DisplaySize size.
 =cut
 --]]
 function getWmAvailable(self)
-    return screen.bounds[7] ~= 0
+	return screen.bounds[7] ~= 0
 end
 
 
