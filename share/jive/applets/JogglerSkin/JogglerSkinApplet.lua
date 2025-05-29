@@ -4032,14 +4032,14 @@ function skin0(self, s, _, _, w, h)
 		},
 		npartistgroup    = {
                         x          = 40,
-                        y          = TITLE_HEIGHT + 50 + 65,
+                        y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5),
                         npartist =  {
                                 w          = screenWidth - 65,
                         },
 		},
 		npalbumgroup     = {
                         x          = 40,
-                        y          = TITLE_HEIGHT + 50 + 60 + 55,
+                        y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
                         npalbum =  {
                                 w          = screenWidth - 65,
                         },
