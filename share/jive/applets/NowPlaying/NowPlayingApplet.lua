@@ -1386,7 +1386,7 @@ function _updateTrack(self, trackinfo, _, _)
 		self.artistTitle:animate(false)
 		self.albumTitle:animate(false)
 		self.artistalbumTitle:animate(false)
---		self.audiometadata:animate(false)
+		self.audiometadata:animate(true)
 
 	end
 end

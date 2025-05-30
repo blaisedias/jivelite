@@ -759,7 +759,7 @@ function getJogglerSkinParams(skinName)
 
     params.TITLE_BUTTON_WIDTH = 76
 
-    params.AUDIO_METADATA_FONT_HEIGHT = 14
+    params.AUDIO_METADATA_FONT_HEIGHT = scaleTextValue(14)
 
     params.TEXT_BLOCK_BLACK_H = scaleTextValue(300)
     params.TEXT_BLOCK_BLACK_FONT_SIZE = scaleTextValue(300)
