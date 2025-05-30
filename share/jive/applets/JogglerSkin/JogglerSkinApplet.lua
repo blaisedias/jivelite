@@ -1137,9 +1137,6 @@ function skin0(self, s, _, _, w, h)
 	local TITLE_BUTTON_WIDTH = scaledValues.TITLE_BUTTON_WIDTH
 
 	local AUDIO_METADATA_FONT_HEIGHT = scaledValues.AUDIO_METADATA_FONT_HEIGHT
-	local AUDIO_METADATA_Y = screenHeight - AUDIO_METADATA_FONT_HEIGHT
-	local AUDIO_METADATA_X = 0
-	local AUDIO_METADATA_W = screenWidth
 	local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
 
 	local large_art_visu_X = screenHeight + 15
@@ -3412,9 +3409,10 @@ function skin0(self, s, _, _, w, h)
 	local volumeBarWidthFudge = 10
 	volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 
-	s.nowplaying = _uses(s.window, {
-		--title bar
-		title = _uses(s.title, {
+	local y_nptitle = TITLE_HEIGHT + 17
+	local y_npartistgroup = y_nptitle + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5)
+
+	local x_title = _uses(s.title, {
 			zOrder = 1,
 			text = {
 				font = _boldfont(TITLEBAR_FONT_SIZE),
@@ -3428,15 +3426,15 @@ function skin0(self, s, _, _, w, h)
 				padding = { 8, 0, 8, 0},
 				align   = 'center',
 			}
-		}),
-	
-		-- Song metadata
-		nptitle = {
+		})
+
+	local x_nptitle = {
+			zOrder = 2,
 			order = { 'nptrack' },
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + 17,
+			y          = y_nptitle,
 			h          = NP_TRACK_FONT_SIZE,
 			nptrack =  {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -3448,13 +3446,58 @@ function skin0(self, s, _, _, w, h)
 				font       = _boldfont(NP_TRACK_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
 			},
-		},
+		}
+
+	if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+		y_npartistgroup = TITLE_HEIGHT + 17
+		x_title = _uses(s.title, {
+			zOrder = 1,
+			h = TITLE_HEIGHT,
+			text = {
+				font = _font(5),
+				-- Hack: text needs to be there to fill the space, but is not visible
+				padding = { screenWidth, 0, 0, 0 }
+			},
+			rbutton  = {
+				font    = _font(scaledValues.RBUTTON_FONT_SIZE),
+				fg      = TEXT_COLOR,
+				bgImg   = V_titlebarButtonBox,
+				w       = TITLE_BUTTON_WIDTH,
+				padding = { 8, 0, 8, 0},
+				align   = 'center',
+			}
+		})
+		x_nptitle = {
+			zOrder = 2,
+			order = { 'nptrack' },
+			position = LAYOUT_NONE,
+			x = 80,
+			y = 0,
+			h = TITLE_HEIGHT,
+			border = { 0, 0 ,0, 0 },
+			padding = { 20, 14, 5, 5 },
+			nptrack = {
+				align = "center",
+				w = screenWidth - 196,
+				h          = WH_FILL,
+				fg         = scaledValues.NP_TITLE_COLOR,
+				font       = _boldfont(NP_TRACK_FONT_SIZE),
+			},
+		}
+	end
+
+	s.nowplaying = _uses(s.window, {
+		--title bar
+		title = x_title,
+
+		-- Song metadata
+		nptitle = x_nptitle,
 		npartistgroup = {
 			order = { 'npartist' },
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5),
+			y          = y_npartistgroup,
 			h          = math.floor(NP_TRACK_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
@@ -3472,7 +3515,7 @@ function skin0(self, s, _, _, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
+			y          = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
 			h          = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			npalbum = {
 				w          = screenWidth - _tracklayout.x - 10,
@@ -3492,12 +3535,11 @@ function skin0(self, s, _, _, w, h)
 			hidden = 0,
 			zOrder = 2,
 			position = LAYOUT_NONE,
-			x = AUDIO_METADATA_X,
-			y = AUDIO_METADATA_Y,
-			w = AUDIO_METADATA_W,
-			h = AUDIO_METADATA_H,
 			bgImg = nil,
-			align = "right",
+			x = _tracklayout.x + 2,
+			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+			w = screenWidth - _tracklayout.x - 10,
+			align = "center",
 			fg = scaledValues.NP_AUDIOMETADATA_COLOR,
 			sh = TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
@@ -3698,7 +3740,6 @@ function skin0(self, s, _, _, w, h)
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 		},
-
 	})
 	s.nowplaying.npprogressNB.elapsedSmall = s.nowplaying.npprogressNB.elapsed
 
@@ -3822,13 +3863,20 @@ function skin0(self, s, _, _, w, h)
 
 	local npX = screenHeight + 15
 
+	local large_art_padding = { 10, 12, 10, 15 }
+	local large_art_rmargin = 10
+	if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+		large_art_padding = nil
+		large_art_rmargin = 100
+	end
+
 	s.nowplaying_large_art = _uses(s.nowplaying, {
 		bgImg = V_blackBackground,
 		title = {
 			bgImg = false,
 			text = {
 				border = { screenHeight - 72, 0, 0, 0 },
-				padding = { 10, 12, 10, 15 },
+				padding = large_art_padding,
 				font = _boldfont(scaledValues.NP_LARGE_ART_TITLE_FONT_SIZE),
 			},
 			button_back = {
@@ -3838,7 +3886,7 @@ function skin0(self, s, _, _, w, h)
 		nptitle = {
 			x = npX,
 			nptrack = {
-				w = screenWidth - npX - 10,
+				w = screenWidth - npX - large_art_rmargin,
 				font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
 			},
 		},
@@ -3874,6 +3922,12 @@ function skin0(self, s, _, _, w, h)
 		},
 		npprogressNB = {
 			x = npX,
+		},
+		npaudiometadata = {
+			x = npX,
+			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+			w = screenWidth - npX - 15,
+			align = "center"
 		},
 		npartwork = {
 			w = screenHeight,
@@ -4018,7 +4072,10 @@ function skin0(self, s, _, _, w, h)
 		},
 
 		npvisu = { hidden = 1 },
-
+		npaudiometadata = {
+			y = screenHeight - AUDIO_METADATA_H - 5,
+			align = "right"
+		},
 	})
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
@@ -4027,7 +4084,8 @@ function skin0(self, s, _, _, w, h)
                         x          = 40,
                         y          = TITLE_HEIGHT + 50,
                         nptrack =  {
-                                w          = screenWidth - 140,
+                                w          = screenWidth - 65,
+                                align      = "center",
                         },
 		},
 		npartistgroup    = {
@@ -4035,6 +4093,7 @@ function skin0(self, s, _, _, w, h)
                         y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5),
                         npartist =  {
                                 w          = screenWidth - 65,
+                                align      = "center",
                         },
 		},
 		npalbumgroup     = {
@@ -4042,6 +4101,7 @@ function skin0(self, s, _, _, w, h)
                         y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
                         npalbum =  {
                                 w          = screenWidth - 65,
+                                align      = "center",
                         },
 		},
 		npartwork = { hidden = 1 },
@@ -4108,6 +4168,12 @@ function skin0(self, s, _, _, w, h)
 			y = screenHeight - controlHeight - 3,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_NONE,
+		},
+		npaudiometadata = {
+			x = 50,
+			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+			w = screenWidth - 2*50,
+			align = "center"
 		},
 	})
 	s.nowplaying_text_only.npprogress.npprogressB_disabled = _uses(s.nowplaying_text_only.npprogress.npprogressB, {
@@ -4230,6 +4296,12 @@ function skin0(self, s, _, _, w, h)
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_SOUTH,
 		},
+	   npaudiometadata = {
+		   x = 50,
+		   y = screenHeight - (100 + controlHeight - 70) - AUDIO_METADATA_H + 10,
+		   w = screenWidth - 100,
+		   align = "center",
+	   },
 	})
 	s.nowplaying_visualizer_common.npprogress.npprogressB_disabled = s.nowplaying_visualizer_common.npprogress.npprogressB
 
@@ -4238,7 +4310,7 @@ function skin0(self, s, _, _, w, h)
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
 	local SP_yFudge = 7
-	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)- SP_yFudge*2
+	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)- SP_yFudge*2 - AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_spectrum_text'] == true then
 		visImage:registerSpectrumResolution(screenWidth, SP_H)
 		-- Visualizer: Spectrum Visualizer
@@ -4309,8 +4381,8 @@ function skin0(self, s, _, _, w, h)
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_spectrum_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10
+		mini_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10 - AUDIO_METADATA_H
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
@@ -4349,6 +4421,12 @@ function skin0(self, s, _, _, w, h)
 					useVisImage = true,
 				}
 			},
+			npaudiometadata = {
+				x = mini_visu_X,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = mini_visu_W,
+				align = "center"
+			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 
@@ -4361,8 +4439,8 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	-- Visualizer: large art Spectrum Visualizer
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING)
+	large_art_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING) - AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
@@ -4402,6 +4480,12 @@ function skin0(self, s, _, _, w, h)
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
 				}
+			},
+			npaudiometadata = {
+				x = large_art_visu_X,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = large_art_visu_W,
+				align = "center"
 			},
 		})
 		s.nowplaying_spectrum_large_art.pressed = s.nowplaying_spectrum_large_art
@@ -4477,6 +4561,10 @@ function skin0(self, s, _, _, w, h)
 	        npprogress = { hidden = 1 },
 	        npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 0 },
+			npaudiometadata = {
+				align = "right",
+				y = screenHeight - AUDIO_METADATA_H
+			}
 		})
 		s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
 
@@ -4533,9 +4621,9 @@ function skin0(self, s, _, _, w, h)
 				hidden = 0,
 				zOrder = 2,
 				position = LAYOUT_NONE,
-				x = AUDIO_METADATA_X,
+				x = 0,
 				y = 0,
-				w = AUDIO_METADATA_W,
+				w = screenWidth,
 				h = AUDIO_METADATA_H,
 				bgImg = nil,
 				align = "right",
@@ -4566,7 +4654,7 @@ function skin0(self, s, _, _, w, h)
 
 
 
-	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)
+	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70) - AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_vuanalog_text'] == true then
 		visImage:registerVUMeterResolution(screenWidth, VU_H)
 		-- Visualizer: Analog VU Meter
@@ -4606,9 +4694,9 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
-		mini_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+		mini_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
 --		mini_visu_H = screenHeight - controlHeight - progressBarHeight - mini_visu_Y - 10
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10 - AUDIO_METADATA_H
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -4635,6 +4723,12 @@ function skin0(self, s, _, _, w, h)
 	--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 				}
 			},
+			npaudiometadata = {
+				x = mini_visu_X,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = mini_visu_W,
+				align = "center"
+			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 
@@ -4647,8 +4741,8 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	-- Visualizer: VuMeter Visualizer large art
-	large_art_visu_Y = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING)
+	large_art_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING) - AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_vumeter_large_art = _uses(s.nowplaying_large_art, {
@@ -4673,6 +4767,12 @@ function skin0(self, s, _, _, w, h)
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 				}
 			},
+			npaudiometadata = {
+				x = large_art_visu_X,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = large_art_visu_W,
+				align = "center"
+			},
 		})
 		s.nowplaying_vumeter_large_art.pressed = s.nowplaying_vumeter_large_art
 
@@ -4687,7 +4787,7 @@ function skin0(self, s, _, _, w, h)
 	if activeNowPlayingScreenStyles['nowplaying_large_vumeter'] == true then
 		visImage:registerVUMeterResolution(screenWidth, screenHeight - (TITLE_HEIGHT * 2))
 		-- Visualizer: VU meter full screen
-		s.nowplaying_large_vumeter = _uses(s.nowplaying_visualizer_common, {
+		s.nowplaying_large_vumeter = _uses(s.nowplaying, {
 			npvisu = {
 				hidden = 0,
 				position = LAYOUT_NONE,
@@ -4735,6 +4835,10 @@ function skin0(self, s, _, _, w, h)
 	        npprogress = { hidden = 1 },
 	        npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 0 },
+			npaudiometadata = {
+				align = "right",
+				y = screenHeight - AUDIO_METADATA_H
+			}
 		})
 		s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
 
@@ -4880,6 +4984,12 @@ function skin0(self, s, _, _, w, h)
 					img = false,
 				},
 			},
+			npaudiometadata = {
+				x = npX,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = tw,
+				align = "center"
+			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 
@@ -4967,6 +5077,12 @@ function skin0(self, s, _, _, w, h)
 					img = false,
 				},
 			},
+			npaudiometadata = {
+				x = npX,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = tw,
+				align = "center"
+			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 
@@ -4991,7 +5107,24 @@ function skin0(self, s, _, _, w, h)
 		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
-		AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - AUDIO_METADATA_FONT_HEIGHT
+		local AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - AUDIO_METADATA_FONT_HEIGHT
+
+		local x_nptitle = {
+				x = npX,
+				nptrack = {
+					w = tw,
+					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+				},
+			}
+		if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+			x_nptitle = {
+					x = 90,
+					nptrack = {
+						w = screenWidth - 196,
+						font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					},
+				}
+		end
 
 --		mini_visu_H = 320
 --		mini_visu_Y = screenHeight - mini_visu_H - controlHeight - progressBarHeight - 10 - 20 - 6
@@ -5036,13 +5169,7 @@ function skin0(self, s, _, _, w, h)
 					useVisImage = true,
 				}
 			},
-			nptitle = {
-				x = npX,
-				nptrack = {
-					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-				},
-			},
+			nptitle = x_nptitle,
 			npartistgroup = {
 				x = npX,
 				npartist = {
@@ -5127,13 +5254,7 @@ function skin0(self, s, _, _, w, h)
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
 				}
 			},
-			nptitle = {
-				x = npX,
-				nptrack = {
-					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-				},
-			},
+			nptitle = x_nptitle,
 			npartistgroup = {
 				x = npX,
 				npartist = {
@@ -5482,8 +5603,6 @@ function init(self)
 	}
 	jiveMain:addNode(node)
 
-
-
 	local weight = 1
 	jiveMain:addItem({
 		id = "enableCustomisation",
@@ -5497,7 +5616,6 @@ function init(self)
 			end,
 		Framework:getGlobalSetting("jogglerScaleAndCustomise"))
 	})
-
 
 	weight = weight + 10
 	jiveMain:addItem({
@@ -5534,6 +5652,19 @@ function init(self)
 				self:messageBox("Scaling & Customisation,\nis not enabled", 2000)
 			end
 		end
+	})
+
+	jiveMain:addItem({
+		id = "npShowXofY",
+		node = "screenSettingsNowPlaying",
+		text = self:string("NOW_PLAYING_XOFY"),
+		style = 'item_choice',
+		weight = 60,
+		check = Checkbox("checkbox", function(_, checked)
+			Framework:setGlobalSetting("jogglerShowNowplayingXofY", checked)
+			reloadSkin()
+			end,
+		Framework:getGlobalSetting("jogglerShowNowplayingXofY"))
 	})
 end
 
