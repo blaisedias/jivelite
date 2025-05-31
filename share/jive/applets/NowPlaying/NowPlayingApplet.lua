@@ -253,7 +253,9 @@ local function getAudioStreamMetadata(self)
 					self.audiometadatatbl.bitrate = statusLoopData.bitrate
 					self.audiometadatatbl.samplerate = statusLoopData.samplerate
 					self.audiometadatatbl.samplesize = statusLoopData.samplesize
-					self.audiometadatatbl.year = statusLoopData.year
+					if statusLoopData.year ~=nil and statusLoopData.year ~= 0 and statusLoopData.year ~= '0' then
+						self.audiometadatatbl.year = statusLoopData.year
+					end
 					self.audiometadatatbl.genre = statusLoopData.genre
 					self.audiometadatatbl.tracknum = statusLoopData.tracknum
 					self.audiometadatatbl.replay_gain = statusLoopData.replay_gain
@@ -300,6 +302,13 @@ local function getAudioStreamMetadata(self)
 					self.audiometadatatxt = amd_txt
 					self.audiometadata:setValue(amd_txt .. " ")
 					log:info("audio stream metadata " .. amd_txt)
+					if self:getSettings().annotateTrack or self:getSettings().annotateAlbum then
+						local playerStatus = self.player:getPlayerStatus()
+						if playerStatus.item_loop then
+							local trackInfo = self:_extractTrackInfo(playerStatus.item_loop[1])
+							self:_updateTrack(trackInfo)
+						end
+					end
 				else
 					log:warn("no audio stream metadata")
 				end
@@ -434,6 +443,35 @@ function init(self)
 			return self:audioMetadataSelectorShow()
 		end
 	})
+
+	jiveMain:addItem({
+		id = "annotateTrack",
+		node = 'screenSettingsNowPlaying',
+		text = self:string("ANNOTATE_TRACK"),
+		style = 'item_choice',
+		weight = 51,
+		check = Checkbox("checkbox", function(_, checked)
+			local cb_settings = self:getSettings()
+			cb_settings.annotateTrack = checked
+			self:storeSettings()
+			end,
+			settings.annotateTrack)
+	})
+
+	jiveMain:addItem({
+		id = "annotateAlbum",
+		node = 'screenSettingsNowPlaying',
+		text = self:string("ANNOTATE_ALBUM"),
+		style = 'item_choice',
+		weight = 52,
+		check = Checkbox("checkbox", function(_, checked)
+			local cb_settings = self:getSettings()
+			cb_settings.annotateAlbum = checked
+			self:storeSettings()
+			end,
+			settings.annotateAlbum)
+	})
+
 
 	jiveMain:addItem({
 		id = "showvisualiserdata",
@@ -1343,6 +1381,23 @@ function _updateTrack(self, trackinfo, _, _)
 		local artist    = trackTable[2]
 		local album     = trackTable[3]
 
+		-- TODO make configurable (annotateTrackAlbum)
+		if self.audiometadatatbl ~= nil then
+			if self.audiometadatatbl.tracknum ~= nil and self:getSettings().annotateTrack then
+				if #self.audiometadatatbl.tracknum < 2 then
+					track = '0' .. self.audiometadatatbl.tracknum .. ' • ' .. track
+				else
+					track = self.audiometadatatbl.tracknum .. ' • ' .. track
+				end
+				if self.audiometadatatbl.disc ~= nil then
+					track = self.audiometadatatbl.disc .. '.' .. track
+				end
+			end
+			if self.audiometadatatbl.year ~= nil and self:getSettings().annotateAlbum then
+				album = album .. ' (' .. self.audiometadatatbl.year .. ')'
+			end
+		end
+
 		local artistalbum = ''
 		if artist ~= '' and album ~= '' then
 			artistalbum = artist ..  ' • ' .. album
@@ -1377,17 +1432,17 @@ function _updateTrack(self, trackinfo, _, _)
 		self.albumTitle:setValue(album)
 		self.artistTitle:setValue(artist)
 		self.artistalbumTitle:setValue(artistalbum)
-		self.audiometadata:setValue("")
+--		self.audiometadata:setValue("")
 		if self.scrollText then
 			self.trackTitle:animate(true)
+			self.audiometadata:animate(true)
 		else
 			self.trackTitle:animate(false)
+			self.audiometadata:animate(false)
 		end
 		self.artistTitle:animate(false)
 		self.albumTitle:animate(false)
 		self.artistalbumTitle:animate(false)
-		self.audiometadata:animate(true)
-
 	end
 end
 
