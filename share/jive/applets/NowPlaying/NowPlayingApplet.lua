@@ -1560,16 +1560,19 @@ function _updatePosition(self)
 			self.progressSlider:setValue(elapsed)
 		end
 	end
-	if self.showVUData then
-		if VUMeter.NF > 0 then
-			self.audiometadata:setValue(
-				"(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS .. ", VU frames=" .. VUMeter.NF .. " •••  " .. self.audiometadatatxt)
-		else
-			self.audiometadata:setValue("(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS .. " ••• " .. self.audiometadatatxt)
+	if self.debugtxt ~= nil then
+		-- print frame count so that liveness of fps is evident
+		if self.showVUData then
+			if VUMeter.NF > 0 then
+				self.debugtxt:setValue(
+					"(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS .. ", VU frames=" .. VUMeter.NF)
+			else
+				self.debugtxt:setValue("(" .. VUMeter.FC .. ") fps=" .. VUMeter.FPS)
+			end
 		end
-	end
-	if self.showSPData then
-		self.audiometadata:setValue("(" .. SpectrumMeter.FC .. ") fps=" .. SpectrumMeter.FPS .. " ••• " .. self.audiometadatatxt)
+		if self.showSPData then
+			self.debugtxt:setValue("(" .. SpectrumMeter.FC .. ") fps=" .. SpectrumMeter.FPS)
+		end
 	end
 end
 
@@ -1926,6 +1929,7 @@ function _createUI(self)
 	self.artistTitle = Label('npartist', "")
 	self.artistalbumTitle = Label('npartistalbum', "")
 	self.audiometadata = Label('npaudiometadata', "")
+	self.debugtxt = Label('npdebugdata', "")
 
 	local launchContextMenu =
 		function()
@@ -2289,6 +2293,7 @@ function _createUI(self)
 	window:addWidget(self.artistalbumTitle)
 	window:addWidget(self.artworkGroup)
 	window:addWidget(self.audiometadata)
+	window:addWidget(self.debugtxt)
 
 	-- Visualizer: Only load if needed
 	if npStyleHasSpectrum(self.windowStyle) or npStyleHasVuMeter(self.windowStyle) then

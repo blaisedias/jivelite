@@ -3545,6 +3545,20 @@ function skin0(self, s, _, _, w, h)
 			padding = { 5, 0, 0, 5 },
 			font = _boldfont(AUDIO_METADATA_FONT_HEIGHT),
 		},
+		npdebugdata = {
+			hidden = 0,
+			zOrder = 2,
+			position = LAYOUT_SOUTH,
+			bgImg = nil,
+			x = screenWidth/2,
+			y = 2,
+			w = screenWidth/2,
+			align = "right",
+			fg = TEXT_COLOR,
+			sh = TEXT_SH_COLOR,
+			padding = { 5, 0, 0, 5 },
+			font = _boldfont(18),
+		},
 
 	
 		-- cover art
@@ -4618,19 +4632,10 @@ function skin0(self, s, _, _, w, h)
 				}
 			},
 			npaudiometadata = {
-				hidden = 0,
-				zOrder = 2,
-				position = LAYOUT_NONE,
 				x = 0,
-				y = 0,
+				y = 4,
 				w = screenWidth,
-				h = AUDIO_METADATA_H,
-				bgImg = nil,
-				align = "right",
-				fg = scaledValues.NP_AUDIOMETADATA_COLOR,
-				sh = TEXT_SH_COLOR,
-				padding = { 5, 0, 0, 5 },
-				font = _font(AUDIO_METADATA_FONT_HEIGHT),
+				align = "center",
 			},
 
 	        nptitle = { hidden = 1 },
@@ -4859,6 +4864,12 @@ function skin0(self, s, _, _, w, h)
 	        npprogress = { hidden = 1 },
 	        npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 1 },
+			npaudiometadata = {
+				x = 0,
+				y = 4,
+				w = screenWidth,
+				align = "center",
+			},
 		})
 		s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
 	end
