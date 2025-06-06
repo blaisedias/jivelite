@@ -264,7 +264,7 @@ SHOW_VISUALISER_DATA
 	EN	Show Visualiser Data
 
 GO_NOWPLAYING_ON_START
-	EN	Startup NowPlaying
+	EN	Startup Now Playing
 
 AUDIO_METADATA
 	EN	Audio Metadata

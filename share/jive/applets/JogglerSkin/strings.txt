@@ -387,7 +387,7 @@ TEXT_SCALING
 	EN	Scale Text By
 
 NP_TEXT_SCALING
-	EN	Scale NowPlaying Text By
+	EN	Scale Now Playing Text By
 
 GRID_TEXT_SCALING
 	EN	Scale Grid Text By
@@ -405,16 +405,16 @@ LAYOUT
 	EN	Layout
 
 TRACK_FONT_SIZE
-	EN	NowPlaying Track Font Size
+	EN	Now Playing Track Font Size
 
 ARTISTALBUM_FONT_SIZE
-	EN	NowPlaying Artist/Album Font Size
+	EN	Now Playing Artist/Album Font Size
 
 LINE_SPACING
-	EN	NowPlaying Line Spacing
+	EN	Now Playing Line Spacing
 
 TRACKLAYOUT_ALIGN
-	EN	NowPlaying Track Alignment
+	EN	Now Playing Track Alignment
 
 MID_ARTWORK_SIZE
 	EN	Mid Artwork Size
