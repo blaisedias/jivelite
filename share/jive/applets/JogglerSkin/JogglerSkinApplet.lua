@@ -95,6 +95,8 @@ local scaled_imgpath = "applets/JogglerSkin/images/"
 
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
+local tbControlButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle'}
+local tbVolumeButtons = {'volDown', 'volSlider', 'volUp' }
 
 local layoutMenuNodeName = 'jogglerLayout'
 local scalingMenuItems = {
@@ -614,24 +616,42 @@ local function layoutLargeArtControls(candidates, screenWidth, controlWidth, div
 	local iDiv = 1
 	local fitted = true
 	local buttonOrder = {}
-	for k,v in ipairs(candidates) do
+	for _,v in ipairs(candidates) do
 		local cw = controlWidth
-		if v == 'volSlider' then
-			cw = volumeBarWidth
+		if v == 'volSlider' or v == 'volUp' or v == 'volDown' then
+			break
 		end
-		if k > 1 then
-			cw = cw + divWidth
-		end
+--		if #buttonOrder > 0 then
+--			cw = cw + divWidth
+--		end
 		if cw <= avail then
-			if k > 1 then
-				table.insert(buttonOrder, 'div' .. tostring(iDiv))
-				iDiv = iDiv + 1
-			end
+--			if #buttonOrder > 0 then
+--				table.insert(buttonOrder, 'div' .. tostring(iDiv))
+--				iDiv = iDiv + 1
+--			end
 			table.insert(buttonOrder, v)
 			avail = avail - cw
 		else
 			fitted = false
+			return {fitted=fitted, order=buttonOrder}
 		end
+	end
+	if table.contains(candidates, 'volUp') then
+		avail = avail - 2 * controlWidth
+	end
+	if table.contains(candidates, 'volSlider') then
+		avail = avail - volumeBarWidth
+	end
+	-- inserting none or all candidate volume controls works because
+	-- calling code will drop volumebar if not fitted and try again
+	if avail >= 0 then
+		for _,v in ipairs(candidates) do
+			if v == 'volSlider' or v == 'volUp' or v == 'volDown' then
+				table.insert(buttonOrder, v)
+			end
+		end
+	else
+		fitted = false
 	end
 	return {fitted=fitted, order=buttonOrder}
 end
@@ -3323,83 +3343,69 @@ function skin0(self, s, _, _, w, h)
 	local buttonOrder = {}
 	local iDiv = 1
 	local settings = appletManager:callService("getNowPlayingScreenButtons")
-	local divVolSpacing = screenWidth
 	local volSpacingInserted = false
 	local volSliderIsEnabled = false
-	-- volume controls width
-	local vc_width = 0
-	-- width when all controls are visible, use this to set volumeBarWidth up for displays
-	-- where for large art NP views the volume slider can be displayed
-	local all_tc_width = 0
-	for _,v in ipairs(tbButtons) do
-		if v == 'volSlider' then
-			all_tc_width = all_tc_width + volumeBarWidth + _transportControlBorder.w
-		else
-			all_tc_width = all_tc_width + controlWidth + _transportControlBorder.w
+	-- non volume controls width
+	local nvc_width = 0
+
+	for _,v in ipairs(tbControlButtons) do
+		if settings[v] then
+--			if #buttonOrder > 0 then
+--				table.insert(buttonOrder, 'div' .. tostring(iDiv))
+--				nvc_width = nvc_width + _transportControlBorder.w
+--				iDiv = iDiv + 1
+--			end
+			table.insert(buttonOrder, v)
+			nvc_width = nvc_width + controlWidth
 		end
 	end
 
-	for k,v in ipairs(tbButtons) do
+	-- volume controls width
+	local vc_width = 0
+	for _,v in ipairs(tbVolumeButtons) do
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
-			if k > 1 then
-				if (v == 'volDown' or v == 'volSlider' or v == 'volUp') and not volSpacingInserted then
-					table.insert(buttonOrder, 'divVolSpace')
-					volSpacingInserted = true
-				else
-					table.insert(buttonOrder, 'div' .. tostring(iDiv))
-				    divVolSpacing = divVolSpacing - _transportControlBorder.w
-				end
-				iDiv = iDiv + 1
+			if not volSpacingInserted then
+				table.insert(buttonOrder, 'divVolSpace')
+				volSpacingInserted = true
+--			else
+--				table.insert(buttonOrder, 'div' .. tostring(iDiv))
+--				vc_width = vc_width + _transportControlBorder.w
+--				iDiv = iDiv + 1
 			end
 			table.insert(buttonOrder, v)
 			if v ~= 'volSlider' then
-				divVolSpacing = divVolSpacing - controlWidth
+				vc_width = vc_width + controlWidth
 			else
-				divVolSpacing = divVolSpacing - volumeBarWidth
 				vc_width = vc_width + volumeBarWidth
 				volSliderIsEnabled = true
-			end
-			if (v == 'volDown' or v == 'volUp') then
-				vc_width = vc_width + controlWidth
 			end
 		end
 	end
 
-	log:info("volSliderIsEnabled:", volSliderIsEnabled)
-	-- FIXME:
-	-- The correct solution would be for NowPlaying to perform this task
-	-- for each NowPlaying view - that isn't possible at this time.
-	-- So we are stuck with a single value of volumeBarWidth for all NowPlaying views
-	-- The following block almost works for all cases...
-	if divVolSpacing > 0 and vc_width ~=0 then
-		-- total width of enabled controls
-		local tc_width =  screenWidth - divVolSpacing
-		-- available width for controls in large art NP views
-		local lac_width =  screenWidth - screenHeight - math.floor(controlWidth/2) - _transportControlBorder.w
-		log:info("debug: all_tc_width:", all_tc_width, " tc_width:", tc_width, " vc_width:", vc_width, " lac_width:", lac_width, " divVolSpacing:", divVolSpacing, " volSliderIsEnabled:", volSliderIsEnabled)
-		-- if large art control width is < width of all controls, increase the volume bar width so
-		-- increase the volume bar width such that the same volume bar width works for all NowPlaying views
-		if volSliderIsEnabled == true then
-			if lac_width > all_tc_width and vc_width ~= tc_width then
-				volumeBarWidth = volumeBarWidth + (lac_width - tc_width)
-				divVolSpacing = divVolSpacing - (lac_width - tc_width)
-				log:info("volume slider visible in ALL NP views")
-			-- if
-			-- 1) if the volume bar cannot be rendered in the large art NP views
-			-- 2) only volume controls are rendered
-			--		we are free to increase the volume bar width such that volume
-			--		controls use most of the right half of the screen width
-			--		(right justification)
-			elseif divVolSpacing > 0 and vc_width < (screenWidth/2) then
-				if divVolSpacing > (screenWidth/2) - vc_width then
-					local vbw_delta = (screenWidth/2) - vc_width
-					volumeBarWidth = volumeBarWidth + vbw_delta
-					divVolSpacing = divVolSpacing - vbw_delta
-				end
-				log:info("volume slider is NOT visible in all NP views")
-			end
+--	-- FIXME:
+--	-- The correct solution would be for NowPlaying code to expand the volume
+--	-- bar size for each NowPlaying view - that isn't possible at this time.
+--	-- So we are stuck with a single value of volumeBarWidth for all NowPlaying views
+--	-- The following block almost works satisfactorily for all cases...
+	local divVolSpacing = screenWidth - nvc_width - vc_width
+	log:info("volSliderIsEnabled:", volSliderIsEnabled, " volumeBarWidth:", volumeBarWidth)
+	log:info("nvc_width: ", nvc_width, " vc_width: ", vc_width, " divVolSpacing: ", divVolSpacing)
+	if divVolSpacing > 0 and vc_width < (screenWidth/2) then
+		if screenAR >= 2 then
+			-- there is enough space to display the volume bar always if its width is reduced
+			vc_width = vc_width - volumeBarWidth
+			volumeBarWidth = screenWidth - screenHeight - nvc_width - vc_width - 10
+			divVolSpacing = screenWidth - nvc_width - vc_width - volumeBarWidth - 10
+		else
+			-- in this case volume bar will be dropped from the set of controls visible
+			-- in large art Now Playing views
+			volumeBarWidth = volumeBarWidth + (screenWidth/2) - vc_width
+			divVolSpacing = divVolSpacing - ((screenWidth/2) - vc_width)
 		end
-	elseif divVolSpacing < 0 then
+	end
+
+	if divVolSpacing < 0 then
+		log:warn(" negative divVolSpacing! nvc_width: ", nvc_width, " vc_width: ", vc_width, " divVolSpacing: ", divVolSpacing, " volumeBarWidth: ", volumeBarWidth)
 		-- divVolSpacing is negative so add it to volumeBarWidth to reduce volumeBarWidth
 		volumeBarWidth = volumeBarWidth + divVolSpacing
 		divVolSpacing = 0
