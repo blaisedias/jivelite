@@ -3454,6 +3454,10 @@ function skin0(self, s, _, _, w, h)
 			},
 		}
 
+	if screenAR >= 3 and screenHeight < 480 then
+		Framework:setGlobalSetting("jogglerShowNowplayingXofY", false)
+	end
+
 	if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
 		y_npartistgroup = TITLE_HEIGHT + 17
 		x_title = _uses(s.title, {
@@ -4899,14 +4903,18 @@ function skin0(self, s, _, _, w, h)
 			y_artwork = (screenHeight - scaledValues.midArtworkSize)/2
 		end
 --		local screenRem = screenWidth - npX - 15
-		local tw = screenHeight - 30
-		mini_visu_X = npX + screenHeight
+--		local tw = screenHeight - 30
+		local screenRem = screenWidth - npX
+		local tw = screenRem/2
+--		mini_visu_X = npX + screenHeight
+		mini_visu_X = npX + tw
 		mini_visu_W = screenWidth - mini_visu_X - 15
 		mini_visu_Y = TITLE_HEIGHT + 5
-		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
+		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - (progressBarHeight/2)
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 
+		tw = tw - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, {
@@ -4950,8 +4958,8 @@ function skin0(self, s, _, _, w, h)
 			nptitle = {
 				x = npX,
 				nptrack = {
-					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE),
+					w = screenRem - 80 - 10,
+					font = _boldfont(NP_TRACK_FONT_SIZE),
 				},
 			},
 			npartistgroup = {
@@ -5043,8 +5051,8 @@ function skin0(self, s, _, _, w, h)
 			nptitle = {
 				x = npX,
 				nptrack = {
-					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE),
+					w = screenRem - 80 - 10,
+					font = _boldfont(NP_TRACK_FONT_SIZE),
 				},
 			},
 			npartistgroup = {
@@ -5130,7 +5138,7 @@ function skin0(self, s, _, _, w, h)
 				x = npX,
 				nptrack = {
 					w = tw,
-					font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
 				},
 			}
 		if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
@@ -5138,7 +5146,7 @@ function skin0(self, s, _, _, w, h)
 					x = 90,
 					nptrack = {
 						w = screenWidth - 196,
-						font = _boldfont(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+						font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
 					},
 				}
 		end
@@ -5671,18 +5679,21 @@ function init(self)
 		end
 	})
 
-	jiveMain:addItem({
-		id = "npShowXofY",
-		node = "screenSettingsNowPlaying",
-		text = self:string("NOW_PLAYING_XOFY"),
-		style = 'item_choice',
-		weight = 60,
-		check = Checkbox("checkbox", function(_, checked)
-			Framework:setGlobalSetting("jogglerShowNowplayingXofY", checked)
-			reloadSkin()
-			end,
-		Framework:getGlobalSetting("jogglerShowNowplayingXofY"))
-	})
+	local screenWidth, screenHeight = Framework:getScreenSize()
+	if screenWidth / screenHeight < 3 then
+		jiveMain:addItem({
+			id = "npShowXofY",
+			node = "screenSettingsNowPlaying",
+			text = self:string("NOW_PLAYING_XOFY"),
+			style = 'item_choice',
+			weight = 60,
+			check = Checkbox("checkbox", function(_, checked)
+				Framework:setGlobalSetting("jogglerShowNowplayingXofY", checked)
+				reloadSkin()
+				end,
+			Framework:getGlobalSetting("jogglerShowNowplayingXofY"))
+		})
+	end
 end
 
 
