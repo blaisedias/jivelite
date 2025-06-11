@@ -53,6 +53,7 @@ function registerApplet(self)
 		jiveMain:registerSkin(self:string("PIGRID_SKIN_720_1280"), "PiGridSkin", "skin720x1280", "PiGridSkin_720x1280")
 		jiveMain:registerSkin(self:string("PIGRID_SKIN_1280_1024"), "PiGridSkin", "skin1280x1024", "PiGridSkin_1280x1024")
 		jiveMain:registerSkin(self:string("PIGRID_SKIN_1920_1080"), "PiGridSkin", "skin1920x1080", "PiGridSkin_1920x1080")
+		jiveMain:registerSkin(self:string("PIGRID_SKIN_1920_480"), "PiGridSkin", "skin1920x480", "PiGridSkin_1920x480")
 		local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
 		local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
 		-- this skin only really works in landscape mode with a decent ratio of > 1.3
