@@ -71,6 +71,7 @@ function registerApplet(self)
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_720_1280"), "JogglerSkin", "skin720x1280", "JogglerSkin_720x1280")
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1280_1024"), "JogglerSkin", "skin1280x1024", "JogglerSkin_1280x1024")
 		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1920_1080"), "JogglerSkin", "skin1920x1080", "JogglerSkin_1920x1080")
+		jiveMain:registerSkin(self:string("JOGGLER_SKIN_1920_480"), "JogglerSkin", "skin1920x480", "JogglerSkin_1920x480")
 		local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH') or 0)
 		local screen_height = tonumber(os.getenv('JL_SCREEN_HEIGHT') or 0)
 		if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then

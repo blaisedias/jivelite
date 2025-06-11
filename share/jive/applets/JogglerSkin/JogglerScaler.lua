@@ -786,6 +786,7 @@ function getJogglerSkinParams(skinName)
 --    params.NP_TRACK_FONT_SIZE =  scaleNPTextValue(28)
     params.NP_TRACK_FONT_SIZE = scaleNPTextValue(36)
     params.NP_ARTISTALBUM_FONT_SIZE = scaleNPTextValue(28)
+
     local screenWidth, screenHeight = Framework:getScreenSize()
     if true then
         if screenWidth/screenHeight >= 3 then
@@ -844,6 +845,16 @@ function getJogglerSkinParams(skinName)
         end
     end
 
+    if jsonData[resolutionKey].jogglerSkin.UW_TEXT_SCREEN_WIDTH == nil then
+        params.UW_TEXT_SCREEN_WIDTH = 0
+        if screenWidth/screenHeight >= 3 then
+            local npX = screenHeight + 15
+            if params.midArtworkSize ~= screenHeight then
+                npX = params.midArtworkSize + 15 + 10
+            end
+            params.UW_TEXT_SCREEN_WIDTH = math.floor((screenWidth - npX)/2)
+        end
+    end
 
     os.execute("mkdir -p " .. System.getUserDir() .. '/cache')
     _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/JogglerSkin.json')
