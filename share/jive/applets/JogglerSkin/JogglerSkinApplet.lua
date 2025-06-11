@@ -115,6 +115,7 @@ local npMenuItems = {
 	{ key='midArtworkSize', titleString='MID_ARTWORK_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 	{ key='TITLEBAR_FONT_SIZE', titleString='TITLEBAR_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 	{ key='TITLE_FONT_SIZE', titleString='TITLE_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
+	{ key='UW_TEXT_SCREEN_WIDTH', titleString='UW_TEXT_SCREEN_WIDTH', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 }
 
 local function addLayoutMenuItems(self)
@@ -3894,182 +3895,184 @@ function skin0(self, s, _, _, w, h)
 		large_art_rmargin = 100
 	end
 
-	s.nowplaying_large_art = _uses(s.nowplaying, {
-		bgImg = V_blackBackground,
-		title = {
-			bgImg = false,
-			text = {
-				border = { screenHeight - 72, 0, 0, 0 },
-				padding = large_art_padding,
-				font = _boldfont(scaledValues.NP_LARGE_ART_TITLE_FONT_SIZE),
+	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
+		s.nowplaying_large_art = _uses(s.nowplaying, {
+			bgImg = V_blackBackground,
+			title = {
+				bgImg = false,
+				text = {
+					border = { screenHeight - 72, 0, 0, 0 },
+					padding = large_art_padding,
+					font = _boldfont(scaledValues.NP_LARGE_ART_TITLE_FONT_SIZE),
+				},
+				button_back = {
+					bgImg = false
+				}
 			},
-			button_back = {
-				bgImg = false
-			}
-		},
-		nptitle = {
-			x = npX,
-			nptrack = {
-				w = screenWidth - npX - large_art_rmargin,
-				font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
+			nptitle = {
+				x = npX,
+				nptrack = {
+					w = screenWidth - npX - large_art_rmargin,
+					font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
+				},
 			},
-		},
-		npartistgroup = {
-			x = npX,
-			npartist = {
-				font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-				w = screenWidth - npX - 10,
-			}
-		},
-		npalbumgroup = {
-			x = npX,
-			npalbum = {
-				font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-				w = screenWidth - npX - 10,
-			}
-		},
-		npcontrols = {
-			order = largeArtButtonOrder,
-			x = screenHeight,
-		},
-		npprogress = {
-			x = npX,
-			elapsed = {
-				w = 60,
+			npartistgroup = {
+				x = npX,
+				npartist = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = screenWidth - npX - 10,
+				}
 			},
-			remain = {
-				w = 60,
+			npalbumgroup = {
+				x = npX,
+				npalbum = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = screenWidth - npX - 10,
+				}
 			},
-			npprogressB = {
-				w = screenWidth - npX - 2*60 - 15,
+			npcontrols = {
+				order = largeArtButtonOrder,
+				x = screenHeight,
 			},
-		},
-		npprogressNB = {
-			x = npX,
-		},
-		npaudiometadata = {
-			x = npX,
-			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
-			w = screenWidth - npX - 15,
-			align = "center"
-		},
-		npartwork = {
-			w = screenHeight,
-			x = 0,
-			y = 0,
-			align = "center",
-			h = WH_FILL,
-			artwork = {
-				w = WH_FILL,
+			npprogress = {
+				x = npX,
+				elapsed = {
+					w = 60,
+				},
+				remain = {
+					w = 60,
+				},
+				npprogressB = {
+					w = screenWidth - npX - 2*60 - 15,
+				},
+			},
+			npprogressNB = {
+				x = npX,
+			},
+			npaudiometadata = {
+				x = npX,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = screenWidth - npX - 15,
+				align = "center"
+			},
+			npartwork = {
+				w = screenHeight,
+				x = 0,
+				y = 0,
+				align = "center",
 				h = WH_FILL,
-				align = "left",
-				padding = 0,
-				img = false,
+				artwork = {
+					w = WH_FILL,
+					h = WH_FILL,
+					align = "left",
+					padding = 0,
+					img = false,
+				},
 			},
-		},
 
-		npvisu = { hidden = 1 },
-	})
-
-	s.nowplaying_large_art.pressed = s.nowplaying_large_art
-
-	-- if we have more than four buttons, then make them smaller
-	if (largeArtSmallTbButtons) then
-		s.nowplaying_large_art.npcontrols.rew = _uses(s.nowplaying.npcontrols.rew, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
-		
-		s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.repeatSong = _uses(s.nowplaying.npcontrols.repeatSong, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.repeatPlaylist = _uses(s.nowplaying.npcontrols.repeatPlaylist, { w = smallControlWidth })
-
-		s.nowplaying_large_art.npcontrols.shuffleMode = _uses(s.nowplaying.npcontrols.shuffleMode, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.shuffleOff = _uses(s.nowplaying.npcontrols.shuffleOff, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.shuffleSong = _uses(s.nowplaying.npcontrols.shuffleSong, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.shuffleAlbum = _uses(s.nowplaying.npcontrols.shuffleAlbum, { w = smallControlWidth })
-		
-		s.nowplaying_large_art.npcontrols.volDown = _uses(s.nowplaying.npcontrols.volDown, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.volUp = _uses(s.nowplaying.npcontrols.volUp, { w = smallControlWidth })
-
-		s.nowplaying_large_art.npcontrols.thumbsUp = _uses(s.nowplaying.npcontrols.thumbsUp, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.thumbsDown = _uses(s.nowplaying.npcontrols.thumbsDown, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.thumbsUpDisabled = _uses(s.nowplaying.npcontrols.thumbsUpDisabled, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.thumbsDownDisabled = _uses(s.nowplaying.npcontrols.thumbsDownDisabled, { w = smallControlWidth })
-
-		s.nowplaying_large_art.npcontrols.love = _uses(s.nowplaying.npcontrols.love, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.hate = _uses(s.nowplaying.npcontrols.hate, { w = smallControlWidth })
-
-		s.nowplaying_large_art.npcontrols.fwdDisabled = _uses(s.nowplaying.npcontrols.fwdDisabled, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
-		s.nowplaying_large_art.npcontrols.repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
-
-		s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
-			w = 1,
-			padding = { 0, 0, 1, 0 }
+			npvisu = { hidden = 1 },
 		})
 
-	else
-		s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
-			w = 6,
-			padding = { 2, 0, 2, 0 }
-		})
+		s.nowplaying_large_art.pressed = s.nowplaying_large_art
 
-	end
-		s.nowplaying_large_art.npcontrols.div2 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.div3 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.div4 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.div7 = _uses(s.nowplaying_large_art.npcontrols.div1)
-		s.nowplaying_large_art.npcontrols.divVolSpace = _uses(s.nowplaying_large_art.npcontrols.div1)
+		-- if we have more than four buttons, then make them smaller
+		if (largeArtSmallTbButtons) then
+			s.nowplaying_large_art.npcontrols.rew = _uses(s.nowplaying.npcontrols.rew, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
 
-	s.nowplaying_large_art.npcontrols.pressed = {
-		rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = controlKeyMiddlePressed }),
-		play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = controlKeyMiddlePressed }),
-		pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
-		fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
-		twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
-		repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
-		repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
-		repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
-		repeatMode      = _uses(s.nowplaying_large_art.npcontrols.repeatMode, { bgImg = controlKeyMiddlePressed }),
-		shuffleAlbum    = _uses(s.nowplaying_large_art.npcontrols.shuffleAlbum, { bgImg = controlKeyMiddlePressed }),
-		shuffleSong     = _uses(s.nowplaying_large_art.npcontrols.shuffleSong, { bgImg = controlKeyMiddlePressed }),
-		shuffleMode      = _uses(s.nowplaying_large_art.npcontrols.shuffleMode, { bgImg = controlKeyMiddlePressed }),
-		shuffleOff      = _uses(s.nowplaying_large_art.npcontrols.shuffleOff, { bgImg = controlKeyMiddlePressed }),
-		volDown = _uses(s.nowplaying_large_art.npcontrols.volDown, { bgImg = controlKeyMiddlePressed }),
-		volUp   = _uses(s.nowplaying_large_art.npcontrols.volUp, { bgImg = controlKeyMiddlePressed }),
+			s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatSong = _uses(s.nowplaying.npcontrols.repeatSong, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatPlaylist = _uses(s.nowplaying.npcontrols.repeatPlaylist, { w = smallControlWidth })
 
-		thumbsUp    = _uses(s.nowplaying_large_art.npcontrols.thumbsUp, { bgImg = controlKeyMiddlePressed }),
-		thumbsDown  = _uses(s.nowplaying_large_art.npcontrols.thumbsDown, { bgImg = controlKeyMiddlePressed }),
-		thumbsUpDisabled    = s.nowplaying_large_art.npcontrols.thumbsUpDisabled,
-		thumbsDownDisabled  = s.nowplaying_large_art.npcontrols.thumbsDownDisabled,
-		love        = _uses(s.nowplaying_large_art.npcontrols.love, { bgImg = controlKeyMiddlePressed }),
-		hate        = _uses(s.nowplaying_large_art.npcontrols.hate, { bgImg = controlKeyMiddlePressed }),
-		fwdDisabled = _uses(s.nowplaying_large_art.npcontrols.fwdDisabled),
-		rewDisabled = _uses(s.nowplaying_large_art.npcontrols.rewDisabled),
-		shuffleDisabled = _uses(s.nowplaying_large_art.npcontrols.shuffleDisabled),
-		repeatDisabled = _uses(s.nowplaying_large_art.npcontrols.repeatDisabled),
-	}
+			s.nowplaying_large_art.npcontrols.shuffleMode = _uses(s.nowplaying.npcontrols.shuffleMode, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleOff = _uses(s.nowplaying.npcontrols.shuffleOff, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleSong = _uses(s.nowplaying.npcontrols.shuffleSong, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleAlbum = _uses(s.nowplaying.npcontrols.shuffleAlbum, { w = smallControlWidth })
 
-	s.nowplaying_large_art.nptitle.pressed = _uses(s.nowplaying_large_art.nptitle)
-	s.nowplaying_large_art.npalbumgroup.pressed = _uses(s.nowplaying_large_art.npalbumgroup)
-	s.nowplaying_large_art.npartistgroup.pressed = _uses(s.nowplaying_large_art.npartistgroup)
-	s.nowplaying_large_art.title.pressed = _uses(s.nowplaying_large_art.title, {
-		text = {
-			fg = { 0xB3, 0xB3, 0xB3 },
-			sh = { },
-			bgImg = pressedTitlebarButtonBox,
+			s.nowplaying_large_art.npcontrols.volDown = _uses(s.nowplaying.npcontrols.volDown, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.volUp = _uses(s.nowplaying.npcontrols.volUp, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.thumbsUp = _uses(s.nowplaying.npcontrols.thumbsUp, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsDown = _uses(s.nowplaying.npcontrols.thumbsDown, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsUpDisabled = _uses(s.nowplaying.npcontrols.thumbsUpDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsDownDisabled = _uses(s.nowplaying.npcontrols.thumbsDownDisabled, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.love = _uses(s.nowplaying.npcontrols.love, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.hate = _uses(s.nowplaying.npcontrols.hate, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.fwdDisabled = _uses(s.nowplaying.npcontrols.fwdDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
+				w = 1,
+				padding = { 0, 0, 1, 0 }
+			})
+
+		else
+			s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
+				w = 6,
+				padding = { 2, 0, 2, 0 }
+			})
+
+		end
+			s.nowplaying_large_art.npcontrols.div2 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div3 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div4 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div7 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.divVolSpace = _uses(s.nowplaying_large_art.npcontrols.div1)
+
+		s.nowplaying_large_art.npcontrols.pressed = {
+			rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = controlKeyMiddlePressed }),
+			play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = controlKeyMiddlePressed }),
+			pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
+			fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
+			twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+			repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
+			repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
+			repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
+			repeatMode      = _uses(s.nowplaying_large_art.npcontrols.repeatMode, { bgImg = controlKeyMiddlePressed }),
+			shuffleAlbum    = _uses(s.nowplaying_large_art.npcontrols.shuffleAlbum, { bgImg = controlKeyMiddlePressed }),
+			shuffleSong     = _uses(s.nowplaying_large_art.npcontrols.shuffleSong, { bgImg = controlKeyMiddlePressed }),
+			shuffleMode      = _uses(s.nowplaying_large_art.npcontrols.shuffleMode, { bgImg = controlKeyMiddlePressed }),
+			shuffleOff      = _uses(s.nowplaying_large_art.npcontrols.shuffleOff, { bgImg = controlKeyMiddlePressed }),
+			volDown = _uses(s.nowplaying_large_art.npcontrols.volDown, { bgImg = controlKeyMiddlePressed }),
+			volUp   = _uses(s.nowplaying_large_art.npcontrols.volUp, { bgImg = controlKeyMiddlePressed }),
+
+			thumbsUp    = _uses(s.nowplaying_large_art.npcontrols.thumbsUp, { bgImg = controlKeyMiddlePressed }),
+			thumbsDown  = _uses(s.nowplaying_large_art.npcontrols.thumbsDown, { bgImg = controlKeyMiddlePressed }),
+			thumbsUpDisabled    = s.nowplaying_large_art.npcontrols.thumbsUpDisabled,
+			thumbsDownDisabled  = s.nowplaying_large_art.npcontrols.thumbsDownDisabled,
+			love        = _uses(s.nowplaying_large_art.npcontrols.love, { bgImg = controlKeyMiddlePressed }),
+			hate        = _uses(s.nowplaying_large_art.npcontrols.hate, { bgImg = controlKeyMiddlePressed }),
+			fwdDisabled = _uses(s.nowplaying_large_art.npcontrols.fwdDisabled),
+			rewDisabled = _uses(s.nowplaying_large_art.npcontrols.rewDisabled),
+			shuffleDisabled = _uses(s.nowplaying_large_art.npcontrols.shuffleDisabled),
+			repeatDisabled = _uses(s.nowplaying_large_art.npcontrols.repeatDisabled),
 		}
-	})
-	s.nowplaying_large_art.npprogress.npprogressB_disabled = _uses(s.nowplaying_large_art.npprogress.npprogressB, {
-		img = _songProgressBarDisabled,
-	})
-	
+
+		s.nowplaying_large_art.nptitle.pressed = _uses(s.nowplaying_large_art.nptitle)
+		s.nowplaying_large_art.npalbumgroup.pressed = _uses(s.nowplaying_large_art.npalbumgroup)
+		s.nowplaying_large_art.npartistgroup.pressed = _uses(s.nowplaying_large_art.npartistgroup)
+		s.nowplaying_large_art.title.pressed = _uses(s.nowplaying_large_art.title, {
+			text = {
+				fg = { 0xB3, 0xB3, 0xB3 },
+				sh = { },
+				bgImg = pressedTitlebarButtonBox,
+			}
+		})
+		s.nowplaying_large_art.npprogress.npprogressB_disabled = _uses(s.nowplaying_large_art.npprogress.npprogressB, {
+			img = _songProgressBarDisabled,
+		})
+	end
+
 	s.nowplaying_art_only = _uses(s.nowplaying, {
 
 		bgImg            = V_blackBackground,
@@ -4465,7 +4468,7 @@ function skin0(self, s, _, _, w, h)
 	-- Visualizer: large art Spectrum Visualizer
 	large_art_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
 	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight + (10 * NP_LINE_SPACING) - AUDIO_METADATA_H
-	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
+	if activeNowPlayingScreenStyles['nowplaying_spectrum_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, {
 			npvisu = {
@@ -4902,20 +4905,21 @@ function skin0(self, s, _, _, w, h)
 			npX = scaledValues.midArtworkSize + 15 + x_artwork
 			y_artwork = (screenHeight - scaledValues.midArtworkSize)/2
 		end
---		local screenRem = screenWidth - npX - 15
---		local tw = screenHeight - 30
-		local screenRem = screenWidth - npX
-		local tw = screenRem/2
---		mini_visu_X = npX + screenHeight
-		mini_visu_X = npX + tw
-		mini_visu_W = screenWidth - mini_visu_X - 15
+			local screenRem = screenWidth - npX
+			local tw = scaledValues.UW_TEXT_SCREEN_WIDTH
+			mini_visu_X = npX + tw
+			mini_visu_W = screenWidth - mini_visu_X - 15
 		mini_visu_Y = TITLE_HEIGHT + 5
-		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - (progressBarHeight/2)
+--		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - (progressBarHeight/2)
+		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 
 		tw = tw - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
+		-- center the text fields vertically
+		y_npartistgroup = (screenHeight - (TITLE_HEIGHT + 17 + controlHeight + progressBarHeight + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING) + NP_ARTISTALBUM_FONT_SIZE)) /2
+		y_npartistgroup = y_npartistgroup + TITLE_HEIGHT + 17
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, {
 			npvisu = {
@@ -4964,6 +4968,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npartistgroup = {
 				x = npX,
+				y = y_npartistgroup,
 				npartist = {
 					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
@@ -4971,6 +4976,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npalbumgroup = {
 				x = npX,
+				y = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
 				npalbum = {
 					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
@@ -5057,6 +5063,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npartistgroup = {
 				x = npX,
+				y = y_npartistgroup,
 				npartist = {
 					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
@@ -5064,6 +5071,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npalbumgroup = {
 				x = npX,
+				y = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
 				npalbum = {
 					font = _font(NP_ARTISTALBUM_FONT_SIZE),
 					w = tw,
@@ -5116,6 +5124,184 @@ function skin0(self, s, _, _, w, h)
 				-- Hack: text needs to be there to fill the space, not visible
 				padding = { screenWidth, 0, 0, 0 }
 			},
+		})
+
+		s.nowplaying_large_art = _uses(s.nowplaying, {
+			bgImg = V_blackBackground,
+			title = {
+				bgImg = false,
+				text = {
+					border = { screenHeight - 72, 0, 0, 0 },
+					padding = large_art_padding,
+					font = _boldfont(scaledValues.NP_LARGE_ART_TITLE_FONT_SIZE),
+				},
+				button_back = {
+					bgImg = false
+				}
+			},
+			nptitle = {
+				x = npX,
+				nptrack = {
+					w = screenWidth - npX - large_art_rmargin,
+					font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
+				},
+			},
+			npartistgroup = {
+				x = npX,
+				y = y_npartistgroup,
+				npartist = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = screenWidth - npX - 10,
+				}
+			},
+			npalbumgroup = {
+				x = npX,
+				y = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
+				npalbum = {
+					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					w = screenWidth - npX - 10,
+				}
+			},
+			npcontrols = {
+				order = largeArtButtonOrder,
+				x = screenHeight,
+			},
+			npprogress = {
+				x = npX,
+				elapsed = {
+					w = 60,
+				},
+				remain = {
+					w = 60,
+				},
+				npprogressB = {
+					w = screenWidth - npX - 2*60 - 15,
+				},
+			},
+			npprogressNB = {
+				x = npX,
+			},
+			npaudiometadata = {
+				x = npX,
+				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				w = screenWidth - npX - 15,
+				align = "center"
+			},
+			npartwork = {
+				w = screenHeight,
+				x = 0,
+				y = 0,
+				align = "center",
+				h = WH_FILL,
+				artwork = {
+					w = WH_FILL,
+					h = WH_FILL,
+					align = "left",
+					padding = 0,
+					img = false,
+				},
+			},
+
+			npvisu = { hidden = 1 },
+		})
+
+		s.nowplaying_large_art.pressed = s.nowplaying_large_art
+
+		-- if we have more than four buttons, then make them smaller
+		if (largeArtSmallTbButtons) then
+			s.nowplaying_large_art.npcontrols.rew = _uses(s.nowplaying.npcontrols.rew, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatSong = _uses(s.nowplaying.npcontrols.repeatSong, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatPlaylist = _uses(s.nowplaying.npcontrols.repeatPlaylist, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.shuffleMode = _uses(s.nowplaying.npcontrols.shuffleMode, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleOff = _uses(s.nowplaying.npcontrols.shuffleOff, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleSong = _uses(s.nowplaying.npcontrols.shuffleSong, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleAlbum = _uses(s.nowplaying.npcontrols.shuffleAlbum, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.volDown = _uses(s.nowplaying.npcontrols.volDown, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.volUp = _uses(s.nowplaying.npcontrols.volUp, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.thumbsUp = _uses(s.nowplaying.npcontrols.thumbsUp, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsDown = _uses(s.nowplaying.npcontrols.thumbsDown, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsUpDisabled = _uses(s.nowplaying.npcontrols.thumbsUpDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.thumbsDownDisabled = _uses(s.nowplaying.npcontrols.thumbsDownDisabled, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.love = _uses(s.nowplaying.npcontrols.love, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.hate = _uses(s.nowplaying.npcontrols.hate, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.fwdDisabled = _uses(s.nowplaying.npcontrols.fwdDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
+
+			s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
+				w = 1,
+				padding = { 0, 0, 1, 0 }
+			})
+
+		else
+			s.nowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
+				w = 6,
+				padding = { 2, 0, 2, 0 }
+			})
+
+		end
+			s.nowplaying_large_art.npcontrols.div2 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div3 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div4 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div5 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div6 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.div7 = _uses(s.nowplaying_large_art.npcontrols.div1)
+			s.nowplaying_large_art.npcontrols.divVolSpace = _uses(s.nowplaying_large_art.npcontrols.div1)
+
+		s.nowplaying_large_art.npcontrols.pressed = {
+			rew     = _uses(s.nowplaying_large_art.npcontrols.rew, { bgImg = controlKeyMiddlePressed }),
+			play    = _uses(s.nowplaying_large_art.npcontrols.play, { bgImg = controlKeyMiddlePressed }),
+			pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
+			fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
+			twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+			repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
+			repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
+			repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
+			repeatMode      = _uses(s.nowplaying_large_art.npcontrols.repeatMode, { bgImg = controlKeyMiddlePressed }),
+			shuffleAlbum    = _uses(s.nowplaying_large_art.npcontrols.shuffleAlbum, { bgImg = controlKeyMiddlePressed }),
+			shuffleSong     = _uses(s.nowplaying_large_art.npcontrols.shuffleSong, { bgImg = controlKeyMiddlePressed }),
+			shuffleMode      = _uses(s.nowplaying_large_art.npcontrols.shuffleMode, { bgImg = controlKeyMiddlePressed }),
+			shuffleOff      = _uses(s.nowplaying_large_art.npcontrols.shuffleOff, { bgImg = controlKeyMiddlePressed }),
+			volDown = _uses(s.nowplaying_large_art.npcontrols.volDown, { bgImg = controlKeyMiddlePressed }),
+			volUp   = _uses(s.nowplaying_large_art.npcontrols.volUp, { bgImg = controlKeyMiddlePressed }),
+
+			thumbsUp    = _uses(s.nowplaying_large_art.npcontrols.thumbsUp, { bgImg = controlKeyMiddlePressed }),
+			thumbsDown  = _uses(s.nowplaying_large_art.npcontrols.thumbsDown, { bgImg = controlKeyMiddlePressed }),
+			thumbsUpDisabled    = s.nowplaying_large_art.npcontrols.thumbsUpDisabled,
+			thumbsDownDisabled  = s.nowplaying_large_art.npcontrols.thumbsDownDisabled,
+			love        = _uses(s.nowplaying_large_art.npcontrols.love, { bgImg = controlKeyMiddlePressed }),
+			hate        = _uses(s.nowplaying_large_art.npcontrols.hate, { bgImg = controlKeyMiddlePressed }),
+			fwdDisabled = _uses(s.nowplaying_large_art.npcontrols.fwdDisabled),
+			rewDisabled = _uses(s.nowplaying_large_art.npcontrols.rewDisabled),
+			shuffleDisabled = _uses(s.nowplaying_large_art.npcontrols.shuffleDisabled),
+			repeatDisabled = _uses(s.nowplaying_large_art.npcontrols.repeatDisabled),
+		}
+
+		s.nowplaying_large_art.nptitle.pressed = _uses(s.nowplaying_large_art.nptitle)
+		s.nowplaying_large_art.npalbumgroup.pressed = _uses(s.nowplaying_large_art.npalbumgroup)
+		s.nowplaying_large_art.npartistgroup.pressed = _uses(s.nowplaying_large_art.npartistgroup)
+		s.nowplaying_large_art.title.pressed = _uses(s.nowplaying_large_art.title, {
+			text = {
+				fg = { 0xB3, 0xB3, 0xB3 },
+				sh = { },
+				bgImg = pressedTitlebarButtonBox,
+			}
+		})
+		s.nowplaying_large_art.npprogress.npprogressB_disabled = _uses(s.nowplaying_large_art.npprogress.npprogressB, {
+			img = _songProgressBarDisabled,
 		})
 
 	end
@@ -5578,6 +5764,10 @@ end
 
 function skin720x1280(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 720, 1280)
+end
+
+function skin1920x480(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1920, 480)
 end
 
 function skinCustom(self, s, reload, useDefaultSize)
