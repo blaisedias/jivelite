@@ -463,7 +463,7 @@ end
 
 local function __addSpectrum(path, jsData)
 	if spLoaded[jsData.name] == true then
-		log:warn("spectrum meter ", jsData.name, " has already been defined ignoring ", path)
+		log:debug("spectrum meter ", jsData.name, " has already been defined ignoring ", path)
 		return
 	end
 	if spectrumImagesMap[jsData.name] ~= nil then
@@ -616,7 +616,7 @@ local function _scanSpectrum(rpath)
 							table.insert(spectrumList, entry)
 							spLoaded[v.name] = true
 						else
-							log:warn("Spectrum meter ", v.name," has been defined before, ignoring redefinition in (", search_root .. "/colours.json", ")")
+							log:debug("Spectrum meter ", v.name," has been defined before, ignoring redefinition in (", search_root .. "/colours.json", ")")
 						end
 					else
 						log:warn("spectrum: colour: invalid values for ", v.name)
@@ -966,6 +966,8 @@ local function addCompose1VUMeter(jsData, path)
 		-- then use the same resource for both channels
 	local cvu = {}
 	cvu.name = jsData.name
+	-- prevent subsequent loading of VUMeters with the same name
+	vuLoaded[jsData.name] = true
 	-- sparse definition support:
 		-- used off/on for peakon/peakoff if peak value are not defined
 	cvu["left_off"] = path .. "/" .. jsData.files.bars[1].off[1]
@@ -1097,7 +1099,7 @@ local function _populateVuMeterList(search_root)
 								log:warn("VU meter ",jsData.name," unknown type " , jsData.vutype, " at ", path)
 							end
 						else
-							log:warn("VU meter ",jsData.name," has been defined before, skipping VU meter defined at ", path)
+							log:debug("VU meter ",jsData.name," has been defined before, skipping VU meter defined at ", path)
 						end
 					end
 				end
