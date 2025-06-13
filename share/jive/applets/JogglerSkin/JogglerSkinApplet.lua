@@ -4456,6 +4456,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
+		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
 		s.nowplaying_spectrum_text_art.title.pressed = _uses(s.nowplaying_spectrum_text_art.title, {
 			text = {
@@ -4749,6 +4750,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
+		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
 		s.nowplaying_vumeter_text_art.title.pressed = _uses(s.nowplaying_vumeter_text_art.title, {
 			text = {
@@ -5023,6 +5025,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
+		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
 		s.nowplaying_spectrum_text_art.title.pressed = _uses(s.nowplaying_spectrum_text_art.title, {
 			text = {
@@ -5118,6 +5121,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
+		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
 		s.nowplaying_vumeter_text_art.title.pressed = _uses(s.nowplaying_vumeter_text_art.title, {
 			text = {
@@ -5429,11 +5433,14 @@ function skin0(self, s, _, _, w, h)
 				},
 			},
 			npaudiometadata = {
+				x = 20,
 				y = AUDIO_METADATA_Y,
+				w = screenWidth - 40,
 				align = "center",
 			},
 		})
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
+		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
 		s.nowplaying_spectrum_text_art.title.pressed = _uses(s.nowplaying_spectrum_text_art.title, {
 			text = {
@@ -5514,11 +5521,14 @@ function skin0(self, s, _, _, w, h)
 				},
 			},
 			npaudiometadata = {
+				x = 20,
 				y = AUDIO_METADATA_Y,
+				w = screenWidth - 40,
 				align = "center",
 			},
 		})
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
+		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
 		s.nowplaying_vumeter_text_art.title.pressed = _uses(s.nowplaying_vumeter_text_art.title, {
 			text = {
