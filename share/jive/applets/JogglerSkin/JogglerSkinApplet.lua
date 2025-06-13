@@ -1103,6 +1103,12 @@ function skin0(self, s, _, _, w, h)
 
 	local popupBackground = blackBackground
 
+	local titleBackground = titleBox
+	local npTitleBackground   = nil
+-- for visual debugging
+--	local titleBackground   = Tile:fillColor(0x40f04040)
+--	local npTitleBackground   = Tile:fillColor(0xf0404040)
+
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
 
 	local THUMB_SIZE = self:param().THUMB_SIZE
@@ -1304,7 +1310,8 @@ function skin0(self, s, _, _, w, h)
 		h = TITLE_HEIGHT,
 		border = 0,
 		position = LAYOUT_NORTH,
-		bgImg = titleBox,
+--		bgImg = titleBox,
+		bgImg = titleBackground,
 		padding = { 0, 5, 0, 5 },
 		order = { "lbutton", "text", "rbutton" },
 		lbutton = {
@@ -3452,6 +3459,7 @@ function skin0(self, s, _, _, w, h)
 				fg         = scaledValues.NP_TITLE_COLOR,
 				font       = _boldfont(NP_TRACK_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
+				bgImg = npTitleBackground
 			},
 		}
 
@@ -3486,13 +3494,14 @@ function skin0(self, s, _, _, w, h)
 			y = 0,
 			h = TITLE_HEIGHT,
 			border = { 0, 0 ,0, 0 },
-			padding = { 20, 14, 5, 5 },
+			padding = { 20, 0, 20, 0 },
 			nptrack = {
 				align = "center",
 				w = screenWidth - 196,
 				h          = WH_FILL,
 				fg         = scaledValues.NP_TITLE_COLOR,
 				font       = _boldfont(NP_TRACK_FONT_SIZE),
+				bgImg = npTitleBackground
 			},
 		}
 	end
@@ -4237,7 +4246,8 @@ function skin0(self, s, _, _, w, h)
 			y = 0,
 			h = TITLE_HEIGHT,
 			border = { 0, 0 ,0, 0 },
-			padding = { 20, 14, 5, 5 },
+--			padding = { 20, 14, 5, 5 },
+			padding = { 20, 0, 20, 0 },
 			nptrack = {
 				align = "center",
 				w = screenWidth - 196,
@@ -4575,7 +4585,8 @@ function skin0(self, s, _, _, w, h)
 				y = 0,
 				h = TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
-				padding = { 20, 14, 5, 5 },
+--				padding = { 20, 14, 5, 5 },
+				padding = { 20, 0, 20, 0 },
 				nptrack = {
 					align = "center",
 					w = screenWidth - 196,
@@ -4841,7 +4852,8 @@ function skin0(self, s, _, _, w, h)
 				y = 0,
 				h = TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
-				padding = { 20, 14, 5, 5 },
+--				padding = { 20, 14, 5, 5 },
+				padding = { 20, 0, 20, 0 },
 				nptrack = {
 					align = "center",
 					w = screenWidth - 196,
