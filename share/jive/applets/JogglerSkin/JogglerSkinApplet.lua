@@ -4923,7 +4923,7 @@ function skin0(self, s, _, _, w, h)
 			local tw = scaledValues.UW_TEXT_SCREEN_WIDTH
 			mini_visu_X = npX + tw
 			mini_visu_W = screenWidth - mini_visu_X - 15
-		mini_visu_Y = TITLE_HEIGHT + 5
+		mini_visu_Y = TITLE_HEIGHT + 17
 --		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - (progressBarHeight/2)
 		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
 		mini_visu_Y = math.floor(mini_visu_Y)
