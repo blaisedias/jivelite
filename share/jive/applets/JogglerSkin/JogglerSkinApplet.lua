@@ -3779,7 +3779,8 @@ function skin0(self, s, _, _, w, h)
 			x = _tracklayout.x + 2,
 			y = screenHeight - controlHeight - 3 - 10,
 			elapsed = {
-				w = WH_FILL,
+--				w = WH_FILL,
+				w = screenWidth - _tracklayout.x - 10,
 --				align = "left",
 				align = scaledValues.NP_PROGRESSNB_ALIGN,
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
@@ -3788,6 +3789,7 @@ function skin0(self, s, _, _, w, h)
 				fg = scaledValues.NP_PROGRESSNB_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
+			bgImg = npProgressBackground,
 		},
 	})
 	s.nowplaying.npprogressNB.elapsedSmall = s.nowplaying.npprogressNB.elapsed
@@ -3972,6 +3974,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = screenWidth - npX - 15,
 			},
 			npaudiometadata = {
 				x = npX,
@@ -4217,6 +4220,7 @@ function skin0(self, s, _, _, w, h)
 		npprogressNB = {
 			x = 50 + screenWidth - 2*50 - 2*60,
 			y = screenHeight - controlHeight - 3,
+			w = screenWidth - 2*50,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_NONE,
 		},
@@ -4345,6 +4349,7 @@ function skin0(self, s, _, _, w, h)
 			x = 50, -- + screenWidth - 2*50 - 2*60,
 			-- y = screenHeight - 100, text location within the progress bar group is lowered somehow :(
 			y = screenHeight - (85 + controlHeight - 70),
+			w = screenWidth - 100,
 			padding = { 0, 0, 0, 0 },
 			position = LAYOUT_SOUTH,
 		},
@@ -5031,6 +5036,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = tw,
 			},
 			npartwork = {
 				w = scaledValues.midArtworkSize,
@@ -5127,6 +5133,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = tw,
 			},
 			npartwork = {
 				w = scaledValues.midArtworkSize,
@@ -5213,6 +5220,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = screenWidth - npX - 15,
 			},
 			npaudiometadata = {
 				x = npX,
@@ -5446,6 +5454,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = tw,
 			},
 			npartwork = {
 				w = portraitArtworkWidth,
@@ -5534,6 +5543,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npprogressNB = {
 				x = npX,
+				w = tw,
 			},
 			npartwork = {
 				w = portraitArtworkWidth,
