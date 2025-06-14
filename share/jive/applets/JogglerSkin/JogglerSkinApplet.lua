@@ -4408,6 +4408,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
+		s.nowplaying_spectrum_text.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text.npprogress.npprogressB
 
 		s.nowplaying_spectrum_text.title.pressed = _uses(s.nowplaying_spectrum_text.title, {
 			text = {
@@ -4729,6 +4730,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		})
 		s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
+		s.nowplaying_vuanalog_text.npprogress.npprogressB_disabled = s.nowplaying_vuanalog_text.npprogress.npprogressB
 
 		s.nowplaying_vuanalog_text.title.pressed = _uses(s.nowplaying_vuanalog_text.title, {
 			text = {
