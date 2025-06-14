@@ -128,12 +128,12 @@ function _layout(self)
 --
 --	barHeight[1] = h - t - b - self.spparms.capHeight[1] - self.spparms.capSpace[1]
 --	barHeight[2] = h - t - b - self.spparms.capHeight[2] - self.spparms.capSpace[2]
-	local barHeight = h - t - b - ((self.spparms.capHeight + self.spparms.capSpace)*2)
-	-- doubly ensure no out of bounds scribbling
-	barHeight = barHeight - 4
-	if barHeight > 31 then
-		barHeight = math.floor(barHeight/31) * 31
-	end
+	local barHeight = h - t - b - (self.spparms.capHeight + self.spparms.capSpace)
+--	-- doubly ensure no out of bounds scribbling
+--	barHeight = barHeight - 4
+--	if barHeight > 31 then
+--		barHeight = math.floor(barHeight/31) * 31
+--	end
 
 	-- max bin value from C code is 31
 --	self.barHeightMulti = {}
@@ -253,10 +253,10 @@ local function _drawBins(surface, bch, params)
 	local dy, yA, yB
 
 	for i = 1, #bch do
-		bch[i] = bch[i] * barHeightMulti
+		bch[i] = math.ceil(bch[i] * barHeightMulti)
 
 		if cch[i] > 0 then
-			cch[i] = cch[i] - barHeightMulti
+			cch[i] = math.ceil(cch[i] - barHeightMulti)
 			if cch[i] < 0 then
 				cch[i] = 0
 			end
@@ -390,10 +390,10 @@ local function _drawTurbineBins(surface, bch, params)
 	local dyFill, yT1, yT2, yB1, yB2, xF
 
 	for i = 1, #bch do
-		bch[i] = bch[i] * barHeightMulti
+		bch[i] = math.ceil(bch[i] * barHeightMulti)
 
 		if cch[i] > 0 then
-			cch[i] = cch[i] - barHeightMulti
+			cch[i] = math.ceil(cch[i] - barHeightMulti)
 			if cch[i] < 0 then
 				cch[i] = 0
 			end
