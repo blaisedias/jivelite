@@ -1103,11 +1103,23 @@ function skin0(self, s, _, _, w, h)
 
 	local popupBackground = blackBackground
 
-	local titleBackground = titleBox
-	local npTitleBackground   = nil
--- for visual debugging
---	local titleBackground   = Tile:fillColor(0x40f04040)
---	local npTitleBackground   = Tile:fillColor(0xf0404040)
+	local titleBackground           = V_titleBox
+	local npTitleBackground         = nil
+	local npArtistBackground        = nil
+	local npAlbumBackground         = nil
+	local npArtistAlbumBackground   = V_titleBox
+	local npAudioMetadataBackground = nil
+	local npProgressBackground = nil
+	if Framework:getGlobalSetting("jogglerDebugColouriseNPFields") == true then
+		-- for visual debugging
+		titleBackground         = Tile:fillColor(0xffffff30)
+		npTitleBackground       = Tile:fillColor(0xff000030)
+		npArtistBackground      = Tile:fillColor(0x00ff0030)
+		npAlbumBackground       = Tile:fillColor(0x0000ff30)
+		npArtistAlbumBackground = Tile:fillColor(0xffff0030)
+		npAudioMetadataBackground = Tile:fillColor(0xff00ff30)
+		npProgressBackground = Tile:fillColor(0x00ffff30)
+	end
 
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
 
@@ -3528,6 +3540,7 @@ function skin0(self, s, _, _, w, h)
 				fg         = scaledValues.NP_ARTIST_COLOR,
 				font       = _font(NP_ARTISTALBUM_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
+				bgImg = npArtistBackground,
 			},
 		},
 		npalbumgroup = {
@@ -3546,6 +3559,7 @@ function skin0(self, s, _, _, w, h)
 				fg         = scaledValues.NP_ALBUM_COLOR,
 				font       = _font(NP_ARTISTALBUM_FONT_SIZE),
 				sh = TEXT_SH_COLOR,
+				bgImg = npAlbumBackground,
 			},
 		},
 		npartistalbum = {
@@ -3555,7 +3569,6 @@ function skin0(self, s, _, _, w, h)
 			hidden = 0,
 			zOrder = 2,
 			position = LAYOUT_NONE,
-			bgImg = nil,
 			x = _tracklayout.x + 2,
 			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
 			w = screenWidth - _tracklayout.x - 10,
@@ -3564,6 +3577,7 @@ function skin0(self, s, _, _, w, h)
 			sh = TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
 			font = _boldfont(AUDIO_METADATA_FONT_HEIGHT),
+			bgImg = npAudioMetadataBackground,
 		},
 		npdebugdata = {
 			hidden = 0,
@@ -3755,6 +3769,7 @@ function skin0(self, s, _, _, w, h)
 				bgImg = _songProgressBackground,
 				img = _songProgressBar,
 			},
+			bgImg = npProgressBackground,
 		},
 	
 		-- special style for when there shouldn't be a progress bar (e.g., internet radio streams)
@@ -4262,12 +4277,12 @@ function skin0(self, s, _, _, w, h)
 			y = TITLE_HEIGHT,
 			w = screenWidth,
 			h = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
-			bgImg = V_titleBox,
 			align = "center",
 			fg = scaledValues.NP_ARTISTALBUM_COLOR,
 			sh = TEXT_SH_COLOR,
 			padding = { 100, 0, 100, 0 },
 			font = _font(NP_ARTISTALBUM_FONT_SIZE),
+			bgImg = npArtistAlbumBackground,
 		},
 
 		npprogress = {
