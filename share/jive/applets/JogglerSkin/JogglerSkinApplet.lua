@@ -4578,7 +4578,7 @@ function skin0(self, s, _, _, w, h)
 					w = screenWidth,
 					h = screenHeight,
 					border = { 0, 0, 0, 0 },
-					padding = { 0, controlHeight, 0, controlHeight },
+					padding = { 0, TITLE_HEIGHT, 0, controlHeight },
 
 					bg = { 0x00, 0x00, 0x00, 0x00 },
 
