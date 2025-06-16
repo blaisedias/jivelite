@@ -4952,10 +4952,10 @@ function skin0(self, s, _, _, w, h)
 			npX = scaledValues.midArtworkSize + 15 + x_artwork
 			y_artwork = (screenHeight - scaledValues.midArtworkSize)/2
 		end
-			local screenRem = screenWidth - npX
-			local tw = scaledValues.UW_TEXT_SCREEN_WIDTH
-			mini_visu_X = npX + tw
-			mini_visu_W = screenWidth - mini_visu_X - 15
+		local screenRem = screenWidth - npX
+		local tw = scaledValues.UW_TEXT_SCREEN_WIDTH
+		mini_visu_X = npX + tw
+		mini_visu_W = screenWidth - mini_visu_X - 15
 		mini_visu_Y = TITLE_HEIGHT + 17
 --		mini_visu_H = screenHeight - controlHeight - mini_visu_Y - (progressBarHeight/2)
 		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
