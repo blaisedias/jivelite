@@ -94,8 +94,11 @@ function __init(self, style, kbType, textinput)
 	row_border = (screenWidth - keyboardWidth) - ((screenWidth - keyboardWidth) % 2)
 	row_offset_x = row_border / 2
 
+	local keyboardHeight = keyboardWidth * (screenHeight/screenWidth) * 1.5
+	log:debug(screenWidth, "x", screenHeight, " display aspect ratio:", screenWidth/screenHeight, " keys aspect ratio:", (keyboardWidth / keyboardHeight))
+
 	default.width = keyboardWidth / row_number_of_keys
-	default.height = (keyboardWidth / row_number_of_keys) - 3
+	default.height = (keyboardHeight / row_number_of_keys) - 3
 	default.width_large = (keyboardWidth / row_number_of_keys) * 2
 	
 	_assert(type(style) == "string")
