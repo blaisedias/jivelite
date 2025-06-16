@@ -845,9 +845,10 @@ function getJogglerSkinParams(skinName)
         end
     end
 
-    if jsonData[resolutionKey].jogglerSkin.UW_TEXT_SCREEN_WIDTH == nil then
-        params.UW_TEXT_SCREEN_WIDTH = 0
-        if screenWidth/screenHeight >= 3 then
+    if screenWidth/screenHeight >= 3 then
+        if jsonData[resolutionKey].jogglerSkin.UW_TEXT_SCREEN_WIDTH ~= nil then
+            params.UW_TEXT_SCREEN_WIDTH = jsonData[resolutionKey].jogglerSkin.UW_TEXT_SCREEN_WIDTH
+        else
             local npX = screenHeight + 15
             if params.midArtworkSize ~= screenHeight then
                 npX = params.midArtworkSize + 15 + 10
