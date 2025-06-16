@@ -1109,7 +1109,8 @@ function skin0(self, s, _, _, w, h)
 	local npAlbumBackground         = nil
 	local npArtistAlbumBackground   = V_titleBox
 	local npAudioMetadataBackground = nil
-	local npProgressBackground = nil
+	local npProgressBackground      = nil
+	local npvisuBackground          = nil
 	if Framework:getGlobalSetting("jogglerDebugColouriseNPFields") == true then
 		-- for visual debugging
 		titleBackground         = Tile:fillColor(0xffffff30)
@@ -1119,6 +1120,7 @@ function skin0(self, s, _, _, w, h)
 		npArtistAlbumBackground = Tile:fillColor(0xffff0030)
 		npAudioMetadataBackground = Tile:fillColor(0xff00ff30)
 		npProgressBackground = Tile:fillColor(0x00ffff30)
+		npvisuBackground        = Tile:fillColor(0x80808080)
 	end
 
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
@@ -4409,7 +4411,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 		})
 		s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
@@ -4477,7 +4480,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
 				x = mini_visu_X,
@@ -4538,7 +4542,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
 				x = large_art_visu_X,
@@ -4596,7 +4601,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			-- Drawn over regular text between buttons
 			nptitle = {
@@ -4675,7 +4681,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
 				x = 0,
@@ -4731,7 +4738,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 		})
 		s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
@@ -4773,7 +4781,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 	--				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
 				x = mini_visu_X,
@@ -4818,7 +4827,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
 				x = large_art_visu_X,
@@ -4865,7 +4875,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			nptitle = {
 				zOrder = 2,
@@ -4993,7 +5004,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			nptitle = {
 				x = npX,
@@ -5090,7 +5102,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			nptitle = {
 				x = npX,
@@ -5419,7 +5432,8 @@ function skin0(self, s, _, _, w, h)
 					binSpace = { 6, 6 },			-- >= 0
 					clipSubbands = { 1, 1 },		-- 0 / 1
 					useVisImage = true,
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			nptitle = x_nptitle,
 			npartistgroup = {
@@ -5508,7 +5522,8 @@ function skin0(self, s, _, _, w, h)
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 --				bgImgPath = imgpath ..  "UNOFFICIAL/VUMeter/vu_analog_25seq_w.png",
-				}
+				},
+				bgImg = npvisuBackground,
 			},
 			nptitle = x_nptitle,
 			npartistgroup = {
