@@ -1557,7 +1557,12 @@ function _updatePosition(self)
 			end
 
 			self.progressGroup:setWidgetValue("remain", strRemain)
-			self.progressSlider:setValue(elapsed)
+			-- work around progress bar rendering
+			if elapsed == 0  and duration < 100 then
+				self.progressSlider:setRange(0, 100, 0)
+			else
+				self.progressSlider:setValue(elapsed)
+			end
 		end
 	end
 	if self.debugtxt ~= nil then
