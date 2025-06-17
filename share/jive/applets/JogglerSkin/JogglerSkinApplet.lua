@@ -1111,6 +1111,8 @@ function skin0(self, s, _, _, w, h)
 	local npAudioMetadataBackground = nil
 	local npProgressBackground      = nil
 	local npvisuBackground          = nil
+	local npControlsBackground      = nil
+	local npArtworkBackground       = nil
 	if Framework:getGlobalSetting("jogglerDebugColouriseNPFields") == true then
 		-- for visual debugging
 		titleBackground         = Tile:fillColor(0xffffff30)
@@ -1121,6 +1123,8 @@ function skin0(self, s, _, _, w, h)
 		npAudioMetadataBackground = Tile:fillColor(0xff00ff30)
 		npProgressBackground = Tile:fillColor(0x00ffff30)
 		npvisuBackground        = Tile:fillColor(0x80808080)
+		npControlsBackground    = Tile:fillColor(0xffff0050)
+		npArtworkBackground     = Tile:fillColor(0xff000050)
 	end
 
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
@@ -3612,6 +3616,7 @@ function skin0(self, s, _, _, w, h)
 				padding = 0,
 				img = false,
 			},
+			bgImg = npArtworkBackground,
 		},
 
 		npvisu = { hidden = 1 },
@@ -3712,6 +3717,7 @@ function skin0(self, s, _, _, w, h)
 			repeatDisabled   = _uses(_transportControlButton, {
 				img = _loadImage(self, "Icons/icon_toolbar_repeat_dis.png"),
 			}),
+			bgImg = npControlsBackground,
 		},
 	
 		-- Progress bar
