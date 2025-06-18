@@ -121,20 +121,39 @@ function json.stringify(obj, as_key, indent, indent_in)
   local kind = kind_of(obj)  -- This is 'array' if it's an array or type(obj) otherwise.
   if kind == 'array' then
     if as_key then error('Can\'t encode array as key.') end
-    s[#s + 1] = '[\n' .. indent
-    for i, val in ipairs(obj) do
-      if i > 1 then s[#s + 1] = ',\n'..indent end
-      s[#s + 1] = json.stringify(val, nil, indent .. '    ', indent)
+    -- "improve" json rendering density, render tables in a single line if members are primitive types
+    -- namely type != table
+    local arrayContainsTable = false
+    for _, val in ipairs(obj) do
+        if type(val) == "table" then
+            arrayContainsTable = true
+        end
     end
-    s[#s + 1] = '\n' .. indent_in .. ']'
+    if arrayContainsTable then
+        s[#s + 1] = '[\n' .. indent
+        for i, val in ipairs(obj) do
+          if i > 1 then s[#s + 1] = ',\n'..indent end
+          s[#s + 1] = json.stringify(val, nil, indent .. '    ', indent)
+        end
+        s[#s + 1] = '\n' .. indent_in .. ']'
+    else
+        s[#s + 1] = '[ '
+        for i, val in ipairs(obj) do
+          if i > 1 then s[#s + 1] = ', ' end
+          s[#s + 1] = json.stringify(val, nil, indent, indent)
+        end
+        s[#s + 1] = ' ]'
+    end
   elseif kind == 'table' then
     if as_key then error('Can\'t encode table as key.') end
-    s[#s + 1] = '{\n' .. indent
     local sorted_keys = {}
     for k,_ in pairs(obj) do table.insert(sorted_keys, k) end
-    table.sort(sorted_keys)
---    for k, v in pairs(obj) do
+    if type(sorted_keys[1]) ~= 'number' then
+      table.sort(sorted_keys)
+    end
+    s[#s + 1] = '{\n' .. indent
     for _, k in ipairs(sorted_keys) do
+--    for k, _ in pairs(obj) do
       local v = obj[k]
       if #s > 1 then s[#s + 1] = ',\n'..indent end
       s[#s + 1] = json.stringify(k, true, indent .. '    ', indent)

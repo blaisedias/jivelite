@@ -107,7 +107,13 @@ files["share/jive/applets/JogglerSkin/JogglerSkinApplet.lua"] = {
        "init", "skinName", "param",
        "skin0", "skin", "free",
        "reloadSkin", "inputLayoutValue", "layoutMenuItem",
-       "messageBox"
+       "messageBox",
+       "npButtonSelectorShow",
+       "setNowPlayingScreenButtons", "getNowPlayingScreenButtons", "buttonSettingsMenuItem",
+       "skinName", "skin1024x600",
+       "skin1280x400", "skin1280x800", "skin1280x400", "skin1280x720", "skin1280x1024",
+       "skin1366x768", "skin1480x320", "skin1600x720",
+       "skin1920x480", "skin1920x1080", "skinCustom",
    },
    read_globals = {
        "_M", "appletManager", "jiveMain", "jive",
@@ -126,6 +132,10 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
        "scaleControlsImages",
        "updateJsonConfig",
        "deleteScaledUIImages",
+       "getNowPlayingStyleJsonTable",
+       "writeCacheJsonFile",
+       "initialiseUserNPTables",
+       "getUserNpTable",
    },
    read_globals = {
    }
