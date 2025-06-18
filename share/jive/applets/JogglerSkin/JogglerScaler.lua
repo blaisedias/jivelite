@@ -15,9 +15,12 @@
 
 --
 local pairs = pairs
+local ipairs = ipairs
+local next = next
 -- local tonumber = tonumber
+local tostring = tostring
 local pcall = pcall
--- local type = type
+local type = type
 local coroutine, package	= coroutine, package
 
 -- lua package imports
@@ -967,4 +970,119 @@ function getGridSkinParams(fiveItemHeight)
     _writeScaledData({gridSkin = params}, System.getUserDir() .. '/cache/PiGridSkin.json')
     log:debug("grid skin params:", table.stringify(params))
     return params
+end
+
+local function kind_of(obj)
+  if type(obj) ~= 'table' then return type(obj) end
+  local i = 1
+  for _ in pairs(obj) do
+    if obj[i] ~= nil then i = i + 1 else return 'table' end
+  end
+  if i == 1 then return 'table' else return 'array' end
+end
+
+local function copy1(obj)
+    if type(obj) ~= 'table' then return obj end
+    local res = {}
+    local tmp = {}
+    for k,_ in pairs(obj) do
+        table.insert(tmp,k)
+    end
+    if #tmp > 0 then
+        for k, v in pairs(obj) do res[copy1(k)] = copy1(v) end
+        return res
+    end
+    return nil
+end
+
+local npkeys = {
+    "nptitle",
+    "npprogress",
+    "npprogressNB",
+    "title",
+    "npvisu",
+    "npalbumgroup",
+    "pressed",
+    "npdebugdata",
+    "npartistgroup",
+    "npcontrols",
+    "npartwork",
+    "npartistalbum",
+    "npaudiometadata",
+}
+
+local proscribed = {
+    "pressed",
+    "rbutton",
+    "title",
+}
+
+-- create a table derived from a now playing style,
+-- which can be rendered as a JSON file.
+function getNowPlayingStyleJsonTable(obj)
+    local expandedTbl = {}
+    local seen = {}
+    local sanitised = {}
+
+    for _, k in pairs(npkeys) do
+        table.insert(expandedTbl, {key=k, value=obj[k], parent=k, psan=sanitised} )
+    end
+
+    local iTop = #expandedTbl
+    local i, wrapped = next(expandedTbl)
+    while i do
+        if type(wrapped.value) == 'table' then
+            if not table.contains(seen, wrapped.value) then
+                if not table.contains(proscribed, wrapped.key) then
+                    wrapped.psan[wrapped.key] = {}
+                    for k, v in pairs(wrapped.value) do
+                        table.insert(expandedTbl, {key=k, value=v, parent=wrapped.parent .. ':' .. k, psan=wrapped.psan[wrapped.key]})
+                    end
+                    -- prevent infinite recursion
+                    if i < iTop then
+                        table.insert(seen, wrapped.value)
+                    end
+                end
+            end
+        else
+            if type(wrapped.value) ~= 'userdata' then
+                wrapped.psan[wrapped.key] = wrapped.value
+            end
+        end
+        i, wrapped = next(expandedTbl, i)
+        if i and i > 10000 then
+            break
+        end
+    end
+    return copy1(copy1(sanitised))
+end
+
+
+function writeCacheJsonFile(data, filename)
+--    local jsonString = json.stringify(copy1(copy1(sanitised)))
+    local jsonString = json.stringify(data)
+    local jsPath = System.getUserDir() .. filename
+    local fh = io.open(jsPath, "w")
+    if fh then
+        fh:write(jsonString)
+        fh:close()
+        log:debug("wrote scaled data json ", jsPath)
+    end
+    return jsonString
+end
+
+function test(tbl)
+    for k, v in pairs(tbl) do
+        if k == '_font_size' then
+            log:warn("_font_size")
+            tbl['_font_sz'] = true
+        end
+        if k == '_bold_font_size' then
+            log:warn("_font_size")
+            tbl['_bold_font_sz'] = true
+        end
+        if type(v) == 'table' then
+            test(v)
+        end
+    end
 end

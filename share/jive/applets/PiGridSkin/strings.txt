@@ -279,3 +279,6 @@ NOW_PLAYING_XOFY
 
 UW_TEXT_SCREEN_WIDTH
 	EN	Ultrawide Display Text Width
+
+DEBUG_LAYOUT
+	EN	Debug Layout

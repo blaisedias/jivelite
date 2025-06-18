@@ -129,12 +129,14 @@ function json.stringify(obj, as_key, indent, indent_in)
     s[#s + 1] = '\n' .. indent_in .. ']'
   elseif kind == 'table' then
     if as_key then error('Can\'t encode table as key.') end
-    s[#s + 1] = '{\n' .. indent
     local sorted_keys = {}
     for k,_ in pairs(obj) do table.insert(sorted_keys, k) end
-    table.sort(sorted_keys)
---    for k, v in pairs(obj) do
+    if type(sorted_keys[1]) ~= 'number' then
+      table.sort(sorted_keys)
+    end
+    s[#s + 1] = '{\n' .. indent
     for _, k in ipairs(sorted_keys) do
+--    for k, _ in pairs(obj) do
       local v = obj[k]
       if #s > 1 then s[#s + 1] = ',\n'..indent end
       s[#s + 1] = json.stringify(k, true, indent .. '    ', indent)
