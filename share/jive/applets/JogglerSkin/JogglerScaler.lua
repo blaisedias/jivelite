@@ -15,9 +15,14 @@
 
 --
 local pairs = pairs
+local ipairs = ipairs
+local next = next
 -- local tonumber = tonumber
+local tostring = tostring
 local pcall = pcall
--- local type = type
+local type = type
+local getmetatable = getmetatable
+
 local coroutine, package	= coroutine, package
 
 -- lua package imports
@@ -969,3 +974,122 @@ function getGridSkinParams(fiveItemHeight)
     log:debug("grid skin params:", table.stringify(params))
     return params
 end
+
+local function kind_of(obj)
+  if type(obj) ~= 'table' then return type(obj) end
+  local i = 1
+  for _ in pairs(obj) do
+    if obj[i] ~= nil then i = i + 1 else return 'table' end
+  end
+  if i == 1 then return 'table' else return 'array' end
+end
+
+local function copy1(obj)
+    if type(obj) ~= 'table' then return obj end
+    local res = {}
+    local tmp = {}
+    for k,_ in pairs(obj) do
+        table.insert(tmp,k)
+    end
+    if #tmp > 0 then
+        for k, v in pairs(obj) do res[copy1(k)] = copy1(v) end
+        return res
+    end
+    return nil
+end
+
+local npkeys = {
+    "nptitle",
+    "npprogress",
+    "npprogressNB",
+    "title",
+    "npvisu",
+    "npalbumgroup",
+    "pressed",
+    "npdebugdata",
+    "npartistgroup",
+    "npcontrols",
+    "npartwork",
+    "npartistalbum",
+    "npaudiometadata",
+}
+
+local proscribed = {
+    "pressed",
+    "rbutton",
+--    "div1", "div2", "div3", "div4", "div5", "div6", "div7", "div8", "div9", "div10", "div11",
+--    "title",
+}
+
+function writeJsonFile(data, relativeFilepath)
+--    local jsonString = json.stringify(copy1(copy1(sanitised)))
+    local jsonString = json.stringify(data)
+    local jsPath = System.getUserDir() .. relativeFilepath
+    local fh = io.open(jsPath, "w")
+    if fh then
+        fh:write(jsonString)
+        fh:close()
+        log:debug("wrote scaled data json ", jsPath)
+    end
+    return jsonString, jsPath
+end
+
+local userNpTables = {}
+
+function initialiseUserNPTables(loadFile)
+    userNpTables = {}
+    if loadFile then
+        userNpTables = _loadJsonData(System.getUserDir() .. '/JogglerNowPlaying.json') or {}
+    end
+end
+
+function getUserNpTable(key)
+    if key ~= nil and userNpTables[resolutionKey] ~= nil then
+        return  userNpTables[resolutionKey][key] or {}
+    end
+    return {}
+end
+
+local function flatten(tbl, tgt)
+    local mt = getmetatable(tbl)
+    if mt and type(mt) == 'table' and mt ~= tbl then
+        flatten(mt, tgt)
+    end
+    for k,v in pairs(tbl) do
+        if type(v) == 'table' then
+            if  v ~= tbl and not table.contains(proscribed, k) then
+                if k ~= '__index' then
+                    tgt[k] = {}
+                    flatten(v, tgt[k])
+                else
+                    flatten(v, tgt)
+                end
+            end
+        else
+            if type(v) ~= 'userdata' then
+                tgt[k] = v
+            end
+        end
+    end
+    return tgt
+end
+
+-- create a table derived from a now playing style,
+-- which can be rendered as a JSON file.
+function getNowPlayingStyleJsonTable(tbl)
+    local tgt = {}
+    flatten(tbl, tgt)
+    tgt.h = nil
+    tgt.w = nil
+    for k, v in pairs(tgt) do
+        if type(v) == 'table' then
+            if v.hidden == 1 then
+                tgt[k] = nil
+            else
+                v.hidden = nil
+            end
+        end
+    end
+    return tgt
+end
+

@@ -436,3 +436,15 @@ NOW_PLAYING_XOFY
 
 UW_TEXT_SCREEN_WIDTH
 	EN	Ultrawide Display Text Width
+
+DEBUG_LAYOUT
+	EN	Debug Layout
+
+RELOAD_SKIN
+	EN	Reload Skin
+
+WRITE_NP_JSON
+	EN	Write Now Playing JSON
+
+LOAD_NP_JSON
+	EN	Load User Now Playing JSON
