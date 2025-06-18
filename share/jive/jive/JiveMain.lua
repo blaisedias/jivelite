@@ -630,6 +630,14 @@ function JiveMain:getSkinParam(key)
 end
 
 
+-- Use sparingly and carefully,
+-- JogglerSkinApplet uses this to access the current style,
+-- for writing out to JSON, callers should not modify
+-- TODO: explore returning a deep clone - making readonly
+function JiveMain:getSkinStyle()
+	return table.clone(jive.ui.style)
+end
+
 -- reloadSkin
 -- 
 function JiveMain:reloadSkin(reload)
