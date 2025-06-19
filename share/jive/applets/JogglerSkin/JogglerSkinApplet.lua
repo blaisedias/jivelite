@@ -594,21 +594,6 @@ local function _boldfont(fontSize)
 	return Font:boldFont(fontSize)
 end
 
-local function _fillNPFonts(tbl)
-	for k, v in pairs(tbl) do
-		if k == '_font_size' then
-			tbl['font'] = _font(v)
-		end
-		if k == '_font_size_bold' then
-			tbl['font'] = _boldfont(v)
-		end
-		if type(v) == 'table' then
-			_fillNPFonts(v)
-		end
-	end
-end
-
-
 -- defines a new style that inherrits from an existing style
 local function _uses(parent, value)
 	if parent == nil then
@@ -626,6 +611,27 @@ local function _uses(parent, value)
 	end
 
 	return style
+end
+
+local function _NP_setup_fonts(tbl)
+	for k, v in pairs(tbl) do
+		if k == '_font_size' then
+			tbl['font'] = _font(v)
+		end
+		if k == '_font_size_bold' then
+			tbl['font'] = _boldfont(v)
+		end
+		if type(v) == 'table' then
+			_NP_setup_fonts(v)
+		end
+	end
+    return tbl
+end
+
+
+local function _NP_uses(parent, tbl)
+    _NP_setup_fonts(tbl)
+    return _uses(parent, tbl)
 end
 
 -- local function layoutLargeArtControls(candidates, screenWidth, controlWidth, divWidth, volumeBarWidth)
@@ -3789,8 +3795,8 @@ function skin0(self, s, _, _, w, h)
 			bgImg = npProgressBackground,
 		},
 	}
-	_fillNPFonts(_NP_def)
-	s.nowplaying = _uses(s.window, _NP_def)
+
+	s.nowplaying = _NP_uses(s.window, _NP_def)
 	s.nowplaying.npprogressNB.elapsedSmall = s.nowplaying.npprogressNB.elapsed
 
 	-- sliders
@@ -4002,8 +4008,8 @@ function skin0(self, s, _, _, w, h)
 
 			npvisu = { hidden = 1 },
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_large_art = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_large_art = _NP_uses(s.nowplaying, _NP_def)
 
 		s.nowplaying_large_art.pressed = s.nowplaying_large_art
 
@@ -4137,8 +4143,8 @@ function skin0(self, s, _, _, w, h)
 			align = "right"
 		},
 	}
-	_fillNPFonts(_NP_def)
-	s.nowplaying_art_only = _uses(s.nowplaying, _NP_def)
+
+	s.nowplaying_art_only = _NP_uses(s.nowplaying, _NP_def)
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
 	_NP_def = {
@@ -4235,8 +4241,8 @@ function skin0(self, s, _, _, w, h)
 			align = "center"
 		},
 	}
-	_fillNPFonts(_NP_def)
-	s.nowplaying_text_only = _uses(s.nowplaying, _NP_def)
+
+	s.nowplaying_text_only = _NP_uses(s.nowplaying, _NP_def)
 	s.nowplaying_text_only.npprogress.npprogressB_disabled = _uses(s.nowplaying_text_only.npprogress.npprogressB, {
 		img = _songProgressBarDisabled,
 	})
@@ -4413,8 +4419,8 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_text = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_spectrum_text = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_spectrum_text.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text.npprogress.npprogressB
 		s.nowplaying_spectrum_text.pressed = s.nowplaying_spectrum_text
 
@@ -4484,8 +4490,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center"
 			},
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_spectrum_text_art = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
@@ -4546,8 +4552,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center"
 			},
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_large_art = _uses(s.nowplaying_large_art, _NP_def)
+
+		s.nowplaying_spectrum_large_art = _NP_uses(s.nowplaying_large_art, _NP_def)
 		s.nowplaying_spectrum_large_art.pressed = s.nowplaying_spectrum_large_art
 
 		s.nowplaying_spectrum_large_art.title.pressed = _uses(s.nowplaying_spectrum_large_art.title, {
@@ -4629,8 +4635,8 @@ function skin0(self, s, _, _, w, h)
                 w = screenWidth - 20,
 			}
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_large_spectrum =  _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_large_spectrum =  _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
 
 		s.nowplaying_large_spectrum.title.pressed = _uses(s.nowplaying_large_spectrum.title, {
@@ -4699,8 +4705,8 @@ function skin0(self, s, _, _, w, h)
 	        npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 1 },
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_only = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_spectrum_only = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_spectrum_only.pressed = s.nowplaying_spectrum_only
 
 		s.nowplaying_spectrum_only.title.pressed = _uses(s.nowplaying_spectrum_only.title, {
@@ -4742,8 +4748,8 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_vuanalog_text = _uses(s.nowplaying_spectrum_text, _NP_def)
+
+		s.nowplaying_vuanalog_text = _NP_uses(s.nowplaying_spectrum_text, _NP_def)
 		s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
 		s.nowplaying_vuanalog_text.npprogress.npprogressB_disabled = s.nowplaying_vuanalog_text.npprogress.npprogressB
 
@@ -4789,8 +4795,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center"
 			},
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_spectrum_text_art, _NP_def)
+
+		s.nowplaying_vumeter_text_art = _NP_uses(s.nowplaying_spectrum_text_art, _NP_def)
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
@@ -4834,8 +4840,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center"
 			},
 		}
-		_fillNPFonts(_NP_def)
-		s.nowplaying_vumeter_large_art =  _uses(s.nowplaying_large_art, _NP_def)
+
+		s.nowplaying_vumeter_large_art =  _NP_uses(s.nowplaying_large_art, _NP_def)
 		s.nowplaying_vumeter_large_art.pressed = s.nowplaying_vumeter_large_art
 
 		s.nowplaying_vumeter_large_art.title.pressed = _uses(s.nowplaying_vumeter_large_art.title, {
@@ -4900,8 +4906,8 @@ function skin0(self, s, _, _, w, h)
                 w = screenWidth - 20,
 			}
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_large_vumeter =  _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_large_vumeter =  _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
 
 		s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
@@ -5070,8 +5076,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center"
 			},
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_spectrum_text_art = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
@@ -5106,8 +5112,8 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_spectrum_text_art, _NP_def)
+
+		s.nowplaying_vumeter_text_art = _NP_uses(s.nowplaying_spectrum_text_art, _NP_def)
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
@@ -5202,8 +5208,8 @@ function skin0(self, s, _, _, w, h)
 			npvisu = { hidden = 1 },
 		}
 
-        _fillNPFonts(_NP_def)
-		s.nowplaying_large_art = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_large_art = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_large_art.pressed = s.nowplaying_large_art
 
 		-- if we have more than four buttons, then make them smaller
@@ -5434,8 +5440,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center",
 			},
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_spectrum_text_art = _uses(s.nowplaying, _NP_def)
+
+		s.nowplaying_spectrum_text_art = _NP_uses(s.nowplaying, _NP_def)
 		s.nowplaying_spectrum_text_art.pressed = s.nowplaying_spectrum_text_art
 		s.nowplaying_spectrum_text_art.npprogress.npprogressB_disabled = s.nowplaying_spectrum_text_art.npprogress.npprogressB
 
@@ -5470,8 +5476,8 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 		}
-        _fillNPFonts(_NP_def)
-		s.nowplaying_vumeter_text_art = _uses(s.nowplaying_spectrum_text_art, _NP_def)
+
+		s.nowplaying_vumeter_text_art = _NP_uses(s.nowplaying_spectrum_text_art, _NP_def)
 		s.nowplaying_vumeter_text_art.pressed = s.nowplaying_vumeter_text_art
 		s.nowplaying_vumeter_text_art.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text_art.npprogress.npprogressB
 
