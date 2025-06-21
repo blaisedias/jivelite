@@ -143,6 +143,7 @@ end
 -- proceeds afresh
 function initialise()
     textScaleFactor = nil
+    npTextScaleFactor = nil
     thumbnailScaleFactor = nil
     gridTextScaleFactor = nil
     controlsScaleFactor = nil
