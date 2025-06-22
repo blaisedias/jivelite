@@ -1246,6 +1246,7 @@ function _updateButtons(self, playerStatus)
 			self.controlsGroup:setWidget('fwd', self.fwdButton)
 		end
 		self.controlsGroup:setWidget('twiddle', self.twiddleButton)
+		self.controlsGroup:setWidget('musicinfo', self.musicinfoButton)
 
 		if buttons.shuffle then
 			local callback = function()
@@ -1293,6 +1294,7 @@ function _updateButtons(self, playerStatus)
 			self.controlsGroup:setWidget('rew', self.rewButton)
 			self.controlsGroup:setWidget('fwd', self.fwdButton)
 			self.controlsGroup:setWidget('twiddle', self.twiddleButton)
+			self.controlsGroup:setWidget('musicinfo', self.musicinfoButton)
 			self.controlsGroup:setWidget('shuffleMode', self.shuffleButton)
 			self.controlsGroup:setWidget('repeatMode', self.repeatButton)
 			-- bug 15618: explicitly set style of rew and fwd here, since setWidget doesn't appear to be doing the job
@@ -2217,6 +2219,14 @@ function _createUI(self)
 				return EVENT_CONSUME
 			end
 	)
+	self.musicinfoButton = Button(
+			Icon('musicinfo'),
+			function()
+				Framework:pushAction("go_current_track_info")
+				return EVENT_CONSUME
+			end
+	)
+
 
 	if self.player:useVolumeControl() == 0 then
 		self.controlsGroup = Group('npcontrols', {
@@ -2232,7 +2242,8 @@ function _createUI(self)
 
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
-				twiddle  = self.twiddleButton,
+				twiddle     = self.twiddleButton,
+				musicinfo   = self.musicinfoButton,
 		})
 	else
 		self.controlsGroup = Group('npcontrols', {
@@ -2252,7 +2263,8 @@ function _createUI(self)
 
 				repeatMode  = self.repeatButton,
 				shuffleMode = self.shuffleButton,
-				twiddle  = self.twiddleButton,
+				twiddle     = self.twiddleButton,
+				musicinfo   = self.musicinfoButton,
 
 				volDown  = Button(
 					Icon('volDown'),

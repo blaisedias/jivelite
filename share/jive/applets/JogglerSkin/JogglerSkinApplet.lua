@@ -93,9 +93,9 @@ oo.class(_M, Applet)
 local imgpath = "applets/JogglerSkin/images/"
 local scaled_imgpath = "applets/JogglerSkin/images/"
 
-local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDown', 'volSlider', 'volUp' }
-local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'volDownUp', 'volSlider'}
-local tbControlButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle'}
+local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo', 'volDown', 'volSlider', 'volUp' }
+local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo', 'volDownUp', 'volSlider'}
+local tbControlButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo'}
 local tbVolumeButtons = {'volDown', 'volSlider', 'volUp' }
 
 local layoutMenuNodeName = 'jogglerLayout'
@@ -3657,6 +3657,9 @@ function skin0(self, s, _, _, w, h)
 			twiddle   = _uses(_transportControlButton, {
 				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_twiddle.png"),
 			}),
+			musicinfo   = _uses(_transportControlButton, {
+				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_musicinfo.png"),
+			}),
 			shuffleMode   = _uses(_transportControlButton, {
 				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_shuffle_off.png"),
 			}),
@@ -3848,6 +3851,7 @@ function skin0(self, s, _, _, w, h)
 		pause   = _uses(s.nowplaying.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
 		fwd     = _uses(s.nowplaying.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
 		twiddle     = _uses(s.nowplaying.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+		musicinfo     = _uses(s.nowplaying.npcontrols.musicinfo, { bgImg = controlKeyMiddlePressed }),
 		repeatPlaylist  = _uses(s.nowplaying.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
 		repeatSong      = _uses(s.nowplaying.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
 		repeatOff       = _uses(s.nowplaying.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
@@ -4017,6 +4021,7 @@ function skin0(self, s, _, _, w, h)
 			s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.musicinfo = _uses(s.nowplaying.npcontrols.musicinfo, { w = smallControlWidth })
 
 			s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
@@ -4070,6 +4075,7 @@ function skin0(self, s, _, _, w, h)
 			pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
 			fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
 			twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+			musicinfo     = _uses(s.nowplaying_large_art.npcontrols.musicinfo, { bgImg = controlKeyMiddlePressed }),
 			repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
 			repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
 			repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
@@ -5274,6 +5280,7 @@ function skin0(self, s, _, _, w, h)
 			s.nowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
+			s.nowplaying_large_art.npcontrols.musicinfo = _uses(s.nowplaying.npcontrols.musicinfo, { w = smallControlWidth })
 
 			s.nowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
 			s.nowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
@@ -5327,6 +5334,7 @@ function skin0(self, s, _, _, w, h)
 			pause   = _uses(s.nowplaying_large_art.npcontrols.pause, { bgImg = controlKeyMiddlePressed }),
 			fwd     = _uses(s.nowplaying_large_art.npcontrols.fwd, { bgImg = controlKeyMiddlePressed }),
 			twiddle     = _uses(s.nowplaying_large_art.npcontrols.twiddle, { bgImg = controlKeyMiddlePressed }),
+			musicinfo     = _uses(s.nowplaying_large_art.npcontrols.musicinfo, { bgImg = controlKeyMiddlePressed }),
 			repeatPlaylist  = _uses(s.nowplaying_large_art.npcontrols.repeatPlaylist, { bgImg = controlKeyMiddlePressed }),
 			repeatSong      = _uses(s.nowplaying_large_art.npcontrols.repeatSong, { bgImg = controlKeyMiddlePressed }),
 			repeatOff       = _uses(s.nowplaying_large_art.npcontrols.repeatOff, { bgImg = controlKeyMiddlePressed }),
