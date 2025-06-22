@@ -461,6 +461,7 @@ function scaleControlsImages(params)
                 { src="shuffle-disabled.png", dest="icon_toolbar_shuffle_off.png", },
                 { src="shuffle.png", dest="icon_toolbar_shuffle_on.png", },
                 { src="next-visualiser.png", dest="icon_toolbar_twiddle.png", },
+                { src="music-information.png", dest="icon_toolbar_musicinfo.png", },
             },
         },
         {
