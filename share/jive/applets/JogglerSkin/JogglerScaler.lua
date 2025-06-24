@@ -40,6 +40,10 @@ local Framework     = require("jive.ui.Framework")
 local json          = require("jive.json")
 local table         = require("jive.utils.table")
 
+local Label                  = require("jive.ui.Label")
+local Window                 = require("jive.ui.Window")
+local Popup             = require("jive.ui.Popup")
+
 -- package global variables
 local textScaleFactor
 local npTextScaleFactor
@@ -57,6 +61,27 @@ local iconsImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/Icons/'
 local volbarImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/VolumeBar/'
 
 module(...)
+
+-- FIXME for now duplicate a function from JogglerSkinApplet
+local function messageBox(txt, count)
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+	local text = Label("text", txt)
+
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		count = count - 1000
+		if count < 1 then
+			popup:hide(Window.transitionFadeOut)
+		end
+	end)
+	popup:show()
+end
 
 local function _loadJsonData(jsPath)
     local file = io.open(jsPath, "rb")
@@ -1040,7 +1065,14 @@ local userNpTables = {}
 function initialiseUserNPTables(loadFile)
     userNpTables = {}
     if loadFile then
-        userNpTables = _loadJsonData(System.getUserDir() .. '/JogglerNowPlaying.json') or {}
+        local jsPath = System.getUserDir() .. '/JogglerNowPlaying.json'
+        local res = _loadJsonData(jsPath)
+        if res == nil then
+            log:warn("WARNING : Failed to load " .. jsPath)
+            messageBox("WARNING : Failed to load " .. jsPath, 5000)
+        else
+            userNpTables = res
+        end
     end
 end
 
