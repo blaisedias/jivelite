@@ -1019,6 +1019,7 @@ local proscribed = {
     "rbutton",
 --    "div1", "div2", "div3", "div4", "div5", "div6", "div7", "div8", "div9", "div10", "div11",
 --    "title",
+    "hate", "love","thumbsUp","thumbsUpDisabled", "thumbsDown", "thumbsDownDisabled",
 }
 
 function writeJsonFile(data, relativeFilepath)
