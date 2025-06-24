@@ -1051,6 +1051,13 @@ function getUserNpTable(key)
     return {}
 end
 
+function getUserNpAllstylesTable()
+    if userNpTables['allstyles'] ~= nil then
+        return  userNpTables['allstyles']
+    end
+    return {}
+end
+
 local function flatten(tbl, tgt)
     local mt = getmetatable(tbl)
     if mt and type(mt) == 'table' and mt ~= tbl then
