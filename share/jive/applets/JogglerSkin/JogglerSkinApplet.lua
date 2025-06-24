@@ -5740,14 +5740,15 @@ function init(self)
 			local s = jiveMain:getSkinStyle()
 			if npss and s ~= nil then
 				local screenWidth, screenHeight = Framework:getScreenSize()
-				local jsData = {
-					LAYOUT_VALUES = {
-					LAYOUT_NORTH = LAYOUT_NORTH,
-					LAYOUT_EAST = LAYOUT_EAST,
-					LAYOUT_SOUTH = LAYOUT_SOUTH,
-					LAYOUT_WEST = LAYOUT_WEST,
-					LAYOUT_CENTER = LAYOUT_CENTER,
-					LAYOUT_NONE = LAYOUT_NONE,
+				local jsData = {}
+				jsData["-doc"] = {
+					position_values_by_name = {
+						LAYOUT_NORTH = LAYOUT_NORTH,
+						LAYOUT_EAST = LAYOUT_EAST,
+						LAYOUT_SOUTH = LAYOUT_SOUTH,
+						LAYOUT_WEST = LAYOUT_WEST,
+						LAYOUT_CENTER = LAYOUT_CENTER,
+						LAYOUT_NONE = LAYOUT_NONE,
 					}
 				}
 				local key = screenWidth..'x'..screenHeight
