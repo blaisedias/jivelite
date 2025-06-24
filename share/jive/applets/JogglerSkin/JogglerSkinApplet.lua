@@ -28,6 +28,7 @@ SqueezeboxSkin overrides the following methods:
 -- stuff we use
 local ipairs, pairs, setmetatable, type, tostring, tonumber = ipairs, pairs, setmetatable, type, tostring, tonumber
 local pcall = pcall
+local next = next
 
 local oo                     = require("loop.simple")
 local string                 = require("jive.utils.string")
@@ -633,9 +634,18 @@ local function _NP_uses(parent, tbl, key)
 	_NP_setup_fonts(tbl)
 	local tblu = _uses(parent, tbl)
 	if key then
+		local allstyles_tbl = jogglerScaler.getUserNpAllstylesTable(key)
+		local xi,_ = next(allstyles_tbl)
+		if xi ~= nil then
+			_NP_setup_fonts(allstyles_tbl)
+			tblu =  _uses(tblu, allstyles_tbl)
+		end
 		local user_tbl = jogglerScaler.getUserNpTable(key)
-		_NP_setup_fonts(user_tbl)
-		return _uses(tblu, user_tbl)
+		xi,_ = next(user_tbl)
+		if xi ~= nil then
+			_NP_setup_fonts(user_tbl)
+			tblu = _uses(tblu, user_tbl)
+		end
 	end
 	return tblu
 end

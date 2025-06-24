@@ -136,6 +136,7 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
        "writeJsonFile",
        "initialiseUserNPTables",
        "getUserNpTable",
+       "getUserNpAllstylesTable",
    },
    read_globals = {
    }
