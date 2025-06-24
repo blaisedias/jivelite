@@ -133,7 +133,7 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
        "updateJsonConfig",
        "deleteScaledUIImages",
        "getNowPlayingStyleJsonTable",
-       "writeCacheJsonFile",
+       "writeJsonFile",
        "initialiseUserNPTables",
        "getUserNpTable",
    },
