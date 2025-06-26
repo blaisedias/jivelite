@@ -275,7 +275,7 @@ TITLEBAR_FONT_SIZE
 	EN	Titlebar Font Size
 
 NOW_PLAYING_XOFY
-	EN	Show Now Playing X of Y
+	EN	Hide Now Playing X of Y
 
 UW_TEXT_SCREEN_WIDTH
 	EN	Ultrawide Display Text Width
