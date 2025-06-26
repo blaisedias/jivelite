@@ -852,8 +852,8 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	tbl_insert(rszs, rszBg)
 	tbl_insert(rszs, rszDc)
 
-	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn
-	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn
+	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn or 0x14bcbcff
+	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn or 0x7456a1ff
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dsResizeRequired)
 --	local desatColor = spectrumList[spImageIndex].desatColor and spectrumList[spImageIndex].desatColor or 0xffffff30
 	local desatColor = 0xffffff30
@@ -861,8 +861,8 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		desatColor = spectrumList[spImageIndex].desatColor
 	end
 
-	local capHeight = capHeightIn
-	local capSpace = capSpaceIn
+	local capHeight = capHeightIn or {4, 4}
+	local capSpace = capSpaceIn or {4, 4}
 	if not visSettings.spectrum.capsOn then
 		capHeight = {0,0}
 		capSpace = {0,0}

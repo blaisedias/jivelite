@@ -51,7 +51,7 @@ function _skin(self)
 
 -- Black background instead of image
 ---	self.bgImg = self:styleImage("bgImg")
-	self.bgCol = self:styleColor("bg", { 0xff, 0xff, 0xff, 0xff })
+--	self.bgCol = self:styleColor("bg", { 0xff, 0xff, 0xff, 0xff })
 
 	self.barColor = self:styleColor("barColor", { 0xff, 0xff, 0xff, 0xff })
 
@@ -74,14 +74,18 @@ function _layout(self)
 	FC = 0
 
 	self.channelWidth = {}
-	self.clipSubbands = {}
+	self.clipSubbands = {1,1}
 	self.counter = FRAME_RATE * visImage.getVisualiserChangeOnTimerValue()
 	self.countDown = self.counter ~= 0
 
-	self.isMono =  self:styleValue("isMono")
+	self.isMono =  0
+	if self:styleValue("isMono") ~= nil then
+		self.isMono =  self:styleValue("isMono")
+	end
 
 --	self.fgImg, self.bgImg, self.dsImg, self.barColor, self.capColor, self.desatColor, self.displayResizing = visImage:getSpectrum(w, h, self.barColor, self.capColor)
-	self.spparms = visImage:getSpectrum(w, h, self.barColor, self.capColor, self:styleValue("capHeight"), self:styleValue("capSpace"))
+--	self.spparms = visImage:getSpectrum(w, h, self.barColor, self.capColor, self:styleValue("capHeight"), self:styleValue("capSpace"))
+	self.spparms = visImage:getSpectrum(w, h)
 
 --	self.settings = visImage:getSpectrumMeterSettings(self:styleValue("capHeight"), self:styleValue("capSpace"))
 	if self.spparms.barsFormat.barsInBin < 1 then
@@ -91,7 +95,9 @@ function _layout(self)
 		self.spparms.barsFormat.barWidth = 1
 	end
 
-	self.clipSubbands = self:styleValue("clipSubbands")
+	if self:styleValue("clipSubbands") ~= nil then
+		self.clipSubbands = self:styleValue("clipSubbands")
+	end
 	self.backgroundDrawn = false;
 
 	local barsInBin = self.spparms.barsFormat.barsInBin
@@ -536,11 +542,11 @@ function draw(self, surface)
 		return
 	end
 
-	-- Avoid calling this more than once as it's not necessary
-	if not self.backgroundDrawn then
-		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
-		self.backgroundDrawn = true
-	end
+--	-- Avoid calling this more than once as it's not necessary
+--	if not self.backgroundDrawn then
+--		surface:filledRectangle(x, y, x + w, y + h, self.bgCol)
+--		self.backgroundDrawn = true
+--	end
 
 	if self.spparms.bgImg ~= nil then
 		self.spparms.bgImg:blit(surface, x, y)
