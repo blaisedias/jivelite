@@ -3468,7 +3468,26 @@ function skin0(self, s, _, _, w, h)
 	local y_nptitle = TITLE_HEIGHT + 17
 	local y_npartistgroup = y_nptitle + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5)
 
-	local x_title = _uses(s.title, {
+	if screenAR >= 3 then
+		-- simplify layout avoid overlaying UI elements
+		log:debug("screen aspect ratio > 3: forcing jogglerHideNowPlayingXofY to true")
+		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", true)
+	end
+
+	if portraitMode then
+		-- simplify layout avoid large gaps betweem elements
+		log:debug("portrait mode: forcing jogglerHideNowPlayingXofY to false")
+		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", false)
+	end
+
+
+	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
+		y_nptitle = 0
+		y_npartistgroup = TITLE_HEIGHT + 17
+	end
+	local _NP_def = {
+		--title bar
+		title = _uses(s.title, {
 			zOrder = 1,
 			text = {
 				_font_size_bold = TITLEBAR_FONT_SIZE,
@@ -3482,9 +3501,9 @@ function skin0(self, s, _, _, w, h)
 				padding = { 8, 0, 8, 0},
 				align   = 'center',
 			}
-		})
-
-	local x_nptitle = {
+		}),
+		-- Song metadata
+		nptitle = {
 			zOrder = 2,
 			order = { 'nptrack' },
 			position   = _tracklayout.position,
@@ -3502,65 +3521,7 @@ function skin0(self, s, _, _, w, h)
 				sh = TEXT_SH_COLOR,
 				bgImg = npTitleBackground
 			},
-		}
-
-	if screenAR >= 3 then
-		-- simplify layout avoid overlaying UI elements
-		log:debug("screen aspect ratio > 3: forcing jogglerHideNowPlayingXofY to true")
-		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", true)
-	end
-
-	if portraitMode then
-		-- simplify layout avoid large gaps betweem elements
-		log:debug("portrait mode: forcing jogglerHideNowPlayingXofY to false")
-		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", false)
-	end
-
-	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
-		y_npartistgroup = TITLE_HEIGHT + 17
-		x_title = _uses(s.title, {
-			zOrder = 1,
-			h = TITLE_HEIGHT,
-			text = {
-				_font_size = 5,
-				-- Hack: text needs to be there to fill the space, but is not visible
-				padding = { screenWidth, 0, 0, 0 }
-			},
-			rbutton  = {
-				_font_size = scaledValues.RBUTTON_FONT_SIZE,
-				fg      = TEXT_COLOR,
-				bgImg   = V_titlebarButtonBox,
-				w       = TITLE_BUTTON_WIDTH,
-				padding = { 8, 0, 8, 0},
-				align   = 'center',
-			}
-		})
-		x_nptitle = {
-			zOrder = 2,
-			order = { 'nptrack' },
-			position = LAYOUT_NONE,
-			x = 80,
-			y = 0,
-			h = TITLE_HEIGHT,
-			border = { 0, 0 ,0, 0 },
-			padding = { 20, 0, 20, 0 },
-			nptrack = {
-				align = "center",
-				w = screenWidth - 196,
-				h          = WH_FILL,
-				fg         = scaledValues.NP_TITLE_COLOR,
-				_font_size_bold = NP_TRACK_FONT_SIZE,
-				bgImg = npTitleBackground
-			},
-		}
-	end
-
-	local _NP_def = {
-		--title bar
-		title = x_title,
-
-		-- Song metadata
-		nptitle = x_nptitle,
+		},
 		npartistgroup = {
 			order = { 'npartist' },
 			position   = _tracklayout.position,
@@ -3614,7 +3575,6 @@ function skin0(self, s, _, _, w, h)
 			padding = { 5, 0, 0, 5 },
 			_font_size = 13,
 		},
-
 
 		-- cover art
 		npartwork = {
@@ -3817,6 +3777,30 @@ function skin0(self, s, _, _, w, h)
 			bgImg = npProgressBackground,
 		},
 	}
+
+	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
+		-- Hack: text needs to be there to fill the space, but is not visible
+		_NP_def['title'].text.padding = { screenWidth, 0, 0, 0 }
+		-- Hack: position the track title on top of title text
+		_NP_def['nptitle'] = {
+			zOrder = 2,
+			order = { 'nptrack' },
+			position = LAYOUT_NONE,
+			border = { 0, 0 ,0, 0 },
+			x = 60,
+			y = 0,
+			h = TITLE_HEIGHT,
+			padding = { 20, 0, 20, 0 },
+			nptrack = {
+				align = "center",
+				w          = screenWidth - 140,
+				h          = WH_FILL,
+				fg         = scaledValues.NP_TITLE_COLOR,
+				_font_size_bold = NP_TRACK_FONT_SIZE,
+				bgImg = npTitleBackground
+			},
+		}
+	end
 
 	local BASEnowplaying = _NP_uses(s.window, _NP_def)
 	BASEnowplaying.npprogressNB.elapsedSmall = BASEnowplaying.npprogressNB.elapsed
