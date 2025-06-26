@@ -4427,23 +4427,6 @@ function skin0(self, s, _, _, w, h)
 					h = SP_H,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0x74, 0x56, 0xa1, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -4504,19 +4487,6 @@ function skin0(self, s, _, _, w, h)
 					h = mini_visu_H,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-					isMono = 0,				-- 0 / 1
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -4558,23 +4528,6 @@ function skin0(self, s, _, _, w, h)
 					h = large_art_visu_H,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -4617,23 +4570,6 @@ function skin0(self, s, _, _, w, h)
 					h = screenHeight,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, TITLE_HEIGHT, 0, controlHeight },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -4700,23 +4636,6 @@ function skin0(self, s, _, _, w, h)
 					h = screenHeight,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -5089,23 +5008,6 @@ function skin0(self, s, _, _, w, h)
 					h = mini_visu_H,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
@@ -5294,23 +5196,6 @@ function skin0(self, s, _, _, w, h)
 					h = mini_visu_H,
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
-
-					bg = { 0x00, 0x00, 0x00, 0x00 },
-
-					barColor = { 0x14, 0xbc, 0xbc, 0xff },
-					capColor = { 0xc0, 0xc0, 0xc0, 0xff },
-
-					isMono = 0,				-- 0 / 1
-
-					capHeight = { 4, 4 },			-- >= 0
-					capSpace = { 4, 4 },			-- >= 0
-					channelFlipped = { 0, 1 },		-- 0 / 1
-					barsInBin = { 2, 2 },			-- > 1
-					barWidth = { 1, 1 },			-- > 1
-					barSpace = { 3, 3 },			-- >= 0
-					binSpace = { 6, 6 },			-- >= 0
-					clipSubbands = { 1, 1 },		-- 0 / 1
-					useVisImage = true,
 				},
 				bgImg = npvisuBackground,
 			},
