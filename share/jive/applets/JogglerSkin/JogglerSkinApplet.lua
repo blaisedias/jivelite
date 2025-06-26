@@ -3506,17 +3506,17 @@ function skin0(self, s, _, _, w, h)
 
 	if screenAR >= 3 then
 		-- simplify layout avoid overlaying UI elements
-		log:debug("screen aspect ratio > 3: forcing jogglerShowNowplayingXofY to false")
-		Framework:setGlobalSetting("jogglerShowNowplayingXofY", false)
+		log:debug("screen aspect ratio > 3: forcing jogglerHideNowPlayingXofY to true")
+		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", true)
 	end
 
 	if portraitMode then
 		-- simplify layout avoid large gaps betweem elements
-		log:debug("portrait mode: forcing jogglerShowNowplayingXofY to true")
-		Framework:setGlobalSetting("jogglerShowNowplayingXofY", true)
+		log:debug("portrait mode: forcing jogglerHideNowPlayingXofY to false")
+		Framework:setGlobalSetting("jogglerHideNowPlayingXofY", false)
 	end
 
-	if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
 		y_npartistgroup = TITLE_HEIGHT + 17
 		x_title = _uses(s.title, {
 			zOrder = 1,
@@ -3945,7 +3945,7 @@ function skin0(self, s, _, _, w, h)
 
 	local large_art_padding = { 10, 12, 10, 15 }
 	local large_art_rmargin = 10
-	if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
 		large_art_padding = nil
 		large_art_rmargin = 100
 	end
@@ -5206,7 +5206,7 @@ function skin0(self, s, _, _, w, h)
 					_font_size_bold = NP_TRACK_FONT_SIZE * 0.9,
 				},
 			}
-		if not Framework:getGlobalSetting("jogglerShowNowplayingXofY") then
+		if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
 			x_nptitle = {
 					x = 90,
 					nptrack = {
@@ -5790,10 +5790,10 @@ function init(self)
 			style = 'item_choice',
 			weight = 60,
 			check = Checkbox("checkbox", function(_, checked)
-				Framework:setGlobalSetting("jogglerShowNowplayingXofY", checked)
+				Framework:setGlobalSetting("jogglerHideNowPlayingXofY", checked)
 				reloadSkin()
 				end,
-			Framework:getGlobalSetting("jogglerShowNowplayingXofY"))
+			Framework:getGlobalSetting("jogglerHideNowPlayingXofY"))
 		})
 	end
 end
