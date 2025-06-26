@@ -862,6 +862,7 @@ function getJogglerSkinParams(skinName)
         end
     end
 
+    params.state.hiddenControlHeight = math.floor(params.TITLE_HEIGHT/2.5)
     if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
         if screenWidth == 720 and screenHeight == 1280 then
             -- portrait mode
@@ -871,7 +872,6 @@ function getJogglerSkinParams(skinName)
         else
             params.midArtworkSize = screenHeight - params.TITLE_HEIGHT - (params.CONTROLS_DIMENSIONS) - 18
             if Framework:getGlobalSetting("jogglerHideControls") then
-                params.state.hiddenControlHeight = math.floor(params.TITLE_HEIGHT/2.5)
                 params.midArtworkSize = screenHeight - params.TITLE_HEIGHT - math.floor(params.TITLE_HEIGHT/2.5) - 18
             end
         end
