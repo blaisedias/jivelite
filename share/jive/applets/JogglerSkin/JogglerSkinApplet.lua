@@ -676,6 +676,7 @@ local function layoutLargeArtControls(candidates, screenWidth, controlWidth, _, 
 			return {fitted=fitted, order=buttonOrder}
 		end
 	end
+	table.insert(buttonOrder, "divVolSpace2")
 	if table.contains(candidates, 'volUp') then
 		avail = avail - 2 * controlWidth
 	end
@@ -3416,6 +3417,7 @@ function skin0(self, s, _, _, w, h)
 		if settings[v] or ((v == 'volUp' or v == 'volDown') and settings['volDownUp']) then
 			if not volSpacingInserted then
 				table.insert(buttonOrder, 'divVolSpace')
+				table.insert(buttonOrder, 'divVolSpace2')
 				volSpacingInserted = true
 --			else
 --				table.insert(buttonOrder, 'div' .. tostring(iDiv))
@@ -3438,6 +3440,7 @@ function skin0(self, s, _, _, w, h)
 --	-- So we are stuck with a single value of volumeBarWidth for all NowPlaying views
 --	-- The following block almost works satisfactorily for all cases...
 	local divVolSpacing = screenWidth - nvc_width - vc_width
+	local divVolSpacing2 = 0
 	log:info("volSliderIsEnabled:", volSliderIsEnabled, " volumeBarWidth:", volumeBarWidth)
 	log:info("nvc_width: ", nvc_width, " vc_width: ", vc_width, " divVolSpacing: ", divVolSpacing)
 	if divVolSpacing > 0 and vc_width < (screenWidth/2) then
@@ -3446,6 +3449,16 @@ function skin0(self, s, _, _, w, h)
 			vc_width = vc_width - volumeBarWidth
 			volumeBarWidth = screenWidth - screenHeight - nvc_width - vc_width - 10
 			divVolSpacing = screenWidth - nvc_width - vc_width - volumeBarWidth - 10
+			vc_width = vc_width + volumeBarWidth
+			if vc_width > screenWidth/2 then
+				divVolSpacing2 = vc_width - screenWidth/2
+				volumeBarWidth = volumeBarWidth - divVolSpacing2
+				if volumeBarWidth > 700 then
+					divVolSpacing2 = divVolSpacing2 + volumeBarWidth - 700
+					vc_width = vc_width + volumeBarWidth - 700
+					volumeBarWidth = 700
+				end
+			end
 		else
 			-- in this case volume bar will be dropped from the set of controls visible
 			-- in large art Now Playing views
@@ -3613,6 +3626,7 @@ function skin0(self, s, _, _, w, h)
 --			div7 = _uses(_transportControlBorder),
 --			div8 = _uses(_transportControlBorder),
 			divVolSpace = _uses(_transportControlBorder),
+			divVolSpace2 = _uses(_transportControlBorder),
 
 			rew   = _uses(_transportControlButton, {
 				img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_toolbar_rew.png"),
@@ -3876,6 +3890,8 @@ function skin0(self, s, _, _, w, h)
 
 	BASEnowplaying.npcontrols.divVolSpace.w = divVolSpacing
 	BASEnowplaying.npcontrols.divVolSpace.img = false
+	BASEnowplaying.npcontrols.divVolSpace2.w = divVolSpacing2
+	BASEnowplaying.npcontrols.divVolSpace2.img = false
 
 	s.nowplaying = _NP_uses(BASEnowplaying, {}, 'nowplaying')
 

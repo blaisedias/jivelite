@@ -2256,6 +2256,7 @@ function _createUI(self)
 				div7 = Icon('div7'),
 				div8 = Icon('div8'),
 				divVolSpace = Icon('divVolSpace'),
+				divVolSpace2 = Icon('divVolSpace2'),
 
 				rew  = self.rewButton,
 				play = playIcon,
