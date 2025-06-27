@@ -288,194 +288,170 @@ function param(self)
 		self._CACHED["SCALED_VALUES"] = jogglerScaler.getJogglerSkinParams(self:skinName())
 		scaledValues = self._CACHED["SCALED_VALUES"]
 	end
-	local npSS = {}
 	local screenWidth, screenHeight = Framework:getScreenSize()
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
 	local midArtwork = tostring(scaledValues.midArtworkSize) .. 'x' .. tostring(scaledValues.midArtworkSize)
 	local screenAR = screenWidth/screenHeight
 	local portraitMode = screenWidth == 720 and screenHeight == 1280
 
-	if portraitMode then
-		npSS = {
+	local npstyles = {
 			{
-				style = 'nowplaying_spectrum_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying',
+					artworkSize = midArtwork,
+					text = self:string("ART_AND_TEXT"),
+				}
 			},
 			{
-				style = 'nowplaying_vumeter_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("VU_METER_TEXT_ART"),
-			},
-		}
-	elseif screenAR < 3 then
-		npSS = {
-			-- every skin needs to start off with a nowplaying style
-			{
-				style = 'nowplaying',
-				artworkSize = midArtwork,
-				text = self:string("ART_AND_TEXT"),
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_large_art',
+					artworkSize = maxArtwork,
+					titleXofYonly = true,
+					text = self:string("LARGE_ART_AND_TEXT"),
+				}
 			},
 			{
-				style = 'nowplaying_large_art',
-				artworkSize = maxArtwork,
-				titleXofYonly = true,
-				text = self:string("LARGE_ART_AND_TEXT"),
+				aspect_ratio_range = {min = 1},
+					npstyle = {
+					style = 'nowplaying_art_only',
+					artworkSize = maxArtwork,
+					suppressTitlebar = 1,
+					text = self:string("ART_ONLY"),
+				}
 			},
 			{
-				style = 'nowplaying_art_only',
-				artworkSize = maxArtwork,
-				suppressTitlebar = 1,
-				text = self:string("ART_ONLY"),
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_text_only',
+					artworkSize = midArtwork,
+					text = self:string("TEXT_ONLY"),
+				}
 			},
 			{
-				style = 'nowplaying_text_only',
-				artworkSize = midArtwork,
-				text = self:string("TEXT_ONLY"),
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_spectrum_text',
+					artworkSize = midArtwork,
+					localPlayerOnly = 1,
+					text = self:string("SPECTRUM_ANALYZER"),
+				}
 			},
 			{
-				style = 'nowplaying_spectrum_text',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("SPECTRUM_ANALYZER"),
+				-- available for all views
+				aspect_ratio_range = {min = 0},
+				npstyle = {
+					style = 'nowplaying_spectrum_text_art',
+					artworkSize = midArtwork,
+					localPlayerOnly = 1,
+					text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+				}
 			},
 			{
-				style = 'nowplaying_spectrum_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
+				-- available for views where screen width >= 2 * screen height and < 3 * screen height
+				-- for aspect ratio > 3. nowplaying_spectrum_text_art is rendered with full height artwork,
+				-- and has the added feature of user configurable artwork size.
+				aspect_ratio_range = {min = 2, max = 3},
+					npstyle = {
+					style = 'nowplaying_spectrum_large_art',
+					localPlayerOnly = 1,
+					artworkSize = maxArtwork,
+					titleXofYonly = true,
+					text = self:string("SPECTRUM_LARGE_ART_AND_TEXT"),
+				}
 			},
 			{
-				style = 'nowplaying_spectrum_large_art',
-				localPlayerOnly = 1,
-				artworkSize = maxArtwork,
-				titleXofYonly = true,
-				text = self:string("SPECTRUM_LARGE_ART_AND_TEXT"),
+				aspect_ratio_range = {min = 1},
+					npstyle = {
+					style = 'nowplaying_large_spectrum',
+					localPlayerOnly = 1,
+					artworkSize = midArtwork,
+					trackartistalbum = true,
+					text = self:string("LARGE_SPECTRUM_ANALYZER"),
+					suppressXofY = true,
+					suppressTitleText = 1,
+				}
 			},
 			{
-				style = 'nowplaying_large_spectrum',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("LARGE_SPECTRUM_ANALYZER"),
-				suppressXofY = true,
-				suppressTitleText = 1,
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_spectrum_only',
+					localPlayerOnly = 1,
+					artworkSize = midArtwork,
+					suppressXofY = true,
+					-- suppressTitlebar = 1,
+					trackartistalbum = true,
+					text = self:string("SPECTRUM_ANALYZER_ONLY"),
+					suppressTitlebar = 1,
+				}
 			},
 			{
-				style = 'nowplaying_spectrum_only',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				suppressXofY = true,
---				suppressTitlebar = 1,
-				trackartistalbum = true,
-				text = self:string("SPECTRUM_ANALYZER_ONLY"),
-				suppressTitlebar = 1,
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_vumeter_text',
+					artworkSize = midArtwork,
+					localPlayerOnly = 1,
+					text = self:string("VU_METER_TEXT"),
+				}
 			},
 			{
-				style = 'nowplaying_vumeter_text',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("VU_METER_TEXT"),
+				-- available for all views
+				aspect_ratio_range = {min = 0},
+				npstyle = {
+					style = 'nowplaying_vumeter_text_art',
+					artworkSize = midArtwork,
+					localPlayerOnly = 1,
+					text = self:string("VU_METER_TEXT_ART"),
+				}
 			},
 			{
-				style = 'nowplaying_vumeter_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("VU_METER_TEXT_ART"),
+				-- available for views where screen width >= 2 * screen height -- and < 3 * screen height
+				-- for aspect ration > 3, nowplaying_vumeter_text_art is rendered with full height artwork,
+				-- and has the added feature of user configurable artwork size.
+				aspect_ratio_range = {min = 2, max = 3},
+				npstyle = {
+					style = 'nowplaying_vumeter_large_art',
+					localPlayerOnly = 1,
+					artworkSize = maxArtwork,
+					titleXofYonly = true,
+					text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
+				}
 			},
 			{
-				style = 'nowplaying_vumeter_large_art',
-				localPlayerOnly = 1,
-				artworkSize = maxArtwork,
-				titleXofYonly = true,
-				text = self:string("VU_METER_LARGE_ART_AND_TEXT"),
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_large_vumeter',
+					localPlayerOnly = 1,
+					artworkSize = midArtwork,
+					trackartistalbum = true,
+					text = self:string("LARGE_VU_METER"),
+					suppressXofY = true,
+					suppressTitleText = 1,
+				}
 			},
 			{
-				style = 'nowplaying_large_vumeter',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("LARGE_VU_METER"),
-				suppressXofY = true,
-				suppressTitleText = 1,
-			},
-			{
-				style = 'nowplaying_vumeter_only',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("VU_METER_ONLY"),
-				suppressXofY = true,
-				suppressTitlebar = 1,
-			},
-		}
-	else
-		npSS = {
-			-- every skin needs to start off with a nowplaying style
-			{
-				style = 'nowplaying_large_art',
-				artworkSize = maxArtwork,
-				titleXofYonly = true,
-				text = self:string("LARGE_ART_AND_TEXT"),
-			},
-			{
-				style = 'nowplaying_art_only',
-				artworkSize = maxArtwork,
-				suppressTitlebar = 1,
-				text = self:string("ART_ONLY"),
-			},
-			{
-				style = 'nowplaying_spectrum_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("SPECTRUM_ANALYZER_TEXT_ART"),
-			},
-			{
-				style = 'nowplaying_large_spectrum',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("LARGE_SPECTRUM_ANALYZER"),
-				suppressXofY = true,
-				suppressTitleText = 1,
-			},
-			{
-				style = 'nowplaying_spectrum_only',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				suppressXofY = true,
---				suppressTitlebar = 1,
-				trackartistalbum = true,
-				text = self:string("SPECTRUM_ANALYZER_ONLY"),
-				suppressTitlebar = 1,
-			},
-			{
-				style = 'nowplaying_vumeter_text_art',
-				artworkSize = midArtwork,
-				localPlayerOnly = 1,
-				text = self:string("VU_METER_TEXT_ART"),
-			},
-			{
-				style = 'nowplaying_large_vumeter',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("LARGE_VU_METER"),
-				suppressXofY = true,
-				suppressTitleText = 1,
-			},
-			{
-				style = 'nowplaying_vumeter_only',
-				localPlayerOnly = 1,
-				artworkSize = midArtwork,
-				trackartistalbum = true,
-				text = self:string("VU_METER_ONLY"),
-				suppressXofY = true,
-				suppressTitlebar = 1,
+				aspect_ratio_range = {min = 1},
+				npstyle = {
+					style = 'nowplaying_vumeter_only',
+					localPlayerOnly = 1,
+					artworkSize = midArtwork,
+					trackartistalbum = true,
+					text = self:string("VU_METER_ONLY"),
+					suppressXofY = true,
+					suppressTitlebar = 1,
+				}
 			},
 		}
+
+	-- every skin needs to start off with a nowplaying style
+	local npSS = {}
+	for _,v in pairs(npstyles) do
+		if screenAR > v.aspect_ratio_range.min then
+			if v.aspect_ratio_range.max == nil or screenAR < v.aspect_ratio_range.max then
+				table.insert(npSS, v.npstyle)
+			end
+		end
 	end
 
 	self._CACHED['PARAM'] = {
