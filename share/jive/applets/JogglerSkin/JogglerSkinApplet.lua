@@ -374,7 +374,7 @@ function param(self)
 				suppressTitlebar = 1,
 			},
 			{
-				style = 'nowplaying_vuanalog_text',
+				style = 'nowplaying_vumeter_text',
 				artworkSize = midArtwork,
 				localPlayerOnly = 1,
 				text = self:string("VU_METER_TEXT"),
@@ -4672,7 +4672,7 @@ function skin0(self, s, _, _, w, h)
 	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
 	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70) - AUDIO_METADATA_H
-	if activeNowPlayingScreenStyles['nowplaying_vuanalog_text'] == true then
+	if activeNowPlayingScreenStyles['nowplaying_vumeter_text'] == true then
 		visImage:registerVUMeterResolution(screenWidth, VU_H)
 		-- Visualizer: Analog VU Meter
 		_NP_def = {
@@ -4686,7 +4686,7 @@ function skin0(self, s, _, _, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = 0,
 					y = TITLE_HEIGHT + 63,
@@ -4699,11 +4699,11 @@ function skin0(self, s, _, _, w, h)
 			},
 		}
 
-		s.nowplaying_vuanalog_text = _NP_uses(BASEnowplaying_visu_text, _NP_def, 'nowplaying_vuanalog_text')
-		s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
-		s.nowplaying_vuanalog_text.npprogress.npprogressB_disabled = s.nowplaying_vuanalog_text.npprogress.npprogressB
+		s.nowplaying_vumeter_text = _NP_uses(BASEnowplaying_visu_text, _NP_def, 'nowplaying_vumeter_text')
+		s.nowplaying_vumeter_text.pressed = s.nowplaying_vumeter_text
+		s.nowplaying_vumeter_text.npprogress.npprogressB_disabled = s.nowplaying_vumeter_text.npprogress.npprogressB
 
-		s.nowplaying_vuanalog_text.title.pressed = _uses(s.nowplaying_vuanalog_text.title, {
+		s.nowplaying_vumeter_text.title.pressed = _uses(s.nowplaying_vumeter_text.title, {
 			text = {
 				-- Hack: text needs to be there to fill the space, not visible
 				padding = { screenWidth, 0, 0, 0 }
@@ -4729,7 +4729,7 @@ function skin0(self, s, _, _, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = mini_visu_X,
 					y = mini_visu_Y,
@@ -4774,7 +4774,7 @@ function skin0(self, s, _, _, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = large_art_visu_X,
 					y = large_art_visu_Y,
@@ -4817,7 +4817,7 @@ function skin0(self, s, _, _, w, h)
 				padding = { 0, 0, 0, 0 },
 
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = 0,
 					y = TITLE_HEIGHT,
@@ -5035,7 +5035,7 @@ function skin0(self, s, _, _, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = mini_visu_X,
 					y = mini_visu_Y,
@@ -5224,7 +5224,7 @@ function skin0(self, s, _, _, w, h)
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
-				vumeter_analog = {
+				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = mini_visu_X,
 					y = mini_visu_Y,

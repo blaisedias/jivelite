@@ -123,7 +123,7 @@ function param(self)
 				text = self:string("SPECTRUM_ANALYZER"),
 			},
 			{
-				style = 'nowplaying_vuanalog_text',
+				style = 'nowplaying_vumeter_text',
 				artworkSize = '180x180',
 				localPlayerOnly = 1,
 				text = self:string("ANALOG_VU_METER"),
@@ -3357,7 +3357,7 @@ function skin(self, s)
 	})
 
 	-- Visualizer: Analog VU Meter
-	s.nowplaying_vuanalog_text = _uses(s.nowplaying_visualizer_common, {
+	s.nowplaying_vumeter_text = _uses(s.nowplaying_visualizer_common, {
 		npvisu = {
 			hidden = 0,
 			position = LAYOUT_NONE,
@@ -3368,7 +3368,7 @@ function skin(self, s)
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
-			vumeter_analog = {
+			vumeter_v2 = {
 				position = LAYOUT_NONE,
 				x = 0,
 				y = TITLE_HEIGHT + 38,
@@ -3380,9 +3380,9 @@ function skin(self, s)
 			}
 		},
 	})
-	s.nowplaying_vuanalog_text.pressed = s.nowplaying_vuanalog_text
+	s.nowplaying_vumeter_text.pressed = s.nowplaying_vumeter_text
 
-	s.nowplaying_vuanalog_text.title.pressed = _uses(s.nowplaying_vuanalog_text.title, {
+	s.nowplaying_vumeter_text.title.pressed = _uses(s.nowplaying_vumeter_text.title, {
 		text = {
 			-- Hack: text needs to be there to fill the space, not visible
 			padding = { screenWidth, 0, 0, 0 }

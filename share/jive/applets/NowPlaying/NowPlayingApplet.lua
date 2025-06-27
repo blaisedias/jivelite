@@ -85,21 +85,30 @@ local shuffleModes = {
 local SCROLL_TIMEOUT = 750
 
 local defaultEnabledStyles = {
-    'nowplaying',
-    'nowplaying_spectrum_text_art',
-    'nowplaying_vumeter_text',
-    'nowplaying_vuanalog_text',
+	'nowplaying',
+	'nowplaying_spectrum_text_art',
+	'nowplaying_vumeter_text',
 }
 
-local function has_value (tab, val)
-    for _, value in ipairs(tab) do
-        if value == val then
-            return true
-        end
-    end
+local npVumeterStyles = {
+	"nowplaying_vumeter_text",
+	"nowplaying_minivumeter_text",
+	"nowplaying_vumeter_text_art",
+	"nowplaying_vumeter_large_art",
+	"nowplaying_vumeter_only",
+	"nowplaying_vumeter_fullscreen",
+	"nowplaying_large_vumeter",
+}
 
-    return false
-end
+local npSpectrumStyles = {
+	"nowplaying_spectrum_text",
+	"nowplaying_minispectrum_text",
+	"nowplaying_spectrum_text_art",
+	"nowplaying_spectrum_large_art",
+	"nowplaying_spectrum_only",
+	"nowplaying_spectrum_fullscreen",
+	"nowplaying_large_spectrum",
+}
 
 ----------------------------------------------------------------------------------------
 -- Helper Functions
@@ -428,7 +437,7 @@ function init(self)
 	self.player = false
 	self.lastVolumeSliderAdjustT = 0
 	self.cumulativeScrollTicks = 0
-    self:sanitiseAudioMetadataSettings()
+	self:sanitiseAudioMetadataSettings()
 
 	local settings      = self:getSettings()
 
@@ -525,7 +534,7 @@ function getNPStyles(self)
 				v.enabled = settings.views[v.style]
 			else
 				--  setting for style/view is undefined, only enable it if is defined as enabled by default
-				v.enabled = has_value(defaultEnabledStyles, v.style)
+				v.enabled = table.contains(defaultEnabledStyles, v.style)
 			end
 			if not self.player:isLocal() and v.localPlayerOnly then
 				log:debug('the style ', v.style , ' is not for non-local players. Removing...')
@@ -617,44 +626,12 @@ function invalidateWindow(self)
 end
 
 local function npStyleHasVuMeter(npstyle)
-	if npstyle == "nowplaying_vuanalog_text" then
-		return true
-	elseif npstyle == "nowplaying_vumeter_text" then
-		return true
-	elseif npstyle == "nowplaying_minivumeter_text" then
-		return true
-	elseif npstyle == "nowplaying_vumeter_text_art" then
-		return true
-	elseif npstyle == "nowplaying_vumeter_large_art" then
-		return true
-	elseif npstyle == "nowplaying_vumeter_only" then
-		return true
-	elseif npstyle == "nowplaying_vumeter_fullscreen" then
-		return true
-	elseif npstyle == "nowplaying_large_vumeter" then
-		return true
-	end
-	return false
+	return table.contains(npVumeterStyles, npstyle)
 end
 
 
 local function npStyleHasSpectrum(npstyle)
-	if npstyle == "nowplaying_spectrum_text" then
-		return true
-	elseif npstyle == "nowplaying_minispectrum_text" then
-		return true
-	elseif npstyle == "nowplaying_spectrum_text_art" then
-		return true
-	elseif npstyle == "nowplaying_spectrum_large_art" then
-		return true
-	elseif npstyle == "nowplaying_spectrum_only" then
-		return true
-	elseif npstyle == "nowplaying_spectrum_fullscreen" then
-		return true
-	elseif npstyle == "nowplaying_large_spectrum" then
-		return true
-	end
-	return false
+	return table.contains(npSpectrumStyles, npstyle)
 end
 
 
@@ -684,8 +661,8 @@ function npviewsSettingsShow(self)
 	if settingsViews == 0 then
 		-- views are undefined - only enable those defined as enabled by default
 		for i, v in ipairs(npscreenViews) do
-			settings.views[v.style] = has_value(defaultEnabledStyles, v.style)
-			npscreenViews[i].enabled = has_value(defaultEnabledStyles, v.style)
+			settings.views[v.style] = table.contains(defaultEnabledStyles, v.style)
+			npscreenViews[i].enabled = table.contains(defaultEnabledStyles, v.style)
 		end
 		self:storeSettings()
 	end
@@ -2097,7 +2074,7 @@ function _createUI(self)
 	if npStyleHasVuMeter(self.windowStyle) then
 		local settings = self:getSettings()
 		self.showVUData = settings.showVisualiserData
-		self.currentVisualiser = VUMeter("vumeter_analog")
+		self.currentVisualiser = VUMeter("vumeter_v2")
 		self.visuGroup = Button(
 			Group('npvisu', {
 				visu = self.currentVisualiser

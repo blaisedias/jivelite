@@ -3085,7 +3085,7 @@ function skin(self, s)
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
-			vumeter_analog = {
+			vumeter_v2 = {
 				position = LAYOUT_NONE,
 				x = _tracklayout.x,
 				y = TITLE_HEIGHT + (screenHeight - TITLE_HEIGHT - coverSize) / 2 + coverSize * 3 / 6,
@@ -3111,7 +3111,7 @@ function skin(self, s)
 			border = { 0, 0, 0, 0 },
 			padding = { 0, 0, 0, 0 },
 
-			vumeter_analog = {
+			vumeter_v2 = {
 				position = LAYOUT_NONE,
 				x = _tracklayout.x,
 				y = (coverSize/6),
