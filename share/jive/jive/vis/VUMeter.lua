@@ -86,6 +86,8 @@ function _skin(self)
 		if self.bgImg == nil then
 			self.style = "vumeter_v2"
 		end
+	elseif self.style == "vumeter_v2" then
+		self.bgImg = nil
 	end
 end
 
