@@ -95,6 +95,7 @@ local imgpath = "applets/JogglerSkin/images/"
 local scaled_imgpath = "applets/JogglerSkin/images/"
 
 local tbButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo', 'volDown', 'volSlider', 'volUp' }
+local npc_order_sort = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo', 'divVolSpace', 'divVolSpace2', 'volDown', 'volSlider', 'volUp' }
 local tbButtonsUIList = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo', 'volDownUp', 'volSlider'}
 local tbControlButtons = { 'rew', 'play', 'fwd', 'repeatMode', 'shuffleMode', 'twiddle', 'musicinfo'}
 local tbVolumeButtons = {'volDown', 'volSlider', 'volUp' }
@@ -623,6 +624,16 @@ local function _NP_uses(parent, tbl, key)
 			tblu = _uses(tblu, user_tbl)
 		end
 	end
+	-- re-order the set of controls buttons as defined by the controls sort order if defined
+	if tblu['npcontrols'] ~= nil and  tblu['npcontrols'].order_sort ~= nil then
+		local new_order =  {}
+		for _, v in pairs(tblu['npcontrols'].order_sort) do
+			if table.contains(tblu['npcontrols'].order, v) then
+				table.insert(new_order, v)
+			end
+		end
+		tblu['npcontrols'].order = new_order
+	end
 	return tblu
 end
 
@@ -695,6 +706,7 @@ function skin0(self, s, _, _, w, h)
 	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
 	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
 	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
+	local TOPBUTTON_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.TOPBUTTONS_DIMENSIONS
 	scaled_imgpath = scaledValues.state.imgPath
 	if scaledValues.state.scalingRequired == true then
 		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
@@ -710,14 +722,14 @@ function skin0(self, s, _, _, w, h)
 
 	-- Images and Tiles
 	local inputTitleBox           = _loadImageTile(self,  imgpath .. "Titlebar/titlebar.png" )
-	local backButton              = _loadImageTile(self,  imgpath .. "Icons/icon_back_button_tb.png")
-	local cancelButton            = _loadImageTile(self,  imgpath .. "Icons/icon_close_button_tb.png")
-	local homeButton              = _loadImageTile(self,  imgpath .. "Icons/icon_home_button_tb.png")
-	local helpButton              = _loadImageTile(self,  imgpath .. "Icons/icon_help_button_tb.png")
-	local powerButton             = _loadImageTile(self,  imgpath .. "Icons/icon_power_button_tb.png")
-	local nowPlayingButton        = _loadImageTile(self,  imgpath .. "Icons/icon_nplay_button_tb.png")
-	local playlistButton          = _loadImageTile(self,  imgpath .. "Icons/icon_nplay_list_tb.png")
-	local moreButton              = _loadImageTile(self,  imgpath .. "Icons/icon_more_tb.png")
+	local backButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_back_button_tb.png")
+	local cancelButton            = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_close_button_tb.png")
+	local homeButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_home_button_tb.png")
+	local helpButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_help_button_tb.png")
+	local powerButton             = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_power_button_tb.png")
+	local nowPlayingButton        = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_nplay_button_tb.png")
+	local playlistButton          = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_nplay_list_tb.png")
+	local moreButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_more_tb.png")
 	local touchToolbarBackground  = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_tch_bkgrd.png")
 	local sliderBackground        = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_lrg.png")
 	local touchToolbarKeyDivider  = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_divider.png")
@@ -4009,38 +4021,38 @@ function skin0(self, s, _, _, w, h)
 		})
 		-- if we have more than four buttons, then make them smaller
 		if (largeArtSmallTbButtons) then
-			BASEnowplaying_large_art.npcontrols.rew = _uses(s.nowplaying.npcontrols.rew, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.play = _uses(s.nowplaying.npcontrols.play, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.pause = _uses(s.nowplaying.npcontrols.pause, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.fwd = _uses(s.nowplaying.npcontrols.fwd, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.twiddle = _uses(s.nowplaying.npcontrols.twiddle, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.musicinfo = _uses(s.nowplaying.npcontrols.musicinfo, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.rew = _uses(BASEnowplaying.npcontrols.rew, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.play = _uses(BASEnowplaying.npcontrols.play, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.pause = _uses(BASEnowplaying.npcontrols.pause, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.fwd = _uses(BASEnowplaying.npcontrols.fwd, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.twiddle = _uses(BASEnowplaying.npcontrols.twiddle, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.musicinfo = _uses(BASEnowplaying.npcontrols.musicinfo, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.repeatMode = _uses(s.nowplaying.npcontrols.repeatMode, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.repeatOff = _uses(s.nowplaying.npcontrols.repeatOff, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.repeatSong = _uses(s.nowplaying.npcontrols.repeatSong, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.repeatPlaylist = _uses(s.nowplaying.npcontrols.repeatPlaylist, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.repeatMode = _uses(BASEnowplaying.npcontrols.repeatMode, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.repeatOff = _uses(BASEnowplaying.npcontrols.repeatOff, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.repeatSong = _uses(BASEnowplaying.npcontrols.repeatSong, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.repeatPlaylist = _uses(BASEnowplaying.npcontrols.repeatPlaylist, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.shuffleMode = _uses(s.nowplaying.npcontrols.shuffleMode, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.shuffleOff = _uses(s.nowplaying.npcontrols.shuffleOff, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.shuffleSong = _uses(s.nowplaying.npcontrols.shuffleSong, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.shuffleAlbum = _uses(s.nowplaying.npcontrols.shuffleAlbum, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.shuffleMode = _uses(BASEnowplaying.npcontrols.shuffleMode, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.shuffleOff = _uses(BASEnowplaying.npcontrols.shuffleOff, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.shuffleSong = _uses(BASEnowplaying.npcontrols.shuffleSong, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.shuffleAlbum = _uses(BASEnowplaying.npcontrols.shuffleAlbum, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.volDown = _uses(s.nowplaying.npcontrols.volDown, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.volUp = _uses(s.nowplaying.npcontrols.volUp, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.volDown = _uses(BASEnowplaying.npcontrols.volDown, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.volUp = _uses(BASEnowplaying.npcontrols.volUp, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.thumbsUp = _uses(s.nowplaying.npcontrols.thumbsUp, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.thumbsDown = _uses(s.nowplaying.npcontrols.thumbsDown, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.thumbsUpDisabled = _uses(s.nowplaying.npcontrols.thumbsUpDisabled, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.thumbsDownDisabled = _uses(s.nowplaying.npcontrols.thumbsDownDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.thumbsUp = _uses(BASEnowplaying.npcontrols.thumbsUp, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.thumbsDown = _uses(BASEnowplaying.npcontrols.thumbsDown, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.thumbsUpDisabled = _uses(BASEnowplaying.npcontrols.thumbsUpDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.thumbsDownDisabled = _uses(BASEnowplaying.npcontrols.thumbsDownDisabled, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.love = _uses(s.nowplaying.npcontrols.love, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.hate = _uses(s.nowplaying.npcontrols.hate, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.love = _uses(BASEnowplaying.npcontrols.love, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.hate = _uses(BASEnowplaying.npcontrols.hate, { w = smallControlWidth })
 
-			BASEnowplaying_large_art.npcontrols.fwdDisabled = _uses(s.nowplaying.npcontrols.fwdDisabled, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.rewDisabled = _uses(s.nowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.shuffleDisabled = _uses(s.nowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
-			BASEnowplaying_large_art.npcontrols.repeatDisabled = _uses(s.nowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.fwdDisabled = _uses(BASEnowplaying.npcontrols.fwdDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.rewDisabled = _uses(BASEnowplaying.npcontrols.rewDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.shuffleDisabled = _uses(BASEnowplaying.npcontrols.shuffleDisabled, { w = smallControlWidth })
+			BASEnowplaying_large_art.npcontrols.repeatDisabled = _uses(BASEnowplaying.npcontrols.repeatDisabled, { w = smallControlWidth })
 
 --			BASEnowplaying_large_art.npcontrols.div1 = _uses(_transportControlBorder, {
 --				w = 1,
@@ -5610,7 +5622,24 @@ function init(self)
 						LAYOUT_WEST = LAYOUT_WEST,
 						LAYOUT_CENTER = LAYOUT_CENTER,
 						LAYOUT_NONE = LAYOUT_NONE,
-					}
+					},
+					npcontrols = {
+						order_sort = npc_order_sort
+					},
+					advisories = {
+						controls_order = {
+							{ "To reorder controls use 'order_sort' array" },
+							{ "Do not modify 'order', that defines button order" },
+							{ "AND also the set of visible buttons." }
+						},
+						allstyles = {
+							{ "Use 'allstyles' to define colours and font elements, plus controls sort order for ALL now playing styles." },
+							{ "DO NOT USE 'allstyles' to define other paramaters." },
+							{ "'allstyles' settings are independent of display resolution" },
+						}
+					},
+				}
+				jsData["allstyles"] = {
 				}
 				local key = screenWidth..'x'..screenHeight
 				jsData[key] = {}
