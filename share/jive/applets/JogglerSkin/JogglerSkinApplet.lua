@@ -706,7 +706,7 @@ function skin0(self, s, _, _, w, h)
 --	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
 	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
 	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.CONTROLS_DIMENSIONS
-	local TOPBUTTON_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.TOPBUTTONS_DIMENSIONS
+	local TITLEBUTTON_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.TITLEBUTTONS_DIMENSIONS
 	scaled_imgpath = scaledValues.state.imgPath
 	if scaledValues.state.scalingRequired == true then
 		jogglerScaler.scaleUIImages("applets/JogglerSkin/images/FULLSIZE", scaledValues)
@@ -722,14 +722,14 @@ function skin0(self, s, _, _, w, h)
 
 	-- Images and Tiles
 	local inputTitleBox           = _loadImageTile(self,  imgpath .. "Titlebar/titlebar.png" )
-	local backButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_back_button_tb.png")
-	local cancelButton            = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_close_button_tb.png")
-	local homeButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_home_button_tb.png")
-	local helpButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_help_button_tb.png")
-	local powerButton             = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_power_button_tb.png")
-	local nowPlayingButton        = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_nplay_button_tb.png")
-	local playlistButton          = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_nplay_list_tb.png")
-	local moreButton              = _loadImageTile(self,  imgpath .. TOPBUTTON_ICONS_PATH .. "/icon_more_tb.png")
+	local backButton              = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_back_button_tb.png")
+	local cancelButton            = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_close_button_tb.png")
+	local homeButton              = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_home_button_tb.png")
+	local helpButton              = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_help_button_tb.png")
+	local powerButton             = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_power_button_tb.png")
+	local nowPlayingButton        = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_nplay_button_tb.png")
+	local playlistButton          = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_nplay_list_tb.png")
+	local moreButton              = _loadImageTile(self,  imgpath .. TITLEBUTTON_ICONS_PATH .. "/icon_more_tb.png")
 	local touchToolbarBackground  = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_tch_bkgrd.png")
 	local sliderBackground        = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_lrg.png")
 	local touchToolbarKeyDivider  = _loadImageTile(self,  imgpath .. "Touch_Toolbar/toolbar_divider.png")
