@@ -50,7 +50,7 @@ local npTextScaleFactor
 local thumbnailScaleFactor
 local gridTextScaleFactor
 local controlsScaleFactor
-local topbuttonsScaleFactor
+local titlebuttonsScaleFactor
 local jsonData
 local resolutionKey
 
@@ -163,7 +163,7 @@ function deleteScaledUIImages()
         System.getUserDir() .. '/' .. jogglerImgpath .. jsParams.THUMB_SIZE,
         System.getUserDir() .. '/' .. iconsImgpath .. jsParams.CONTROLS_DIMENSIONS,
         System.getUserDir() .. '/' .. volbarImgpath .. jsParams.CONTROLS_DIMENSIONS,
-        System.getUserDir() .. '/' .. iconsImgpath .. jsParams.TOPBUTTONS_DIMENSIONS,
+        System.getUserDir() .. '/' .. iconsImgpath .. jsParams.TITLEBUTTONS_DIMENSIONS,
         System.getUserDir() .. '/' .. gridImgpath .. gsParams.THUMB_SIZE
     }) do
         log:debug('rm -rf ' .. rm_path .. '/*')
@@ -179,7 +179,7 @@ function initialise()
     thumbnailScaleFactor = nil
     gridTextScaleFactor = nil
     controlsScaleFactor = nil
-    topbuttonsScaleFactor = nil
+    titlebuttonsScaleFactor = nil
     jsonData = nil
     resolutionKey = nil
 
@@ -193,7 +193,7 @@ function initialise()
             npTextScaleFactor = jd.npTextScaleFactor
             thumbnailScaleFactor = jd.thumbnailScaleFactor
             controlsScaleFactor = jd.controlsScaleFactor
-            topbuttonsScaleFactor = jd.topbuttonsScaleFactor
+            titlebuttonsScaleFactor = jd.titlebuttonsScaleFactor
             -- zap derived fields
             jd.state = nil
         end
@@ -338,26 +338,26 @@ end
 
 
 -- function scale top bar buttons image size value to match the display dimensions
-local function scaleTopbuttonsImageValue(v)
-    if topbuttonsScaleFactor == nil then
+local function scaleTitleButtonsImageValue(v)
+    if titlebuttonsScaleFactor == nil then
         -- default to scaling of 1
-        topbuttonsScaleFactor = 1
+        titlebuttonsScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             -- By default do not scale controls down
             if screenHeight >= 480 then
                 -- landscape
                 if screenWidth > screenHeight then
-                    topbuttonsScaleFactor = screenHeight / 480
+                    titlebuttonsScaleFactor = screenHeight / 480
                 end
                 -- portrait
                 if screenWidth < screenHeight then
-                    topbuttonsScaleFactor = (screenWidth / 800) * 1.6666666666666665
+                    titlebuttonsScaleFactor = (screenWidth / 800) * 1.6666666666666665
                 end
             end
         end
     end
-    return math.floor(topbuttonsScaleFactor * v)
+    return math.floor(titlebuttonsScaleFactor * v)
 end
 
 
@@ -535,9 +535,9 @@ function scaleControlsImages(params)
         },
     }
 
-    local tbl_topbuttons = {
+    local tbl_titlebuttons = {
             -- top bar buttons
-            dim = math.ceil(params.TOPBUTTONS_DIMENSIONS),
+            dim = math.ceil(params.TITLEBUTTONS_DIMENSIONS),
             imgs = {
                 { src="add_1000dp_1F1F1F_FILL0_wght700_GRAD0_opsz48.png", dest="icon_more_tb.png", },
                 { src="arrow_back_ios_1000dp_1F1F1F_FILL0_wght700_GRAD0_opsz48.png", dest="icon_back_button_tb.png", },
@@ -568,10 +568,10 @@ function scaleControlsImages(params)
         end
     end
 
-    dest_root = System.getUserDir() .. '/' .. iconsImgpath .. params.TOPBUTTONS_DIMENSIONS
+    dest_root = System.getUserDir() .. '/' .. iconsImgpath .. params.TITLEBUTTONS_DIMENSIONS
     os.execute("mkdir -p " .. dest_root)
-    for _, imgnames in pairs(tbl_topbuttons.imgs) do
-        scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest, tbl_topbuttons.dim, tbl_topbuttons.dim)
+    for _, imgnames in pairs(tbl_titlebuttons.imgs) do
+        scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest, tbl_titlebuttons.dim, tbl_titlebuttons.dim)
     end
 
     -- scale volume bar components
@@ -674,7 +674,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     NP_LINE_SPACING = 1.7,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenWidth * 0.20)),
-                    TOPBUTTONS_DIMENSIONS = scaleTopbuttonsImageValue(22),
+                    TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
                         scalingRequired=true
@@ -690,7 +690,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
-                    TOPBUTTONS_DIMENSIONS = scaleTopbuttonsImageValue(22),
+                    TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
                         scalingRequired=true
@@ -708,7 +708,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
-                    TOPBUTTONS_DIMENSIONS = scaleTopbuttonsImageValue(22),
+                    TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
                         scalingRequired=true
@@ -722,7 +722,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 NP_LINE_SPACING = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                 CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
-                TOPBUTTONS_DIMENSIONS = scaleTopbuttonsImageValue(22),
+                TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                 state = {
                     imgPath = jogglerImgpath .. thumbSize .. "/",
                     scalingRequired=true
@@ -738,7 +738,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
             NP_LINE_SPACING = 1.7,
             CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
             CONTROL_POPUP_DIMENSIONS = 146,
-            TOPBUTTONS_DIMENSIONS = scaleTopbuttonsImageValue(22),
+            TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
             state = {
                 imgPath = jogglerImgpath,
                 scalingRequired=false
