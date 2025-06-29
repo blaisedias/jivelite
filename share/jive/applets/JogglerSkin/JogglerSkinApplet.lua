@@ -703,9 +703,9 @@ function skin0(self, s, _, _, w, h)
 	-- the correct values of configuration items are then reflected in the UI
 	addLayoutMenuItems(self)
 
-	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
+--	local CONTROLS_DIMENSIONS = scaledValues.CONTROLS_DIMENSIONS
 	local CONTROLS_THEME_PATH = "UNOFFICIAL/Material"
-	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. CONTROLS_DIMENSIONS
+	local CONTROLS_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.CONTROLS_DIMENSIONS
 	local TOPBUTTON_ICONS_PATH = CONTROLS_THEME_PATH .. "/Icons/" .. scaledValues.TOPBUTTONS_DIMENSIONS
 	scaled_imgpath = scaledValues.state.imgPath
 	if scaledValues.state.scalingRequired == true then
@@ -717,8 +717,8 @@ function skin0(self, s, _, _, w, h)
 	Framework.mostRecentInputType = "mouse"
 
 	-- skin
-	local thisSkin = 'touch'
-	local skinSuffix = "_" .. thisSkin .. ".png"
+--	local thisSkin = 'touch'
+	local skinSuffix = "_" .. 'touch' .. ".png"
 
 	-- Images and Tiles
 	local inputTitleBox           = _loadImageTile(self,  imgpath .. "Titlebar/titlebar.png" )
@@ -1176,42 +1176,43 @@ function skin0(self, s, _, _, w, h)
 --	local MENU_CURRENTALBUM_TEXT_PADDING = { 6, 20, 0, 10 }
 	local TEXTAREA_PADDING = { 13, 8, 8, 0 }
 
-	local TEXT_COLOR = scaledValues.TEXT_COLOR
-	local TEXT_COLOR_BLACK = scaledValues.TEXT_COLOR_BLACK
-	local TEXT_SH_COLOR = scaledValues.TEXT_SH_COLOR
+--	local TEXT_COLOR = scaledValues.TEXT_COLOR
+--	local TEXT_COLOR_BLACK = scaledValues.TEXT_COLOR_BLACK
+--	local TEXT_SH_COLOR = scaledValues.TEXT_SH_COLOR
 --	local TEXT_COLOR_TEAL = scaledValues.TEXT_COLOR_TEAL
 
 --	local SELECT_COLOR = { 0xE7, 0xE7, 0xE7 }
 --	local SELECT_SH_COLOR = { }
 
-	local TITLE_HEIGHT = scaledValues.TITLE_HEIGHT
-	local TITLE_FONT_SIZE = scaledValues.TITLE_FONT_SIZE
-	local TITLEBAR_FONT_SIZE = scaledValues.TITLEBAR_FONT_SIZE
-	local ALBUMMENU_FONT_SIZE = scaledValues.ALBUMMENU_FONT_SIZE
-	local ALBUMMENU_SMALL_FONT_SIZE = scaledValues.ALBUMMENU_SMALL_FONT_SIZE
-	local TEXTMENU_FONT_SIZE = scaledValues.TEXTMENU_FONT_SIZE
-	local POPUP_TEXT_SIZE_1 = scaledValues.POPUP_TEXT_SIZE_1
-	local POPUP_TEXT_SIZE_2 = scaledValues.POPUP_TEXT_SIZE_2
---	local TRACK_FONT_SIZE = scaledValues.TRACK_FONT_SIZE
-	local TEXTAREA_FONT_SIZE = scaledValues.TEXTAREA_FONT_SIZE
+--	local TITLE_HEIGHT = scaledValues.TITLE_HEIGHT
+--	local TITLE_FONT_SIZE = scaledValues.TITLE_FONT_SIZE
+--	local TITLEBAR_FONT_SIZE = scaledValues.TITLEBAR_FONT_SIZE
+--	local ALBUMMENU_FONT_SIZE = scaledValues.ALBUMMENU_FONT_SIZE
+--	local ALBUMMENU_SMALL_FONT_SIZE = scaledValues.ALBUMMENU_SMALL_FONT_SIZE
+--	local TEXTMENU_FONT_SIZE = scaledValues.TEXTMENU_FONT_SIZE
+--	local POPUP_TEXT_SIZE_1 = scaledValues.POPUP_TEXT_SIZE_1
+--	local POPUP_TEXT_SIZE_2 = scaledValues.POPUP_TEXT_SIZE_2
+----	local TRACK_FONT_SIZE = scaledValues.TRACK_FONT_SIZE
+--	local TEXTAREA_FONT_SIZE = scaledValues.TEXTAREA_FONT_SIZE
 --	local CENTERED_TEXTAREA_FONT_SIZE = scaleValues.CENTERED_TEXTAREA_FONT_SIZE
 
-	local CM_MENU_HEIGHT = scaledValues.CM_MENU_HEIGHT
+--	local CM_MENU_HEIGHT = scaledValues.CM_MENU_HEIGHT
 
-	local TEXTINPUT_FONT_SIZE = scaledValues.TEXTINPUT_FONT_SIZE
-	local TEXTINPUT_SELECTED_FONT_SIZE = scaledValues.TEXTINPUT_SELECTED_FONT_SIZE
+--	local TEXTINPUT_FONT_SIZE = scaledValues.TEXTINPUT_FONT_SIZE
+--	local TEXTINPUT_SELECTED_FONT_SIZE = scaledValues.TEXTINPUT_SELECTED_FONT_SIZE
 
-	local HELP_FONT_SIZE = scaledValues.HELP_FONT_SIZE
-	local UPDATE_SUBTEXT_SIZE = scaledValues.UPDATE_SUBTEXT_SIZE
+--	local HELP_FONT_SIZE = scaledValues.HELP_FONT_SIZE
+--	local UPDATE_SUBTEXT_SIZE = scaledValues.UPDATE_SUBTEXT_SIZE
 
-	local ITEM_ICON_ALIGN   = scaledValues.ITEM_ICON_ALIGN
-	local ITEM_LEFT_PADDING = scaledValues.ITEM_LEFT_PADDING
-	local THREE_ITEM_HEIGHT = scaledValues.THREE_ITEM_HEIGHT
-	local FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT
-	local TITLE_BUTTON_WIDTH = scaledValues.TITLE_BUTTON_WIDTH
+--	local ITEM_ICON_ALIGN   = scaledValues.ITEM_ICON_ALIGN
+--	local ITEM_LEFT_PADDING = scaledValues.ITEM_LEFT_PADDING
+--	local THREE_ITEM_HEIGHT = scaledValues.THREE_ITEM_HEIGHT
+--	local FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT
+--	local TITLE_BUTTON_WIDTH = scaledValues.TITLE_BUTTON_WIDTH
 
-	local AUDIO_METADATA_FONT_HEIGHT = scaledValues.AUDIO_METADATA_FONT_HEIGHT
-	local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
+--	local AUDIO_METADATA_FONT_HEIGHT = scaledValues.AUDIO_METADATA_FONT_HEIGHT
+	scaledValues.AUDIO_METADATA_H = scaledValues.AUDIO_METADATA_FONT_HEIGHT
+--	local AUDIO_METADATA_H = AUDIO_METADATA_FONT_HEIGHT
 
 	local large_art_visu_X = screenHeight + 15
 	local large_art_visu_W = math.floor((screenWidth - large_art_visu_X - 10)/2)*2
@@ -1222,7 +1223,7 @@ function skin0(self, s, _, _, w, h)
 	local portraitMode = self:param().portraitMode
 
 	visImage:initialise()
-	local NP_LINE_SPACING = scaledValues.NP_LINE_SPACING
+--	local NP_LINE_SPACING = scaledValues.NP_LINE_SPACING
 
 	local smallSpinny = {
 		img = _loadImage(self, "Alerts/wifi_connecting_sm.png"),
@@ -1241,11 +1242,11 @@ function skin0(self, s, _, _, w, h)
 		padding = { 0, 0, 0, 10 }
 	}
 	-- convenience method for removing a button from the window
-	local noButton = {
-		img = false,
-		bgImg = false,
-		w = 0
-	}
+--	local noButton = {
+--		img = false,
+--		bgImg = false,
+--		w = 0
+--	}
 
 	local playArrow = {
 		img = _loadImage(self, "Icons/selection_play_3line_on.png"),
@@ -1323,12 +1324,12 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	local _modernVolumeSliderBar = _loadHTile(self, {
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_l.png",
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill.png",
-		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_r.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_fill_r.png",
 	})
 
-	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. CONTROLS_DIMENSIONS .. "/tch_volumebar_slider.png")
+	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_slider.png")
 
 
 --------- DEFAULT WIDGET STYLES ---------
@@ -1351,7 +1352,7 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	s.title = {
-		h = TITLE_HEIGHT,
+		h = scaledValues.TITLE_HEIGHT,
 		border = 0,
 		position = LAYOUT_NORTH,
 		bgImg = titleBackground,
@@ -1369,7 +1370,7 @@ function skin0(self, s, _, _, w, h)
 			w = WH_FILL,
 			padding = TITLE_PADDING,
 			align = "center",
-			font = _boldfont(TITLEBAR_FONT_SIZE),
+			font = _boldfont(scaledValues.TITLEBAR_FONT_SIZE),
 			fg = scaledValues.TITLE_TEXT_COLOR,
 		}
 	}
@@ -1395,16 +1396,16 @@ function skin0(self, s, _, _, w, h)
                         padding = { 10, 160, 10, 0 },
                         align = "center",
                         font = _font(scaledValues.TEXT_BLOCK_BLACK_FONT_SIZE),
-                        fg = TEXT_COLOR,
-                        sh = TEXT_SH_COLOR,
+                        fg = scaledValues.TEXT_COLOR,
+                        sh = scaledValues.TEXT_SH_COLOR,
                 },
 	}
 
 	s.menu = {
-		h = math.floor((screenHeight - TITLE_HEIGHT) / FIVE_ITEM_HEIGHT) * FIVE_ITEM_HEIGHT,
+		h = math.floor((screenHeight - scaledValues.TITLE_HEIGHT) / scaledValues.FIVE_ITEM_HEIGHT) * scaledValues.FIVE_ITEM_HEIGHT,
 		position = LAYOUT_CENTER,
 		padding = { 0, 0, 0, 0 },
-		itemHeight = FIVE_ITEM_HEIGHT,
+		itemHeight = scaledValues.FIVE_ITEM_HEIGHT,
 		fg = scaledValues.TEXT_COLOR_MENU,
 		font = _boldfont(scaledValues.MENU_FONT_SIZE),
 	}
@@ -1415,22 +1416,22 @@ function skin0(self, s, _, _, w, h)
 
 	s.item = {
 		order = { "icon", "text", "arrow" },
-		padding = { ITEM_LEFT_PADDING, 0, 8, 0 },
+		padding = { scaledValues.ITEM_LEFT_PADDING, 0, 8, 0 },
 		text = {
 			padding = { 0, 0, 2, 0 },
 			align = "left",
 			w = WH_FILL,
 			h = WH_FILL,
-			font = _boldfont(TEXTMENU_FONT_SIZE),
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _boldfont(scaledValues.TEXTMENU_FONT_SIZE),
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 		icon = {
 			padding = MENU_ITEM_ICON_PADDING,
 			align = 'center',
 		},
 		arrow = {
-			align = ITEM_ICON_ALIGN,
+			align = scaledValues.ITEM_ICON_ALIGN,
 			img = _loadImage(self, "Icons/selection_right_5line.png"),
 			padding = { 0, 0, 0, 0 },
 		},
@@ -1467,15 +1468,15 @@ function skin0(self, s, _, _, w, h)
 			h = WH_FILL,
 			padding = CHECKBOX_RADIO_PADDING,
 			align = 'right',
-			font = _boldfont(TEXTMENU_FONT_SIZE),
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _boldfont(scaledValues.TEXTMENU_FONT_SIZE),
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 	})
 	s.item_checked = _uses(s.item, {
 		order = { "icon", "text", "check", "arrow" },
 		check = {
-			align = ITEM_ICON_ALIGN,
+			align = scaledValues.ITEM_ICON_ALIGN,
 			padding = CHECK_PADDING,
 			img = _loadImage(self, "Icons/icon_check_5line.png")
 		}
@@ -1483,7 +1484,7 @@ function skin0(self, s, _, _, w, h)
 
 	s.item_info = _uses(s.item, {
 		order = { 'text' },
-		padding = { ITEM_LEFT_PADDING, 0, 0, 0 },
+		padding = { scaledValues.ITEM_LEFT_PADDING, 0, 0, 0 },
 		text = {
 			align = "top-left",
 			w = WH_FILL,
@@ -1601,10 +1602,10 @@ function skin0(self, s, _, _, w, h)
 		w = screenWidth - 30,
 		padding = { 12, 8, 12, 0 },
 		border = 0,
-		font = _font(HELP_FONT_SIZE),
+		font = _font(scaledValues.HELP_FONT_SIZE),
 		lineHeight = 23,
-		fg = TEXT_COLOR,
-		sh = TEXT_SH_COLOR,
+		fg = scaledValues.TEXT_COLOR,
+		sh = scaledValues.TEXT_SH_COLOR,
 		align = "top-left",
 	}
 
@@ -1622,9 +1623,9 @@ function skin0(self, s, _, _, w, h)
 		w = screenWidth,
 		h = WH_FILL,
 		padding = TEXTAREA_PADDING,
-		font = _boldfont(TEXTAREA_FONT_SIZE),
-		fg = TEXT_COLOR,
-		sh = TEXT_SH_COLOR,
+		font = _boldfont(scaledValues.TEXTAREA_FONT_SIZE),
+		fg = scaledValues.TEXT_COLOR,
+		sh = scaledValues.TEXT_SH_COLOR,
 		align = "left",
 	}
 
@@ -1664,11 +1665,11 @@ function skin0(self, s, _, _, w, h)
 	s.textinput = {
 		h = 72,
 		padding = { 24, 0, 24, 0 },
-		font = _boldfont(TEXTINPUT_FONT_SIZE),
-		cursorFont = _boldfont(TEXTINPUT_SELECTED_FONT_SIZE),
-		wheelFont = _boldfont(TEXTINPUT_FONT_SIZE),
-		charHeight = TEXTINPUT_SELECTED_FONT_SIZE,
-		fg = TEXT_COLOR_BLACK,
+		font = _boldfont(scaledValues.TEXTINPUT_FONT_SIZE),
+		cursorFont = _boldfont(scaledValues.TEXTINPUT_SELECTED_FONT_SIZE),
+		wheelFont = _boldfont(scaledValues.TEXTINPUT_FONT_SIZE),
+		charHeight = scaledValues.TEXTINPUT_SELECTED_FONT_SIZE,
+		fg = scaledValues.TEXT_COLOR_BLACK,
 		charOffsetY = 32,
 		wh = { 0x55, 0x55, 0x55 },
 		cursorImg = textinputCursor,
@@ -1879,20 +1880,20 @@ function skin0(self, s, _, _, w, h)
 
 	s.time_input_background_12h = {
 		w = WH_FILL,
-		h = screenHeight - TITLE_HEIGHT,
+		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
 		img = _loadImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_3c.png"),
 		x = 0,
-		y = TITLE_HEIGHT,
+		y = scaledValues.TITLE_HEIGHT,
 	}
 
 	s.time_input_background_24h = {
 		w = WH_FILL,
-		h = screenHeight - TITLE_HEIGHT,
+		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
 		img = _loadImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_2c.png"),
 		x = 0,
-		y = TITLE_HEIGHT,
+		y = scaledValues.TITLE_HEIGHT,
 	}
 
 	s.time_input_menu_box_12h = {
@@ -1913,12 +1914,12 @@ function skin0(self, s, _, _, w, h)
 	s.input_time_12h = _uses(s.window)
 	s.input_time_12h.hour = _uses(s.menu, {
 		w = 100,
-		--h = screenHeight - TITLE_HEIGHT,
+		--h = screenHeight - scaledValues.TITLE_HEIGHT,
 		h = screenHeight,
 		itemHeight = 80,
 		position = LAYOUT_WEST,
 		padding = 0,
-		border = { _timeFirstColumnX12h, TITLE_HEIGHT, 0, 0 },
+		border = { _timeFirstColumnX12h, scaledValues.TITLE_HEIGHT, 0, 0 },
 		item = {
 			bgImg = false,
 			order = { 'text' },
@@ -1958,10 +1959,10 @@ function skin0(self, s, _, _, w, h)
 		},
 	})
 	s.input_time_12h.minute = _uses(s.input_time_12h.hour, {
-		border = { _timeFirstColumnX12h + 125, TITLE_HEIGHT, 0, 0 },
+		border = { _timeFirstColumnX12h + 125, scaledValues.TITLE_HEIGHT, 0, 0 },
 	})
 	s.input_time_12h.ampm = _uses(s.input_time_12h.hour, {
-		border = { _timeFirstColumnX12h + 125 + 120, TITLE_HEIGHT, 0, 0 },
+		border = { _timeFirstColumnX12h + 125 + 120, scaledValues.TITLE_HEIGHT, 0, 0 },
 		item = {
 			text = {
 				padding = { 0, 2, 8, 0 },
@@ -1991,16 +1992,16 @@ function skin0(self, s, _, _, w, h)
 
 	s.input_time_24h = _uses(s.input_time_12h, {
 		hour = {
-			border = { _timeFirstColumnX24h, TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		minute = {
-			border = { _timeFirstColumnX24h + 124, TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h + 124, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		hourUnselected = {
-			border = { _timeFirstColumnX24h, TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		minuteUnselected = {
-			border = { _timeFirstColumnX24h + 124, TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h + 124, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 	})
 
@@ -2041,7 +2042,7 @@ function skin0(self, s, _, _, w, h)
 		text = {
 			line = {
 				{
-					font = _boldfont(TITLEBAR_FONT_SIZE),
+					font = _boldfont(scaledValues.TITLEBAR_FONT_SIZE),
 					height = scaledValues.TITLEBAR_H,
 				},
 				{
@@ -2068,7 +2069,7 @@ function skin0(self, s, _, _, w, h)
 	s.multiline_text_list = _uses(s.text_list)
 
 	s.multiline_text_list.menu = _uses(s.menu, {
-		itemHeight = THREE_ITEM_HEIGHT,
+		itemHeight = scaledValues.THREE_ITEM_HEIGHT,
 		item = {
 			padding = { 10, 8, 0, 8 },
 			bgImg = false,
@@ -2096,15 +2097,15 @@ function skin0(self, s, _, _, w, h)
 	s.waiting_popup = _uses(s.popup, {
 		text = {
 			w = WH_FILL,
-			h = (POPUP_TEXT_SIZE_1 + 8 ),
+			h = (scaledValues.POPUP_TEXT_SIZE_1 + 8 ),
 			position = LAYOUT_NORTH,
 			border = { 0, 50, 0, 0 },
 			padding = { 15, 0, 15, 0 },
 			align = "center",
-			font = _font(POPUP_TEXT_SIZE_1),
-			lineHeight = POPUP_TEXT_SIZE_1 + 8,
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _font(scaledValues.POPUP_TEXT_SIZE_1),
+			lineHeight = scaledValues.POPUP_TEXT_SIZE_1 + 8,
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 		subtext = {
 			w = WH_FILL,
@@ -2113,9 +2114,9 @@ function skin0(self, s, _, _, w, h)
 			border = { 0, 0, 0, 20 },
 			padding = { 15, 0, 15, 0 },
 			align = "top",
-			font = _boldfont(POPUP_TEXT_SIZE_2),
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _boldfont(scaledValues.POPUP_TEXT_SIZE_2),
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 	})
 
@@ -2150,15 +2151,15 @@ function skin0(self, s, _, _, w, h)
 	s.update_popup = _uses(s.popup, {
 		text = {
 			w = WH_FILL,
-			h = (POPUP_TEXT_SIZE_1 + 8 ),
+			h = (scaledValues.POPUP_TEXT_SIZE_1 + 8 ),
 			position = LAYOUT_NORTH,
 			border = { 0, 34, 0, 2 },
 			padding = { 10, 0, 10, 0 },
 			align = "center",
-			font = _font(POPUP_TEXT_SIZE_1),
-			lineHeight = POPUP_TEXT_SIZE_1 + 8,
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _font(scaledValues.POPUP_TEXT_SIZE_1),
+			lineHeight = scaledValues.POPUP_TEXT_SIZE_1 + 8,
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 		subtext = {
 			w = WH_FILL,
@@ -2166,9 +2167,9 @@ function skin0(self, s, _, _, w, h)
 			-- the content out of the widget bounding box.
 			h = 30,
 			padding = { 0, 0, 0, 28 },
-			font = _boldfont(UPDATE_SUBTEXT_SIZE),
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _boldfont(scaledValues.UPDATE_SUBTEXT_SIZE),
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 			align = "bottom",
 			position = LAYOUT_SOUTH,
 		},
@@ -2220,23 +2221,23 @@ function skin0(self, s, _, _, w, h)
 		menu = {
 			item = {
 				order = { "icon", "text", "arrow" },
-				padding = { ITEM_LEFT_PADDING, 0, 0, 0 },
+				padding = { scaledValues.ITEM_LEFT_PADDING, 0, 0, 0 },
 				text = {
 					w = WH_FILL,
 					h = WH_FILL,
 					align = 'left',
-					font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+					font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 					line = {
 						{
-							font = _boldfont(ALBUMMENU_FONT_SIZE),
+							font = _boldfont(scaledValues.ALBUMMENU_FONT_SIZE),
 							height = scaledValues.ALBUMMENU_H,
 						},
 						{
-							font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+							font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 						},
 					},
-					fg = TEXT_COLOR,
-					sh = TEXT_SH_COLOR,
+					fg = scaledValues.TEXT_COLOR,
+					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				icon = {
 					h = THUMB_SIZE,
@@ -2251,7 +2252,7 @@ function skin0(self, s, _, _, w, h)
 	s.icon_list.menu.item_checked = _uses(s.icon_list.menu.item, {
 		order = { 'icon', 'text', 'check', 'arrow' },
 		check = {
-			align = ITEM_ICON_ALIGN,
+			align = scaledValues.ITEM_ICON_ALIGN,
 			padding = CHECK_PADDING,
 			img = _loadImage(self, "Icons/icon_check_5line.png")
 		},
@@ -2353,8 +2354,8 @@ function skin0(self, s, _, _, w, h)
 
 	s.help_list.menu = _uses(s.menu, {
 		position = LAYOUT_SOUTH,
-		maxHeight = FIVE_ITEM_HEIGHT * 3,
-		itemHeight = FIVE_ITEM_HEIGHT,
+		maxHeight = scaledValues.FIVE_ITEM_HEIGHT * 3,
+		itemHeight = scaledValues.FIVE_ITEM_HEIGHT,
 	})
 
 	s.help_list.help_text = _uses(s.help_text, {
@@ -2372,9 +2373,9 @@ function skin0(self, s, _, _, w, h)
 	s.information = _uses(s.window)
 
 	s.information.text = {
-		font = _font(TEXTAREA_FONT_SIZE),
-		fg = TEXT_COLOR,
-		sh = TEXT_SH_COLOR,
+		font = _font(scaledValues.TEXTAREA_FONT_SIZE),
+		fg = scaledValues.TEXT_COLOR,
+		sh = scaledValues.TEXT_SH_COLOR,
 		padding = { 18, 18, 10, 0},
 		lineHeight = 23,
 	}
@@ -2406,9 +2407,9 @@ function skin0(self, s, _, _, w, h)
 		align = 'left',
 		w = WH_FILL,
 		h = WH_FILL,
-		font = _font(POPUP_TEXT_SIZE_1),
-		fg = TEXT_COLOR,
-		sh = TEXT_SH_COLOR,
+		font = _font(scaledValues.POPUP_TEXT_SIZE_1),
+		fg = scaledValues.TEXT_COLOR,
+		sh = scaledValues.TEXT_SH_COLOR,
         }
 
 	-- toast_popup popup with art and text
@@ -2426,8 +2427,8 @@ function skin0(self, s, _, _, w, h)
 				align = 'top-left',
 				w = WH_FILL,
 				h = WH_FILL,
-				font = _font(HELP_FONT_SIZE),
-				lineHeight = HELP_FONT_SIZE + 5,
+				font = _font(scaledValues.HELP_FONT_SIZE),
+				lineHeight = scaledValues.HELP_FONT_SIZE + 5,
 			},
 			icon = {
 				align = 'top-left',
@@ -2447,8 +2448,8 @@ function skin0(self, s, _, _, w, h)
 				h = WH_FILL,
 				align = 'top-left',
 				padding = { 10, 12, 12, 12 },
-				fg = TEXT_COLOR,
-				sh = TEXT_SH_COLOR,
+				fg = scaledValues.TEXT_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 			},
 		}
 	})
@@ -2486,10 +2487,10 @@ function skin0(self, s, _, _, w, h)
 			align = 'top',
 			w = WH_FILL,
 			h = WH_FILL,
-			font = _font(POPUP_TEXT_SIZE_1),
-			lineHeight = POPUP_TEXT_SIZE_1 + 5,
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _font(scaledValues.POPUP_TEXT_SIZE_1),
+			lineHeight = scaledValues.POPUP_TEXT_SIZE_1 + 5,
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 		subtext = {
 			position = LAYOUT_NORTH,
@@ -2497,10 +2498,10 @@ function skin0(self, s, _, _, w, h)
 			align = 'top',
 			w = WH_FILL,
 			h = WH_FILL,
-			font = _font(POPUP_TEXT_SIZE_2),
-			lineHeight = POPUP_TEXT_SIZE_2 + 5,
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			font = _font(scaledValues.POPUP_TEXT_SIZE_2),
+			lineHeight = scaledValues.POPUP_TEXT_SIZE_2 + 5,
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 		},
 	}
 
@@ -2522,7 +2523,7 @@ function skin0(self, s, _, _, w, h)
 		img = _loadImage(self, "Icons/icon_badge_add.png")
 	})
 
-	local CM_MENU_ITEM_COUNT = math.floor(((screenHeight - 32 - 52 - 20) / CM_MENU_HEIGHT))
+	local CM_MENU_ITEM_COUNT = math.floor(((screenHeight - 32 - 52 - 20) / scaledValues.CM_MENU_HEIGHT))
 
 	s.context_menu = {
 		x = 8,
@@ -2570,39 +2571,39 @@ function skin0(self, s, _, _, w, h)
 				w = WH_FILL,
 				padding = {0,0,20,0},
 				align = "center",
-				font = _boldfont(TITLE_FONT_SIZE),
+				font = _boldfont(scaledValues.TITLE_FONT_SIZE),
 				fg = scaledValues.TITLE_TEXT_COLOR,
 			},
 		},
 
 		menu = {
-			h = CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
+			h = scaledValues.CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
 			border = { 7, 0, 7, 0 },
 			padding = { 0, 0, 0, 100 },
 			scrollbar = {
-				h = CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
+				h = scaledValues.CM_MENU_HEIGHT * CM_MENU_ITEM_COUNT,
 			},
 			item = {
-				h = CM_MENU_HEIGHT,
+				h = scaledValues.CM_MENU_HEIGHT,
 				order = { "text", "arrow" },
-				padding = { ITEM_LEFT_PADDING, 0, 12, 0 },
+				padding = { scaledValues.ITEM_LEFT_PADDING, 0, 12, 0 },
 				text = {
 					padding = { 0, 4, 0, 0 },
 					w = WH_FILL,
 					h = WH_FILL,
 					align = 'left',
-					font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+					font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 					line = {
 						{
-							font = _boldfont(ALBUMMENU_FONT_SIZE),
+							font = _boldfont(scaledValues.ALBUMMENU_FONT_SIZE),
 							height = scaledValues.ALBUMMENU_H,
 						},
 						{
-							font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+							font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 						},
 					},
-					fg = TEXT_COLOR,
-					sh = TEXT_SH_COLOR,
+					fg = scaledValues.TEXT_COLOR,
+					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				arrow = _uses(s.item.arrow),
 			},
@@ -2610,24 +2611,24 @@ function skin0(self, s, _, _, w, h)
 				item = {
 					order = { "text", "arrow" },
 					bgImg = fiveItemSelectionBox,
-					padding = { ITEM_LEFT_PADDING, 0, 12, 0 },
+					padding = { scaledValues.ITEM_LEFT_PADDING, 0, 12, 0 },
 					text = {
 						padding = { 0, 4, 0, 0 },
 						w = WH_FILL,
 						h = WH_FILL,
 						align = 'left',
-						font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+						font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 						line = {
 							{
-								font = _boldfont(ALBUMMENU_FONT_SIZE),
+								font = _boldfont(scaledValues.ALBUMMENU_FONT_SIZE),
 								height = scaledValues.ALBUMMENU_H,
 							},
 							{
-								font = _font(ALBUMMENU_SMALL_FONT_SIZE),
+								font = _font(scaledValues.ALBUMMENU_SMALL_FONT_SIZE),
 							},
 						},
-						fg = TEXT_COLOR,
-						sh = TEXT_SH_COLOR,
+						fg = scaledValues.TEXT_COLOR,
+						sh = scaledValues.TEXT_SH_COLOR,
 					},
 					arrow = _uses(s.item.arrow),
 				},
@@ -2700,14 +2701,14 @@ function skin0(self, s, _, _, w, h)
 
 	s.alarm_time = {
 		w = screenWidth - 20,
-		fg = TEXT_COLOR,
-		sh = TEXT_SH_COLOR,
+		fg = scaledValues.TEXT_COLOR,
+		sh = scaledValues.TEXT_SH_COLOR,
 		align = "center",
 		font = _boldfont(scaledValues.ALARM_TIME_FONT_SIZE),
 	}
 
 	s.preview_text = _uses(s.alarm_time, {
-		font = _boldfont(TITLE_FONT_SIZE),
+		font = _boldfont(scaledValues.TITLE_FONT_SIZE),
 	})
 
 	-- alarm menu window
@@ -2726,27 +2727,27 @@ function skin0(self, s, _, _, w, h)
 		},
 
 		menu = {
-			h = CM_MENU_HEIGHT * 5,
+			h = scaledValues.CM_MENU_HEIGHT * 5,
 			w = screenWidth - 34,
 			x = 7,
 			y = 65,
 			border = 0,
-			itemHeight = CM_MENU_HEIGHT,
+			itemHeight = scaledValues.CM_MENU_HEIGHT,
 			position = LAYOUT_NORTH,
 			scrollbar = {
-				h = CM_MENU_HEIGHT * 5 - 8,
+				h = scaledValues.CM_MENU_HEIGHT * 5 - 8,
 				border = {0,4,0,0},
 			},
 			item = {
-				h = CM_MENU_HEIGHT,
+				h = scaledValues.CM_MENU_HEIGHT,
 				order = { "text", "arrow" },
 				text = {
 					w = WH_FILL,
 					h = WH_FILL,
 					align = 'left',
-					font = _boldfont(TEXTMENU_FONT_SIZE),
-					fg = TEXT_COLOR,
-					sh = TEXT_SH_COLOR,
+					font = _boldfont(scaledValues.TEXTMENU_FONT_SIZE),
+					fg = scaledValues.TEXT_COLOR,
+					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				arrow = _uses(s.item.arrow),
 			},
@@ -2758,9 +2759,9 @@ function skin0(self, s, _, _, w, h)
 						w = WH_FILL,
 						h = WH_FILL,
 						align = 'left',
-						font = _boldfont(TEXTMENU_FONT_SIZE),
-						fg = TEXT_COLOR,
-						sh = TEXT_SH_COLOR,
+						font = _boldfont(scaledValues.TEXTMENU_FONT_SIZE),
+						fg = scaledValues.TEXT_COLOR,
+						sh = scaledValues.TEXT_SH_COLOR,
 					},
 					arrow = _uses(s.item.arrow),
 				},
@@ -2778,7 +2779,7 @@ function skin0(self, s, _, _, w, h)
 		heading = {
 			w = WH_FILL,
 		      border = 10,
-		      fg = TEXT_COLOR,
+		      fg = scaledValues.TEXT_COLOR,
 		      font = _boldfont(scaledValues.SLIDER_POPUP_FONT_SIZE),
 			padding = { 4, 16, 4, 0 },
 		      align = "center",
@@ -2829,7 +2830,7 @@ function skin0(self, s, _, _, w, h)
 	-- base button
 	local _button = {
 		bgImg = V_titlebarButtonBox,
-		w = TITLE_BUTTON_WIDTH,
+		w = scaledValues.TITLE_BUTTON_WIDTH,
 		h = WH_FILL,
 		border = { 8, 0, 8, 0 },
 		icon = {
@@ -2895,7 +2896,7 @@ function skin0(self, s, _, _, w, h)
 	-- invisible button
 	s.button_none = _uses(_button, {
 		bgImg    = false,
-		w = TITLE_BUTTON_WIDTH  - 12,
+		w = scaledValues.TITLE_BUTTON_WIDTH  - 12,
 	})
 
 	_titleButtonIcon("button_back", backButton)
@@ -3327,11 +3328,11 @@ function skin0(self, s, _, _, w, h)
 
 	-- BEGIN NowPlaying skin code
 
-	local NP_TRACK_FONT_SIZE = scaledValues.NP_TRACK_FONT_SIZE
-	local NP_ARTISTALBUM_FONT_SIZE = scaledValues.NP_ARTISTALBUM_FONT_SIZE
+--	local NP_TRACK_FONT_SIZE = scaledValues.NP_TRACK_FONT_SIZE
+--	local NP_ARTISTALBUM_FONT_SIZE = scaledValues.NP_ARTISTALBUM_FONT_SIZE
 
-	local controlHeight = CONTROLS_DIMENSIONS
-	local controlWidth = CONTROLS_DIMENSIONS
+	local controlHeight = scaledValues.CONTROLS_DIMENSIONS
+	local controlWidth = scaledValues.CONTROLS_DIMENSIONS
 	local progressBarHeight = 30
 	-- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
 	-- with screenWidth == 800 the value is 240,
@@ -3352,7 +3353,7 @@ function skin0(self, s, _, _, w, h)
 		controlHeight = scaledValues.state.hiddenControlHeight
 	end
 
-	local midArtworkYoffset = math.floor((screenHeight - (TITLE_HEIGHT + 18 + controlHeight) - scaledValues.midArtworkSize)/2)
+	local midArtworkYoffset = math.floor((screenHeight - (scaledValues.TITLE_HEIGHT + 18 + controlHeight) - scaledValues.midArtworkSize)/2)
 
 	local _transportControlBorder = _uses(_transportControlButton, {
 		w = 2,
@@ -3369,8 +3370,8 @@ function skin0(self, s, _, _, w, h)
 		position = LAYOUT_NONE,
 		w = WH_FILL,
 		align = scaledValues.NP_TRACKLAYOUT_ALIGN,
-		lineHeight = NP_TRACK_FONT_SIZE,
-		fg = TEXT_COLOR,
+		lineHeight = scaledValues.NP_TRACK_FONT_SIZE,
+		fg = scaledValues.TEXT_COLOR,
 		x =  scaledValues.midArtworkSize + 20,
 	}
 
@@ -3466,8 +3467,8 @@ function skin0(self, s, _, _, w, h)
 	local volumeBarWidthFudge = 10
 	volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 
-	local y_nptitle = TITLE_HEIGHT + 17
-	local y_npartistgroup = y_nptitle + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5)
+	local y_nptitle = scaledValues.TITLE_HEIGHT + 17
+	local y_npartistgroup = y_nptitle + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING + 5)
 
 	if screenAR >= 3 then
 		-- simplify layout avoid overlaying UI elements
@@ -3484,21 +3485,21 @@ function skin0(self, s, _, _, w, h)
 
 	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
 		y_nptitle = 0
-		y_npartistgroup = TITLE_HEIGHT + 17
+		y_npartistgroup = scaledValues.TITLE_HEIGHT + 17
 	end
 	local _NP_def = {
 		--title bar
 		title = _uses(s.title, {
 			zOrder = 1,
 			text = {
-				_font_size_bold = TITLEBAR_FONT_SIZE,
+				_font_size_bold = scaledValues.TITLEBAR_FONT_SIZE,
 				bgImg   = V_titlebarButtonBox,
 			},
 			rbutton  = {
 				_font_size = scaledValues.RBUTTON_FONT_SIZE,
-				fg      = TEXT_COLOR,
+				fg      = scaledValues.TEXT_COLOR,
 				bgImg   = V_titlebarButtonBox,
-				w       = TITLE_BUTTON_WIDTH,
+				w       = scaledValues.TITLE_BUTTON_WIDTH,
 				padding = { 8, 0, 8, 0},
 				align   = 'center',
 			}
@@ -3511,15 +3512,15 @@ function skin0(self, s, _, _, w, h)
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
 			y          = y_nptitle,
-			h          = NP_TRACK_FONT_SIZE,
+			h          = scaledValues.NP_TRACK_FONT_SIZE,
 			nptrack =  {
 				w          = screenWidth - _tracklayout.x - 10,
 				h          = WH_FILL,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight - 5,
 				fg         = scaledValues.NP_TITLE_COLOR,
-				_font_size_bold = NP_TRACK_FONT_SIZE,
-				sh = TEXT_SH_COLOR,
+				_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
+				sh = scaledValues.TEXT_SH_COLOR,
 				bgImg = npTitleBackground
 			},
 		},
@@ -3529,15 +3530,15 @@ function skin0(self, s, _, _, w, h)
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
 			y          = y_npartistgroup,
-			h          = math.floor(NP_TRACK_FONT_SIZE * 1.5),
+			h          = math.floor(scaledValues.NP_TRACK_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
 				w          = screenWidth - _tracklayout.x - 10,
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
 				fg         = scaledValues.NP_ARTIST_COLOR,
-				_font_size = NP_ARTISTALBUM_FONT_SIZE,
-				sh = TEXT_SH_COLOR,
+				_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
+				sh = scaledValues.TEXT_SH_COLOR,
 				bgImg = npArtistBackground,
 			},
 		},
@@ -3546,16 +3547,16 @@ function skin0(self, s, _, _, w, h)
 			position   = _tracklayout.position,
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
-			y          = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
-			h          = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
+			y          = y_npartistgroup + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
+			h          = math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			npalbum = {
 				w          = screenWidth - _tracklayout.x - 10,
 				padding    = { 0, 6, 0, 0 },
 				align      = _tracklayout.align,
 				lineHeight = _tracklayout.lineHeight,
 				fg         = scaledValues.NP_ALBUM_COLOR,
-				_font_size = NP_ARTISTALBUM_FONT_SIZE,
-				sh = TEXT_SH_COLOR,
+				_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
+				sh = scaledValues.TEXT_SH_COLOR,
 				bgImg = npAlbumBackground,
 			},
 		},
@@ -3571,8 +3572,8 @@ function skin0(self, s, _, _, w, h)
 			y = 2,
 			w = screenWidth/2,
 			align = "right",
-			fg = TEXT_COLOR,
-			sh = TEXT_SH_COLOR,
+			fg = scaledValues.TEXT_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
 			_font_size = 13,
 		},
@@ -3582,7 +3583,7 @@ function skin0(self, s, _, _, w, h)
 			w = scaledValues.midArtworkSize,
 			position = LAYOUT_NONE,
 			x = 10,
-			y = TITLE_HEIGHT + 18 + midArtworkYoffset,
+			y = scaledValues.TITLE_HEIGHT + 18 + midArtworkYoffset,
 			align = "center",
 			h = scaledValues.midArtworkSize,
 
@@ -3752,13 +3753,13 @@ function skin0(self, s, _, _, w, h)
 			zOrder = 2,
 			position = LAYOUT_NONE,
 			x = _tracklayout.x + 2 + 60,
-			y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+			y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 			w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
 			align = "center",
 			fg = scaledValues.NP_AUDIOMETADATA_COLOR,
-			sh = TEXT_SH_COLOR,
+			sh = scaledValues.TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
-			_font_size_bold = AUDIO_METADATA_FONT_HEIGHT,
+			_font_size_bold = scaledValues.AUDIO_METADATA_FONT_HEIGHT,
 			bgImg = npAudioMetadataBackground,
 		},
 
@@ -3791,14 +3792,14 @@ function skin0(self, s, _, _, w, h)
 			border = { 0, 0 ,0, 0 },
 			x = 60,
 			y = 0,
-			h = TITLE_HEIGHT,
+			h = scaledValues.TITLE_HEIGHT,
 			padding = { 20, 0, 20, 0 },
 			nptrack = {
 				align = "center",
 				w          = screenWidth - 140,
 				h          = WH_FILL,
 				fg         = scaledValues.NP_TITLE_COLOR,
-				_font_size_bold = NP_TRACK_FONT_SIZE,
+				_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
 				bgImg = npTitleBackground
 			},
 		}
@@ -3956,23 +3957,23 @@ function skin0(self, s, _, _, w, h)
 				x = npX,
 				nptrack = {
 					w = screenWidth - npX - large_art_rmargin,
-					font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
-					_font_size_bold = NP_TRACK_FONT_SIZE * 0.9,
+					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE * 0.9),
+					_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE * 0.9,
 				},
 			},
 			npartistgroup = {
 				x = npX,
 				npartist = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE * 0.9,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9,
 					w = screenWidth - npX - 10,
 				}
 			},
 			npalbumgroup = {
 				x = npX,
 				npalbum = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE * 0.9,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9,
 					w = screenWidth - npX - 10,
 				}
 			},
@@ -3998,7 +3999,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npaudiometadata = {
 				x = npX + 60,
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				w = screenWidth - npX - 2*60 - 15,
 				align = "center"
 			},
@@ -4151,7 +4152,7 @@ function skin0(self, s, _, _, w, h)
 		npvisu = { hidden = 1 },
 		npaudiometadata = {
             x = 10,
-			y = screenHeight - AUDIO_METADATA_H - 5,
+			y = screenHeight - scaledValues.AUDIO_METADATA_H - 5,
             w = screenWidth - 10,
 			align = "right"
 		},
@@ -4163,7 +4164,7 @@ function skin0(self, s, _, _, w, h)
 	_NP_def = {
 		nptitle          = {
                         x          = 40,
-                        y          = TITLE_HEIGHT + 50,
+                        y          = scaledValues.TITLE_HEIGHT + 50,
                         nptrack =  {
                                 w          = screenWidth - 65,
                                 align      = "center",
@@ -4171,7 +4172,7 @@ function skin0(self, s, _, _, w, h)
 		},
 		npartistgroup    = {
                         x          = 40,
-                        y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING + 5),
+                        y          = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING + 5),
                         npartist =  {
                                 w          = screenWidth - 65,
                                 align      = "center",
@@ -4179,7 +4180,7 @@ function skin0(self, s, _, _, w, h)
 		},
 		npalbumgroup     = {
                         x          = 40,
-                        y          = TITLE_HEIGHT + 50 + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
+                        y          = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
                         npalbum =  {
                                 w          = screenWidth - 65,
                                 align      = "center",
@@ -4249,7 +4250,7 @@ function skin0(self, s, _, _, w, h)
 		},
 		npaudiometadata = {
 			x = 50 + 60,
-			y = screenHeight - controlHeight - progressBarHeight - AUDIO_METADATA_H,
+			y = screenHeight - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H,
 			w = screenWidth - 2*50 - 2*60,
 			align = "center"
 		},
@@ -4271,7 +4272,7 @@ function skin0(self, s, _, _, w, h)
 	-- the progress bar
 	-- increase top and bottom "borders" for spectrum
 	local SP_yFudge = 7
-	local SP_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)- SP_yFudge*2 - AUDIO_METADATA_H
+	local SP_H = screenHeight - (scaledValues.TITLE_HEIGHT +  math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70)- SP_yFudge*2 - scaledValues.AUDIO_METADATA_H
 
 		local BASEnowplaying_visu_text = _NP_uses(BASEnowplaying, {
 			bgImg = V_blackBackground,
@@ -4280,7 +4281,7 @@ function skin0(self, s, _, _, w, h)
 			npartwork = { hidden = 1 },
 			title = _uses(s.title, {
 				zOrder = 1,
-				h = TITLE_HEIGHT,
+				h = scaledValues.TITLE_HEIGHT,
 				text = {
 					-- Hack: text needs to be there to fill the space, but is not visible
 					padding = { screenWidth, 0, 0, 0 }
@@ -4292,7 +4293,7 @@ function skin0(self, s, _, _, w, h)
 				position = LAYOUT_NONE,
 				x = 80,
 				y = 0,
-				h = TITLE_HEIGHT,
+				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 	--			padding = { 20, 14, 5, 5 },
 				padding = { 20, 0, 20, 0 },
@@ -4306,15 +4307,15 @@ function skin0(self, s, _, _, w, h)
 				zOrder = 2,
 				position = LAYOUT_NONE,
 				x = 0,
-				y = TITLE_HEIGHT,
+				y = scaledValues.TITLE_HEIGHT,
 				w = screenWidth,
-				h = math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5),
+				h = math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5),
 				align = "center",
 				fg = scaledValues.NP_ARTISTALBUM_COLOR,
-				sh = TEXT_SH_COLOR,
+				sh = scaledValues.TEXT_SH_COLOR,
 				padding = { 100, 0, 100, 0 },
-				font = _font(NP_ARTISTALBUM_FONT_SIZE),
-				_font_size = NP_ARTISTALBUM_FONT_SIZE,
+				font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE),
+				_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
 				bgImg = npArtistAlbumBackground,
 			},
 			npprogress = {
@@ -4387,7 +4388,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npaudiometadata = {
 				x = 50 + 60,
-				y = screenHeight - (100 + controlHeight - 70) - AUDIO_METADATA_H + 10,
+				y = screenHeight - (100 + controlHeight - 70) - scaledValues.AUDIO_METADATA_H + 10,
 				w = screenWidth - 2*50 - 2*60,
 				align = "center",
 			},
@@ -4401,7 +4402,7 @@ function skin0(self, s, _, _, w, h)
 				hidden = 0,
 				position = LAYOUT_NONE,
 				x = 0,
-				y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4 + SP_yFudge,
+				y =  scaledValues.TITLE_HEIGHT +  math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4 + SP_yFudge,
 				w = screenWidth,
 				h = SP_H,
 				border = { 0, 0, 0, 0 },
@@ -4410,7 +4411,7 @@ function skin0(self, s, _, _, w, h)
 				spectrum = {
 					position = LAYOUT_NONE,
 					x = 0,
-					y = 2 * TITLE_HEIGHT + 4,
+					y = 2 * scaledValues.TITLE_HEIGHT + 4,
 					w = screenWidth,
 					h = SP_H,
 					border = { 0, 0, 0, 0 },
@@ -4438,8 +4439,8 @@ function skin0(self, s, _, _, w, h)
 	-- for vu meters widths must be divisible by 2
 	mini_visu_W = math.floor(mini_visu_W/2) * 2
 
-		mini_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10 - AUDIO_METADATA_H
+		mini_visu_Y = y_npartistgroup + (scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 5
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * scaledValues.NP_LINE_SPACING) - 10 - scaledValues.AUDIO_METADATA_H
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		local BASEnowplaying_visu_text_art = _NP_uses(BASEnowplaying, {
@@ -4449,7 +4450,7 @@ function skin0(self, s, _, _, w, h)
 			npalbumgroup = { hidden = 0 },
 			npartwork = { hidden = 0 },
 			npaudiometadata = {
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				align = "center"
 			},
 		})
@@ -4493,8 +4494,8 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	-- Visualizer: large art Spectrum Visualizer
-	large_art_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight - AUDIO_METADATA_H
+	large_art_visu_Y = y_npartistgroup + (scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_spectrum_large_art'] == true then
 		visImage:registerSpectrumResolution(large_art_visu_W, large_art_visu_H)
 		_NP_def = {
@@ -4520,7 +4521,7 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				align = "center"
 			},
 		}
@@ -4557,7 +4558,7 @@ function skin0(self, s, _, _, w, h)
 					w = screenWidth,
 					h = screenHeight,
 					border = { 0, 0, 0, 0 },
-					padding = { 0, TITLE_HEIGHT, 0, controlHeight },
+					padding = { 0, scaledValues.TITLE_HEIGHT, 0, controlHeight },
 				},
 				bgImg = npvisuBackground,
 			},
@@ -4567,7 +4568,7 @@ function skin0(self, s, _, _, w, h)
 				position = LAYOUT_NONE,
 				x = 80,
 				y = 0,
-				h = TITLE_HEIGHT,
+				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 				padding = { 20, 0, 20, 0 },
 				nptrack = {
@@ -4585,7 +4586,7 @@ function skin0(self, s, _, _, w, h)
 			npcontrols  = { hidden = 0 },
 			npaudiometadata = {
 				align = "right",
-				y = screenHeight - AUDIO_METADATA_H,
+				y = screenHeight - scaledValues.AUDIO_METADATA_H,
                 x = 10,
                 w = screenWidth - 20,
 			}
@@ -4659,7 +4660,7 @@ function skin0(self, s, _, _, w, h)
 
 	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
-	local VU_H = screenHeight - (TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70) - AUDIO_METADATA_H
+	local VU_H = screenHeight - (scaledValues.TITLE_HEIGHT +  math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4) - (100 + controlHeight - 70) - scaledValues.AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_text'] == true then
 		visImage:registerVUMeterResolution(screenWidth, VU_H)
 		-- Visualizer: Analog VU Meter
@@ -4668,7 +4669,7 @@ function skin0(self, s, _, _, w, h)
 				hidden = 0,
 				position = LAYOUT_NONE,
 				x = 0,
-				y =  TITLE_HEIGHT +  math.floor(NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4,
+				y =  scaledValues.TITLE_HEIGHT +  math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5) + 4,
 				w = screenWidth,
 				h = VU_H,
 				border = { 0, 0, 0, 0 },
@@ -4677,7 +4678,7 @@ function skin0(self, s, _, _, w, h)
 				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = 0,
-					y = TITLE_HEIGHT + 63,
+					y = scaledValues.TITLE_HEIGHT + 63,
 					w = screenWidth,
 					h = VU_H,
 					border = { 0, 0, 0, 0 },
@@ -4700,8 +4701,8 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	if screenAR < 3 and portraitMode == false and activeNowPlayingScreenStyles['nowplaying_vumeter_text_art'] == true then
-		mini_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * NP_LINE_SPACING) - 10 - AUDIO_METADATA_H
+		mini_visu_Y = y_npartistgroup + (scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 5
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - (10 * scaledValues.NP_LINE_SPACING) - 10 - scaledValues.AUDIO_METADATA_H
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H) - 10
 		visImage:registerVUMeterResolution(mini_visu_W, mini_visu_H)
@@ -4729,7 +4730,7 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				align = "center"
 			},
 		}
@@ -4747,8 +4748,8 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	-- Visualizer: VuMeter Visualizer large art
-	large_art_visu_Y = y_npartistgroup + (NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 5
-	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight - AUDIO_METADATA_H
+	large_art_visu_Y = y_npartistgroup + (scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 5
+	large_art_visu_H = screenHeight - large_art_visu_Y - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H
 	if activeNowPlayingScreenStyles['nowplaying_vumeter_large_art'] == true then
 		visImage:registerVUMeterResolution(large_art_visu_W, large_art_visu_H)
 		_NP_def = {
@@ -4774,7 +4775,7 @@ function skin0(self, s, _, _, w, h)
 				bgImg = npvisuBackground,
 			},
 			npaudiometadata = {
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				align = "center"
 			},
 		}
@@ -4791,16 +4792,16 @@ function skin0(self, s, _, _, w, h)
 	end
 
 	if activeNowPlayingScreenStyles['nowplaying_large_vumeter'] == true then
-		visImage:registerVUMeterResolution(screenWidth, screenHeight - (TITLE_HEIGHT * 2))
+		visImage:registerVUMeterResolution(screenWidth, screenHeight - (scaledValues.TITLE_HEIGHT * 2))
 		-- Visualizer: VU meter full screen
 		_NP_def = {
 			npvisu = {
 				hidden = 0,
 				position = LAYOUT_NONE,
 				x = 0,
-				y = TITLE_HEIGHT,
+				y = scaledValues.TITLE_HEIGHT,
 				w = screenWidth,
-				h = screenHeight - (TITLE_HEIGHT * 2),
+				h = screenHeight - (scaledValues.TITLE_HEIGHT * 2),
 				border = { 0, 0, 0, 0 },
 				padding = { 0, 0, 0, 0 },
 
@@ -4808,9 +4809,9 @@ function skin0(self, s, _, _, w, h)
 				vumeter_v2 = {
 					position = LAYOUT_CENTER,
 					x = 0,
-					y = TITLE_HEIGHT,
+					y = scaledValues.TITLE_HEIGHT,
 					w = screenWidth,
-					h = screenHeight - (TITLE_HEIGHT * 2),
+					h = screenHeight - (scaledValues.TITLE_HEIGHT * 2),
 					border = { 0, 0, 0, 0 },
 					padding = { 0, 0, 0, 0 },
 				},
@@ -4821,7 +4822,7 @@ function skin0(self, s, _, _, w, h)
 				position = LAYOUT_NONE,
 				x = 80,
 				y = 0,
-				h = TITLE_HEIGHT,
+				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 				padding = { 20, 0, 20, 0 },
 				nptrack = {
@@ -4839,7 +4840,7 @@ function skin0(self, s, _, _, w, h)
 			npcontrols  = { hidden = 0 },
 			npaudiometadata = {
 				align = "right",
-				y = screenHeight - AUDIO_METADATA_H,
+				y = screenHeight - scaledValues.AUDIO_METADATA_H,
                 x = 10,
                 w = screenWidth - 20,
 			}
@@ -4897,7 +4898,7 @@ function skin0(self, s, _, _, w, h)
 		local tw = scaledValues.UW_TEXT_SCREEN_WIDTH
 		mini_visu_X = npX + tw
 		mini_visu_W = screenWidth - mini_visu_X - 15
-		mini_visu_Y = TITLE_HEIGHT + 17
+		mini_visu_Y = scaledValues.TITLE_HEIGHT + 17
 		mini_visu_H = screenHeight - controlHeight - mini_visu_Y
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
@@ -4905,33 +4906,33 @@ function skin0(self, s, _, _, w, h)
 		tw = tw - 10
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- center the text fields vertically
-		y_npartistgroup = (screenHeight - (TITLE_HEIGHT + 17 + controlHeight + progressBarHeight + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING) + NP_ARTISTALBUM_FONT_SIZE)) /2
-		y_npartistgroup = y_npartistgroup + TITLE_HEIGHT + 17
+		y_npartistgroup = (screenHeight - (scaledValues.TITLE_HEIGHT + 17 + controlHeight + progressBarHeight + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING) + scaledValues.NP_ARTISTALBUM_FONT_SIZE)) /2
+		y_npartistgroup = y_npartistgroup + scaledValues.TITLE_HEIGHT + 17
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		local BASEnowplaying_visu_text_art_wide = _NP_uses(BASEnowplaying, {
 			nptitle = {
 				x = npX,
 				nptrack = {
 					w = screenRem - 80 - 10,
-					font = _boldfont(NP_TRACK_FONT_SIZE),
-					_font_size_bold = NP_TRACK_FONT_SIZE,
+					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE),
+					_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
 				},
 			},
 			npartistgroup = {
 				x = npX,
 				y = y_npartistgroup,
 				npartist = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
 					w = tw,
 				}
 			},
 			npalbumgroup = {
 				x = npX,
-				y = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
+				y = y_npartistgroup + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
 				npalbum = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
 					w = tw,
 				}
 			},
@@ -4971,7 +4972,7 @@ function skin0(self, s, _, _, w, h)
 			},
 			npaudiometadata = {
 				x = npX + 60,
-				y = screenHeight - controlHeight - 18 - AUDIO_METADATA_H,
+				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
 				w = tw - 120,
 				align = "center"
 			},
@@ -5052,7 +5053,7 @@ function skin0(self, s, _, _, w, h)
 				y = y_npartistgroup,
 			},
 			npalbumgroup = {
-				y = y_npartistgroup + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING),
+				y = y_npartistgroup + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
 			}
 		}
 
@@ -5078,53 +5079,58 @@ function skin0(self, s, _, _, w, h)
 		npX = 30
 		local portraitArtworkWidth = scaledValues.midArtworkSize
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
-		local y_artwork = TITLE_HEIGHT + math.floor(NP_TRACK_FONT_SIZE * NP_LINE_SPACING) + math.floor(NP_ARTISTALBUM_FONT_SIZE * NP_LINE_SPACING * 2) + 41
+		local y_artwork = scaledValues.TITLE_HEIGHT + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 41
 		mini_visu_X = npX
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
 		mini_visu_Y = y_artwork + portraitArtworkWidth + 22
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight - AUDIO_METADATA_H
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
-		local AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - AUDIO_METADATA_FONT_HEIGHT
+		local AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_FONT_HEIGHT
 
-		x_nptitle = {
-				x = npX,
-				nptrack = {
-					w = tw,
-					font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
-					_font_size_bold = NP_TRACK_FONT_SIZE * 0.9,
-				},
-			}
-		if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
-			x_nptitle = {
-					x = 90,
-					nptrack = {
-						w = screenWidth - 196,
-						font = _boldfont(NP_TRACK_FONT_SIZE * 0.9),
-						_font_size_bold = NP_TRACK_FONT_SIZE * 0.9,
-					},
-				}
-		end
-
-
+--		local x_nptitle = {
+--				x = npX,
+--				nptrack = {
+--					w = tw,
+--					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE * 0.9),
+--					_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE * 0.9,
+--				},
+--			}
+--		if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
+--			x_nptitle = {
+--					x = 90,
+--					nptrack = {
+--						w = screenWidth - 196,
+--						font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE * 0.9),
+--						_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE * 0.9,
+--					},
+--				}
+--		end
 		visImage:registerSpectrumResolution(mini_visu_W, mini_visu_H)
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		local BASEnowplaying_visu_text_art_portrait = _NP_uses(BASEnowplaying, {
-			nptitle = x_nptitle,
+			nptitle = {
+				x = npX,
+				nptrack = {
+					w = tw,
+					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE * 0.9),
+					_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE * 0.9,
+				},
+			},
 			npartistgroup = {
 				x = npX,
 				npartist = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE * 0.9,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9,
 					w = tw,
 				}
 			},
 			npalbumgroup = {
 				x = npX,
 				npalbum = {
-					font = _font(NP_ARTISTALBUM_FONT_SIZE * 0.9),
-					_font_size = NP_ARTISTALBUM_FONT_SIZE * 0.9,
+					font = _font(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9),
+					_font_size = scaledValues.NP_ARTISTALBUM_FONT_SIZE * 0.9,
 					w = tw,
 				}
 			},
@@ -5328,8 +5334,8 @@ function skin0(self, s, _, _, w, h)
 		h = 50,
                 align = 'center',
                 padding = { 6, 0, 6, 10 },
-                fg = TEXT_COLOR,
-                sh = TEXT_SH_COLOR,
+                fg = scaledValues.TEXT_COLOR,
+                sh = scaledValues.TEXT_SH_COLOR,
         }
 
 	if hideControls then
@@ -5352,13 +5358,13 @@ function skin0(self, s, _, _, w, h)
 
 		CHECK_PADDING = CHECK_PADDING,
 		MENU_ITEM_ICON_PADDING = MENU_ITEM_ICON_PADDING,
-		TEXT_COLOR = TEXT_COLOR,
-		TEXT_SH_COLOR = TEXT_SH_COLOR,
-		TITLE_HEIGHT = TITLE_HEIGHT,
-		ALBUMMENU_FONT_SIZE = ALBUMMENU_FONT_SIZE,
-		ITEM_ICON_ALIGN = ITEM_ICON_ALIGN,
-		FIVE_ITEM_HEIGHT = FIVE_ITEM_HEIGHT,
-		NP_ARTISTALBUM_FONT_SIZE = NP_ARTISTALBUM_FONT_SIZE,
+		TEXT_COLOR = scaledValues.TEXT_COLOR,
+		TEXT_SH_COLOR = scaledValues.TEXT_SH_COLOR,
+		TITLE_HEIGHT = scaledValues.TITLE_HEIGHT,
+		ALBUMMENU_FONT_SIZE = scaledValues.ALBUMMENU_FONT_SIZE,
+		ITEM_ICON_ALIGN = scaledValues.ITEM_ICON_ALIGN,
+		FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT,
+		NP_ARTISTALBUM_FONT_SIZE = scaledValues.NP_ARTISTALBUM_FONT_SIZE,
 	}
 	return s
 end
