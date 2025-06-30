@@ -1143,6 +1143,7 @@ function skin0(self, s, _, _, w, h)
 	local npvisuBackground          = nil
 	local npControlsBackground      = V_touchToolbarBackground
 	local npArtworkBackground       = nil
+	local titleTextBackground       = nil
 	if Framework:getGlobalSetting("jogglerDebugColouriseNPFields") == true then
 		-- for visual debugging
 		titleBackground         = Tile:fillColor(0xffffff30)
@@ -1155,6 +1156,8 @@ function skin0(self, s, _, _, w, h)
 		npvisuBackground        = Tile:fillColor(0x80808080)
 		npControlsBackground    = Tile:fillColor(0xffff0050)
 		npArtworkBackground     = Tile:fillColor(0xff000050)
+		V_titlebarButtonBox     = Tile:fillColor(0x008f0080)
+		titleTextBackground     = Tile:fillColor(0x00a08f20)
 	end
 
 	local textinputCursor = _loadImageTile(self, imgpath .. "Text_Entry/Keyboard_Touch/tch_cursor.png")
@@ -1372,6 +1375,7 @@ function skin0(self, s, _, _, w, h)
 			align = "center",
 			font = _boldfont(scaledValues.TITLEBAR_FONT_SIZE),
 			fg = scaledValues.TITLE_TEXT_COLOR,
+			bgImg = titleTextBackground,
 		}
 	}
 
@@ -2851,18 +2855,25 @@ function skin0(self, s, _, _, w, h)
 			fg = scaledValues.TEXT_COLOR_BASE_BUTTON,
 		},
 	}
+
 	local _pressed_button = _uses(_button, {
 		bgImg = pressedTitlebarButtonBox,
 	})
 
+	local _pressed_button2 = _uses(_button, {
+		bgImg = _loadImage(self, TITLEBUTTON_ICONS_PATH .. '/title_button_press.png')
+	})
 
 	-- icon button factory
 --	local _titleButtonIcon = function(name, icon, attr)
-	local _titleButtonIcon = function(name, icon, _)
+	local _titleButtonIcon = function(name, icon, pressed2)
 		s[name] = _uses(_button)
 		s[name].layer = LAYER_TITLE
 
 		s.pressed[name] = _uses(_pressed_button)
+		if pressed2 == true then
+			s.pressed[name] = _uses(_pressed_button2)
+		end
 
 		local attr = {
 			hidden = 0,
@@ -2871,9 +2882,12 @@ function skin0(self, s, _, _, w, h)
 		}
 
 		s[name].icon = _uses(_button.icon, attr)
-		s[name].w = 65
+		s[name].w = scaledValues.TITLE_BUTTON_WIDTH
 		s.pressed[name].icon = _uses(_pressed_button.icon, attr)
-		s.pressed[name].w = 65
+		if pressed2 == true then
+			s.pressed[name].icon = _uses(_pressed_button2.icon, attr)
+		end
+		s.pressed[name].w = scaledValues.TITLE_BUTTON_WIDTH
 	end
 
 	-- text button factory
@@ -2899,16 +2913,16 @@ function skin0(self, s, _, _, w, h)
 		w = scaledValues.TITLE_BUTTON_WIDTH  - 12,
 	})
 
-	_titleButtonIcon("button_back", backButton)
-	_titleButtonIcon("button_cancel", cancelButton)
-	_titleButtonIcon("button_go_home", homeButton)
-	_titleButtonIcon("button_playlist", playlistButton)
-	_titleButtonIcon("button_more", moreButton)
-	_titleButtonIcon("button_go_playlist", playlistButton)
-	_titleButtonIcon("button_go_now_playing", nowPlayingButton)
-	_titleButtonIcon("button_power", powerButton)
+	_titleButtonIcon("button_back", backButton, true)
+	_titleButtonIcon("button_cancel", cancelButton, true)
+	_titleButtonIcon("button_go_home", homeButton, true)
+	_titleButtonIcon("button_help", helpButton, true)
+	_titleButtonIcon("button_power", powerButton, true)
+	_titleButtonIcon("button_go_now_playing", nowPlayingButton, true)
+	_titleButtonIcon("button_playlist", playlistButton, true)
+	_titleButtonIcon("button_more", moreButton, true)
+	_titleButtonIcon("button_go_playlist", playlistButton, true)
 	_titleButtonIcon("button_nothing", nil)
-	_titleButtonIcon("button_help", helpButton)
 	_titleButtonText("button_more_help", self:string("MORE_HELP"))
 	_titleButtonText("button_finish_operation", self:string("ENTER"))
 
@@ -3493,12 +3507,12 @@ function skin0(self, s, _, _, w, h)
 			zOrder = 1,
 			text = {
 				_font_size_bold = scaledValues.TITLEBAR_FONT_SIZE,
-				bgImg   = V_titlebarButtonBox,
+--				bgImg   = V_titlebarButtonBox,
 			},
 			rbutton  = {
 				_font_size = scaledValues.RBUTTON_FONT_SIZE,
 				fg      = scaledValues.TEXT_COLOR,
-				bgImg   = V_titlebarButtonBox,
+--				bgImg   = V_titlebarButtonBox,
 				w       = scaledValues.TITLE_BUTTON_WIDTH,
 				padding = { 8, 0, 8, 0},
 				align   = 'center',
