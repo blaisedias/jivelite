@@ -550,6 +550,13 @@ function scaleControlsImages(params)
                 { src="queue_music_1000dp_1F1F1F_FILL0_wght700_GRAD0_opsz48.png", dest="icon_nplay_list_tb.png", },
             },
         }
+    local tbl_titlebutton_pressed = {
+            -- title button pressed background
+            dim = { w=math.ceil(params.TITLEBUTTONS_DIMENSIONS), h=params.TITLE_HEIGHT - 12 },
+            imgs = {
+                { src="title_button_press.png", dest="title_button_press.png"}
+            },
+        }
 
 --    local src_root =  findFQPath("applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/1k")
     local src_root =  findFQPath(iconsImgpath .. "1k")
@@ -558,7 +565,6 @@ function scaleControlsImages(params)
         return
     end
 
---    local dest_root = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/Icons/' .. params.CONTROLS_DIMENSIONS
     local dest_root = System.getUserDir() .. '/' .. iconsImgpath .. params.CONTROLS_DIMENSIONS
     os.execute("mkdir -p " .. dest_root)
     for _, v in pairs(tbl_control) do
@@ -571,7 +577,14 @@ function scaleControlsImages(params)
     dest_root = System.getUserDir() .. '/' .. iconsImgpath .. params.TITLEBUTTONS_DIMENSIONS
     os.execute("mkdir -p " .. dest_root)
     for _, imgnames in pairs(tbl_titlebuttons.imgs) do
-        scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest, tbl_titlebuttons.dim, tbl_titlebuttons.dim)
+        scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest,
+                        tbl_titlebuttons.dim, tbl_titlebuttons.dim)
+    end
+    for _, imgnames in pairs(tbl_titlebutton_pressed.imgs) do
+        -- always regenerate this because TITLE_HEIGHT may change
+        os.execute("rm  " .. dest_root .. "/" .. imgnames.dest)
+        scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest,
+                        tbl_titlebutton_pressed.dim.w, tbl_titlebutton_pressed.dim.h)
     end
 
     -- scale volume bar components
@@ -583,7 +596,7 @@ function scaleControlsImages(params)
         log:error("scaleControlsImages: ", src_root, " is not a directory")
         return
     end
---    dest_root = System.getUserDir() .. '/applets/JogglerSkin/images/UNOFFICIAL/Material/VolumeBar/' .. params.CONTROLS_DIMENSIONS
+
     dest_root = System.getUserDir() .. '/' .. volbarImgpath .. params.CONTROLS_DIMENSIONS
     os.execute("mkdir -p " .. dest_root)
     local tbl_vol = {
@@ -845,7 +858,9 @@ function getJogglerSkinParams(skinName)
     -- three item component vertical dimension is 72 for *ALL* skins
     params.THREE_ITEM_HEIGHT = 72
 
-    params.TITLE_BUTTON_WIDTH = 76
+--    params.TITLE_BUTTON_WIDTH = 76
+--    params.TITLE_BUTTON_WIDTH = params.TITLE_HEIGHT
+    params.TITLE_BUTTON_WIDTH = params.TITLEBUTTONS_DIMENSIONS
 
     params.AUDIO_METADATA_FONT_HEIGHT = scaleTextValue(14)
 
@@ -907,6 +922,7 @@ function getJogglerSkinParams(skinName)
     params.thumbnailScaleFactor = thumbnailScaleFactor
     params.gridTextScaleFactor = gridTextScaleFactor
     params.controlsScaleFactor = controlsScaleFactor
+    params.titlebuttonsScaleFactor = titlebuttonsScaleFactor
 
     -- after scaling update params values from json - if they exist
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
