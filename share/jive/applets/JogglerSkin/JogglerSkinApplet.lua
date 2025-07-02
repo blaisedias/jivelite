@@ -5635,22 +5635,25 @@ function init(self)
 				local screenWidth, screenHeight = Framework:getScreenSize()
 				local jsData = {}
 				jsData["-doc"] = {
-					position_values_by_name = {
-						LAYOUT_NORTH = LAYOUT_NORTH,
-						LAYOUT_EAST = LAYOUT_EAST,
-						LAYOUT_SOUTH = LAYOUT_SOUTH,
-						LAYOUT_WEST = LAYOUT_WEST,
-						LAYOUT_CENTER = LAYOUT_CENTER,
-						LAYOUT_NONE = LAYOUT_NONE,
-					},
-					npcontrols = {
-						order_sort = npc_order_sort
+					reference = {
+						position_values_by_name = {
+							LAYOUT_NORTH = LAYOUT_NORTH,
+							LAYOUT_EAST = LAYOUT_EAST,
+							LAYOUT_SOUTH = LAYOUT_SOUTH,
+							LAYOUT_WEST = LAYOUT_WEST,
+							LAYOUT_CENTER = LAYOUT_CENTER,
+							LAYOUT_NONE = LAYOUT_NONE,
+						},
+						npcontrols = {
+							order_sort = npc_order_sort
+						},
 					},
 					advisories = {
 						controls_order = {
-							{ "To reorder controls use 'order_sort' array" },
-							{ "Do not modify 'order', that defines button order" },
-							{ "AND also the set of visible buttons." }
+							{ "Do not modify 'order', that defines button order AND also the set of visible buttons." },
+							{ "To reorder controls use 'order_sort' array." },
+							{ "A reference order_sort is included the reference section."},
+							{ "Use this and imply rearrange to suit - do not add or delete elements."},
 						},
 						allstyles = {
 							{ "Use 'allstyles' to define colours and font elements, plus controls sort order for ALL now playing styles." },
