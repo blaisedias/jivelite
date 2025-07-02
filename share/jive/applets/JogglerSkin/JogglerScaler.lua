@@ -1113,7 +1113,7 @@ local npkeys = {
 
 local proscribed = {
     "pressed",
-    "rbutton",
+--    "rbutton",
 --    "div1", "div2", "div3", "div4", "div5", "div6", "div7", "div8", "div9", "div10", "div11",
 --    "title",
     "hate", "love","thumbsUp","thumbsUpDisabled", "thumbsDown", "thumbsDownDisabled",
@@ -1204,4 +1204,16 @@ function getNowPlayingStyleJsonTable(tbl)
     end
     return tgt
 end
+
+function templatiseTable(tbl)
+    for k,v in pairs(tbl) do
+        if kind_of(v) == 'table' then
+            templatiseTable(v)
+        else
+            tbl[k] = nil
+        end
+    end
+    return tbl
+end
+
 

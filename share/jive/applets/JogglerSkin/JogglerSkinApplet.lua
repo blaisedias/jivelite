@@ -5634,6 +5634,29 @@ function init(self)
 			if npss and s ~= nil then
 				local screenWidth, screenHeight = Framework:getScreenSize()
 				local jsData = {}
+				local key = screenWidth..'x'..screenHeight
+				jsData[key] = {}
+				for _,v  in pairs(npss) do
+					log:debug(v.style, " ", s[v.style])
+					jsData[key][v.style] = jogglerScaler.getNowPlayingStyleJsonTable(s[v.style])
+				end
+				local _, fpath = jogglerScaler.writeJsonFile(jsData, '/cache/JogglerNowPlaying.json')
+				self:messageBox("Wrote " .. fpath , 5000)
+				-- generate a template for the JogglerNowPlaying
+				jogglerScaler.templatiseTable(jsData)
+				-- add allstyles section - derive from "nowplaying" style
+				jsData['allstyles'] = table.clone(jsData[key]["nowplaying"])
+				-- templatise allstyle npcontrols
+				jsData['allstyles']['npcontrols'] = { }
+				-- remove artwork UI element - nothing there to be configured in allstyles
+				jsData['allstyles']['npartwork'] = nil
+				-- add missing entry "npartistalbum" from "nowplaying_spectrum_text" to allstyles
+				jsData['allstyles']['npartistalbum'] = jsData[key]["nowplaying_spectrum_text"]["npartistalbum"]
+				jsData['allstyles']['npprogress']['npprogressB'] = nil
+				jsData['allstyles']['npprogress']['npprogressB_disabled'] = nil
+				-- templatise allstyle title
+				jsData['allstyles']['title'] = { text={}, textButton={} }
+				-- finally add -doc section
 				jsData["-doc"] = {
 					reference = {
 						position_values_by_name = {
@@ -5662,15 +5685,7 @@ function init(self)
 						}
 					},
 				}
-				jsData["allstyles"] = {
-				}
-				local key = screenWidth..'x'..screenHeight
-				jsData[key] = {}
-				for _,v  in pairs(npss) do
-					log:debug(v.style, " ", s[v.style])
-					jsData[key][v.style] = jogglerScaler.getNowPlayingStyleJsonTable(s[v.style])
-				end
-				local _, fpath = jogglerScaler.writeJsonFile(jsData, '/cache/JogglerNowPlaying.json')
+				_, fpath = jogglerScaler.writeJsonFile(jsData, '/cache/JogglerNowPlayingTemplate.json')
 				self:messageBox("Wrote " .. fpath , 5000)
 			else
 				self:messageBox("failed to get nowPlayingScreenStyles " .. npss .. " or skin " .. s, 2000)
