@@ -1,32 +1,38 @@
 # Overview
 This document is a basic guide on customising Jivelite layout
 
-There are 3 methods of customisation
+There are 3 stages of customisation
 * Layout UI menu
 * Reading key value pairs from the file `/home/<username>/.jivelite/userpath-vis/Joggler.json`
-* Reading pairs from the file `/.jivelite/userpath-vis/JogglerNowPlaying.json`
+* Reading key value pairs from the file `/.jivelite/userpath-vis/JogglerNowPlaying.json`
 
 Note: the value of a key may itself be a set of key value pairs.
 
 The layout of the JSON files reflect the internal data structures of jivelite-vis.
 
-The contents of the JSON files are loaded into internal data structures of jivelite-vis. This makes fine control possible but is currently implemented without any safeguards. When loaded the contents are not marshalled.
+The contents of the JSON files are loaded into internal data structures of jivelite-vis.
+This makes fine control possible but is currently implemented without any safeguards.
+The contents are not marshalled when loaded.
 
-Care must be exercised when using the JSON files.
+Consequently, care must be exercised when using the JSON files.
 
 # Workflow
-The recommended procedure is to use the Layout UI menu first and other *Now Playing* menu settings like *Hide Now Playing X of Y*
+The recommended procedure is to proceeed in stages, 
+* Use the Layout UI menu first and other *Now Playing* menu settings like *Hide Now Playing X of Y*
+* If this proves insufficient then use Joggler.json file
+* And finally JogglerNowPlaying.json
 
-If this proves insufficient then use Joggler.json file
-
-And finally JogglerNowPlaying.json
+All three stages are *NOT* necessary!
 
 In the absence of published schemas for the JSON files, jivelite-vis generates JSON files that reflect the current settings
 * `/home/<username>/.jivelite/userpath-vis/cache/JogglerSkin.json`
 * `/home/<username>/.jivelite/userpath-vis/cache/PiGridSkin.json`
 * `/home/<username>/.jivelite/userpath-vis/cache/JogglerNowPlaying.json`
+* `/home/<username>/.jivelite/userpath-vis/cache/JogglerNowPlayingTemplate.json`
 
-These files serve as templates of the key value pairs required to configure the layout.
+These files serve as templates of the key value pairs required to configure the layout, with the exception of `JogglerNowPlaying.json`.
+
+Given the complex structure of `JogglerNowPlaying.json`, a template file with no concrete key pair values `JogglerNowPlayingTemplate.json` is generated.
 
 The generated JSON files have sections keyed under the display resolution(s).
 These settings will be loaded and applied only when Jivelite-vis is running with the display set to that resolution.
@@ -36,7 +42,7 @@ Settings in the Layout UI menu are reflected in generated JSON files.
 Settings in Joggler.json are reflected JogglerNowPlaying.json
 
 ## Using the UI
-The titles of the  menu items are considered largely self explanatory - and will not be described further here.
+The titles of the menu items are considered largely self explanatory - and will not be described further here.
 
 ## Joggler.json
 It is good practice to only add key value pairs that are modified and cannot be modified to the UI here.
@@ -68,27 +74,43 @@ The contents of "gridSkin" should be copied from
 * `/home/<username>/.jivelite/userpath-vis/cache/PiGridSkin.json`
 and then modified to suit
 
-**Only copy those parts that need modification.**
+**Only copy those key values pairs that need modification.**
 
 ## JogglerNowPlaying.json
+The simplest way to create this is to copy
+* `/home/<username>/.jivelite/userpath-vis/cache/JogglerNowPlayingTemplate.json`
+to
+* `/home/<username>/.jivelite/userpath-vis/cache/JogglerNowPlaying.json`
+
+
+Then copy the key pair values in matching sections from  `/home/<username>/.jivelite/userpath-vis/Joggler.json`,
+and then modify the values.
+
+
 It is good practice to only add key value pairs that are modified and cannot be modified to the UI here.
 
 Further it is good practice to only add key value pairs that cannot be modified suitably in `/home/<username>/.jivelite/userpath-vis/Joggler.json` here
 
+`JogglerNowPlayingTemplate.json` contains a section `-doc`, which contains 2 sections targeted at users,
+ * *advisories*
+   * This contains notes on how to use the *allstyles* section and *ordering of controls*
+ * *reference*
+   * This section contains reference values of key pairs
+
 Format is:
 ```
 {
+    <W>x<H>: {
+        ....
+        ....
+    },
     "allstyles": {
         ....
         ....
     }
-    <W>x<H>: {
-        ....
-        ....
-    }
+
 }
 ```
-
 Where:
 * W is display width
 * H is display height
@@ -218,3 +240,23 @@ By defining this in `allstyles` the control buttons order is defined consistentl
    * `4`: center
    * `5`: none
 
+# Debugging Layout issues
+When modifying location, width, height, font sizes, text justification .... it is often difficult to work out what is required,
+or what is setting is causing undesired effects.
+
+To help in this case use the menu item *Settings->Screen->Layout->Debug Layout*, this sets background colours for UI elements.
+
+This feature is mainly targeted at Now Playing views, and is not very useful for other screens.
+
+# FAQ
+1) In *npcontrols.order_sort*, what are *divVolSpace* and *divVolSpace2* ?
+
+Answer:
+  * These are spacers, used to right justify the volume controls in the controls bar.
+  * Only *divVolSpace2* is used for large art Now Playing views with controls.
+  * The values are calculated by the code and are not user configurable.
+
+2) Is the *-doc* section in *JogglerNowPlayingTemplate.json* required in *JogglerNowPlaying.json*?
+
+Answer:
+  * No, the section has been provided as an aid for the user. Including the section does no harm, as the section is ignored.

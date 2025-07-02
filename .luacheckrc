@@ -137,6 +137,7 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
        "initialiseUserNPTables",
        "getUserNpTable",
        "getUserNpAllstylesTable",
+       "templatiseTable",
    },
    read_globals = {
    }
