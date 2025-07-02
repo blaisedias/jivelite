@@ -22,9 +22,9 @@ If this proves insufficient then use Joggler.json file
 And finally JogglerNowPlaying.json
 
 In the absence of published schemas for the JSON files, jivelite-vis generates JSON files that reflect the current settings
-* `/home/<username>/.jivelite/userpath-vis/JogglerSkin.json`
-* `/home/<username>/.jivelite/userpath-vis/PiGridSkin.json`
-* `/home/<username>/.jivelite/userpath-vis/JogglerNowPlaying.json`
+* `/home/<username>/.jivelite/userpath-vis/cache/JogglerSkin.json`
+* `/home/<username>/.jivelite/userpath-vis/cache/PiGridSkin.json`
+* `/home/<username>/.jivelite/userpath-vis/cache/JogglerNowPlaying.json`
 
 These files serve as templates of the key value pairs required to configure the layout.
 
