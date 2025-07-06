@@ -305,7 +305,10 @@ function param(self)
 				}
 			},
 			{
-				aspect_ratio_range = {min = 1},
+				-- available for views where screen width >= 2 * screen height and < 3 * screen height
+				-- for aspect ratio > 3. nowplaying_spectrum_text_art is rendered with full height artwork,
+				-- and has the added feature of user configurable artwork size.
+				aspect_ratio_range = {min = 2, max = 3},
 				npstyle = {
 					style = 'nowplaying_large_art',
 					artworkSize = maxArtwork,
@@ -1169,7 +1172,9 @@ function skin0(self, s, _, _, w, h)
 		activeNowPlayingScreenStyles[v.style] = true
 	end
 
-	local TITLE_PADDING  = { 0, 15, 0, 15 }
+	local tmp = (scaledValues.TITLE_HEIGHT - scaledValues.TITLEBAR_FONT_SIZE)/2
+	local TITLE_PADDING  = { 0, tmp, 0, tmp }
+	local NP_TITLE_PADDING  = { 10, tmp, 10, tmp }
 	local CHECK_PADDING  = { 2, 0, 6, 0 }
 	local CHECKBOX_RADIO_PADDING  = { 2, 0, 0, 0 }
 
@@ -1372,7 +1377,7 @@ function skin0(self, s, _, _, w, h)
 		text = {
 			w = WH_FILL,
 			padding = TITLE_PADDING,
-			align = "center",
+			align = "top",
 			font = _boldfont(scaledValues.TITLEBAR_FONT_SIZE),
 			fg = scaledValues.TITLE_TEXT_COLOR,
 			bgImg = titleTextBackground,
@@ -2460,10 +2465,10 @@ function skin0(self, s, _, _, w, h)
 
 	-- toast popup with icon only
 	s.toast_popup_icon = _uses(s.toast_popup, {
-		w = 190,
-		h = 178,
-		x = (screenWidth - 190) / 2,
-		y = (screenHeight - 170) / 2,
+		w = scaledValues.CONTROL_POPUP_DIMENSIONS+40,
+		h = scaledValues.CONTROL_POPUP_DIMENSIONS+40,
+		x = (screenWidth - scaledValues.CONTROL_POPUP_DIMENSIONS+40) / 2,
+		y = (screenHeight - scaledValues.CONTROL_POPUP_DIMENSIONS+40) / 2,
 		position = LAYOUT_NONE,
 		group = {
 			order = { 'icon' },
@@ -3507,6 +3512,7 @@ function skin0(self, s, _, _, w, h)
 			zOrder = 1,
 			text = {
 				_font_size_bold = scaledValues.TITLEBAR_FONT_SIZE,
+				padding = NP_TITLE_PADDING,
 --				bgImg   = V_titlebarButtonBox,
 			},
 			rbutton  = {
@@ -3946,7 +3952,7 @@ function skin0(self, s, _, _, w, h)
 
 	local npX = screenHeight + 15
 
-	local large_art_padding = { 10, 12, 10, 15 }
+	local large_art_padding = NP_TITLE_PADDING
 	local large_art_rmargin = 10
 	if Framework:getGlobalSetting("jogglerHideNowPlayingXofY") then
 		large_art_padding = nil
