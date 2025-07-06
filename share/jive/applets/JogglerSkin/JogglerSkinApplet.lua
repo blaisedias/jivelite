@@ -4877,7 +4877,36 @@ function skin0(self, s, _, _, w, h)
 		})
 
 
-		s.nowplaying_vumeter_only = _uses(s.nowplaying_large_vumeter, {
+		_NP_def = {
+			npvisu = {
+				hidden = 0,
+				position = LAYOUT_NONE,
+				x = 0,
+				y = scaledValues.TITLE_HEIGHT,
+				w = screenWidth,
+				h = screenHeight - (scaledValues.TITLE_HEIGHT * 2),
+				border = { 0, 0, 0, 0 },
+				padding = { 0, 0, 0, 0 },
+
+
+				vumeter_v2 = {
+					position = LAYOUT_CENTER,
+					x = 0,
+					y = scaledValues.TITLE_HEIGHT,
+					w = screenWidth,
+					h = screenHeight - (scaledValues.TITLE_HEIGHT * 2),
+					border = { 0, 0, 0, 0 },
+					padding = { 0, 0, 0, 0 },
+				},
+				bgImg = npvisuBackground,
+			},
+			npaudiometadata = {
+				x = 0,
+				y = 4,
+				w = screenWidth,
+				align = "center",
+			},
+
 			nptitle = { hidden = 1 },
 	        npartistgroup = { hidden = 1 },
 	        npalbumgroup = { hidden = 1 },
@@ -4886,13 +4915,8 @@ function skin0(self, s, _, _, w, h)
 	        npprogress = { hidden = 1 },
 	        npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 1 },
-			npaudiometadata = {
-				x = 0,
-				y = 4,
-				w = screenWidth,
-				align = "center",
-			},
-		})
+		}
+		s.nowplaying_vumeter_only = _NP_uses(BASEnowplaying, _NP_def, "nowplaying_vumeter_only")
 		s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only
 	end
 
