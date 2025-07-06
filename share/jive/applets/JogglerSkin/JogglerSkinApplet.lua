@@ -4178,7 +4178,7 @@ function skin0(self, s, _, _, w, h)
 		},
 	}
 
-	s.nowplaying_art_only = _NP_uses(BASEnowplaying, _NP_def)
+	s.nowplaying_art_only = _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_art_only')
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
 	_NP_def = {
