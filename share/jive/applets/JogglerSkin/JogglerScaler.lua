@@ -647,34 +647,41 @@ local function _getJogglerCoreParams(skinName, skinValues)
         -- padding at the bottom is nominally 16
         local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16
         local fiveItemHeight = math.floor(availHeight/math.floor(availHeight/(skinValues.TEXTMENU_FONT_SIZE * 1.8)))
+        if skinValues.FIVE_ITEM_HEIGHT > 0 then
+            -- user has configured fiveItemHeight use that value
+            fiveItemHeight = skinValues.FIVE_ITEM_HEIGHT
+        end
         local rows =  math.floor(availHeight/fiveItemHeight)
         local TEXTMENU_FONT_SIZE = skinValues.TEXTMENU_FONT_SIZE
-        if skinName == "PiGridSkin" then
-            if rows % 3 ~= 0 then
-                -- grid item height = 3 * fiveItemHeight,
-                -- For now: PiGridSkin scrolling needs more than 1 row so force roundup
-                if skinValues.ADJUST_FOR_GRID_ROWS == "roundup" or (math.floor(rows/3)*3) == 3 then
-                -- increase the number of rows to be a multiple of 3
-                    rows = math.floor((rows+2)/3)*3
-                elseif skinValues.ADJUST_FOR_GRID_ROWS == "rounddown" then
-                -- decrease the number of rows to be a multiple of 3
-                    rows = math.floor(rows/3)*3
+        if skinValues.FIVE_ITEM_HEIGHT == 0 then
+            -- user has not configured fiveItemHeight, so the value can be adjusted for better layout
+            if skinName == "PiGridSkin" then
+                if rows % 3 ~= 0 then
+                    -- grid item height = 3 * fiveItemHeight,
+                    -- For now: PiGridSkin scrolling needs more than 1 row so force roundup
+                    if skinValues.ADJUST_FOR_GRID_ROWS == "roundup" or (math.floor(rows/3)*3) == 3 then
+                    -- increase the number of rows to be a multiple of 3
+                        rows = math.floor((rows+2)/3)*3
+                    elseif skinValues.ADJUST_FOR_GRID_ROWS == "rounddown" then
+                    -- decrease the number of rows to be a multiple of 3
+                        rows = math.floor(rows/3)*3
+                    end
+                    log:info("fiveItemHeight adjusted for PiGridSkin requirements ",
+                                fiveItemHeight, ' -> ', math.floor(availHeight/rows)
+                            )
+                    -- recalculate fiveItemHeight using the adjusted number of rows
+                    fiveItemHeight = math.floor(availHeight/rows)
+                    -- change associated text menu size to match updated fiveItemHeight
+                    TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
                 end
-                log:info("fiveItemHeight adjusted for PiGridSkin requirements ",
-                            fiveItemHeight, ' -> ', math.floor(availHeight/rows)
-                        )
-                -- recalculate fiveItemHeight using the adjusted number of rows
-                fiveItemHeight = math.floor(availHeight/rows)
+            end
+            -- visually, fuzzy padding at the bottom is better, sacrifice up to X pixels,
+            -- if we can increment fiveItemHeight by 1
+            if availHeight%(rows * fiveItemHeight) + 7 >= rows then
+                fiveItemHeight = fiveItemHeight + 1
                 -- change associated text menu size to match updated fiveItemHeight
                 TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
             end
-        end
-        -- visually, fuzzy padding at the bottom is better, sacrifice up to X pixels,
-        -- if we can increment fiveItemHeight by 1
-        if availHeight%(rows * fiveItemHeight) + 7 >= rows then
-            fiveItemHeight = fiveItemHeight + 1
-            -- change associated text menu size to match updated fiveItemHeight
-            TEXTMENU_FONT_SIZE = math.floor(fiveItemHeight/1.8)
         end
         local popupThumbSize = scaleThumbsizeValue(BASE_POPUP_THUMBSIZE)
         if screenWidth == 720 and screenHeight == 1280 then
@@ -768,6 +775,8 @@ function getJogglerSkinParams(skinName)
         --  roundup -> decrease FIVE_ITEM_HEIGHT to increase the number of Grid Item Rows
         --  * -> no adjustment - bottom Grid Item Row may be rendered partially
         ADJUST_FOR_GRID_ROWS = "rounddown",
+        -- set FIVE_ITEM_HEIGHT to 0 to signify value unset by user configuration
+        FIVE_ITEM_HEIGHT = 0,
     }
     -- before scaling update values from json config
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
@@ -1042,11 +1051,15 @@ function getGridSkinParams(fiveItemHeight)
     -- before scaling update values from json config
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
         if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].gridSkin then
-            local jd = jsonData[resolutionKey].gridSkin
-            for k,_ in pairs(skinValues) do
-                if jd[k] then
-                    log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
-                    skinValues[k] = jd[k]
+            -- set values as defined in user config for jogglerSkin and gridSkin
+            -- gridSkin values override JogglerSkin but there should not be any colliding key value pairs
+            for _, skinV in pairs({"jogglerSkin", "gridSkin"}) do
+                local jd = jsonData[resolutionKey][skinV]
+                for k,_ in pairs(skinValues) do
+                    if jd[k] then
+                        log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
+                        skinValues[k] = jd[k]
+                    end
                 end
             end
         end
