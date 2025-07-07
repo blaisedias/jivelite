@@ -2464,23 +2464,25 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	-- toast popup with icon only
-	s.toast_popup_icon = _uses(s.toast_popup, {
-		w = scaledValues.CONTROL_POPUP_DIMENSIONS+40,
-		h = scaledValues.CONTROL_POPUP_DIMENSIONS+40,
-		x = (screenWidth - scaledValues.CONTROL_POPUP_DIMENSIONS+40) / 2,
-		y = (screenHeight - scaledValues.CONTROL_POPUP_DIMENSIONS+40) / 2,
-		position = LAYOUT_NONE,
+	local popup_icon_wh = scaledValues.CONTROL_POPUP_DIMENSIONS + 40
+	s.toast_popup_icon = {
+		x = math.floor((screenWidth - popup_icon_wh) / 2),
+		y = math.floor((screenHeight - popup_icon_wh) / 2),
+		w = popup_icon_wh,
+		h = popup_icon_wh,
+		bgImg = popupBox,
+--		position = LAYOUT_NONE,
 		group = {
+--			padding = 10,
 			order = { 'icon' },
-			border = { 22, 22, 0, 0 },
-			padding = 0,
+--			border = { 22, 22, 0, 0 },
 			icon = {
 				w = WH_FILL,
 				h = WH_FILL,
 				align = 'center',
 			},
 		}
-	})
+	}
 
 	-- new style that incorporates text, icon, more text, and maybe a badge
 	s.toast_popup_mixed = {
@@ -3049,14 +3051,14 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	s.icon_popup_stop = _uses(_popupicon, {
-		img = _loadImage(self, "Icons/icon_popup_box_stop.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_stop.png"),
 	})
 	s.icon_popup_lineIn = _uses(_popupicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_linein_134.png"),
 	})
 
 	s.icon_popup_volume = {
-		img = _loadImage(self, "Icons/icon_popup_box_volume_bar.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_volume_bar.png"),
 		w = WH_FILL,
 		h = 90,
 		align = 'center',
@@ -3064,7 +3066,7 @@ function skin0(self, s, _, _, w, h)
 	}
 
 	s.icon_popup_mute = _uses(s.icon_popup_volume, {
-		img = _loadImage(self, "Icons/icon_popup_box_volume_mute.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_volume_mute.png"),
 	})
 
 	s.icon_popup_shuffle0 = _uses(_popupicon, {
@@ -3092,25 +3094,25 @@ function skin0(self, s, _, _, w, h)
         })
 
 	s.icon_popup_sleep_15 = {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_15.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_15.png"),
 		h = WH_FILL,
 		w = WH_FILL,
 		padding = { 24, 24, 0, 0 },
 	}
 	s.icon_popup_sleep_30 = _uses(s.icon_popup_sleep_15, {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_30.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_30.png"),
 	})
 	s.icon_popup_sleep_45 = _uses(s.icon_popup_sleep_15, {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_45.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_45.png"),
 	})
 	s.icon_popup_sleep_60 = _uses(s.icon_popup_sleep_15, {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_60.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_60.png"),
 	})
 	s.icon_popup_sleep_90 = _uses(s.icon_popup_sleep_15, {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_90.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_90.png"),
 	})
 	s.icon_popup_sleep_cancel = _uses(s.icon_popup_sleep_15, {
-		img = _loadImage(self, "Icons/icon_popup_box_sleep_off.png"),
+		img = _loadImage(self, CONTROLS_ICONS_PATH .. "/icon_popup_box_sleep_off.png"),
 		padding = { 24, 34, 0, 0 },
 	})
 
