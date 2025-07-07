@@ -4956,10 +4956,14 @@ function skin0(self, s, _, _, w, h)
 		-- center the text fields vertically
 		y_npartistgroup = (screenHeight - (scaledValues.TITLE_HEIGHT + 17 + controlHeight + progressBarHeight + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING) + scaledValues.NP_ARTISTALBUM_FONT_SIZE)) /2
 		y_npartistgroup = y_npartistgroup + scaledValues.TITLE_HEIGHT + 17
+		-- set padding to 0 so that left edge aligns with other fields
+		local visu_text_art_wide_nptitle_padding = table.clone(BASEnowplaying.nptitle.padding)
+		visu_text_art_wide_nptitle_padding[1] = 0
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		local BASEnowplaying_visu_text_art_wide = _NP_uses(BASEnowplaying, {
 			nptitle = {
 				x = npX,
+				padding = visu_text_art_wide_nptitle_padding,
 				nptrack = {
 					w = screenRem - 80 - 10,
 					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE),
