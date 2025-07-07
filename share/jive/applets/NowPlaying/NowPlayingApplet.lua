@@ -1962,6 +1962,7 @@ function _createUI(self)
 		end
 
 	local hasArtistAlbum = jiveMain:getSkinParam("NOWPLAYING_TRACKINFO_LINES") == 2
+	hasArtistAlbum = hasArtistAlbum or self:getSelectedStyleParam('hasArtistAlbum')
 
 	if hasArtistAlbum then
 		self.artistalbumTitle.textStopCallback =

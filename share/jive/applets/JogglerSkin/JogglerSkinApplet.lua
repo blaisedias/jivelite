@@ -340,6 +340,7 @@ function param(self)
 					artworkSize = midArtwork,
 					localPlayerOnly = 1,
 					text = self:string("SPECTRUM_ANALYZER"),
+					hasArtistAlbum = true,
 				}
 			},
 			{
@@ -397,6 +398,7 @@ function param(self)
 					artworkSize = midArtwork,
 					localPlayerOnly = 1,
 					text = self:string("VU_METER_TEXT"),
+					hasArtistAlbum = true,
 				}
 			},
 			{
