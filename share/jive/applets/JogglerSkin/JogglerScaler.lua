@@ -494,6 +494,20 @@ function scaleControlsImages(params)
                 { src="shuffle-album.png", dest="icon_popup_box_shuffle_album.png"},
                 { src="shuffle-disabled.png", dest="icon_popup_box_shuffle_off.png"},
                 { src="shuffle.png", dest="icon_popup_box_shuffle.png"},
+
+                { src="alarm.png", dest="icon_popup_box_alarm.png"},
+                { src="playlist-plus.png", dest="icon_popup_box_mode_playlist.png"},
+                { src="power.png", dest="icon_popup_box_power.png"},
+                { src="skip-limit.png", dest="icon_popup_box_skip_limit.png"},
+                { src="sleep15.png", dest="icon_popup_box_sleep_15.png"},
+                { src="sleep30.png", dest="icon_popup_box_sleep_30.png"},
+                { src="sleep45.png", dest="icon_popup_box_sleep_45.png"},
+                { src="sleep60.png", dest="icon_popup_box_sleep_60.png"},
+                { src="sleep90.png", dest="icon_popup_box_sleep_90.png"},
+                { src="sleep-off.png", dest="icon_popup_box_sleep_off.png"},
+                { src="stop-circle.png", dest="icon_popup_box_stop.png"},
+                { src="volume-high.png", dest="icon_popup_box_volume_bar.png"},
+                { src="volume-mute.png", dest="icon_popup_box_volume_mute.png"},
             },
         },
         {
@@ -693,7 +707,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.7,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenWidth * 0.20)),
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenWidth / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -709,7 +723,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -727,7 +741,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
                     NP_LINE_SPACING = 1.9,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                    CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
                         imgPath = jogglerImgpath .. thumbSize .. "/",
@@ -741,7 +755,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 FIVE_ITEM_HEIGHT=fiveItemHeight,
                 NP_LINE_SPACING = 1.6,
                 CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight * 0.20)),
+                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                 TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                 state = {
                     imgPath = jogglerImgpath .. thumbSize .. "/",
