@@ -566,7 +566,7 @@ function scaleControlsImages(params)
         }
     local tbl_titlebutton_pressed = {
             -- title button pressed background
-            dim = { w=math.ceil(params.TITLEBUTTONS_DIMENSIONS), h=params.TITLE_HEIGHT - 12 },
+            dim = { w=math.ceil(params.TITLE_BUTTON_WIDTH), h=params.TITLE_HEIGHT - 12 },
             imgs = {
                 { src="title_button_press.png", dest="title_button_press.png"}
             },
@@ -884,6 +884,9 @@ function getJogglerSkinParams(skinName)
 --    params.TITLE_BUTTON_WIDTH = 76
 --    params.TITLE_BUTTON_WIDTH = params.TITLE_HEIGHT
     params.TITLE_BUTTON_WIDTH = params.TITLEBUTTONS_DIMENSIONS
+    if params.TITLE_BUTTON_WIDTH < params.TITLE_HEIGHT then
+        params.TITLE_BUTTON_WIDTH = params.TITLE_BUTTON_WIDTH + math.floor((params.TITLE_HEIGHT-params.TITLE_BUTTON_WIDTH)/2)
+    end
 
     params.AUDIO_METADATA_FONT_HEIGHT = scaleTextValue(14)
 
