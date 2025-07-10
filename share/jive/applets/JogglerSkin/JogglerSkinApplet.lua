@@ -3814,13 +3814,14 @@ function skin0(self, s, _, _, w, h)
 			order = { 'nptrack' },
 			position = LAYOUT_NONE,
 			border = { 0, 0 ,0, 0 },
-			x = 60,
+			x = scaledValues.TITLE_BUTTON_WIDTH + 16,
 			y = 0,
 			h = scaledValues.TITLE_HEIGHT,
+			w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 			padding = { 20, 0, 20, 0 },
 			nptrack = {
 				align = "center",
-				w          = screenWidth - 140,
+				w          = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				h          = WH_FILL,
 				fg         = scaledValues.NP_TITLE_COLOR,
 				_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
@@ -4175,9 +4176,9 @@ function skin0(self, s, _, _, w, h)
 
 		npvisu = { hidden = 1 },
 		npaudiometadata = {
-            x = 10,
+			x = 10,
 			y = screenHeight - scaledValues.AUDIO_METADATA_H - 5,
-            w = screenWidth - 10,
+			w = screenWidth - 10,
 			align = "right"
 		},
 	}
@@ -4186,34 +4187,34 @@ function skin0(self, s, _, _, w, h)
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
 	_NP_def = {
-		nptitle          = {
-                        x          = 40,
-                        y          = scaledValues.TITLE_HEIGHT + 50,
-                        nptrack =  {
-                                w          = screenWidth - 65,
-                                align      = "center",
-                        },
+		nptitle = {
+			x = 40,
+			y = scaledValues.TITLE_HEIGHT + 50,
+			w = screenWidth - 65,
+			nptrack =  {
+				x = 40,
+				w = screenWidth - 65,
+				align = "center",
+			},
 		},
-		npartistgroup    = {
-                        x          = 40,
-                        y          = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING + 5),
-                        npartist =  {
-                                w          = screenWidth - 65,
-                                align      = "center",
-                        },
+		npartistgroup = {
+			x = 40,
+			y = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING + 5),
+			npartist = {
+				w = screenWidth - 65,
+				align = "center",
+			},
 		},
-		npalbumgroup     = {
-                        x          = 40,
-                        y          = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
-                        npalbum =  {
-                                w          = screenWidth - 65,
-                                align      = "center",
-                        },
+		npalbumgroup = {
+			x = 40,
+			y = scaledValues.TITLE_HEIGHT + 50 + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING),
+			npalbum = {
+				w = screenWidth - 65,
+				align = "center",
+			},
 		},
 		npartwork = { hidden = 1 },
-
 		npvisu = { hidden = 1 },
-
 		npprogress = {
 			position = LAYOUT_NONE,
 			x = 50,
@@ -4266,7 +4267,7 @@ function skin0(self, s, _, _, w, h)
 			},
 		},
 		npprogressNB = {
-			x = 50 + screenWidth - 2*50 - 2*60,
+			x = 50,
 			y = screenHeight - controlHeight - progressBarHeight,
 			w = screenWidth - 2*50,
 			padding = { 0, 0, 0, 0 },
@@ -4315,15 +4316,16 @@ function skin0(self, s, _, _, w, h)
 			nptitle = {
 				zOrder = 2,
 				position = LAYOUT_NONE,
-				x = 80,
+				x = scaledValues.TITLE_BUTTON_WIDTH + 16,
 				y = 0,
+				w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 	--			padding = { 20, 14, 5, 5 },
 				padding = { 20, 0, 20, 0 },
 				nptrack = {
 					align = "center",
-					w = screenWidth - 196,
+					w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				},
 			},
 			npartistalbum = {
@@ -4590,14 +4592,15 @@ function skin0(self, s, _, _, w, h)
 			nptitle = {
 				zOrder = 2,
 				position = LAYOUT_NONE,
-				x = 80,
+				x = scaledValues.TITLE_BUTTON_WIDTH + 16,
 				y = 0,
+				w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 				padding = { 20, 0, 20, 0 },
 				nptrack = {
 					align = "center",
-					w = screenWidth - 196,
+					w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				},
 			},
 
@@ -4844,14 +4847,15 @@ function skin0(self, s, _, _, w, h)
 			nptitle = {
 				zOrder = 2,
 				position = LAYOUT_NONE,
-				x = 80,
+				x = scaledValues.TITLE_BUTTON_WIDTH + 16,
 				y = 0,
+				w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				h = scaledValues.TITLE_HEIGHT,
 				border = { 0, 0 ,0, 0 },
 				padding = { 20, 0, 20, 0 },
 				nptrack = {
 					align = "center",
-					w = screenWidth - 196,
+					w = screenWidth - 2*(scaledValues.TITLE_BUTTON_WIDTH + 16),
 				},
 			},
 
