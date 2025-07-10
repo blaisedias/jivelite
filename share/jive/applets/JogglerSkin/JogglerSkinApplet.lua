@@ -4186,7 +4186,7 @@ function skin0(self, s, _, _, w, h)
 	s.nowplaying_art_only = _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_art_only')
 	s.nowplaying_art_only.pressed = s.nowplaying_art_only
 
-	_NP_def = {
+	local BASEnowplaying_text_only = _NP_uses( BASEnowplaying, {
 		nptitle = {
 			x = 40,
 			y = scaledValues.TITLE_HEIGHT + 50,
@@ -4279,9 +4279,9 @@ function skin0(self, s, _, _, w, h)
 			w = screenWidth - 2*50 - 2*60,
 			align = "center"
 		},
-	}
+	})
 
-	s.nowplaying_text_only = _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_text_only')
+	s.nowplaying_text_only = _NP_uses(BASEnowplaying_text_only, {}, 'nowplaying_text_only')
 	s.nowplaying_text_only.npprogress.npprogressB_disabled = _uses(s.nowplaying_text_only.npprogress.npprogressB, {
 		img = _songProgressBarDisabled,
 	})
@@ -5129,6 +5129,18 @@ function skin0(self, s, _, _, w, h)
 			img = _songProgressBarDisabled,
 		})
 
+		_NP_def = {
+			nptitle = {
+				y = scaledValues.TITLE_HEIGHT
+			},
+			npartistgroup = {
+				y = scaledValues.TITLE_HEIGHT +  math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING),
+			},
+			npalbumgroup = {
+				y =  scaledValues.TITLE_HEIGHT + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING)
+			},
+		}
+		s.nowplaying_text_only = _NP_uses(BASEnowplaying_text_only, _NP_def, 'nowplaying_text_only')
 	end
 
 	if portraitMode then

@@ -245,18 +245,18 @@ function scaleNPTextValue(v)
         -- default to scaling of 1
         npTextScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleAndCustomise") and screenHeight > 480 then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             -- landscape
             if screenWidth > screenHeight then
-                if screenHeight >= 480 then
+--                if screenHeight >= 480 then
                     npTextScaleFactor = screenHeight / 480
-                else
-                    if screenWidth/screenHeight >= 3 then
-                        npTextScaleFactor = 1
-                    else
-                        npTextScaleFactor =  math.max(screenHeight/480, 0.8)
-                    end
-                end
+--                else
+--                    if screenWidth/screenHeight >= 3 then
+--                        npTextScaleFactor = 1
+--                    else
+--                        npTextScaleFactor =  math.max(screenHeight/480, 0.8)
+--                    end
+--                end
             end
             -- portrait
 --            for now only explicitly support portrait mode 720x1280
@@ -734,12 +734,12 @@ local function _getJogglerCoreParams(skinName, skinValues)
        elseif screenHeight < 480 then
             local thumbSize = scaleThumbsizeValue(BASE_ICON_SIZE)
             skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
-            if screenWidth/screenHeight >= 3 then
+--            if screenWidth/screenHeight >= 3 then
                 return {
                     THUMB_SIZE=thumbSize,
                     POPUP_THUMB_SIZE=popupThumbSize,
                     FIVE_ITEM_HEIGHT=fiveItemHeight,
-                    NP_LINE_SPACING = 1.9,
+                    NP_LINE_SPACING = 1.9 * screenHeight/480,
                     CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
@@ -748,20 +748,20 @@ local function _getJogglerCoreParams(skinName, skinValues)
                         scalingRequired=true
                     }
                 }
-            end
-            return {
-                THUMB_SIZE=thumbSize,
-                POPUP_THUMB_SIZE=popupThumbSize,
-                FIVE_ITEM_HEIGHT=fiveItemHeight,
-                NP_LINE_SPACING = 1.6,
-                CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
-                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
-                TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
-                state = {
-                    imgPath = jogglerImgpath .. thumbSize .. "/",
-                    scalingRequired=true
-                }
-            }
+--            end
+--            return {
+--                THUMB_SIZE=thumbSize,
+--                POPUP_THUMB_SIZE=popupThumbSize,
+--                FIVE_ITEM_HEIGHT=fiveItemHeight,
+--                NP_LINE_SPACING = 1.6,
+--                CONTROLS_DIMENSIONS = scaleControlsImageValue(70),
+--                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
+--                TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
+--                state = {
+--                    imgPath = jogglerImgpath .. thumbSize .. "/",
+--                    scalingRequired=true
+--                }
+--            }
         end
     end
 
