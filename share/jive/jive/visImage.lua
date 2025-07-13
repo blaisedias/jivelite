@@ -1356,6 +1356,7 @@ function getVuImage(_,w,h)
 --		__vuBump()
 --	end
 	local entry = vuImages[vuImageIndex]
+	log:debug("getVuImage ", entry.displayName, " ", entry.vutype)
 
 	if visSettings.cacheEnabled == false and vuImageIndex ~= prevVuImageIndex then
 		imCacheClear()
