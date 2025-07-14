@@ -225,6 +225,10 @@ function scaleTextValue(v)
             -- landscape
             if screenWidth >= screenHeight then
                 textScaleFactor = screenHeight / 480
+                if screenHeight < 480 and screenWidth/screenHeight >= 3 then
+                    -- exception for ultra wide screens
+                    textScaleFactor = 1
+                end
             else
                 -- portrait
                 textScaleFactor = (screenHeight/480) * 0.64
@@ -300,17 +304,17 @@ local function scaleControlsImageValue(v)
         controlsScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
---            -- By default do not scale controls down
---            if screenHeight >= 480 then
-                -- landscape
-                if screenWidth >= screenHeight then
-                    controlsScaleFactor = screenHeight / 480
+            -- landscape
+            if screenWidth >= screenHeight then
+                controlsScaleFactor = screenHeight / 480
+                if screenHeight < 480 and screenWidth/screenHeight >= 3 then
+                    -- exception for ultra wide screens
+                    controlsScaleFactor = 1
                 end
-                -- portrait
-                if screenWidth < screenHeight then
-                    controlsScaleFactor = (screenWidth / 800) * 1.6666666666666665
-                end
---            end
+            else
+            -- portrait
+                controlsScaleFactor = (screenWidth / 800) * 1.6666666666666665
+            end
         end
     end
     return math.floor(controlsScaleFactor * v)
