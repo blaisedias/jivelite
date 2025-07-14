@@ -293,7 +293,8 @@ function param(self)
 	local maxArtwork = tostring(screenHeight) .. 'x' .. tostring(screenHeight)
 	local midArtwork = tostring(scaledValues.midArtworkSize) .. 'x' .. tostring(scaledValues.midArtworkSize)
 	local screenAR = screenWidth/screenHeight
-	local portraitMode = screenWidth == 720 and screenHeight == 1280
+--	local portraitMode = screenWidth == 720 and screenHeight == 1280
+	local portraitMode = screenWidth < screenHeight
 
 	local npstyles = {
 			{
@@ -3356,7 +3357,7 @@ function skin0(self, s, _, _, w, h)
 
 	local controlHeight = scaledValues.CONTROLS_DIMENSIONS
 	local controlWidth = scaledValues.CONTROLS_DIMENSIONS
-	local progressBarHeight = 30
+	local progressBarHeight = scaledValues.PROGRESS_BAR_HEIGHT
 	-- screenWidth - (transport controls + volume controls + dividers + border around volume bar)
 	-- with screenWidth == 800 the value is 240,
 	-- however volumeBarWidth is adjusted upwards if space permits, so this is the minimum value
@@ -3491,7 +3492,7 @@ function skin0(self, s, _, _, w, h)
 	volumeBarWidth = volumeBarWidth - volumeBarWidthFudge
 
 	local y_nptitle = scaledValues.TITLE_HEIGHT + 17
-	local y_npartistgroup = y_nptitle + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING + 5)
+	local y_npartistgroup = y_nptitle + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + 5
 
 	if screenAR >= 3 then
 		-- simplify layout avoid overlaying UI elements
@@ -3541,7 +3542,7 @@ function skin0(self, s, _, _, w, h)
 				w          = screenWidth - _tracklayout.x - 10,
 				h          = WH_FILL,
 				align      = _tracklayout.align,
-				lineHeight = _tracklayout.lineHeight - 5,
+				lineHeight = _tracklayout.lineHeight,
 				fg         = scaledValues.NP_TITLE_COLOR,
 				_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
 				sh = scaledValues.TEXT_SH_COLOR,
@@ -5147,12 +5148,16 @@ function skin0(self, s, _, _, w, h)
 		npX = 30
 		local portraitArtworkWidth = scaledValues.midArtworkSize
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
-		local y_artwork = scaledValues.TITLE_HEIGHT + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING) + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2) + 41
+		local y_artwork = scaledValues.TITLE_HEIGHT
+                            + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING)
+                            + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2)
+                            + scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
 		mini_visu_X = npX
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
-		mini_visu_Y = y_artwork + portraitArtworkWidth + 22
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H
+		mini_visu_Y = y_artwork + portraitArtworkWidth + scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
+                        - scaledValues.AUDIO_METADATA_H - scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 		local AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_FONT_HEIGHT
@@ -5763,7 +5768,8 @@ function init(self)
 
 
 	local screenWidth, screenHeight = Framework:getScreenSize()
-	local portraitMode = screenWidth == 720 and screenHeight == 1280
+--	local portraitMode = screenWidth == 720 and screenHeight == 1280
+	local portraitMode = screenWidth < screenHeight
 	if screenWidth / screenHeight < 3 and portraitMode == false then
 		jiveMain:addItem({
 			id = "npShowXofY",
