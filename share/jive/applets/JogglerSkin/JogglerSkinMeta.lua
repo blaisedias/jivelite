@@ -77,6 +77,7 @@ function registerApplet(self)
 		if screen_width > 300 and screen_height > 200 and screen_width/screen_height >= 1.2 then
 			jiveMain:registerSkin(tostring(self:string("JOGGLER_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "JogglerSkin", "skinCustom", "JogglerSkin_Custom")
 		elseif screen_width > 0 or screen_height > 0 then
+			jiveMain:registerSkin(tostring(self:string("JOGGLER_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "JogglerSkin", "skinCustom", "JogglerSkin_Custom")
 			log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
 		end
 	end

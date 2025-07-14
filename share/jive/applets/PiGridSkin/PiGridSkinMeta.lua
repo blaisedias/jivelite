@@ -61,6 +61,7 @@ function registerApplet(self)
 			jiveMain:registerSkin(tostring(self:string("PIGRID_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "PiGridSkin", "skinCustom", "PiGridSkin_Custom")
 		elseif screen_width > 0 or screen_height > 0 then
 			log:warn("Custom screen size ratio (width/height) must be >= 1.2, is " .. tostring(screen_width/screen_height))
+			jiveMain:registerSkin(tostring(self:string("PIGRID_SKIN_CUSTOM")) .. " (" .. tostring(screen_width) .. "x" .. tostring(screen_height) .. ")", "PiGridSkin", "skinCustom", "PiGridSkin_Custom")
 		end
 	else
 		jiveMain:registerSkin(self:string("PIGRID_SKIN_NORES"), "PiGridSkin", "skin", "PiGridSkin")

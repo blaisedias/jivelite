@@ -221,18 +221,13 @@ function scaleTextValue(v)
         -- default to scaling of 1
         textScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
-        if Framework:getGlobalSetting("jogglerScaleAndCustomise") and screenHeight > 480 then
+        if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             -- landscape
-            if screenWidth > screenHeight then
+            if screenWidth >= screenHeight then
                 textScaleFactor = screenHeight / 480
-            end
-            -- portrait
---            if screenWidth < screenHeight then
---                textScaleFactor = screenWidth / 800
---            end
---            for now only explicitly support portrait mode 720x1280
-            if screenWidth == 720 and screenHeight == 1280 then
-                textScaleFactor = 1.7
+            else
+                -- portrait
+                textScaleFactor = (screenHeight/480) * 0.64
             end
         end
     end
@@ -247,21 +242,11 @@ function scaleNPTextValue(v)
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             -- landscape
-            if screenWidth > screenHeight then
---                if screenHeight >= 480 then
-                    npTextScaleFactor = screenHeight / 480
---                else
---                    if screenWidth/screenHeight >= 3 then
---                        npTextScaleFactor = 1
---                    else
---                        npTextScaleFactor =  math.max(screenHeight/480, 0.8)
---                    end
---                end
-            end
-            -- portrait
---            for now only explicitly support portrait mode 720x1280
-            if screenWidth == 720 and screenHeight == 1280 then
-                npTextScaleFactor = 1.4
+            if screenWidth >= screenHeight then
+                npTextScaleFactor = screenHeight / 480
+            else
+                -- portrait
+                npTextScaleFactor = (screenHeight/480) * 0.53
             end
         end
     end
@@ -297,15 +282,10 @@ function scaleThumbsizeValue(v)
         if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
             local screenWidth, screenHeight = Framework:getScreenSize()
             -- landscape
-            if screenWidth > screenHeight then
+            if screenWidth >= screenHeight then
                 thumbnailScaleFactor = screenHeight / 480
-            end
-            -- portrait
---            if screenWidth < screenHeight then
---                thumbnailScaleFactor = screenWidth / 800
---            end
---            for now only explicitly support portrait mode 720x1280
-            if screenWidth == 720 and screenHeight == 1280 then
+            else
+                -- portrait
                 thumbnailScaleFactor = screenWidth / 480
             end
         end
@@ -320,17 +300,17 @@ local function scaleControlsImageValue(v)
         controlsScaleFactor = 1
         local screenWidth, screenHeight = Framework:getScreenSize()
         if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
-            -- By default do not scale controls down
-            if screenHeight >= 480 then
+--            -- By default do not scale controls down
+--            if screenHeight >= 480 then
                 -- landscape
-                if screenWidth > screenHeight then
+                if screenWidth >= screenHeight then
                     controlsScaleFactor = screenHeight / 480
                 end
                 -- portrait
                 if screenWidth < screenHeight then
                     controlsScaleFactor = (screenWidth / 800) * 1.6666666666666665
                 end
-            end
+--            end
         end
     end
     return math.floor(controlsScaleFactor * v)
@@ -950,6 +930,9 @@ function getJogglerSkinParams(skinName)
     params.controlsScaleFactor = controlsScaleFactor
     params.titlebuttonsScaleFactor = titlebuttonsScaleFactor
 
+    params.NP_PORTRAIT_GRAPHICS_SPACING = math.floor(30 * (screenHeight/1280))
+    params.PROGRESS_BAR_HEIGHT = 30
+
     -- after scaling update params values from json - if they exist
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
         if jsonData and jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin then
@@ -962,9 +945,16 @@ function getJogglerSkinParams(skinName)
 
     params.state.hiddenControlHeight = math.floor(params.TITLE_HEIGHT/2.5)
     if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
-        if screenWidth == 720 and screenHeight == 1280 then
+        if screenHeight > screenWidth then
             -- portrait mode
-            params.midArtworkSize = math.floor(screenWidth/20) * 11
+            local _top = params.TITLE_HEIGHT
+                        + math.floor(params.NP_TRACK_FONT_SIZE * params.NP_LINE_SPACING)
+                        + math.floor(params.NP_ARTISTALBUM_FONT_SIZE * params.NP_LINE_SPACING *2)
+            local _bottom = params.CONTROLS_DIMENSIONS + params.AUDIO_METADATA_FONT_HEIGHT + params.PROGRESS_BAR_HEIGHT
+            local _spacing = 3 * params.NP_PORTRAIT_GRAPHICS_SPACING
+            -- This calculation is off when controls are hidden - but deemed acceptable,
+            -- to solve a chicken first? egg first? problem
+            params.midArtworkSize =  math.floor((screenHeight - _top - _bottom - _spacing)/2)
         elseif screenWidth/screenHeight >= 3 then
             params.midArtworkSize = screenHeight
         else
