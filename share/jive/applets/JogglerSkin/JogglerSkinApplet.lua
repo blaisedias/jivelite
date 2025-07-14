@@ -3536,7 +3536,7 @@ function skin0(self, s, _, _, w, h)
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
 			y          = y_nptitle,
-			h          = scaledValues.NP_TRACK_FONT_SIZE,
+			h          = math.floor(scaledValues.NP_TRACK_FONT_SIZE * 1.5),
 			nptrack =  {
 				w          = screenWidth - _tracklayout.x - 10,
 				h          = WH_FILL,
@@ -3554,7 +3554,7 @@ function skin0(self, s, _, _, w, h)
 			border     = _tracklayout.border,
 			x          = _tracklayout.x,
 			y          = y_npartistgroup,
-			h          = math.floor(scaledValues.NP_TRACK_FONT_SIZE * 1.5),
+			h          = math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * 1.5),
 			npartist = {
 				padding    = { 0, 6, 0, 0 },
 				w          = screenWidth - _tracklayout.x - 10,
