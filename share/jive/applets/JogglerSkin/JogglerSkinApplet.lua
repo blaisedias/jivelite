@@ -1153,9 +1153,9 @@ function skin0(self, s, _, _, w, h)
 	if Framework:getGlobalSetting("jogglerDebugColouriseNPFields") == true then
 		-- for visual debugging
 		titleBackground         = Tile:fillColor(0xffffff30)
-		npTitleBackground       = Tile:fillColor(0xff000030)
+		npTitleBackground       = Tile:fillColor(0xff000060)
 		npArtistBackground      = Tile:fillColor(0x00ff0030)
-		npAlbumBackground       = Tile:fillColor(0x0000ff30)
+		npAlbumBackground       = Tile:fillColor(0x0000ff60)
 		npArtistAlbumBackground = Tile:fillColor(0xffff0030)
 		npAudioMetadataBackground = Tile:fillColor(0xff00ff30)
 		npProgressBackground = Tile:fillColor(0x00ffff30)
