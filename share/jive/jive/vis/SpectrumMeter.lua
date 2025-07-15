@@ -117,12 +117,14 @@ function _layout(self)
 		self.isMono,
 
 		self.channelWidth[1],
-		self.spparms.channelFlipped[1],
+--		self.spparms.channelFlipped[1],
+		0,
 		barSize[1],
 		self.clipSubbands[1],
 
 		self.channelWidth[2],
-		self.spparms.channelFlipped[2],
+--		self.spparms.channelFlipped[2],
+		0,
 		barSize[2],
 		self.clipSubbands[2]
 	)
@@ -205,6 +207,7 @@ function _layout(self)
 	self.left.adjustedHeight = self.left.h - self.left.yoffset_controls
 	self.left.adjustedY = self.left.y - self.left.yoffset_controls
 	self.left.barHeightMulti = barHeight / 31
+	self.left.flip = 0 ~= self.spparms.channelFlipped[1]
 	self.left.cap = {}
 	for i = 1, numBars[1] do
 		self.left.cap[i] = 0
@@ -214,6 +217,7 @@ function _layout(self)
 	self.left.totalCapHeight = self.left.capHeight + self.left.capSpace
 
 	self.right = table.clone(self.left)
+	self.right.flip = 0 ~= self.spparms.channelFlipped[2]
 
 	self.left.x = x + l + self.channelWidth[1] - numBars[1] * barSize[1] + 2
 
@@ -256,9 +260,17 @@ local function _drawBins(surface, bch, params)
 	local xLeft
 	local yTop
 	local imgXLeft, imgY
-	local dy, yA, yB
+	local yA, yB
 
-	for i = 1, #bch do
+	local cStart = 1
+	local cEnd = #bch
+	local cInc = 1
+	if params.flip then
+		cStart = #bch
+		cEnd = 1
+		cInc = -1
+	end
+	for i = cStart, cEnd, cInc do
 		bch[i] = math.ceil(bch[i] * barHeightMulti)
 
 		if cch[i] > 0 then
