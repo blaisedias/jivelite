@@ -951,14 +951,14 @@ function getJogglerSkinParams(skinName)
     if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
         if screenHeight > screenWidth then
             -- portrait mode
-            local _top = params.TITLE_HEIGHT
+            local _top = params.TITLE_HEIGHT + 18
                         + math.floor(params.NP_TRACK_FONT_SIZE * params.NP_LINE_SPACING)
                         + math.floor(params.NP_ARTISTALBUM_FONT_SIZE * params.NP_LINE_SPACING *2)
-            local _bottom = params.CONTROLS_DIMENSIONS + params.AUDIO_METADATA_FONT_HEIGHT + params.PROGRESS_BAR_HEIGHT
+            local _bottom = params.CONTROLS_DIMENSIONS + params.PROGRESS_BAR_HEIGHT
             local _spacing = 3 * params.NP_PORTRAIT_GRAPHICS_SPACING
             -- This calculation is off when controls are hidden - but deemed acceptable,
             -- to solve a chicken first? egg first? problem
-            params.midArtworkSize =  math.floor((screenHeight - _top - _bottom - _spacing)/2)
+            params.midArtworkSize =  math.ceil((screenHeight - _top - _bottom - _spacing)/2)
         elseif screenWidth/screenHeight >= 3 then
             params.midArtworkSize = screenHeight
         else

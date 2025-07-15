@@ -5148,7 +5148,7 @@ function skin0(self, s, _, _, w, h)
 		npX = 30
 		local portraitArtworkWidth = scaledValues.midArtworkSize
 		local x_artwork = (screenWidth - portraitArtworkWidth)/2
-		local y_artwork = scaledValues.TITLE_HEIGHT
+		local y_artwork = scaledValues.TITLE_HEIGHT + 18
                             + math.floor(scaledValues.NP_TRACK_FONT_SIZE * scaledValues.NP_LINE_SPACING)
                             + math.floor(scaledValues.NP_ARTISTALBUM_FONT_SIZE * scaledValues.NP_LINE_SPACING * 2)
                             + scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
@@ -5156,8 +5156,7 @@ function skin0(self, s, _, _, w, h)
 		mini_visu_W = screenWidth - (npX * 2)
 		local tw = screenWidth - (npX * 2)
 		mini_visu_Y = y_artwork + portraitArtworkWidth + scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
-		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight
-                        - scaledValues.AUDIO_METADATA_H - scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
+		mini_visu_H = screenHeight - mini_visu_Y - controlHeight - progressBarHeight - scaledValues.NP_PORTRAIT_GRAPHICS_SPACING
 		mini_visu_Y = math.floor(mini_visu_Y)
 		mini_visu_H = math.floor(mini_visu_H)
 		local AUDIO_METADATA_Y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_FONT_HEIGHT
