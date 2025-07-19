@@ -90,25 +90,25 @@ local defaultEnabledStyles = {
 	'nowplaying_vumeter_text',
 }
 
-local npVumeterStyles = {
-	"nowplaying_vumeter_text",
-	"nowplaying_minivumeter_text",
-	"nowplaying_vumeter_text_art",
-	"nowplaying_vumeter_large_art",
-	"nowplaying_vumeter_only",
-	"nowplaying_vumeter_fullscreen",
-	"nowplaying_large_vumeter",
-}
-
-local npSpectrumStyles = {
-	"nowplaying_spectrum_text",
-	"nowplaying_minispectrum_text",
-	"nowplaying_spectrum_text_art",
-	"nowplaying_spectrum_large_art",
-	"nowplaying_spectrum_only",
-	"nowplaying_spectrum_fullscreen",
-	"nowplaying_large_spectrum",
-}
+--local npVumeterStyles = {
+--	"nowplaying_vumeter_text",
+--	"nowplaying_minivumeter_text",
+--	"nowplaying_vumeter_text_art",
+--	"nowplaying_vumeter_large_art",
+--	"nowplaying_vumeter_only",
+--	"nowplaying_vumeter_fullscreen",
+--	"nowplaying_large_vumeter",
+--}
+--
+--local npSpectrumStyles = {
+--	"nowplaying_spectrum_text",
+--	"nowplaying_minispectrum_text",
+--	"nowplaying_spectrum_text_art",
+--	"nowplaying_spectrum_large_art",
+--	"nowplaying_spectrum_only",
+--	"nowplaying_spectrum_fullscreen",
+--	"nowplaying_large_spectrum",
+--}
 
 ----------------------------------------------------------------------------------------
 -- Helper Functions
@@ -626,12 +626,18 @@ function invalidateWindow(self)
 end
 
 local function npStyleHasVuMeter(npstyle)
-	return table.contains(npVumeterStyles, npstyle)
+	local styl = jiveMain:getSkinStyle()[npstyle]
+	log:debug("npStyleHasVuMeter:",npstyle, " ", styl, " ", styl and styl.npvisu.hidden == 0 and styl.npvisu.vumeter_v2 ~= nil)
+	return styl and styl.npvisu and styl.npvisu.hidden == 0 and styl.npvisu.vumeter_v2 ~= nil
+--	return table.contains(npVumeterStyles, npstyle)
 end
 
 
 local function npStyleHasSpectrum(npstyle)
-	return table.contains(npSpectrumStyles, npstyle)
+	local styl = jiveMain:getSkinStyle()[npstyle]
+	log:debug("npStyleHasSpectrum:", npstyle, " ", styl, " ", styl and styl.npvisu.hidden == 0 and styl.npvisu.spectrum ~= nil)
+	return styl and styl.npvisu and styl.npvisu.hidden == 0 and styl.npvisu.spectrum ~= nil
+--	return table.contains(npSpectrumStyles, npstyle)
 end
 
 
