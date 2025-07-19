@@ -298,7 +298,7 @@ function param(self)
 
 	local npstyles = {
 			{
-				aspect_ratio_range = {min = 1},
+				aspect_ratio_range = {min = 1.2},
 				npstyle = {
 					style = 'nowplaying',
 					artworkSize = midArtwork,
@@ -345,8 +345,7 @@ function param(self)
 				}
 			},
 			{
-				-- available for all views
-				aspect_ratio_range = {min = 0},
+				aspect_ratio_range = {min = 1.2, portraitMode = true},
 				npstyle = {
 					style = 'nowplaying_spectrum_text_art',
 					artworkSize = midArtwork,
@@ -403,8 +402,7 @@ function param(self)
 				}
 			},
 			{
-				-- available for all views
-				aspect_ratio_range = {min = 0},
+				aspect_ratio_range = {min = 1.2, portraitMode = true},
 				npstyle = {
 					style = 'nowplaying_vumeter_text_art',
 					artworkSize = midArtwork,
@@ -454,7 +452,7 @@ function param(self)
 	-- every skin needs to start off with a nowplaying style
 	local npSS = {}
 	for _,v in pairs(npstyles) do
-		if screenAR > v.aspect_ratio_range.min then
+		if screenAR >= v.aspect_ratio_range.min or (portraitMode and v.aspect_ratio_range.portraitMode) then
 			if v.aspect_ratio_range.max == nil or screenAR < v.aspect_ratio_range.max then
 				table.insert(npSS, v.npstyle)
 			end
@@ -1146,6 +1144,7 @@ function skin0(self, s, _, _, w, h)
 	local npArtistAlbumBackground   = V_titleBox
 	local npAudioMetadataBackground = nil
 	local npProgressBackground      = nil
+	local npProgressTextBackground  = nil
 	local npvisuBackground          = nil
 	local npControlsBackground      = V_touchToolbarBackground
 	local npArtworkBackground       = nil
@@ -1158,7 +1157,8 @@ function skin0(self, s, _, _, w, h)
 		npAlbumBackground       = Tile:fillColor(0x0000ff60)
 		npArtistAlbumBackground = Tile:fillColor(0xffff0030)
 		npAudioMetadataBackground = Tile:fillColor(0xff00ff30)
-		npProgressBackground = Tile:fillColor(0x00ffff30)
+		npProgressBackground     = Tile:fillColor(0x00ffff30)
+		npProgressTextBackground = Tile:fillColor(0x00ffff60)
 		npvisuBackground        = Tile:fillColor(0x80808080)
 		npControlsBackground    = Tile:fillColor(0xffff0050)
 		npArtworkBackground     = Tile:fillColor(0xff000050)
@@ -3511,6 +3511,7 @@ function skin0(self, s, _, _, w, h)
 		y_nptitle = 0
 		y_npartistgroup = scaledValues.TITLE_HEIGHT + 17
 	end
+	local w_progress_text = math.ceil(scaledValues.NP_PROGRESS_FONT_SIZE * 3.3333333333333335)
 	local _NP_def = {
 		--title bar
 		title = _uses(s.title, {
@@ -3600,7 +3601,7 @@ function skin0(self, s, _, _, w, h)
 			fg = scaledValues.TEXT_COLOR,
 			sh = scaledValues.TEXT_SH_COLOR,
 			padding = { 5, 0, 0, 5 },
-			_font_size = 13,
+			_font_size = scaledValues.DEBUG_DATA_FONT_SIZE,
 		},
 
 		-- cover art
@@ -3731,39 +3732,43 @@ function skin0(self, s, _, _, w, h)
 			padding = { 0, 10, 0, 0 },
 			order = { "elapsed", "slider", "remain" },
 			elapsed = {
-				w = 60,
+				w = w_progress_text,
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
 				_font_size_bold = scaledValues.NP_PROGRESS_FONT_SIZE,
 				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
+				bgImg = npProgressTextBackground,
 			},
 			remain = {
-				w = 60,
+				w = w_progress_text,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
 				_font_size_bold = scaledValues.NP_PROGRESS_FONT_SIZE,
 				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
+				bgImg = npProgressTextBackground,
 			},
 			elapsedSmall = {
-				w = 60,
+				w = w_progress_text,
 				align = 'left',
 				padding = { 0, 0, 4, 0 },
 				_font_size_bold = scaledValues.NP_PROGRESS_SMALL_FONT_SIZE,
 				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
+				bgImg = npProgressTextBackground,
 			},
 			remainSmall = {
-				w = 60,
+				w = w_progress_text,
 				align = 'right',
 				padding = { 4, 0, 0, 0 },
 				_font_size_bold = scaledValues.NP_PROGRESS_SMALL_FONT_SIZE,
 				fg = scaledValues.NP_PROGRESS_TEXT_COLOR,
 				sh = scaledValues.TEXT_SH_COLOR,
+				bgImg = npProgressTextBackground,
 			},
 			npprogressB = {
-				w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
+				w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - (2 * w_progress_text),
 				h = progressBarHeight,
 				padding = { 0, 0, 0, 0 },
 			        position = LAYOUT_SOUTH,
@@ -3777,9 +3782,9 @@ function skin0(self, s, _, _, w, h)
 			hidden = 0,
 			zOrder = 2,
 			position = LAYOUT_NONE,
-			x = _tracklayout.x + 2 + 60,
+			x = _tracklayout.x + 2 + w_progress_text,
 			y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
-			w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - 120,
+			w = math.floor((screenWidth - _tracklayout.x - 13)/2)*2 - (2 * w_progress_text),
 			align = "center",
 			fg = scaledValues.NP_AUDIOMETADATA_COLOR,
 			sh = scaledValues.TEXT_SH_COLOR,
@@ -4010,13 +4015,13 @@ function skin0(self, s, _, _, w, h)
 			npprogress = {
 				x = npX,
 				elapsed = {
-					w = 60,
+					w = w_progress_text,
 				},
 				remain = {
-					w = 60,
+					w = w_progress_text,
 				},
 				npprogressB = {
-					w = screenWidth - npX - 2*60 - 15,
+					w = screenWidth - npX - (2 * w_progress_text) - 15,
 				},
 			},
 			npprogressNB = {
@@ -4024,9 +4029,9 @@ function skin0(self, s, _, _, w, h)
 				w = screenWidth - npX - 15,
 			},
 			npaudiometadata = {
-				x = npX + 60,
+				x = npX + w_progress_text,
 				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
-				w = screenWidth - npX - 2*60 - 15,
+				w = screenWidth - npX - (2 * w_progress_text) - 15,
 				align = "center"
 			},
 			npartwork = {
@@ -4222,7 +4227,7 @@ function skin0(self, s, _, _, w, h)
 			y = screenHeight - controlHeight - progressBarHeight,
 			padding = { 0, 10, 0, 0 },
 			elapsed = {
-				w = 60,
+				w = w_progress_text,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
@@ -4231,7 +4236,7 @@ function skin0(self, s, _, _, w, h)
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remain = {
-				w = 60,
+				w = w_progress_text,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
@@ -4240,7 +4245,7 @@ function skin0(self, s, _, _, w, h)
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			elapsedSmall = {
-				w = 60,
+				w = w_progress_text,
 				align = 'left',
 				padding = { 0, 0, 4, 20 },
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
@@ -4249,7 +4254,7 @@ function skin0(self, s, _, _, w, h)
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			remainSmall = {
-				w = 60,
+				w = w_progress_text,
 				align = 'right',
 				padding = { 4, 0, 0, 20 },
 				font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
@@ -4258,7 +4263,7 @@ function skin0(self, s, _, _, w, h)
 				sh = scaledValues.TEXT_SH_COLOR,
 			},
 			npprogressB = {
-				w = screenWidth - 2*50 - 2*60,
+				w = screenWidth - 2*50 - 2*w_progress_text,
 				h = progressBarHeight,
 				padding = { 0, 0, 0, 0 },
 		                position = LAYOUT_SOUTH,
@@ -4275,9 +4280,9 @@ function skin0(self, s, _, _, w, h)
 			position = LAYOUT_NONE,
 		},
 		npaudiometadata = {
-			x = 50 + 60,
+			x = 50 + w_progress_text,
 			y = screenHeight - controlHeight - progressBarHeight - scaledValues.AUDIO_METADATA_H,
-			w = screenWidth - 2*50 - 2*60,
+			w = screenWidth - 2*50 - 2*w_progress_text,
 			align = "center"
 		},
 	})
@@ -4352,7 +4357,7 @@ function skin0(self, s, _, _, w, h)
 				h = 30,
 				padding = { 0, 10, 0, 0 },
 				elapsed = {
-					w = 60,
+					w = w_progress_text,
 					align = 'left',
 					padding = { 0, 0, 4, 0 },
 					font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
@@ -4363,7 +4368,7 @@ function skin0(self, s, _, _, w, h)
 					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				remain = {
-					w = 60,
+					w = w_progress_text,
 					align = 'right',
 					padding = { 4, 0, 0, 0 },
 					font = _boldfont(scaledValues.NP_PROGRESS_FONT_SIZE),
@@ -4374,7 +4379,7 @@ function skin0(self, s, _, _, w, h)
 					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				elapsedSmall = {
-					w = 60,
+					w = w_progress_text,
 					align = 'left',
 					padding = { 0, 0, 4, 0 },
 					font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
@@ -4385,7 +4390,7 @@ function skin0(self, s, _, _, w, h)
 					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				remainSmall = {
-					w = 60,
+					w = w_progress_text,
 					align = 'right',
 					padding = { 4, 0, 0, 0 },
 					font = _boldfont(scaledValues.NP_PROGRESS_SMALL_FONT_SIZE),
@@ -4396,7 +4401,7 @@ function skin0(self, s, _, _, w, h)
 					sh = scaledValues.TEXT_SH_COLOR,
 				},
 				npprogressB = {
-					w = screenWidth - 2*50 - 2*60,
+					w = screenWidth - 2*50 - 2*w_progress_text,
 					h = 30,
 					padding = { 0, 0, 0, 0 },
 					position = LAYOUT_SOUTH,
@@ -4414,9 +4419,9 @@ function skin0(self, s, _, _, w, h)
 				position = LAYOUT_SOUTH,
 			},
 			npaudiometadata = {
-				x = 50 + 60,
+				x = 50 + w_progress_text,
 				y = screenHeight - (100 + controlHeight - 70) - scaledValues.AUDIO_METADATA_H + 10,
-				w = screenWidth - 2*50 - 2*60,
+				w = screenWidth - 2*50 - 2*w_progress_text,
 				align = "center",
 			},
 		})
@@ -5000,13 +5005,13 @@ function skin0(self, s, _, _, w, h)
 			npprogress = {
 				x = npX,
 				elapsed = {
-					w = 60,
+					w = w_progress_text,
 				},
 				remain = {
-					w = 60,
+					w = w_progress_text,
 				},
 				npprogressB = {
-					w = tw - 120,
+					w = tw - 2 * w_progress_text,
 				},
 			},
 			npprogressNB = {
@@ -5028,9 +5033,9 @@ function skin0(self, s, _, _, w, h)
 				},
 			},
 			npaudiometadata = {
-				x = npX + 60,
+				x = npX + w_progress_text,
 				y = screenHeight - controlHeight - 18 - scaledValues.AUDIO_METADATA_H,
-				w = tw - 120,
+				w = tw - 2 * w_progress_text,
 				align = "center"
 			},
 		})
@@ -5209,13 +5214,13 @@ function skin0(self, s, _, _, w, h)
 			npprogress = {
 				x = npX,
 				elapsed = {
-					w = 60,
+					w = w_progress_text,
 				},
 				remain = {
-					w = 60,
+					w = w_progress_text,
 				},
 				npprogressB = {
-					w = tw - 120,
+					w = tw - 2 * w_progress_text,
 				},
 			},
 			npprogressNB = {
@@ -5237,9 +5242,9 @@ function skin0(self, s, _, _, w, h)
 				},
 			},
 			npaudiometadata = {
-				x = npX + 60,
+				x = npX + w_progress_text,
 				y = AUDIO_METADATA_Y,
-				w = tw - 120,
+				w = tw - 2 * w_progress_text,
 				align = "center",
 			},
 		})

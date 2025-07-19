@@ -913,19 +913,20 @@ function getJogglerSkinParams(skinName)
         end
     end
 
-    -- unscaled font sizes {
-    params.MENU_FONT_SIZE = 120
-    params.KEYBOARD_FONT_SIZE = 48
-    params.KEYBOARD_SMALL_FONT_SIZE = 36
-    params.INPUT_TIME_FONT_SIZE = 45
-    params.INPUT_TIME_SMALL_FONT_SIZE = 26
-    params.ALARM_TIME_FONT_SIZE = 62
-    params.SLIDER_POPUP_FONT_SIZE = 32
-    params.RBUTTON_FONT_SIZE = 14
-    params.NP_PROGRESS_FONT_SIZE = 18
-    params.NP_PROGRESS_SMALL_FONT_SIZE = 14
-    params.DEMO_FONT_SIZE = 18
-    -- } unscaled font sizes
+
+    params.MENU_FONT_SIZE = scaleTextValue(120)
+    params.KEYBOARD_FONT_SIZE = scaleTextValue(48)
+    params.KEYBOARD_SMALL_FONT_SIZE = scaleTextValue(36)
+    params.INPUT_TIME_FONT_SIZE = scaleTextValue(45)
+    params.INPUT_TIME_SMALL_FONT_SIZE = scaleTextValue(26)
+    params.ALARM_TIME_FONT_SIZE = scaleTextValue(62)
+    params.SLIDER_POPUP_FONT_SIZE = scaleTextValue(32)
+    params.RBUTTON_FONT_SIZE = scaleTextValue(14)
+    params.NP_PROGRESS_FONT_SIZE = scaleTextValue(18)
+    params.NP_PROGRESS_SMALL_FONT_SIZE = scaleTextValue(14)
+    params.DEMO_FONT_SIZE = scaleTextValue(18)
+    params.DEBUG_DATA_FONT_SIZE = scaleTextValue(13)
+
 
     params.textScaleFactor = textScaleFactor
     params.npTextScaleFactor = npTextScaleFactor
