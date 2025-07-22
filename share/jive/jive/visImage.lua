@@ -149,6 +149,16 @@ local function loadJsonFile(jsPath)
 	return jsonData
 end
 
+local function readMD5sum(path)
+	local content
+	local file = io.open(path .. ".md5sum")
+	if file ~= nil then
+		content = file:read "*line"
+		file:close()
+	end
+	return content
+end
+
 local function boolOsEnv(envName, defaultValue)
 	local tmp = os.getenv(envName)
 	log:info("boolOsEnv:", envName, " defaultValue:", defaultValue, " got:", tmp)
@@ -493,11 +503,28 @@ local function __addSpectrum(path, jsData)
 		bg="bg-" .. imgName,
 	}
 	propN["src_fg"] =  path .. "/" .. jsData.foreground
+	propN.fg_key =  propN.fg
+	propN.ds_key =  propN.ds
+	propN.bg_key =  propN.bg
+	local md5 = readMD5sum(propN["src_fg"])
+	if md5 ~= nil then
+		propN.fg_key = propN.fg .. '-' .. md5
+		propN.ds_key = propN.ds .. '-' .. md5
+		propN.bg_key = propN.bg .. '-' .. md5
+	end
 	if jsData.desaturated ~= nil then
 		propN["src_ds"] = path .. "/" .. jsData.desaturated
+		md5 = readMD5sum(propN["src_ds"])
+		if md5 ~= nil then
+			propN.ds_key = propN.ds .. '-' .. md5
+		end
 	end
 	if jsData.background ~= nil then
 		propN["src_bg"] = path .. "/" .. jsData.background
+		md5 = readMD5sum(propN["src_bg"])
+		if md5 ~= nil then
+			propN.bg_key = propN.bg .. '-' .. md5
+		end
 	end
 
 	table.insert(spectrumList, {name=imgName, enabled=false, spType=jsData.sptype})
@@ -517,11 +544,28 @@ local function __addSpectrum(path, jsData)
 				bg="trb-bg-" .. imgName,
 			}
 			propT["src_fg"] =  path .. "/" .. jsData.turbine.foreground
+			propT.fg_key = propT.fg
+			propT.ds_key = propT.ds
+			propT.bg_key = propT.bg
+			md5 = readMD5sum(propT["src_fg"])
+			if md5 ~= nil then
+				propT.fg_key = propT.fg .. '-' .. md5
+				propT.ds_key = propT.ds .. '-' .. md5
+				propT.bg_key = propT.bg .. '-' .. md5
+			end
 			if jsData.turbine.desaturated ~= nil then
 				propT["src_ds"] =  path .. "/" .. jsData.turbine.desaturated
+				md5 = readMD5sum(propT["src_ds"])
+				if md5 ~= nil then
+					propT.ds_key = propT.ds .. '-' .. md5
+				end
 			end
 			if jsData.turbine.background ~= nil then
 				propT["src_bg"] =  path .. "/" .. jsData.turbine.background
+				md5 = readMD5sum(propT["src_bg"])
+				if md5 ~= nil then
+					propT.bg_key = propT.bg .. '-' .. md5
+				end
 			end
 			if jsData.sptype ~= SPT_BACKLIT then
 				propT["bg"] =  nil
@@ -729,9 +773,9 @@ local function _getFgSpectrumImage(spkey, w, h, propsIndex)
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].fg
+	local dicKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].fg_key
 	log:debug("getFgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].fg,
-				" ", dicKey, " ", resizedImagesTable[dicKey])
+				" key:", dicKey, " ", resizedImagesTable[dicKey])
 	fgImage = loadResizedImage(dicKey)
 	return fgImage, fgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_fg}
 end
@@ -746,10 +790,11 @@ local function _getBgSpectrumImage(spkey, w, h, fgimg, propsIndex)
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].bg
+	local dicKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].bg_key
 	log:debug("getBgSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].bg, " ", dicKey)
 
 	if spectrumImagesMap[spkey].properties[propsIndex].src_bg ~= nil then
+		dicKey = w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].bg_key
 		bgImage = loadResizedImage(dicKey)
 		return bgImage, bgImage == nil, {key=dicKey, src=spectrumImagesMap[spkey].properties[propsIndex].src_bg}
 	end
@@ -790,7 +835,7 @@ local function _getDsSpectrumImage(spkey, w, h, fgimg, propsIndex)
 		return nil, false, nil
 	end
 
-	local dicKey = "for-" .. w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].ds
+	local dicKey =  w .. "x" .. h .. "-" ..  spectrumImagesMap[spkey].properties[propsIndex].ds_key
 	log:debug("getDsSpectrumImage: ", spImageIndex, ", ", spectrumImagesMap[spkey].properties[propsIndex].ds, " ", dicKey)
 
 	if spectrumImagesMap[spkey].properties[propsIndex].src_ds ~= nil then
@@ -1010,6 +1055,13 @@ local function addCompose1VUMeter(jsData, path)
 		cvu["right_trail"] = path .. "/" .. jsData.files.trail[2]
 	end
 	cvu["centre"] = path .. "/" .. jsData.files.centre
+	local md5sums = {}
+	for k,v in pairs(cvu) do
+		if v ~= 'name' then
+			md5sums[k] = readMD5sum(v)
+		end
+	end
+	cvu.md5sums = md5sums
 	cvu.step = jsData.step
 	cvu.maxVU = 50
 	if jsData.maxVolumeUnits ~= nil and type(jsData.maxVolumeUnits) == 'number' then
@@ -1029,7 +1081,7 @@ local function addSingleImageFrameVUMeter(jsData, path)
 		vuLoaded[jsData.name] = true
 		log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
 		for i,_ in ipairs(jsData.files.frames) do
-			vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i] }
+			vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i], md5sum = readMD5sum(path .. "/" .. jsData.files.frames[i]) }
 		end
 		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_frames, jsData=jsData})
 	else
@@ -1058,7 +1110,7 @@ local function addDiscreteFrameVUMeter(jsData, path)
 		vuLoaded[jsData.name] = true
 		for i,_ in ipairs(jsData.files.frames) do
 			local xk = jsData.name .. ":" .. i
-			vuImagesMap[xk] = {src= path .. "/" .. jsData.files.frames[i] }
+			vuImagesMap[xk] = {src= path .. "/" .. jsData.files.frames[i], md5sum = readMD5sum(path .. "/" .. jsData.files.frames[i]) }
 		end
 		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_discreteframes, jsData=jsData})
 	else
@@ -1192,9 +1244,12 @@ function vuChange(_, name)
 	end
 end
 
-local function _resizedCompose1Element(srcImg, key, w, h)
-	local dicKey = key .. "-" .. w .. "x" .. h
---	log:info("_resizedCompose1Element ", "key=", key, " dicKey=", dicKey)
+local function _resizedCompose1Element(srcImg, name, element, w, h, md5sum)
+	local dicKey = w .. "x" .. h .. '-' .. name .. '-' .. element
+	if md5sum ~= nil then
+		dicKey = dicKey .. '-' .. md5sum
+	end
+--	log:info("_resizedCompose1Element ", "name=", name, "element=", element, " dicKey=", dicKey)
 	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
@@ -1219,20 +1274,6 @@ local function getCompose1VUmeter(name, w, h)
 	-- imCacheClear()
 
 	local cvu = compositeVuMeters[name]
-	local bar_on = name .. ":bar-on"
-	local bar_off = name .. ":bar-off"
-	local bar_peak_on = name .. ":bar-peak-on"
-	local bar_peak_off = name .. ":bar-peak-off"
-
-	local r_bar_on = name .. ":r-bar-on"
-	local r_bar_off = name .. ":r-bar-off"
-	local r_bar_peak_on = name .. ":r-bar-peak-on"
-	local r_bar_peak_off = name .. ":r-bar-peak-off"
-	local left = name .. ":left"
-	local right = name .. ":right"
-	local left_trail = name .. ":left-trail"
-	local right_trail = name .. ":right-trail"
-	local center = name .. ":center"
 	c1vu = {}
 	c1vu.left={}
 	c1vu.right={}
@@ -1310,20 +1351,20 @@ local function getCompose1VUmeter(name, w, h)
 		cw = (calcbw * (cvu.maxVU -1)) + lw + tw
 		ch = math.floor((ch * sf))
 		-- c1vu.bar_rxo= barwidth - bw
-		c1vu.left.on = _resizedCompose1Element(c1vu.left.on, bar_on, bw, bh)
-		c1vu.left.off = _resizedCompose1Element(c1vu.left.off, bar_off, bw, bh)
-		c1vu.left.peakon = _resizedCompose1Element(c1vu.left.peakon, bar_peak_on, bw, bh)
-		c1vu.left.peakoff = _resizedCompose1Element(c1vu.left.peakoff, bar_peak_off, bw, bh)
-		c1vu.right.on = _resizedCompose1Element(c1vu.right.on, r_bar_on, bw, bh)
-		c1vu.right.off = _resizedCompose1Element(c1vu.right.off, r_bar_off, bw, bh)
-		c1vu.right.peakon = _resizedCompose1Element(c1vu.right.peakon, r_bar_peak_on, bw, bh)
-		c1vu.right.peakoff = _resizedCompose1Element(c1vu.right.peakoff, r_bar_peak_off, bw, bh)
+		c1vu.left.on = _resizedCompose1Element(c1vu.left.on, name, "bar_on", bw, bh, cvu.md5sums["left_on"])
+		c1vu.left.off = _resizedCompose1Element(c1vu.left.off, name, "bar_off", bw, bh, cvu.md5sums["left_off"])
+		c1vu.left.peakon = _resizedCompose1Element(c1vu.left.peakon, name, "bar_peak_on", bw, bh, cvu.md5sums["left_peakon"])
+		c1vu.left.peakoff = _resizedCompose1Element(c1vu.left.peakoff, name, "bar_peak_off", bw, bh, cvu.md5sums["left_peakoff"])
+		c1vu.right.on = _resizedCompose1Element(c1vu.right.on, name, "r_bar_on", bw, bh, cvu.md5sums["right_on"])
+		c1vu.right.off = _resizedCompose1Element(c1vu.right.off, name, "r_bar_off", bw, bh, cvu.md5sums["right_off"])
+		c1vu.right.peakon = _resizedCompose1Element(c1vu.right.peakon, name, "r_bar_peak_on", bw, bh, cvu.md5sums["right_peakon"])
+		c1vu.right.peakoff = _resizedCompose1Element(c1vu.right.peakoff,name, "r_bar_peak_off", bw, bh, cvu.md5sums["right_peakoff"])
 
-		c1vu.leftlead = _resizedCompose1Element(c1vu.leftlead, left, lw, lh)
-		c1vu.rightlead = _resizedCompose1Element(c1vu.rightlead, right, lw, lh)
-		c1vu.lefttrail = _resizedCompose1Element(c1vu.lefttrail, left, tw, th)
-		c1vu.righttrail = _resizedCompose1Element(c1vu.righttrail, right, tw, th)
-		c1vu.center = _resizedCompose1Element(c1vu.center, center, cw, ch)
+		c1vu.leftlead = _resizedCompose1Element(c1vu.leftlead, name, "left", lw, lh, cvu.md5sums["left_lead"])
+		c1vu.rightlead = _resizedCompose1Element(c1vu.rightlead, name, "right", lw, lh, cvu.md5sums["right_lead"])
+		c1vu.lefttrail = _resizedCompose1Element(c1vu.lefttrail, name, "left", tw, th, cvu.md5sums["left_trail"])
+		c1vu.righttrail = _resizedCompose1Element(c1vu.righttrail, name, "right", tw, th, cvu.md5sums["right_trail"])
+		c1vu.center = _resizedCompose1Element(c1vu.center, name, "center", cw, ch, cvu.md5sums["centre"])
 		c1vu.w = cw
 		c1vu.h = ch + (bh * 2)
 	end
@@ -1370,7 +1411,11 @@ function getVuImage(_,w,h)
 	local imgs = {}
 	local resizeRequired = false
 	for i,_ in ipairs(entry.jsData.files.frames) do
-		local dicKey = "for-" .. w .. "x" .. h .. "-" .. entry.name .. ":" .. i
+		local _name = entry.name .. ":" .. i
+		local dicKey = w .. "x" .. h .. "-" .. _name
+		if  vuImagesMap[_name].md5sum ~= nil then
+			dicKey = dicKey .. '-' .. vuImagesMap[_name].md5sum
+		end
 		local frameVU = loadResizedImage(dicKey)
 		table.insert(imgs, frameVU)
 		resizeRequired = resizeRequired or (frameVU == nil)
@@ -1472,19 +1517,19 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 			for _, prop in ipairs(spectrumImagesMap[name].properties) do
 				if prop.src_fg ~= nil then
 					table.insert(rszs, {
-						key = "for-" .. w .. "x" .. h .. "-" ..  prop.fg,
+						key = w .. "x" .. h .. "-" ..  prop.fg_key,
 						src = prop.src_fg}
 					)
 				end
 				if prop.src_bg ~= nil then
 					table.insert(rszs, {
-						key = "for-" .. w .. "x" .. h .. "-" ..  prop.bg,
+						key = w .. "x" .. h .. "-" ..  prop.bg_key,
 						src = prop.src_bg}
 					)
 				end
 				if prop.src_ds ~= nil then
 					table.insert(rszs, {
-						key = "for-" .. w .. "x" .. h .. "-" ..  prop.ds,
+						key =  w .. "x" .. h .. "-" ..  prop.ds_key,
 						src = prop.src_ds}
 					)
 				end
@@ -1514,7 +1559,10 @@ end
 local function requestFramesVuResize(name, w , h)
 --	log:info("requestFramesVuResize ", name, ", ", w, ", ", h)
 	local path = vuImagesMap[name].src
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+	local dicKey = w .. "x" .. h .. "-" .. name
+	if  vuImagesMap[name].md5sum ~= nil then
+		dicKey = dicKey .. '-' .. vuImagesMap[name].md5sum
+	end
 	local dcpath = resizedImagePath(dicKey)
 	if resizedImagesTable[dicKey] ~= nil then
 		return true
@@ -1537,7 +1585,10 @@ end
 local function requestDiscreteFrameVuResize(name, w , h)
 --	log:info("requestFramesVuResize ", name, ", ", w, ", ", h)
 	local path = vuImagesMap[name].src
-	local dicKey = "for-" .. w .. "x" .. h .. "-" .. name
+	local dicKey = w .. "x" .. h .. "-" .. name
+	if  vuImagesMap[name].md5sum ~= nil then
+		dicKey = dicKey .. '-' .. vuImagesMap[name].md5sum
+	end
 	local dcpath = resizedImagePath(dicKey)
 	if resizedImagesTable[dicKey] ~= nil then
 		return true
