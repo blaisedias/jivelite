@@ -1917,7 +1917,7 @@ function _createUI(self)
 	self.XofY        = Label('xofy', "")
 	self.albumTitle  = Label('npalbum', "")
 	self.artistTitle = Label('npartist', "")
-	self.artistalbumTitle = Label('npartistalbum', "")
+--	self.artistalbumTitle = Label('npartistalbum', "")
 	self.audiometadata = Label('npaudiometadata', "")
 	self.debugtxt = Label('npdebugdata', "")
 
@@ -1926,6 +1926,7 @@ function _createUI(self)
 			Framework:pushAction('go_now_playing')
 			return EVENT_CONSUME
 		end
+	self.artistalbumTitle = Button(Label('npartistalbum', ""), launchContextMenu)
 
 	self.trackTitleButton  = Button(self.trackTitle, launchContextMenu)
 	self.albumTitleButton  = Button(self.albumTitle, launchContextMenu)
