@@ -3877,6 +3877,7 @@ function skin0(self, s, _, _, w, h)
 	BASEnowplaying.nptitle.pressed = _uses(BASEnowplaying.nptitle)
 	BASEnowplaying.npalbumgroup.pressed = _uses(BASEnowplaying.npalbumgroup)
 	BASEnowplaying.npartistgroup.pressed = _uses(BASEnowplaying.npartistgroup)
+	BASEnowplaying.npartistalbum.pressed = _uses(BASEnowplaying.npartistalbum)
 	BASEnowplaying.npartwork.pressed = BASEnowplaying.npartwork
 
 	BASEnowplaying.npcontrols.pressed = {
@@ -4295,6 +4296,7 @@ function skin0(self, s, _, _, w, h)
 	s.nowplaying_text_only.nptitle.pressed = _uses(s.nowplaying_text_only.nptitle)
 	s.nowplaying_text_only.npalbumgroup.pressed = _uses(s.nowplaying_text_only.npalbumgroup)
 	s.nowplaying_text_only.npartistgroup.pressed = _uses(s.nowplaying_text_only.npartistgroup)
+	s.nowplaying_text_only.npartistalbum.pressed = _uses(s.nowplaying_text_only.npartistalbum)
 
 	-- Visualizer: Container with titlebar, progressbar and controls.
 	--  The space between title and controls is used for the visualizer.
@@ -5124,6 +5126,7 @@ function skin0(self, s, _, _, w, h)
 		s.nowplaying_large_art.nptitle.pressed = _uses(s.nowplaying_large_art.nptitle)
 		s.nowplaying_large_art.npalbumgroup.pressed = _uses(s.nowplaying_large_art.npalbumgroup)
 		s.nowplaying_large_art.npartistgroup.pressed = _uses(s.nowplaying_large_art.npartistgroup)
+		s.nowplaying_large_art.npartistalbum.pressed = _uses(s.nowplaying_large_art.npartistalbum)
 		s.nowplaying_large_art.title.pressed = _uses(s.nowplaying_large_art.title, {
 			text = {
 				fg = { 0xB3, 0xB3, 0xB3 },
