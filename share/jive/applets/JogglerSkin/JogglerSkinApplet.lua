@@ -3863,7 +3863,7 @@ function skin0(self, s, _, _, w, h)
 		text = {
 			fg = { 0xB3, 0xB3, 0xB3 },
 			sh = { },
-			bgImg = pressedTitlebarButtonBox,
+			bgImg = nil,
 		},
 		lbutton = {
 			bgImg = pressedTitlebarButtonBox,
