@@ -4427,6 +4427,8 @@ function skin0(self, s, _, _, w, h)
 				align = "center",
 			},
 		})
+	BASEnowplaying_visu_text.npartistalbum.pressed = _uses(BASEnowplaying_visu_text.npartistalbum)
+	BASEnowplaying_visu_text.nptitle.pressed = _uses(BASEnowplaying_visu_text.nptitle)
 
 	if activeNowPlayingScreenStyles['nowplaying_spectrum_text'] == true then
 		visImage:registerSpectrumResolution(screenWidth, SP_H)
@@ -4629,6 +4631,7 @@ function skin0(self, s, _, _, w, h)
 
 		s.nowplaying_large_spectrum =  _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_large_spectrum')
 		s.nowplaying_large_spectrum.pressed = s.nowplaying_large_spectrum
+		s.nowplaying_large_spectrum.nptitle.pressed = _uses(s.nowplaying_large_spectrum.nptitle)
 
 		s.nowplaying_large_spectrum.title.pressed = _uses(s.nowplaying_large_spectrum.title, {
 			text = {
@@ -4884,6 +4887,7 @@ function skin0(self, s, _, _, w, h)
 
 		s.nowplaying_large_vumeter =  _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_large_vumeter')
 		s.nowplaying_large_vumeter.pressed = s.nowplaying_large_vumeter
+		s.nowplaying_large_vumeter.nptitle.pressed = _uses(s.nowplaying_large_vumeter.nptitle)
 
 		s.nowplaying_large_vumeter.title.pressed = _uses(s.nowplaying_large_vumeter.title, {
 			text = {
