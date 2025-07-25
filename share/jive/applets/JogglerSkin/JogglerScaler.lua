@@ -901,7 +901,12 @@ function getJogglerSkinParams(skinName)
     params.NP_ARTISTALBUM_FONT_SIZE = scaleNPTextValue(28)
 
     local screenWidth, screenHeight = Framework:getScreenSize()
-    if true then
+    params.TOAST_POPUP_MIXED_HEIGHT = math.floor(screenHeight * 250 / 480)
+    if screenHeight < 480 then
+        -- for now we ignore screen height < 250
+        params.TOAST_POPUP_MIXED_HEIGHT = 250
+    end
+     if true then
         if screenWidth/screenHeight >= 3 then
             local availHeight = screenHeight - skinValues.TITLE_HEIGHT - 16 - 50
             -- When screen apect ratio is > 3 then visualisers are positioned to the right
@@ -910,7 +915,7 @@ function getJogglerSkinParams(skinName)
             -- Heuristic
             params.NP_ARTISTALBUM_FONT_SIZE = math.floor(availHeight/5.5)
             params.NP_TRACK_FONT_SIZE = math.floor(availHeight/5.5)
-        end
+       end
     end
 
 
