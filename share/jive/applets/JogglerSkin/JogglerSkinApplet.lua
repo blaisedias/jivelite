@@ -2493,11 +2493,11 @@ function skin0(self, s, _, _, w, h)
 		y = (screenHeight - 250) / 2,
 		position = LAYOUT_NONE,
 		w = screenWidth - 200,
-		h = 250,
+		h = scaledValues.TOAST_POPUP_MIXED_HEIGHT,
 		bgImg = popupBox,
 		text = {
 			position = LAYOUT_NORTH,
-			padding = { 8, 24, 8, 0 },
+			padding = { 8, scaledValues.TOAST_POPUP_MIXED_HEIGHT/10, 8, 0 },
 			align = 'top',
 			w = WH_FILL,
 			h = WH_FILL,
@@ -2508,7 +2508,8 @@ function skin0(self, s, _, _, w, h)
 		},
 		subtext = {
 			position = LAYOUT_NORTH,
-			padding = { 8, 203, 8, 0 },
+--			padding = { 8, 203, 8, 0 },
+			padding = { 8, scaledValues.TOAST_POPUP_MIXED_HEIGHT - scaledValues.POPUP_TEXT_SIZE_2 - 5, 8, 0 },
 			align = 'top',
 			w = WH_FILL,
 			h = WH_FILL,
