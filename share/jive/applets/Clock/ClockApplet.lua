@@ -2,7 +2,7 @@ local ipairs, pairs, tonumber, setmetatable, type, tostring = ipairs, pairs, ton
 
 local math             = require("math")
 local table            = require("table")
-local os           = require("os")  
+local os           = require("os")
 local string           = require("jive.utils.string")
 local debug        = require("jive.utils.debug")
 
@@ -25,7 +25,7 @@ local Window           = require("jive.ui.Window")
 local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 
 local Player           = require("jive.slim.Player")
-                       
+
 local datetime         = require("jive.utils.datetime")
 
 local appletManager = appletManager
@@ -73,18 +73,18 @@ end
 
 local function _imgpath(self)
 	local skinName = self.skinName
-	
+
 	if _isJogglerSkin(skinName) then
 		skinName = 'JogglerSkin'
-		
+
 	elseif _isWQVGASkin(skinName) then
 		skinName = "WQVGAsmallSkin"
-	
+
 	elseif _isHDSkin(skinName) then
 		skinName = "HDSkin"
-	
+
 	end
-	
+
     return "applets/" .. skinName .. "/images/"
 end
 
@@ -203,7 +203,7 @@ function Clock:_getDate(time)
     local theDate
     if self.clock_format_date == "%d%m%Y" then
         theDate = self:_padString(time.day) .. self:_padString(time.month) .. tostring(time.year)
-        
+
     else
         theDate = self:_padString(time.month) .. self:_padString(time.day) .. tostring(time.year)
     end
@@ -216,7 +216,7 @@ function DotMatrix:__init(ampm, shortDateFormat)
     log:debug("Init Dot Matrix Clock")
 
     local skinName = jiveMain:getSelectedSkin()
-    
+
     if not self.skin or skinName ~= self.oldSkinName then
         log:debug("Fetching Dot Matrix clock skin")
         self.oldSkinName = skinName
@@ -232,7 +232,7 @@ function DotMatrix:__init(ampm, shortDateFormat)
     obj.h2   = Group('h2', {
         digit = Icon('icon_dotMatrixDigit0'),
     })
-    local clockDots = Group('dots', { 
+    local clockDots = Group('dots', {
         dots = Icon('icon_dotMatrixDots'),
     })
     obj.m1   = Group('m1', {
@@ -309,9 +309,9 @@ function DotMatrix:__init(ampm, shortDateFormat)
     obj.clock_format_month  = "%m"
     obj.clock_format_day    = "%d"
     obj.clock_format_year   = "%Y"
-    
-    -- do not allow any format for date here, but instead decide 
-    -- based on the position of %m and %d in shortDateFormat 
+
+    -- do not allow any format for date here, but instead decide
+    -- based on the position of %m and %d in shortDateFormat
     -- if the format should end up on this clock as MM.DD.YYYY or DD.MM.YYYY
     local monthSpot = string.find(shortDateFormat, "m")
     local daySpot   = string.find(shortDateFormat, "d")
@@ -320,7 +320,7 @@ function DotMatrix:__init(ampm, shortDateFormat)
     else
         obj.clock_format_date   = "%m%d%Y"
     end
-    
+
     obj.clock_format = obj.clock_format_hour .. ":" .. obj.clock_format_minute
 
     return obj
@@ -336,7 +336,7 @@ function DotMatrix:Draw()
     local theDate   = self:_getDate(time)
 
 --[[
-    FOR TESTING PURPOSES 
+    FOR TESTING PURPOSES
 
     -- MIN test
     local theHour   = '01'
@@ -404,7 +404,7 @@ function WordClock:__init(applet)
     log:debug("Init Word Clock")
 
     local skinName = jiveMain:getSelectedSkin()
-    
+
     log:debug("self.skin: ", self.skin)
     log:debug("self.skinName: ", self.skinName)
     log:debug("skinName: ", skinName)
@@ -421,43 +421,43 @@ function WordClock:__init(applet)
     obj.skinParams = WordClock:getSkinParams(skinName)
 
     if _isJogglerSkin(skinName) or _isWQVGASkin(skinName) or _isHDSkin(skinName) then
-        obj.pointer_textIt         = Surface:loadImage(obj.skinParams.textIt)  
-        obj.pointer_textIs         = Surface:loadImage(obj.skinParams.textIs)  
-        obj.pointer_textHas        = Surface:loadImage(obj.skinParams.textHas)  
-        obj.pointer_textNearly     = Surface:loadImage(obj.skinParams.textNearly)  
-        obj.pointer_textJustgone   = Surface:loadImage(obj.skinParams.textJustgone)  
+        obj.pointer_textIt         = Surface:loadImage(obj.skinParams.textIt)
+        obj.pointer_textIs         = Surface:loadImage(obj.skinParams.textIs)
+        obj.pointer_textHas        = Surface:loadImage(obj.skinParams.textHas)
+        obj.pointer_textNearly     = Surface:loadImage(obj.skinParams.textNearly)
+        obj.pointer_textJustgone   = Surface:loadImage(obj.skinParams.textJustgone)
 
-        obj.pointer_textHalf       = Surface:loadImage(obj.skinParams.textHalf)  
-        obj.pointer_textTen        = Surface:loadImage(obj.skinParams.textTen)  
-        obj.pointer_textAquarter   = Surface:loadImage(obj.skinParams.textAQuarter)  
-        obj.pointer_textTwenty     = Surface:loadImage(obj.skinParams.textTwenty)  
+        obj.pointer_textHalf       = Surface:loadImage(obj.skinParams.textHalf)
+        obj.pointer_textTen        = Surface:loadImage(obj.skinParams.textTen)
+        obj.pointer_textAquarter   = Surface:loadImage(obj.skinParams.textAQuarter)
+        obj.pointer_textTwenty     = Surface:loadImage(obj.skinParams.textTwenty)
 
-        obj.pointer_textFive       = Surface:loadImage(obj.skinParams.textFive)  
-        obj.pointer_textMinutes    = Surface:loadImage(obj.skinParams.textMinutes)  
-        obj.pointer_textTo         = Surface:loadImage(obj.skinParams.textTo)  
-        obj.pointer_textPast       = Surface:loadImage(obj.skinParams.textPast)  
+        obj.pointer_textFive       = Surface:loadImage(obj.skinParams.textFive)
+        obj.pointer_textMinutes    = Surface:loadImage(obj.skinParams.textMinutes)
+        obj.pointer_textTo         = Surface:loadImage(obj.skinParams.textTo)
+        obj.pointer_textPast       = Surface:loadImage(obj.skinParams.textPast)
 
-        obj.pointer_textHourOne    = Surface:loadImage(obj.skinParams.textHourOne)  
-        obj.pointer_textHourTwo    = Surface:loadImage(obj.skinParams.textHourTwo)  
-        obj.pointer_textHourThree  = Surface:loadImage(obj.skinParams.textHourThree)  
-        obj.pointer_textHourFour   = Surface:loadImage(obj.skinParams.textHourFour)  
-        obj.pointer_textHourFive   = Surface:loadImage(obj.skinParams.textHourFive)  
-        obj.pointer_textHourSix    = Surface:loadImage(obj.skinParams.textHourSix)  
-        obj.pointer_textHourSeven  = Surface:loadImage(obj.skinParams.textHourSeven)  
-        obj.pointer_textHourEight  = Surface:loadImage(obj.skinParams.textHourEight)  
-        obj.pointer_textHourNine   = Surface:loadImage(obj.skinParams.textHourNine)  
-        obj.pointer_textHourTen    = Surface:loadImage(obj.skinParams.textHourTen)  
-        obj.pointer_textHourEleven = Surface:loadImage(obj.skinParams.textHourEleven)  
-        obj.pointer_textHourTwelve = Surface:loadImage(obj.skinParams.textHourTwelve)  
+        obj.pointer_textHourOne    = Surface:loadImage(obj.skinParams.textHourOne)
+        obj.pointer_textHourTwo    = Surface:loadImage(obj.skinParams.textHourTwo)
+        obj.pointer_textHourThree  = Surface:loadImage(obj.skinParams.textHourThree)
+        obj.pointer_textHourFour   = Surface:loadImage(obj.skinParams.textHourFour)
+        obj.pointer_textHourFive   = Surface:loadImage(obj.skinParams.textHourFive)
+        obj.pointer_textHourSix    = Surface:loadImage(obj.skinParams.textHourSix)
+        obj.pointer_textHourSeven  = Surface:loadImage(obj.skinParams.textHourSeven)
+        obj.pointer_textHourEight  = Surface:loadImage(obj.skinParams.textHourEight)
+        obj.pointer_textHourNine   = Surface:loadImage(obj.skinParams.textHourNine)
+        obj.pointer_textHourTen    = Surface:loadImage(obj.skinParams.textHourTen)
+        obj.pointer_textHourEleven = Surface:loadImage(obj.skinParams.textHourEleven)
+        obj.pointer_textHourTwelve = Surface:loadImage(obj.skinParams.textHourTwelve)
 
-        obj.pointer_textOClock     = Surface:loadImage(obj.skinParams.textOClock)  
-        obj.pointer_textAM         = Surface:loadImage(obj.skinParams.textAM)  
-        obj.pointer_textPM         = Surface:loadImage(obj.skinParams.textPM)  
+        obj.pointer_textOClock     = Surface:loadImage(obj.skinParams.textOClock)
+        obj.pointer_textAM         = Surface:loadImage(obj.skinParams.textAM)
+        obj.pointer_textPM         = Surface:loadImage(obj.skinParams.textPM)
     elseif skinName == "QVGAlandscapeSkin" or skinName == "QVGAportraitSkin" or skinName == "QVGA240squareSkin" then
         obj.pointer_hour           = Surface:loadImage(obj.skinParams.hourHand)
         obj.pointer_minute         = Surface:loadImage(obj.skinParams.minuteHand)
     end
-    
+
     obj.alarmIcon = Surface:loadImage(obj.skinParams.alarmIcon)
 
     -- bring in applet's self so strings are available
@@ -488,13 +488,13 @@ function WordClock:_reDraw(screen)
         local flags = WordClock:getwordflags(timenow)
 
         local all = false  -- Just for debugging screen position
-        
+
         -- ratio by which we have to multiply coordinates relative to the Joggler skin
         local r = self.skin.Clock.ratio
-        
+
         -- zoom factor by which we have to resize the artwork
         local z = r
-        
+
         -- resizing is not necessary for the WQVGA skins - we have native sizes
         if _isWQVGASkin(self.skinName) then
         	z = 1
@@ -502,7 +502,7 @@ function WordClock:_reDraw(screen)
 
         local x = self.skin.Clock.offsetX
         local y = self.skin.Clock.offsetY
-      
+
     -- Row 1
         self.pointer_textIt:zoom(z, z, 1):blit(screen, x + 20*r, y + 50*r)
         if all or flags.is         then self.pointer_textIs:zoom(z, z, 1):blit(screen, x + 86*r, y + 50*r) end
@@ -564,23 +564,23 @@ function WordClock:_reDraw(screen)
         tmp:release()
 
         -- Minute Pointer
-        local angle = (360 / 60) * m 
+        local angle = (360 / 60) * m
 
         local tmp = self.pointer_minute:rotozoom(-angle, 1, 5)
         local facew, faceh = tmp:getSize()
         x = math.floor((self.screen_width/2) - (facew/2))
         y = math.floor((self.screen_height/2) - (faceh/2))
         tmp:blit(screen, x, y)
-        tmp:release()   
+        tmp:release()
 
         self.textdate:setValue(string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
     end
-    
+
     if self.alarmSet then
         local tmp = self.alarmIcon
         tmp:blit(screen, self.skinParams.alarmX, self.skinParams.alarmY)
     end
-  
+
 end
 
 -----------------------------------------------------------------------------------------
@@ -591,7 +591,7 @@ function Analog:__init(applet)
     log:info("Init Analog Clock")
 
     local skinName = jiveMain:getSelectedSkin()
-    
+
     if not self.skin or skinName ~= self.oldSkinName then
         log:debug("Fetching Analog clock skin")
         self.oldSkinName = skinName
@@ -642,7 +642,7 @@ function Analog:_reDraw(screen)
     tmp:release()
 
     -- Minute Pointer
-    local angle = (360 / 60) * m 
+    local angle = (360 / 60) * m
 
     local tmp = self.pointer_minute:rotozoom(-angle, self.skinParams.ratio, 5)
     local facew, faceh = tmp:getSize()
@@ -661,7 +661,7 @@ Digital = oo.class({}, Clock)
 
 function Digital:__init(applet, ampm)
     log:debug("Init Digital Clock")
-    
+
     local windowStyle = applet.windowStyle or 'Clock'
 
     local skinName = jiveMain:getSelectedSkin()
@@ -679,8 +679,8 @@ function Digital:__init(applet, ampm)
 
     obj.h1   = Label('h1', '1')
     obj.h2   = Label('h2', '2')
-    local dots = Group('dots', { 
-        dots = Icon("icon_digitalDots") 
+    local dots = Group('dots', {
+        dots = Icon("icon_digitalDots")
         }
     )
     obj.m1   = Label('m1', '0')
@@ -713,8 +713,8 @@ function Digital:__init(applet, ampm)
         horizDivider = Icon('icon_digitalClockHDivider'),
     })
 
-    obj.h1Shadow   = Group('h1Shadow', { 
-        h1Shadow = Icon('icon_digitalClockDropShadow'), 
+    obj.h1Shadow   = Group('h1Shadow', {
+        h1Shadow = Icon('icon_digitalClockDropShadow'),
     })
     obj.h2Shadow   = Group('h2Shadow', {
         h2Shadow = Icon('icon_digitalClockDropShadow'),
@@ -762,7 +762,7 @@ function Digital:__init(applet, ampm)
     return obj
 end
 
-    
+
 function Digital:Draw()
 
     local time = os.date("*t")
@@ -796,14 +796,14 @@ function Digital:Draw()
 
     -- what time is it? it's time to get ill!
     self:DrawTime(time)
-    
+
     --FOR DEBUG
     --[[
     self:DrawMinTest()
     self:DrawMaxTest()
     --]]
 end
-    
+
 -- this method is around for testing the rendering of different elements
 -- it is not called in practice
 function Digital:DrawMinTest()
@@ -814,7 +814,7 @@ function Digital:DrawMinTest()
     self.h2:setValue('1')
     self.m1:setValue('0')
     self.m2:setValue('1')
-    
+
     self.ampm:setValue('AM')
 
     widget = self.dateGroup:getWidget('dayofweek')
@@ -834,7 +834,7 @@ function Digital:DrawMaxTest()
     self.h2:setValue('4')
     self.m1:setValue('5')
     self.m2:setValue('9')
-    
+
     self.ampm:setValue('PM')
 
     widget = self.dateGroup:getWidget('dayofweek')
@@ -868,7 +868,7 @@ function Digital:DrawTime(time)
 
     self.m1:setValue(string.sub(theMinute, 1, 1))
     self.m2:setValue(string.sub(theMinute, 2, 2))
-    
+
     -- Draw AM PM
     if self.useAmPm then
         -- localized ampm rendering requires an os.date() call
@@ -939,9 +939,9 @@ function _openScreensaver(self, type, windowStyle, force)
         return
     end
     -- Global Date/Time Settings
-    local weekstart       = datetime:getWeekstart() 
-    local hours           = datetime:getHours() 
-    local shortDateFormat = datetime:getShortDateFormat() 
+    local weekstart       = datetime:getWeekstart()
+    local hours           = datetime:getHours()
+    local shortDateFormat = datetime:getShortDateFormat()
 
     hours = (hours == "12")
 
@@ -999,7 +999,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         local _dotMatrixDate = function(self, digit)
             local fileName = "Clocks/Dot_Matrix/dotmatrix_date_" .. tostring(digit) .. ".png"
             return {
@@ -1010,7 +1010,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 border = { 1, 0, 1, 0 },
             }
         end
-    
+
         s.icon_dotMatrixDigit0 = _dotMatrixDigit(self, 0)
         s.icon_dotMatrixDigit1 = _dotMatrixDigit(self, 1)
         s.icon_dotMatrixDigit2 = _dotMatrixDigit(self, 2)
@@ -1024,7 +1024,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDigitNone = _uses(s.icon_dotMatrixDigit9, {
             img = false,
         })
-    
+
         s.icon_dotMatrixDate0 = _dotMatrixDate(self, 0)
         s.icon_dotMatrixDate1 = _dotMatrixDate(self, 1)
         s.icon_dotMatrixDate2 = _dotMatrixDate(self, 2)
@@ -1035,29 +1035,29 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDate7 = _dotMatrixDate(self, 7)
         s.icon_dotMatrixDate8 = _dotMatrixDate(self, 8)
         s.icon_dotMatrixDate9 = _dotMatrixDate(self, 9)
-    
+
         s.icon_dotMatrixDateDot = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_dot_sm.png")
         }
-    
+
         s.icon_dotMatrixDots = {
             align = 'center',
             border = { 4, 0, 3, 0 },
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_clock_dots.png"),
         }
-    
+
         s.icon_alarm_on = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_alarm_on.png"),
             w   = 36,
             border = { 0, 0, 13, 0 },
         }
-    
+
         s.icon_alarm_off = _uses(s.icon_alarm_on, {
             img = false,
         })
-    
+
         local _clockDigit = {
             position = LAYOUT_NONE,
             w = 68,
@@ -1154,7 +1154,10 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
 
     elseif _isJogglerSkin(skinName) or _isHDSkin(skinName) then
 
-        local dotMatrixBackground = Tile:loadImage(self.imgpath .. "Clocks/Dot_Matrix/wallpaper_clock_dotmatrix.png")
+--        local dotMatrixBackground = Tile:loadImage(self.imgpath .. "Clocks/Dot_Matrix/wallpaper_clock_dotmatrix.png")
+        local screen_width, screen_height = Framework:getScreenSize()
+        local dotMatrixBackground = _loadImage(self, "Clocks/Dot_Matrix/wallpaper_clock_dotmatrix.png")
+        dotMatrixBackground = dotMatrixBackground:zoom(screen_width/800,  screen_height/480, 1)
 
         local _dotMatrixDigit = function(self, digit)
             local fileName = "Clocks/Dot_Matrix/dotmatrix_clock_" .. tostring(digit) .. ".png"
@@ -1166,7 +1169,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         local _dotMatrixDate = function(self, digit)
             local fileName = "Clocks/Dot_Matrix/dotmatrix_date_" .. tostring(digit) .. ".png"
             return {
@@ -1177,7 +1180,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 border = { 1, 0, 1, 0 },
             }
         end
-    
+
         s.icon_dotMatrixDigit0 = _dotMatrixDigit(self, 0)
         s.icon_dotMatrixDigit1 = _dotMatrixDigit(self, 1)
         s.icon_dotMatrixDigit2 = _dotMatrixDigit(self, 2)
@@ -1191,7 +1194,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDigitNone = _uses(s.icon_dotMatrixDigit9, {
             img = false,
         })
-    
+
         s.icon_dotMatrixDate0 = _dotMatrixDate(self, 0)
         s.icon_dotMatrixDate1 = _dotMatrixDate(self, 1)
         s.icon_dotMatrixDate2 = _dotMatrixDate(self, 2)
@@ -1202,25 +1205,25 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDate7 = _dotMatrixDate(self, 7)
         s.icon_dotMatrixDate8 = _dotMatrixDate(self, 8)
         s.icon_dotMatrixDate9 = _dotMatrixDate(self, 9)
-    
+
         s.icon_dotMatrixDateDot = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_dot_sm.png")
         }
-    
+
         s.icon_dotMatrixDots = {
             align = 'center',
             border = { 4, 0, 3, 0 },
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_clock_dots.png"),
         }
-    
+
         s.icon_alarm_on = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_alarm_on.png"),
             w   = 36,
             border = { 0, 0, 13, 0 },
         }
-    
+
         s.icon_alarm_off = _uses(s.icon_alarm_on, {
             img = false,
         })
@@ -1228,8 +1231,8 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         local jogglerSkinAlignWithBackgroundXOffset = 2
         local jogglerSkinAlignWithBackgroundYOffset = 1
         local jogglerSkinXOffset = 160 + jogglerSkinAlignWithBackgroundXOffset + 9
-        local jogglerSkinYOffset = 104 + jogglerSkinAlignWithBackgroundYOffset
-        
+        local jogglerSkinYOffset = math.floor(104 * screen_height/480) + jogglerSkinAlignWithBackgroundYOffset
+
         local _clockDigit = {
             position = LAYOUT_NONE,
             w = 68 + 4,
@@ -1240,7 +1243,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
             w = 27,
             y = 192 + jogglerSkinYOffset,
         }
-        
+
         local x = {}
         x.h1 = 68 + jogglerSkinXOffset
         x.h2 = x.h1 + 72
@@ -1261,9 +1264,10 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         x.Y3 = x.Y2 + 30
         x.Y4 = x.Y3 + 29 + 1
 
+        local screen_width, screen_height = Framework:getScreenSize()
         s.Clock = {
-            w = 800, --480,
-            h = 480, --272,
+            w = screen_width, --480,
+            h = screen_height, --272,
             bgImg = dotMatrixBackground,
             h1 = _uses(_clockDigit, {
                 x = x.h1,
@@ -1341,7 +1345,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         local _dotMatrixDate = function(self, digit)
             local fileName = "Clocks/Dot_Matrix/dotmatrix_date_" .. tostring(digit) .. ".png"
             return {
@@ -1351,7 +1355,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         s.icon_dotMatrixDigit0 = _dotMatrixDigit(self, 0)
         s.icon_dotMatrixDigit1 = _dotMatrixDigit(self, 1)
         s.icon_dotMatrixDigit2 = _dotMatrixDigit(self, 2)
@@ -1365,7 +1369,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDigitNone = _uses(s.icon_dotMatrixDigit9, {
             img = false,
         })
-    
+
         s.icon_dotMatrixDate0 = _dotMatrixDate(self, 0)
         s.icon_dotMatrixDate1 = _dotMatrixDate(self, 1)
         s.icon_dotMatrixDate2 = _dotMatrixDate(self, 2)
@@ -1376,28 +1380,28 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDate7 = _dotMatrixDate(self, 7)
         s.icon_dotMatrixDate8 = _dotMatrixDate(self, 8)
         s.icon_dotMatrixDate9 = _dotMatrixDate(self, 9)
-    
+
         s.icon_dotMatrixDateDot = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_dot_sm.png")
         }
-    
+
         s.icon_dotMatrixDots = {
             align = 'center',
             border = { 4, 0, 3, 0 },
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_clock_dots.png"),
         }
-    
+
         s.icon_alarm_on = {
             align = 'bottom',
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_alarm_on.png"),
             w   = 36,
         }
-    
+
         s.icon_alarm_off = _uses(s.icon_alarm_on, {
             img = false,
         })
-    
+
         local _clockDigit = {
             position = LAYOUT_NONE,
             w = 61,
@@ -1504,7 +1508,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         s.icon_dotMatrixDigit0 = _dotMatrixDigit(self, 0)
         s.icon_dotMatrixDigit1 = _dotMatrixDigit(self, 1)
         s.icon_dotMatrixDigit2 = _dotMatrixDigit(self, 2)
@@ -1518,7 +1522,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDigitNone = _uses(s.icon_dotMatrixDigit9, {
             img = false,
         })
-    
+
         s.icon_dotMatrixDate0 = { img = false }
         s.icon_dotMatrixDate1 = { img = false }
         s.icon_dotMatrixDate2 = { img = false }
@@ -1529,29 +1533,29 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDate7 = { img = false }
         s.icon_dotMatrixDate8 = { img = false }
         s.icon_dotMatrixDate9 = { img = false }
-    
+
         s.icon_dotMatrixDateDot = {
             img = false,
         }
-    
+
         s.icon_dotMatrixDots = {
             img = false,
         }
-    
+
         s.icon_alarm_on = {
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_alarm_on.png"),
         }
         s.icon_alarm_off = _uses(s.icon_alarm_on, {
             img = false,
         })
-    
+
         s.icon_dotMatrixPowerOn = {
             img = false,
         }
         s.icon_dotMatrixPowerButtonOff = _uses(s.icon_dotMatrixPowerOn, {
             img = false,
         })
-    
+
         local _clockDigit = {
             position = LAYOUT_NONE,
             w = 61,
@@ -1610,7 +1614,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
                 align = 'bottom',
             }
         end
-    
+
         s.icon_dotMatrixDigit0 = _dotMatrixDigit(self, 0)
         s.icon_dotMatrixDigit1 = _dotMatrixDigit(self, 1)
         s.icon_dotMatrixDigit2 = _dotMatrixDigit(self, 2)
@@ -1624,7 +1628,7 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDigitNone = _uses(s.icon_dotMatrixDigit9, {
             img = false,
         })
-    
+
         s.icon_dotMatrixDate0 = { img = false }
         s.icon_dotMatrixDate1 = { img = false }
         s.icon_dotMatrixDate2 = { img = false }
@@ -1635,29 +1639,29 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
         s.icon_dotMatrixDate7 = { img = false }
         s.icon_dotMatrixDate8 = { img = false }
         s.icon_dotMatrixDate9 = { img = false }
-    
+
         s.icon_dotMatrixDateDot = {
             img = false,
         }
-    
+
         s.icon_dotMatrixDots = {
             img = false,
         }
-    
+
         s.icon_alarm_on = {
             img = _loadImage(self, "Clocks/Dot_Matrix/dotmatrix_alarm_on.png"),
         }
         s.icon_alarm_off = _uses(s.icon_alarm_on, {
             img = false,
         })
-    
+
         s.icon_dotMatrixPowerOn = {
             img = false,
         }
         s.icon_dotMatrixPowerButtonOff = _uses(s.icon_dotMatrixPowerOn, {
             img = false,
         })
-    
+
         local _clockDigit = {
             position = LAYOUT_NONE,
             w = 61,
@@ -1715,18 +1719,23 @@ function WordClock:getWordClockSkin(skinName)
 
     self.skinName = skinName
     self.imgpath = _imgpath(self)
-    
+
     log:debug("Image path - " .. self.imgpath)
     local s = {}
-        
+
     -- HDSkin is using the Joggler's artwork. Quite a mess...
     local imgpath = string.gsub(self.imgpath, 'HDSkin', 'JogglerSkin')
 
     local wordClockBackground = Tile:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
-        
+
     if _isJogglerSkin(skinName) or _isHDSkin(skinName) then
         local screen_width, screen_height = Framework:getScreenSize()
         local ratio = math.min(screen_width/800, screen_height/480)
+        local td_font_size = 26 * screen_height/480
+        -- portrait mode for WordClock this is deemed good enough for now
+        if screen_height > screen_width then
+            td_font_size = 26 * screen_height/800
+        end
 
         s.Clock = {
             textdate = {
@@ -1734,7 +1743,7 @@ function WordClock:getWordClockSkin(skinName)
                 x = 0,
                 y = 420 * ratio,
                 w = screen_width,
-                font = _font(26 * screen_height/480),
+                font = _font(td_font_size),
                 align = 'bottom',
                 fg = { 0xff, 0xff, 0xff },
             },
@@ -1749,7 +1758,7 @@ function WordClock:getWordClockSkin(skinName)
         -- if the ratio of the resized background is different, we need to shift it accordingly
         if ratio ~= (800/480) then
 	        local w, h = wordClockBackground:getSize()
-	        
+
 	        if w < screen_width then
 	        	s.Clock.offsetX = (screen_width - w)/2
 		        local tmp = Surface:newRGB(screen_width, screen_height)
@@ -1770,9 +1779,9 @@ function WordClock:getWordClockSkin(skinName)
 		        wordClockBackground = tmp
 		    end
         end
-                
+
         s.Clock.bgImg = wordClockBackground
-        
+
     elseif _isWQVGASkin(skinName) then
         s.Clock = {
             bgImg = wordClockBackground,
@@ -1828,7 +1837,7 @@ function WordClock:getWordClockSkin(skinName)
             },
         }
     end
-    
+
     return s
 end
 
@@ -1837,9 +1846,9 @@ function WordClock:getSkinParams(skinName)
 
     self.skinName = skinName
     self.imgpath = _imgpath(self)
-    
+
     log:debug("Image path - " .. self.imgpath)
-    
+
     if _isJogglerSkin(skinName) or _isWQVGASkin(skinName) or _isHDSkin(skinName) then
         -- HDSkin is using the Joggler's artwork. Quite a mess...
         local imgpath = string.gsub(self.imgpath, 'HDSkin', 'JogglerSkin') .. "Clocks/WordClock/"
@@ -1882,12 +1891,12 @@ function WordClock:getSkinParams(skinName)
             alarmX     = jogglerSkinAlarmX,
             alarmY     = jogglerSkinAlarmY,
         }
-        
+
         if _isWQVGASkin(skinname) then
             params.alarmX = 445
             params.alarmY = 2
         end
-        
+
         return params
     elseif skinName == "QVGAlandscapeSkin" then
         return {
@@ -2154,7 +2163,7 @@ function Digital:getDigitalClockSkin(skinName)
                 x.h2 = x.h1 + 75
                 x.dots = x.h2 + 75
                 x.m1 = x.dots + 39
-                x.m2 = x.m1 + 86 
+                x.m2 = x.m1 + 86
                 x.alarm = x.m2 + 80
         x.ampm = x.alarm
 
@@ -2170,7 +2179,7 @@ function Digital:getDigitalClockSkin(skinName)
             y = 54 + 100,
             zOrder = 1,
         })
-    
+
         s.icon_digitalClockDropShadow = {
             img = _loadImage(self, "Clocks/Digital/drop_shadow_digital.png"),
             align = 'center',
@@ -2320,7 +2329,7 @@ function Digital:getDigitalClockSkin(skinName)
                 },
             },
         }
-    
+
         local blackMask = Tile:fillColor(0x000000ff)
         s.ClockBlack = _uses(s.Clock, {
             bgImg = blackMask,
@@ -2353,13 +2362,17 @@ function Digital:getDigitalClockSkin(skinName)
         local screen_width, screen_height = Framework:getScreenSize()
         local scale = screen_height / 480
         local scale_x = screen_width / 800
+
+        if screen_height > screen_width then
+            scale = screen_width/800
+        end
         local digitWidth = 120 * scale
 
-        local jogglerSkinXOffset = 20
-        local jogglerSkinYOffset = 104
+--        local jogglerSkinXOffset = 20
+        local jogglerSkinYOffset = math.floor(104 * screen_height/480)
 
         local digitalClockBackground = _loadImage(self, "Clocks/Digital/wallpaper_clock_digital.png")
-        digitalClockBackground = digitalClockBackground:zoom(scale_x, scale, 1)
+        digitalClockBackground = digitalClockBackground:zoom(screen_width/800,  screen_height/480, 1)
 
         local x = {}
         x.dots = screen_width/2 - 20
@@ -2369,20 +2382,22 @@ function Digital:getDigitalClockSkin(skinName)
         x.m2   = x.m1 + digitWidth
         x.ampm = x.m2 + digitWidth
         x.alarm = jogglerSkinAlarmX
-        
+
         local digitalDots = _loadImage(self, "Clocks/Digital/clock_dots_digital.png")
         if scale ~= 1 then
 	        digitalDots = digitalDots:zoom(scale, scale, 1)
 	    end
-	    
-	    -- unfortunately I didn't find any reliable algorithm to calculate this value
-	    local ampmY = 277
-	    if screen_height == 600 then
-	    	ampmY = 310
-	    elseif screen_height > 600 and screen_height <= 800 then
-	    	ampmY = 360
-	    end
 
+	    -- unfortunately I didn't find any reliable algorithm to calculate this value
+--	    local ampmY = 277
+--	    if screen_height == 600 then
+--	    	ampmY = 310
+--	    elseif screen_height > 600 and screen_height <= 800 then
+--	    	ampmY = 360
+--	    end
+
+        -- this works when the font is FreeSans
+        local ampmY = 40 + jogglerSkinYOffset + (220 * scale) - (40*scale) - (47 * scale)
         local _clockDigit = {
             position = LAYOUT_NONE,
             font = _font(220 * scale),
@@ -2391,12 +2406,12 @@ function Digital:getDigitalClockSkin(skinName)
             y = 40 + jogglerSkinYOffset,
             zOrder = 10,
         }
-        
+
         -- hide the drop shadows, as they're really hard to scale and position right in all possible resolutions
         local _digitShadow = _uses(_clockDigit, {
  			hidden = 1
         })
-    
+
         s.icon_digitalClockDropShadow = {
         	hidden = 1
         }
@@ -2414,7 +2429,7 @@ function Digital:getDigitalClockSkin(skinName)
 
 		local digitalClockHDivider = _loadImage(self, "Clocks/Digital/divider_hort_digital.png")
 		digitalClockHDivider = digitalClockHDivider:zoom(scale_x, 1, 1)
-		
+
         s.icon_digitalClockHDivider = {
             w = WH_FILL,
             img = digitalClockHDivider,
@@ -2529,7 +2544,7 @@ function Digital:getDigitalClockSkin(skinName)
                 },
             },
         }
-    
+
         local blackMask = Tile:fillColor(0x000000ff)
         s.ClockBlack = _uses(s.Clock, {
             bgImg = blackMask,
@@ -2564,10 +2579,10 @@ function Digital:getDigitalClockSkin(skinName)
             y = 116,
             zOrder = 1,
         })
-    
+
         local x = {}
                 x.h1 = 19
-                x.h2 = x.h1 + 50 
+                x.h2 = x.h1 + 50
                 x.dots = x.h2 + 65
                 x.m1 = x.dots + 15
                 x.m2 = x.m1 + 64
@@ -2706,7 +2721,7 @@ function Digital:getDigitalClockSkin(skinName)
                 },
             },
         }
-    
+
         local blackMask = Tile:fillColor(0x000000ff)
         s.ClockBlack = _uses(s.Clock, {
             bgImg = blackMask,
@@ -2758,7 +2773,7 @@ function Digital:getDigitalClockSkin(skinName)
             padding = { 4, 0, 0, 0 },
             zOrder = 1,
         })
-    
+
         local x = {}
                 x.h1 = 0
                 x.h2 = x.h1 + 49
@@ -2900,7 +2915,7 @@ function Digital:getDigitalClockSkin(skinName)
                 },
             },
         }
-    
+
         local blackMask = Tile:fillColor(0x000000ff)
         s.ClockBlack = _uses(s.Clock, {
             bgImg = blackMask,
@@ -2950,7 +2965,7 @@ function Digital:getDigitalClockSkin(skinName)
             padding = { 4, 0, 0, 0 },
             zOrder = 1,
         })
-    
+
         local x = {}
                 x.h1 = 0
                 x.h2 = x.h1 + 49
@@ -3094,7 +3109,7 @@ function Digital:getDigitalClockSkin(skinName)
                 },
             },
         }
-    
+
         local blackMask = Tile:fillColor(0x000000ff)
         s.ClockBlack = _uses(s.Clock, {
             bgImg = blackMask,
@@ -3120,7 +3135,7 @@ function Digital:getDigitalClockSkin(skinName)
             m1Shadow = { hidden = 1 },
             m2Shadow = { hidden = 1 },
         })
-    
+
     end
 
     return s
@@ -3133,7 +3148,7 @@ function Analog:getAnalogClockSkin(skinName)
     self.imgpath = _imgpath(self)
 
     local analogClockBackground
-    
+
     if skinName == 'QVGAlandscapeSkin' then
         analogClockBackground = Tile:loadImage(self.imgpath .. "Clocks/Analog/bb_wallpaper_clock_analog.png")
 
@@ -3142,27 +3157,29 @@ function Analog:getAnalogClockSkin(skinName)
 
     elseif _isJogglerSkin(skinName) or _isHDSkin(skinName) then
         local screen_width, screen_height = Framework:getScreenSize()
-        local ratio = math.max(screen_width/800, screen_height/480)
-
         analogClockBackground = Surface:loadImage(self.imgpath .. "Clocks/Analog/wallpaper_clock_analog.png")
-        analogClockBackground = analogClockBackground:zoom(ratio, ratio, 1)
-        
-        -- if the ratio of the resized background is different, we need to shift it accordingly
-        if ratio ~= (800/480) then
-	        local w, h = analogClockBackground:getSize()
-	        
-	        if w > screen_width then
-		        local tmp = Surface:newRGB(screen_width, screen_height)
-		        analogClockBackground:blit(tmp, (screen_width - w)/2, 0)
-		        analogClockBackground:release()
-		        analogClockBackground = tmp
-		    elseif h > screen_height then
-		        local tmp = Surface:newRGB(screen_width, screen_height)
-		        analogClockBackground:blit(tmp, 0, (screen_height - h)/2)
-		        analogClockBackground:release()
-		        analogClockBackground = tmp
-		    end
+        local w, h = analogClockBackground:getSize()
+        -- choose largest dimension
+        local ratio = math.max(screen_width/w, screen_height/h)
+        -- then prevent clipping
+        if w * ratio > screen_width then
+            ratio = screen_width / w
         end
+        if h * ratio > screen_height then
+            ratio = screen_height / h
+        end
+
+        analogClockBackground = analogClockBackground:zoom(ratio, ratio, 1)
+	    w, h = analogClockBackground:getSize()
+        local tmp = Surface:newRGB(screen_width, screen_height)
+        analogClockBackground:blit(tmp, (screen_width - w)/2,  (screen_height - h)/2)
+        analogClockBackground = tmp
+        return {
+        	Clock = {
+    	        bgImg = analogClockBackground,
+    	    },
+            ratio = ratio,
+        }
 
     elseif skinName == 'QVGAportraitSkin' then
         analogClockBackground = Tile:loadImage(self.imgpath .. "Clocks/Analog/jive_wallpaper_clock_analog.png")
@@ -3175,7 +3192,7 @@ function Analog:getAnalogClockSkin(skinName)
     return {
     	Clock = {
 	        bgImg = analogClockBackground,
-	    } 
+	    }
     }
 
 end
@@ -3191,20 +3208,26 @@ function Analog:getSkinParams(skin)
         alarmY     = 15,
         ratio      = 1,
     }
-    
+
     if _isWQVGASkin(skin) then
         params.alarmY = 18
-        
+
     elseif _isJogglerSkin(skin) or _isHDSkin(skin) then
         params.alarmX = jogglerSkinAlarmX
         params.alarmY = jogglerSkinAlarmY
-        params.ratio  = math.max(screen_width/800, screen_height/480)
-        
+        if params.ratio == nil then
+            log:warn("ratio is nil!!!!!!!!!!!!!!")
+            params.ratio  = math.max(screen_width/800, screen_height/480)
+            if screen_height > screen_width then
+                params.ratio = screen_width/800
+            end
+        end
+
         if _isHDSkin(skin) then
         	params.ratio = params.ratio * 1.5
         end
     end
-    
+
     return params
 end
 
