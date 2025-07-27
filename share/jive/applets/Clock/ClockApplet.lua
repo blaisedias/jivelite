@@ -1230,7 +1230,8 @@ function DotMatrix:getDotMatrixClockSkin(skinName)
 
         local jogglerSkinAlignWithBackgroundXOffset = 2
         local jogglerSkinAlignWithBackgroundYOffset = 1
-        local jogglerSkinXOffset = 160 + jogglerSkinAlignWithBackgroundXOffset + 9
+--        local jogglerSkinXOffset = 160 + jogglerSkinAlignWithBackgroundXOffset + 9
+        local jogglerSkinXOffset = ((screen_width - 300)/2) - 68
         local jogglerSkinYOffset = math.floor(104 * screen_height/480) + jogglerSkinAlignWithBackgroundYOffset
 
         local _clockDigit = {
@@ -2452,6 +2453,10 @@ function Digital:getDigitalClockSkin(skinName)
             w = 40,
         }
 
+        local scalef = 1
+        if screen_width < 800 then
+            scalef = screen_width/800
+        end
         s.Clock = {
             bgImg = digitalClockBackground,
             h1 = _uses(_clockDigit, {
@@ -2504,9 +2509,9 @@ function Digital:getDigitalClockSkin(skinName)
                 padding = { 0, 0, 0, 6 },
                 dayofweek = {
                     align = 'center',
-                    w = 348,
+                    w = math.floor(scalef * 348),
                     h = WH_FILL,
-                    font = _font(30),
+                    font = _font(math.floor(scalef * 30)),
                     fg = { 0xcc, 0xcc, 0xcc },
                     padding  = { 1, 0, 0, 6 },
                 },
@@ -2515,8 +2520,8 @@ function Digital:getDigitalClockSkin(skinName)
                     w = 3,
                 },
                 dayofmonth = {
-                    font = _font(56),
-                    w = 95,
+                    font = _font(math.floor(scalef * 56)),
+                    w = math.floor(scalef * 95),
                     h = WH_FILL,
                     align = 'center',
                     fg = { 0xcc, 0xcc, 0xcc },
@@ -2527,7 +2532,7 @@ function Digital:getDigitalClockSkin(skinName)
                     w = 3,
                 },
                 month = {
-                    font = _font(30),
+                    font = _font(math.floor(scalef * 30)),
                     w = WH_FILL,
                     h = WH_FILL,
                     align = 'center',
@@ -2535,8 +2540,8 @@ function Digital:getDigitalClockSkin(skinName)
                     padding = { 0, 0, 0, 5 },
                 },
                 year = {
-                    font = _boldfont(30),
-                    w = 50,
+                    font = _boldfont(math.floor(scalef * 30)),
+                    w = math.floor(scalef * 50),
                     h = WH_FILL,
                     align = 'left',
                     fg = { 0xcc, 0xcc, 0xcc },
