@@ -407,7 +407,15 @@ local function _drawTurbineBins(surface, bch, params)
 
 	local dyFill, yT1, yT2, yB1, yB2, xF
 
-	for i = 1, #bch do
+	local cStart = 1
+	local cEnd = #bch
+	local cInc = 1
+	if params.flip then
+		cStart = #bch
+		cEnd = 1
+		cInc = -1
+	end
+	for i = cStart, cEnd, cInc do
 		bch[i] = math.ceil(bch[i] * barHeightMulti)
 
 		if cch[i] > 0 then
