@@ -385,7 +385,7 @@ local function _drawTurbineBins(surface, bch, params)
 	local adjustedHeight = params.adjustedHeight
 	local halfHeight = params.halfHeight
 
-	local barHeightMulti = params.barHeightMulti
+	local barHeightMulti = math.floor(params.barHeightMulti/2) * 2
 	local barsInBin = params.barsInBin
 	local barSize = params.barSize
 	local barWidth = params.barWidth
@@ -393,9 +393,9 @@ local function _drawTurbineBins(surface, bch, params)
 	local barColor = params.barColor
 
 	local capColor = params.capColor
-	local totalCapHeight = params.totalCapHeight
-	local capHeight = params.capHeight
-	local capSpace = params.capSpace
+	local totalCapHeight = math.floor(params.totalCapHeight/2) * 2
+	local capHeight = math.floor(params.capHeight/2) * 2
+	local capSpace = math.floor(params.capSpace/2) * 2
 	local desatColor = params.desatColor
 
 	local fgImg = params.fgImg
@@ -443,7 +443,7 @@ local function _drawTurbineBins(surface, bch, params)
 			yB2 = yBot - dyFill
 			for k = 0, barsInBin - 1 do
 				xLeft = x + (k * barSize)
-				if fgImg ~= nil and  params.dsImg ~= nil then
+				if fgImg ~= nil and  params.dsImg ~= nil and dyFill > 0 then
 					imgXLeft = xLeft - xshift
 					params.dsImg:blitClip(imgXLeft, yT1,
 								barWidth, dyFill,
