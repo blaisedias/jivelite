@@ -497,33 +497,33 @@ local function __addSpectrum(path, jsData)
 	end
 
 	local imgName = jsData.name
-	local propN = {
+	local prop = {
 		fg=imgName,
 		ds="ds-" .. imgName,
 		bg="bg-" .. imgName,
 	}
-	propN["src_fg"] =  path .. "/" .. jsData.foreground
-	propN.fg_key =  propN.fg
-	propN.ds_key =  propN.ds
-	propN.bg_key =  propN.bg
-	local md5 = readMD5sum(propN["src_fg"])
+	prop["src_fg"] =  path .. "/" .. jsData.foreground
+	prop.fg_key =  prop.fg
+	prop.ds_key =  prop.ds
+	prop.bg_key =  prop.bg
+	local md5 = readMD5sum(prop["src_fg"])
 	if md5 ~= nil then
-		propN.fg_key = propN.fg .. '-' .. md5
-		propN.ds_key = propN.ds .. '-' .. md5
-		propN.bg_key = propN.bg .. '-' .. md5
+		prop.fg_key = prop.fg .. '-' .. md5
+		prop.ds_key = prop.ds .. '-' .. md5
+		prop.bg_key = prop.bg .. '-' .. md5
 	end
 	if jsData.desaturated ~= nil then
-		propN["src_ds"] = path .. "/" .. jsData.desaturated
-		md5 = readMD5sum(propN["src_ds"])
+		prop["src_ds"] = path .. "/" .. jsData.desaturated
+		md5 = readMD5sum(prop["src_ds"])
 		if md5 ~= nil then
-			propN.ds_key = propN.ds .. '-' .. md5
+			prop.ds_key = prop.ds .. '-' .. md5
 		end
 	end
 	if jsData.background ~= nil then
-		propN["src_bg"] = path .. "/" .. jsData.background
-		md5 = readMD5sum(propN["src_bg"])
+		prop["src_bg"] = path .. "/" .. jsData.background
+		md5 = readMD5sum(prop["src_bg"])
 		if md5 ~= nil then
-			propN.bg_key = propN.bg .. '-' .. md5
+			prop.bg_key = prop.bg .. '-' .. md5
 		end
 	end
 
@@ -533,52 +533,51 @@ local function __addSpectrum(path, jsData)
 	if jsData.sptype == SPT_BACKLIT then
 		rszOp = RESIZEOP_SCALED_CENTERED_CROP
 	else
-		propN["bg"] = nil
+		prop["bg"] = nil
 	end
-	local propT = nil
+	spectrumImagesMap[imgName] = {
+		properties = {
+			prop,
+		},
+		rszOp = rszOp,
+	}
 	if jsData.turbine ~= nil then
 		if jsData.turbine.foreground ~= nil then
-			propT = {
+			prop = {
 				fg="trb-" .. imgName,
 				ds="trb-ds-" .. imgName,
 				bg="trb-bg-" .. imgName,
 			}
-			propT["src_fg"] =  path .. "/" .. jsData.turbine.foreground
-			propT.fg_key = propT.fg
-			propT.ds_key = propT.ds
-			propT.bg_key = propT.bg
-			md5 = readMD5sum(propT["src_fg"])
+			prop["src_fg"] =  path .. "/" .. jsData.turbine.foreground
+			prop.fg_key = prop.fg
+			prop.ds_key = prop.ds
+			prop.bg_key = prop.bg
+			md5 = readMD5sum(prop["src_fg"])
 			if md5 ~= nil then
-				propT.fg_key = propT.fg .. '-' .. md5
-				propT.ds_key = propT.ds .. '-' .. md5
-				propT.bg_key = propT.bg .. '-' .. md5
+				prop.fg_key = prop.fg .. '-' .. md5
+				prop.ds_key = prop.ds .. '-' .. md5
+				prop.bg_key = prop.bg .. '-' .. md5
 			end
 			if jsData.turbine.desaturated ~= nil then
-				propT["src_ds"] =  path .. "/" .. jsData.turbine.desaturated
-				md5 = readMD5sum(propT["src_ds"])
+				prop["src_ds"] =  path .. "/" .. jsData.turbine.desaturated
+				md5 = readMD5sum(prop["src_ds"])
 				if md5 ~= nil then
-					propT.ds_key = propT.ds .. '-' .. md5
+					prop.ds_key = prop.ds .. '-' .. md5
 				end
 			end
 			if jsData.turbine.background ~= nil then
-				propT["src_bg"] =  path .. "/" .. jsData.turbine.background
-				md5 = readMD5sum(propT["src_bg"])
+				prop["src_bg"] =  path .. "/" .. jsData.turbine.background
+				md5 = readMD5sum(prop["src_bg"])
 				if md5 ~= nil then
-					propT.bg_key = propT.bg .. '-' .. md5
+					prop.bg_key = prop.bg .. '-' .. md5
 				end
 			end
 			if jsData.sptype ~= SPT_BACKLIT then
-				propT["bg"] =  nil
+				prop["bg"] =  nil
 			end
 		end
+		table.insert(spectrumImagesMap[imgName].properties, prop)
 	end
-	spectrumImagesMap[imgName] = {
-		properties = {
-			propN,
-			propT,
-		},
-		rszOp = rszOp,
-	}
 	spLoaded[jsData.name] = true
 	if jsData.backlitAlpha ~= nil then
 		if type(jsData.backlitAlpha) == 'number' and jsData.backlitAlpha >1 and jsData.backlitAlpha < 256 then
