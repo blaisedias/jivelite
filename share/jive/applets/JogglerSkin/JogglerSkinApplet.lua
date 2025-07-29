@@ -2489,10 +2489,10 @@ function skin0(self, s, _, _, w, h)
 
 	-- new style that incorporates text, icon, more text, and maybe a badge
 	s.toast_popup_mixed = {
-		x = 100,
-		y = (screenHeight - 250) / 2,
+		x = (screenWidth - scaledValues.TOAST_POPUP_MIXED_WIDTH)/2,
+		y = (screenHeight - scaledValues.TOAST_POPUP_MIXED_HEIGHT) / 2,
 		position = LAYOUT_NONE,
-		w = screenWidth - 200,
+		w = scaledValues.TOAST_POPUP_MIXED_WIDTH,
 		h = scaledValues.TOAST_POPUP_MIXED_HEIGHT,
 		bgImg = popupBox,
 		text = {
@@ -2509,7 +2509,7 @@ function skin0(self, s, _, _, w, h)
 		subtext = {
 			position = LAYOUT_NORTH,
 --			padding = { 8, 203, 8, 0 },
-			padding = { 8, scaledValues.TOAST_POPUP_MIXED_HEIGHT - scaledValues.POPUP_TEXT_SIZE_2 - 5, 8, 0 },
+			padding = { 8, math.floor(scaledValues.TOAST_POPUP_MIXED_HEIGHT * 0.8), 8, 0 },
 			align = 'top',
 			w = WH_FILL,
 			h = WH_FILL,
