@@ -3845,6 +3845,11 @@ function skin0(self, s, _, _, w, h)
 		img = _songProgressBarDisabled,
 	})
 
+	local hideVolumeBar = 0
+	if volumeBarWidth < 30 then
+		-- the volumebar cannot be rendered meaningfully - hide it
+		hideVolumeBar = 1
+	end
 	s.npvolumeB = {
 		w = volumeBarWidth,
 		border = { 5, 0, 5, 0},
@@ -3854,10 +3859,14 @@ function skin0(self, s, _, _, w, h)
 		bgImg = _modernVolumeSliderBackground,
 		img = _modernVolumeSliderBar,
 		pillImg = _modernVolumeSliderPill,
+        hidden = hideVolumeBar,
 	}
 	s.npvolumeB_disabled = _uses(s.npvolumeB, {
 		pillImg = false,
 	})
+	if hideVolumeBar then
+        volumeBarWidth = 0
+	end
 
 	-- pressed styles
 	BASEnowplaying.title.pressed = _uses(BASEnowplaying.title, {
