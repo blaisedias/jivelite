@@ -2523,10 +2523,9 @@ function skin0(self, s, _, _, w, h)
 	s._badge = {
 		position = LAYOUT_NONE,
 		zOrder = 99,
-		-- middle of the screen plus half of the icon width minus half of the badge width. gotta love LAYOUT_NONE
-		x = (screenWidth-200)/2 + self:param().POPUP_THUMB_SIZE/2 - 17,
+		x = (scaledValues.TOAST_POPUP_MIXED_WIDTH)/2 + self:param().POPUP_THUMB_SIZE/2 - 17,
 		w = 34,
-		y = 48,
+		y = (scaledValues.POPUP_TEXT_SIZE_1 * 2) - 4,
 	}
 	s.badge_none = _uses(s._badge, {
 		img = false,
