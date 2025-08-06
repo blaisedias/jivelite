@@ -878,7 +878,7 @@ JiveSurface *jive_surface_set_video_mode(Uint16 w, Uint16 h, Uint16 bpp, bool fu
 
 	}
 //	LOG_INFO(log_ui_draw, "Video mode : %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d] flags=%x", sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift, sdl->flags);
-	fprintf(stderr, "Video mode : %dx%d %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d] flags=%x\n", sdl->w, sdl->h, sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift, sdl->flags);
+	logfprintf("Video mode : %dx%d %d bits/pixel %d bytes/pixel [R<<%d G<<%d B<<%d] flags=%x\n", sdl->w, sdl->h, sdl->format->BitsPerPixel, sdl->format->BytesPerPixel, sdl->format->Rshift, sdl->format->Gshift, sdl->format->Bshift, sdl->flags);
 
 	srf = calloc(sizeof(JiveSurface), 1);
 	srf->refcount = 1;
@@ -2649,14 +2649,14 @@ int jiveL_surfacetile_gc(lua_State *L) {
 	return 0;
 }
 
-// concurrent resizer
+// concurrent resize ENUM
 #define  RESIZE_PENDING  0
 #define  RESIZE_COMPLETE 1
 #define  RESIZE_ERROR -1
 
 //static pthread_t thread_resizer;
 //static pthread_mutex_t resizer_lock; 
-static SDL_Thread* resizer_thread = NULL;
+static SDL_Thread* worker_threads[2] = {NULL};
 static SDL_mutex* resizer_lock = NULL;
 static SDL_sem* resizer_sem;
 
@@ -2829,40 +2829,36 @@ void do_resize(resize_request_ptr req) {
 		}
 }
 
-static bool debug_resize_enabled = 0;
-static void debug_printf(char *format, ...) {
-	if (debug_resize_enabled) {
+static void dummy_printf(char *format, ...) {
 		va_list args;
 		va_start(args, format);
-		logfprintf(format, args);
 		va_end(args);
-	}
 }
+static void (*debug_printf)(char *format, ...) = &dummy_printf;
 
-// read only in the fn_thread_resizer
-static volatile unsigned flag_run_resize = 1;
-// read only outside fn_thread_resizer
-static volatile unsigned flag_in_resize = 0;
+// read only in the fn_worker_thread
+static volatile unsigned flag_app_running = 1;
 
 // resizer thread - runs as daemon - polling every second
-int fn_thread_resizer(void *ptr)
+int fn_worker_thread(void *ptr)
 {
+	const SDL_Thread *self = *((SDL_Thread **)ptr);
 	int retValue = 0;
 	resize_request_ptr req;
-	debug_printf("fn_thread_resizer: starting\n");
-	while(flag_run_resize) {
+	debug_printf("fn_worker_thread: %p starting\n", self);
+	while(flag_app_running) {
 		// use wait timeout for more robust behaviour,
 		while(SDL_SemWaitTimeout(resizer_sem, 5000) == -1) {
 			// if wait for semaphore fails fall back to polling mode
-			if (resize_pending != NULL || flag_run_resize == 0) {
+			if (resize_pending != NULL || flag_app_running == 0) {
 				break;
 			}
 			sleep(1);
 		}
 		if (resize_pending != NULL) {
-			debug_printf("fn_thread_resizer: resize start\n");
+			debug_printf("fn_worker_thread: %p resize start\n", self);
 			if (SDL_LockMutex(resizer_lock) < 0) {
-				debug_printf("fn_thread_resizer: mutex lock failed\n");
+				debug_printf("fn_worker_thread: %p mutex lock failed\n", self);
 				continue;
 			}
 
@@ -2872,23 +2868,23 @@ int fn_thread_resizer(void *ptr)
 //				req->next = NULL;
 			}
 			if (SDL_UnlockMutex(resizer_lock) < 0) {
-				debug_printf("fn_thread_resizer: terminating: mutex unlock failed\n");
+				debug_printf("fn_worker_thread: %p terminating: mutex unlock failed\n", self);
 				retValue = -1;
 				break;
 			}
 
-			flag_in_resize = 1;
 			do_resize(req);
-			flag_in_resize = 0;
-			debug_printf("fn_thread_resizer: resize finished\n");
+			debug_printf("fn_worker_thread: %p resize finished\n", self);
 		}
 	}
-	debug_printf("fn_thread_resizer: terminating\n");
+	debug_printf("fn_worker_thread: %p terminating\n", self);
 	return  retValue;
 }
 
-void start_concurrent_resizer(void) {
-	debug_resize_enabled = getenv("JIVE_DEBUG_RESIZE") != NULL;
+void start_concurrent_threads(void) {
+	if (getenv("JIVE_DEBUG_RESIZE") != NULL) {
+		debug_printf = logfprintf;
+	}
 
 	resizer_sem = SDL_CreateSemaphore(0);
 	if (resizer_sem == NULL) {
@@ -2900,30 +2896,36 @@ void start_concurrent_resizer(void) {
 		debug_printf("failed to initialise lock\n");
 		return;
 	}
-	resizer_thread = SDL_CreateThread(fn_thread_resizer, NULL);
-	if (resizer_thread != NULL) {
-		debug_printf("started resizer thread\n");
-	} else {
-		debug_printf("failed to initialise lock\n");
+	int indx=0;
+	debug_printf("worker threads %ld\n", sizeof(worker_threads)/sizeof(worker_threads[0]));
+	for (indx=0; indx < sizeof(worker_threads)/sizeof(worker_threads[0]); ++indx) {
+		worker_threads[indx] = SDL_CreateThread(fn_worker_thread, &worker_threads[indx]);
+		if (worker_threads[indx] != NULL) {
+			debug_printf("started threads %d) %p\n", indx + 1,  worker_threads[indx]);
+		} else {
+			debug_printf("failed to create thread %d\n", indx + 1);
+		}
 	}
 }
 
-void stop_concurrent_resizer(void) {
+void stop_concurrent_threads(void) {
 	int th_status = 0;
-	debug_printf("stop_concurrent_resizer: resize_thread: %p\n", resizer_thread);
-	if (resizer_thread == NULL)
-		return;
-
-	// signal thread to stop, by clearing the run flag
-	flag_run_resize = 0;
-	// post twice 
-	SDL_SemPost(resizer_sem);
-	SDL_SemPost(resizer_sem);
-	debug_printf("stop_concurrent_resizer: flag_in_resize=%d, invoking SDL_WaitThread\n", flag_in_resize);
-	// wait for thread to terminate
-	SDL_WaitThread(resizer_thread, &th_status);
-	debug_printf("stop_concurrent_resizer: resize_thread status: %d\n", th_status);
-	resizer_thread = NULL;
+	int indx;
+	for (indx=0; indx < sizeof(worker_threads)/sizeof(worker_threads[0]); ++indx) {
+		if (worker_threads[indx] != NULL) {
+			 debug_printf("stop_concurrent_threads: %d, thread: %p\n", indx+1, worker_threads[indx]);
+			// signal thread to stop, by clearing the run flag
+			flag_app_running = 0;
+			// post twice 
+			SDL_SemPost(resizer_sem);
+			SDL_SemPost(resizer_sem);
+			debug_printf("stop_concurrent_threads: invoking SDL_WaitThread %p\n", worker_threads[indx]);
+			// wait for thread to terminate
+			SDL_WaitThread(worker_threads[indx], &th_status);
+			debug_printf("stop_concurrent_threads: %d, thread: %p, thread status: %d\n",indx+1, worker_threads[indx], th_status);
+			worker_threads[indx] = NULL;
+		}
+	}
 }
 
 int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
