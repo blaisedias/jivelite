@@ -26,7 +26,6 @@ static SDL_mutex* background_exec_lock = NULL;
 static SDL_sem* background_exec_sem;
 int fn_thread_background_exec(void *ptr);
 static volatile unsigned background_exec_run = 1;
-static bool debug_background_exec = 1;
 
 // public API
 const char * system_get_machine(void) {
@@ -134,13 +133,11 @@ static int system_get_user_dir(lua_State *L) {
 	return 1;
 }
 
-
 static int system_init(lua_State *L) {
 	/* stack is:
 	 * 1: system
 	 * 2: table
 	 */
-
 	lua_getfield(L, 2, "macAddress");
 	if (!lua_isnil(L, -1)) {
 		char *ptr;
@@ -308,6 +305,12 @@ int jive_find_file(const char *path, char *fullpath) {
 	return 0;
 }
 
+static void dummy_printf(char *format, ...) {
+		va_list args;
+		va_start(args, format);
+		va_end(args);
+}
+static void (*debug_printf)(char *format, ...) = &dummy_printf;
 
 /*
  * 
@@ -388,7 +391,9 @@ static int system_atomic_write(lua_State *L)
 #endif
 
 	if (background_exec_thread == NULL) { 
-		debug_background_exec =  getenv("JIVE_DEBUG_BACKGROUND_EXEC") != NULL;
+		if (getenv("JIVE_DEBUG_BACKGROUND_EXEC") != NULL) {
+			debug_printf = logfprintf;
+		}
 		background_exec_sem = SDL_CreateSemaphore(0);
 		if (background_exec_sem == NULL) {
 			logfprintf("failed to create background exec semaphore\n");
@@ -401,7 +406,7 @@ static int system_atomic_write(lua_State *L)
 		}
 		background_exec_thread = SDL_CreateThread(fn_thread_background_exec, NULL);
 		if (background_exec_thread != NULL) {
-			logfprintf("started background_exec thread\n");
+			logfprintf("created background_exec thread %p\n", background_exec_thread);
 		} else {
 			logfprintf("failed to create background thread\n");
 		}
@@ -416,21 +421,13 @@ typedef struct background_request {
 } background_request, *background_request_ptr;
 
 static background_request_ptr background_request_list_head;
-
-static void debug_printf(char *format, ...) {
-	if (debug_background_exec) {
-		va_list args;
-		va_start(args, format);
-		logfprintf(format, args);
-		va_end(args);
-	}
-}
-
 void stop_background_exec(void) {
 	int th_status = 0;
 	background_exec_run = 0;
 	logfprintf("waiting for background exec thread to terminate\n");
 	SDL_WaitThread(background_exec_thread, &th_status);
+	debug_printf("background exec thread %p terminated\n", background_exec_thread);
+	background_exec_thread = NULL;
 }
 
 int fn_thread_background_exec(void *ptr) {
