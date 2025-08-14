@@ -1,3 +1,8 @@
 [submodule "src/SDL_SavePNG"]
 	path = src/SDL_SavePNG
 	url = https://github.com/driedfruit/SDL_SavePNG.git
+	branch = master
+[submodule "assets/tcz-jivelite-visualisers"]
+	path = assets/tcz-jivelite-visualisers
+	url = https://github.com/blaisedias/tcz-jivelite-visualisers.git
+	branch = main
