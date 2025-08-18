@@ -105,24 +105,23 @@ end
 
 
 local function _writeScaledData(obj, jsPath)
-    local data = {}
-    -- do not write transient state
-    local objCopy = {}
-    for topIndex,nestedObj in pairs(obj) do
-        objCopy[topIndex] = {}
-        for k,v in pairs(nestedObj) do
-            if k ~= 'state' then
-                objCopy[topIndex][k] = v
-            end
-        end
+    local data = _loadJsonData(jsPath) or {}
+    if data[resolutionKey] == nil then
+        data[resolutionKey] = {}
     end
-    data[resolutionKey] = objCopy
-    data["comments"] = {
-        ADJUST_FOR_GRID_ROWS = {
-            "values are:",
-            " - rounddown -> reduced number of grid rows to fit",
-            " - roundup   -> increase number of grid rows to fit",
-            " - anything-else  -> display partial grid row"
+    for k,v in pairs(obj) do
+        data[resolutionKey][k] = v
+    end
+    data["-doc"] = {
+        descriptions = {
+            ADJUST_FOR_GRID_ROWS = {
+                "rounddown -> reduced number of grid rows to fit",
+                "roundup   -> increase number of grid rows to fit",
+                "anything-else -> leave unchanged possibly partial grid row"
+            }
+        },
+        reference = {
+            ADJUST_FOR_GRID_ROWS = { "roundown", "roundup", '-' }
         }
     }
     local jsonString = json.stringify(data)
@@ -986,7 +985,7 @@ function getJogglerSkinParams(skinName)
     end
 
     os.execute("mkdir -p " .. System.getUserDir() .. '/cache')
-    _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/JogglerSkin.json')
+    _writeScaledData({jogglerSkin = params}, System.getUserDir() .. '/cache/Joggler.json')
     log:debug("skin params:", table.stringify(params))
     return params
 end
@@ -1095,7 +1094,7 @@ function getGridSkinParams(fiveItemHeight)
         end
     end
     os.execute("mkdir -p " .. System.getUserDir() .. '/cache')
-    _writeScaledData({gridSkin = params}, System.getUserDir() .. '/cache/PiGridSkin.json')
+    _writeScaledData({gridSkin = params}, System.getUserDir() .. '/cache/Joggler.json')
     log:debug("grid skin params:", table.stringify(params))
     return params
 end
