@@ -950,8 +950,10 @@ function getJogglerSkinParams(skinName)
         end
     end
 
+    local mas_defined = jsonData[resolutionKey] and jsonData[resolutionKey].jogglerSkin and jsonData[resolutionKey].jogglerSkin.midArtworkSize ~= nil
     params.state.hiddenControlHeight = math.floor(params.TITLE_HEIGHT/2.5)
-    if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+--    if jsonData[resolutionKey].jogglerSkin.midArtworkSize == nil then
+    if not mas_defined then
         if screenHeight > screenWidth then
             -- portrait mode
             local _top = params.TITLE_HEIGHT + 18
