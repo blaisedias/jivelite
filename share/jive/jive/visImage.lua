@@ -905,8 +905,12 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		desatColor = spectrumList[spImageIndex].desatColor
 	end
 
-	local capHeight = capHeightIn or {4, 4}
-	local capSpace = capSpaceIn or {4, 4}
+	local vcap = 4
+	if h/31 < 4 then
+		vcap = math.floor(h/62) or 1
+	end
+	local capHeight = capHeightIn or {vcap, vcap}
+	local capSpace = capSpaceIn or {vcap, vcap}
 	if not visSettings.spectrum.capsOn then
 		capHeight = {0,0}
 		capSpace = {0,0}
