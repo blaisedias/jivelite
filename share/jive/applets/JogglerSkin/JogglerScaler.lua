@@ -15,10 +15,10 @@
 
 --
 local pairs = pairs
-local ipairs = ipairs
-local next = next
+-- local ipairs = ipairs
+-- local next = next
 -- local tonumber = tonumber
-local tostring = tostring
+-- local tostring = tostring
 local pcall = pcall
 local type = type
 local getmetatable = getmetatable
@@ -30,7 +30,7 @@ local math  = require("math")
 local lfs   = require("lfs")
 local os    = require("os")
 local io    = require("io")
-local string      = require("string")
+-- local string      = require("string")
 
 -- jive package imports
 local Surface = require("jive.ui.Surface")
@@ -60,6 +60,8 @@ local jogglerImgpath = "applets/JogglerSkin/images/"
 local gridImgpath = "applets/PiGridSkin/images/"
 local iconsImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/Icons/'
 local volbarImgpath = jogglerImgpath .. 'UNOFFICIAL/Material/VolumeBar/'
+
+local correctionsNpTables = {}
 
 module(...)
 
@@ -214,23 +216,22 @@ function initialise()
     end
 
     -- load and apply corrections to scaling
-    local correctionsF = System:findFile('share/jive/applets/JogglerSkin/JogglerScalerCorrections.json')
-    if correctionsF then
-        local correctionsData =  _loadJsonData(correctionsF)
-        if correctionsData and correctionsData[resolutionKey] then
-            local jd = jsonData[resolutionKey]
-            for k,v in pairs(correctionsData[resolutionKey]) do
-                if jd[k] == nil then
-                    jd[k] = {}
+    local correctionsData =  _loadJsonData('share/jive/applets/JogglerSkin/JogglerScalerCorrections.json')
+    if correctionsData and correctionsData[resolutionKey] then
+        local jd = jsonData[resolutionKey]
+        for k,v in pairs(correctionsData[resolutionKey]) do
+            if jd[k] == nil then
+                jd[k] = {}
+            end
+            for kk,vv in pairs(v) do
+                if jd[k][kk] == nil then
+                    jd[k][kk] = vv
                 end
-                for kk,vv in pairs(v) do
-                    if jd[k][kk] == nil then
-                        jd[k][kk] = vv
-                    end
-                end
-           end
-        end
+            end
+       end
     end
+    -- load NowPlaying corrections
+    correctionsNpTables = _loadJsonData('share/jive/applets/JogglerSkin/JogglerNowPlayingCorrections.json') or {}
 end
 
 -- global function scale a text size value to match the display dimensions
@@ -442,9 +443,9 @@ local function scaleImageFile(src_path, dest_path, w, h)
             end
 end
 
-local function str_endswith(str, ending)
-    return ending == "" or string.sub(str, -#ending) == ending
-end
+-- local function str_endswith(str, ending)
+--     return ending == "" or string.sub(str, -#ending) == ending
+-- end
 
 local function pathIter(rpath)
 	local hist = {}
@@ -1145,22 +1146,6 @@ local function copy1(obj)
     return nil
 end
 
-local npkeys = {
-    "nptitle",
-    "npprogress",
-    "npprogressNB",
-    "title",
-    "npvisu",
-    "npalbumgroup",
-    "pressed",
-    "npdebugdata",
-    "npartistgroup",
-    "npcontrols",
-    "npartwork",
-    "npartistalbum",
-    "npaudiometadata",
-}
-
 local proscribed = {
     "pressed",
 --    "rbutton",
@@ -1208,6 +1193,13 @@ end
 function getUserNpAllstylesTable()
     if userNpTables['allstyles'] ~= nil then
         return  userNpTables['allstyles']
+    end
+    return {}
+end
+
+function getCorrectionsNpTable(key)
+    if key ~= nil and correctionsNpTables[resolutionKey] ~= nil then
+        return  correctionsNpTables[resolutionKey][key] or {}
     end
     return {}
 end
