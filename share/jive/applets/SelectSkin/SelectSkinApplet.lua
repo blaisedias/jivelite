@@ -46,30 +46,30 @@ module(..., Framework.constants)
 oo.class(_M, Applet)
 
 local _defaultSkinNameForType = {
-		["touch"] = "WQVGAsmallSkin",
-		["remote"] = "WQVGAlargeSkin",
+		["touch"] = "JogglerSkin",
+		["remote"] = "JogglerSkin",
 }
 
 --service method
 function getSelectedSkinNameForType(self, skinType)
-	if Framework:getWmAvailable() == false then
-		-- No window manager => embedded system and full screen
-		-- for larger displays default to Joggler skin
-		local dispW, dispH = Framework:getDisplaySize()
-		log:info("Display size:", dispW, 'x', dispH, ", wmAvailable:", wmAvailable)
-		-- Portrait mode
-		if dispW == 720 and dispH == 1280 then
-			return self:getSettings()[skinType] or "JogglerSkin"
-		end
-		-- FIXME: skinType is ignored
-		if dispW >= 800 or dispH >= 480 then
-			return self:getSettings()[skinType] or "JogglerSkin"
-		end
-		if dispW == 400 and dispH == 240 then
-			return self:getSettings()[skinType] or "WQVGAsmallSkin"
-		end
-		-- FIXME: QVGA
-	end
+--	if Framework:getWmAvailable() == false then
+--		-- No window manager => embedded system and full screen
+--		-- for larger displays default to Joggler skin
+--		local dispW, dispH = Framework:getDisplaySize()
+--		log:info("Display size:", dispW, 'x', dispH, ", wmAvailable:", wmAvailable)
+--		-- Portrait mode
+--		if dispW == 720 and dispH == 1280 then
+--			return self:getSettings()[skinType] or "JogglerSkin"
+--		end
+--		-- FIXME: skinType is ignored
+--		if dispW >= 800 or dispH >= 480 then
+--			return self:getSettings()[skinType] or "JogglerSkin"
+--		end
+--		if dispW == 400 and dispH == 240 then
+--			return self:getSettings()[skinType] or "WQVGAsmallSkin"
+--		end
+--		-- FIXME: QVGA
+--	end
 	return self:getSettings()[skinType] or _defaultSkinNameForType[skinType]
 end
 
