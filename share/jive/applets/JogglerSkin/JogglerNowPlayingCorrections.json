@@ -1,0 +1,481 @@
+{
+    "-doc": {
+        "advisories": {
+            "allstyles": [
+                [ "Use 'allstyles' to define colours and font elements, plus controls sort order for ALL now playing styles." ],
+                [ "DO NOT USE 'allstyles' to define other paramaters." ],
+                [ "'allstyles' settings are independent of display resolution" ]
+            ],
+            "controls_order": [
+                [ "Do not modify 'order', that defines button order AND also the set of visible buttons." ],
+                [ "To reorder controls use 'order_sort' array." ],
+                [ "A reference order_sort is included the reference section." ],
+                [ "Use this and imply rearrange to suit - do not add or delete elements." ]
+            ]
+        },
+        "reference": {
+            "npcontrols": {
+                "order_sort": [ "rew", "play", "fwd", "repeatMode", "shuffleMode", "twiddle", "musicinfo", "divVolSpace", "divVolSpace2", "volDown", "volSlider", "volUp" ]
+            },
+            "position_values_by_name": {
+                "LAYOUT_CENTER": 4,
+                "LAYOUT_EAST": 1,
+                "LAYOUT_NONE": 5,
+                "LAYOUT_NORTH": 0,
+                "LAYOUT_SOUTH": 2,
+                "LAYOUT_WEST": 3
+            }
+        }
+    },
+    "240x240": {
+        "nowplaying_text_only": {
+            "npalbumgroup": {
+                "h": 30,
+                "npalbum": {
+                    "_font_size": 20,
+                    "w": 230
+                },
+                "x": 5,
+                "y": 80
+            },
+            "npartistgroup": {
+                "h": 30,
+                "npartist": {
+                    "_font_size": 20,
+                    "lineHeight": 30,
+                    "w": 230
+                },
+                "x": 5,
+                "y": 120
+            },
+            "nptitle": {
+                "h": 30,
+                "nptrack": {
+                    "_font_size_bold": 25,
+                    "lineHeight": 30,
+                    "w": 240,
+                    "x": 0
+                },
+                "w": 240,
+                "x": 0,
+                "y": 40,
+                "padding": [5,0,5,0]
+            },
+            "npprogress": {
+                "x": 10,
+                "w":220,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            }
+        },
+       "nowplaying_large_spectrum": {
+            "nptitle": {
+                "padding":  [0,0,0,0]
+            }
+        },
+       "nowplaying_spectrum_text": {
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            },
+            "nptitle": {
+                "padding":  [0,0,0,0]
+            },
+            "npprogress": {
+                "x": 10,
+                "w":220,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            }
+        },
+       "nowplaying_large_vumeter": {
+            "nptitle": {
+                "padding":  [0,0,0,0]
+            }        },
+       "nowplaying_vumeter_text": {
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            },
+            "nptitle": {
+                "padding":  [0,0,0,0]
+            },
+            "npprogress": {
+                "x": 10,
+                "w":220,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            }
+
+        }
+    },
+    "320x240": {
+        "nowplaying_text_only": {
+            "npalbumgroup": {
+                "h": 30,
+                "npalbum": {
+                    "_font_size": 20,
+                    "w": 300
+                },
+                "x": 10,
+                "y": 80
+            },
+            "npartistgroup": {
+                "h": 30,
+                "npartist": {
+                    "_font_size": 20,
+                    "lineHeight": 30,
+                    "w": 300
+                },
+                "x": 10,
+                "y": 120
+            },
+            "nptitle": {
+                "h": 30,
+                "nptrack": {
+                    "_font_size_bold": 25,
+                    "lineHeight": 30,
+                    "w": 300,
+                    "x": 10
+                },
+                "w": 300,
+                "x": 10,
+                "y": 40
+            },
+            "npprogress": {
+                "x": 10,
+                "w":300,
+                "npprogressB": {
+                    "w": 240
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            }
+        },
+       "nowplaying_spectrum_text": {
+            "npprogress": {
+                "x": 10,
+                "w":300,
+                "npprogressB": {
+                    "w": 240
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            }
+        },
+       "nowplaying_vumeter_text": {
+            "npprogress": {
+                "x": 10,
+                "w":300,
+                "npprogressB": {
+                    "w": 240
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            }
+        },
+        "nowplaying": {
+            "npalbumgroup": {
+                "y": 120
+            },
+            "npartistgroup": {
+                "y": 90
+            }
+        }
+    },
+    "240x320": {
+        "nowplaying_spectrum_text_art": {
+            "npalbumgroup": {
+                "npalbum": {
+                    "w": 220
+                },
+                "x": 10
+            },
+            "npartistgroup": {
+                "npartist": {
+                    "w": 220
+                },
+                "x": 10
+            },
+            "npprogress": {
+                "x": 10,
+                "w":220,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "nptitle": {
+                "nptrack": {
+                    "w": 220
+                },
+                "x": 10,
+                "zOrder": 2
+            },
+            "npvisu" : {
+                "w":220,
+                "x":10,
+                "spectrum": {
+                    "w":220,
+                    "x":10
+                }
+            }
+        },
+        "nowplaying_vumeter_text_art": {
+            "npalbumgroup": {
+                "npalbum": {
+                    "w": 220
+                },
+                "x": 10
+            },
+            "npartistgroup": {
+                "npartist": {
+                    "w": 220
+                },
+                "x": 10
+            },
+             "npprogress": {
+                "x": 10,
+                "w":220,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "npvisu" : {
+                "w":220,
+                "x":10,
+                "vumeter_v2": {
+                    "w":220,
+                    "x":10
+                }
+            }
+        }
+    },
+    "480x272": {
+        "nowplaying_text_only": {
+            "npalbumgroup": {
+                "h": 40,
+                "npalbum": {
+                    "_font_size": 25,
+                    "lineHeight": 30,
+                    "w": 460
+                },
+                "x": 10,
+                "y": 100
+            },
+            "npartistgroup": {
+                "h": 40,
+                "npartist": {
+                    "_font_size": 25,
+                    "lineHeight": 30,
+                    "w": 460
+                },
+                "x": 10,
+                "y": 150
+            },
+            "nptitle": {
+                "h": 50,
+                "nptrack": {
+                    "_font_size_bold": 35,
+                    "lineHeight": 40,
+                    "w": 460,
+                    "x": 10
+                },
+                "w": 460,
+                "x": 10,
+                "y": 40
+            },
+            "npprogress": {
+                "x": 10,
+                "w":460,
+                "npprogressB": {
+                    "w": 400
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            }
+        },
+       "nowplaying_spectrum_text": {
+            "npprogress": {
+                "x": 10,
+                "w":460,
+                "npprogressB": {
+                    "w": 400
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            }
+        },
+       "nowplaying_vumeter_text": {
+            "npprogress": {
+                "x": 10,
+                "w":460,
+                "npprogressB": {
+                    "w": 400
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "npartistalbum": {
+                "padding": [ 20, 0, 10, 0 ]
+            }
+        },
+        "nowplaying": {
+            "npalbumgroup": {
+                "y": 120
+            },
+            "npartistgroup": {
+                "y": 90
+            }
+        }
+    },
+    "272x480": {
+        "nowplaying_spectrum_text_art": {
+            "npalbumgroup": {
+                "npalbum": {
+                    "w": 252
+                },
+                "x": 10
+            },
+            "npartistgroup": {
+                "npartist": {
+                    "w": 252
+                },
+                "x": 10
+            },
+            "npprogress": {
+                "x": 10,
+                "w":252,
+                "npprogressB": {
+                    "w": 192
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "nptitle": {
+                "nptrack": {
+                    "w": 252
+                },
+                "x": 10,
+                "zOrder": 2
+            },
+            "npvisu" : {
+                "w":252,
+                "x":10,
+                "spectrum": {
+                    "w":252,
+                    "x":10
+                }
+            }
+        },
+        "nowplaying_vumeter_text_art": {
+            "npalbumgroup": {
+                "npalbum": {
+                    "w": 252
+                },
+                "x": 10
+            },
+            "npartistgroup": {
+                "npartist": {
+                    "w": 252
+                },
+                "x": 10
+            },
+             "npprogress": {
+                "x": 10,
+                "w":252,
+                "npprogressB": {
+                    "w": 160
+                },
+                "elapsed" : {
+                    "padding": [0,0,10,0]
+                },
+                "remain" : {
+                    "padding": [0,0,10,0]
+                }
+            },
+            "nptitle": {
+                "nptrack": {
+                    "w": 252
+                },
+                "x": 10,
+                "zOrder": 2
+            },
+            "npvisu" : {
+                "w":252,
+                "x":10,
+                "vumeter_v2": {
+                    "w":252,
+                    "x":10
+                }
+            }
+        }
+    }
+}

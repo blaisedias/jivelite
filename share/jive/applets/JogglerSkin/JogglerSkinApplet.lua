@@ -615,8 +615,14 @@ local function _NP_uses(parent, tbl, key)
 	_NP_setup_fonts(tbl)
 	local tblu = _uses(parent, tbl)
 	if key then
+		local corrections_tbl = jogglerScaler.getCorrectionsNpTable(key)
+		local xi,_ = next(corrections_tbl)
+		if xi ~= nil then
+			_NP_setup_fonts(corrections_tbl)
+			tblu =  _uses(tblu, corrections_tbl)
+		end
 		local allstyles_tbl = jogglerScaler.getUserNpAllstylesTable(key)
-		local xi,_ = next(allstyles_tbl)
+		xi,_ = next(allstyles_tbl)
 		if xi ~= nil then
 			_NP_setup_fonts(allstyles_tbl)
 			tblu =  _uses(tblu, allstyles_tbl)
@@ -5575,6 +5581,27 @@ end
 function skin1920x480(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 1920, 480)
 end
+
+function skin240x240(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 240, 240)
+end
+
+function skin320x240(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 320, 240)
+end
+
+function skin240x320(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 240, 320)
+end
+
+function skin480x272(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 480, 272)
+end
+
+function skin272x480(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 272, 480)
+end
+
 
 function skinCustom(self, s, reload, useDefaultSize)
 	local screen_width = tonumber(os.getenv('JL_SCREEN_WIDTH'))
