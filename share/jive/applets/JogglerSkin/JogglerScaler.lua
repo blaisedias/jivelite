@@ -212,6 +212,25 @@ function initialise()
             gridSkin = {}
         }
     end
+
+    -- load and apply corrections to scaling
+    local correctionsF = System:findFile('share/jive/applets/JogglerSkin/JogglerScalerCorrections.json')
+    if correctionsF then
+        local correctionsData =  _loadJsonData(correctionsF)
+        if correctionsData and correctionsData[resolutionKey] then
+            local jd = jsonData[resolutionKey]
+            for k,v in pairs(correctionsData[resolutionKey]) do
+                if jd[k] == nil then
+                    jd[k] = {}
+                end
+                for kk,vv in pairs(v) do
+                    if jd[k][kk] == nil then
+                        jd[k][kk] = vv
+                    end
+                end
+           end
+        end
+    end
 end
 
 -- global function scale a text size value to match the display dimensions
@@ -1071,10 +1090,12 @@ function getGridSkinParams(fiveItemHeight)
             -- gridSkin values override JogglerSkin but there should not be any colliding key value pairs
             for _, skinV in pairs({"jogglerSkin", "gridSkin"}) do
                 local jd = jsonData[resolutionKey][skinV]
-                for k,_ in pairs(skinValues) do
-                    if jd[k] then
-                        log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
-                        skinValues[k] = jd[k]
+                if jd then
+                    for k,_ in pairs(skinValues) do
+                        if jd[k] then
+                            log:info("using configured values of ", k , "=", jd[k], " instead of coded value ", skinValues[k])
+                            skinValues[k] = jd[k]
+                        end
                     end
                 end
             end
