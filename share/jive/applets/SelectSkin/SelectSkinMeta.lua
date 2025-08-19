@@ -62,7 +62,8 @@ function configureApplet(meta)
 	local skin
 
 	if arg[1] and arg[1] == "--smallskin" then
-		skin = "WQVGAsmallSkin"
+--		skin = "WQVGAsmallSkin"
+		skin = "JogglerSkin"
 	else
 		skin = meta:getSettings().skin
 	end
