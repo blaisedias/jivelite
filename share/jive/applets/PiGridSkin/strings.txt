@@ -294,3 +294,7 @@ NOW_PLAYING_XOFY
 
 UW_TEXT_SCREEN_WIDTH
 	EN	Ultrawide Display Text Width
+
+NP_SHOW_BACK_BUTTON_ALWAYS
+	EN	Now Playing Show Back Button Always
+
