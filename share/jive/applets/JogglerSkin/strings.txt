@@ -463,3 +463,7 @@ WRITE_NP_JSON
 
 LOAD_NP_JSON
 	EN	Load User Now Playing JSON
+
+NP_SHOW_BACK_BUTTON_ALWAYS
+	EN	Now Playing Show Back Button Always
+

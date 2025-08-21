@@ -114,6 +114,7 @@ local npMenuItems = {
 	{ key='NP_ARTISTALBUM_FONT_SIZE', titleString='ARTISTALBUM_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 	{ key='NP_LINE_SPACING', titleString='LINE_SPACING', skin='jogglerSkin', value_type='float', nodename = layoutMenuNodeName},
 	{ key='NP_TRACKLAYOUT_ALIGN', titleString='TRACKLAYOUT_ALIGN', skin='jogglerSkin', value_type='fieldalign', nodename = layoutMenuNodeName},
+	{ key='npShowBackButtonAlways', titleString='NP_SHOW_BACK_BUTTON_ALWAYS', skin='jogglerSkin', value_type='boolean', nodename = layoutMenuNodeName},
 	{ key='midArtworkSize', titleString='MID_ARTWORK_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 	{ key='TITLEBAR_FONT_SIZE', titleString='TITLEBAR_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
 --	{ key='TITLE_FONT_SIZE', titleString='TITLE_FONT_SIZE', skin='jogglerSkin', value_type='integer', nodename = layoutMenuNodeName},
@@ -263,6 +264,20 @@ function layoutMenuItem(self, entry, weight)
 			end,
 			currentIndex)
 		}
+	elseif entry.value_type == 'boolean' then
+		return {
+			id = entry.key,
+			node = entry.nodename,
+			text = self:string(entry.titleString),
+			style = 'item_choice',
+			weight = weight,
+			check = Checkbox('checkbox',
+			function(_, checked)
+				jogglerScaler.updateJsonConfig(entry.key, entry.skin, checked)
+				reloadSkin()
+			end,
+			jogglerScaler.getJogglerSkinParams(self:skinName())[entry.key])
+	}
 	else
 		return {
 			id = entry.key,
@@ -322,7 +337,7 @@ function param(self)
 					npstyle = {
 					style = 'nowplaying_art_only',
 					artworkSize = maxArtwork,
-					suppressTitlebar = 1,
+--					suppressTitlebar = 1,
 					text = self:string("ART_ONLY"),
 				}
 			},
@@ -385,10 +400,9 @@ function param(self)
 					localPlayerOnly = 1,
 					artworkSize = midArtwork,
 					suppressXofY = true,
-					-- suppressTitlebar = 1,
 					trackartistalbum = true,
 					text = self:string("SPECTRUM_ANALYZER_ONLY"),
-					suppressTitlebar = 1,
+--					suppressTitlebar = 1,
 				}
 			},
 			{
@@ -444,7 +458,7 @@ function param(self)
 					trackartistalbum = true,
 					text = self:string("VU_METER_ONLY"),
 					suppressXofY = true,
-					suppressTitlebar = 1,
+--					suppressTitlebar = 1,
 				}
 			},
 		}
@@ -1399,7 +1413,7 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	s.title.pressed = {}
-	s.title.pressed.textButton = _uses(s.title.textButton, {
+s.title.pressed.textButton = _uses(s.title.textButton, {
 		bgImg = pressedTitlebarButtonBox,
 	})
 
@@ -4151,6 +4165,35 @@ function skin0(self, s, _, _, w, h)
 			repeatDisabled = _uses(BASEnowplaying_large_art.npcontrols.repeatDisabled),
 		}
 
+	-- title bar for art/spectrum/vumeter only Now Playing views
+	-- only display the back button
+	-- this almost works except that lbutton sensitivity extends to the right
+	-- beyond what would be visually considered the button.
+	-- TO BE FIXED.
+	local _only_title = _uses(s.title, {
+		hidden = 1,
+		zOrder = 2,
+		h = scaledValues.TITLE_HEIGHT,
+		text = {
+			-- Hack: text needs to be there to fill the space, but is not visible
+			padding = { screenWidth, 0, 0, 0 },
+			h = 1,
+			w = 1,
+		},
+		order = { "lbutton"},
+		lbutton = {
+			w = scaledValues.TITLE_BUTTON_WIDTH
+		},
+		rbutton = {
+			w = 1
+		}
+	})
+	if scaledValues.npShowBackButtonAlways then
+		_only_title.hidden = 0
+	end
+	_only_title.pressed = {}
+	_only_title.pressed.textButton = {}
+
 	if activeNowPlayingScreenStyles['nowplaying_large_art'] == true then
 
 		s.nowplaying_large_art = _NP_uses(BASEnowplaying_large_art, {}, 'nowplaying_large_art')
@@ -4174,7 +4217,8 @@ function skin0(self, s, _, _, w, h)
 
 	_NP_def = {
 		bgImg            = V_blackBackground,
-		title            = { hidden = 1 },
+--		title            = { hidden = 1 },
+		title            = _only_title,
 		nptitle          = { hidden = 1 },
 		npcontrols       = { hidden = 1 },
 		npprogress       = { hidden = 1 },
@@ -4194,6 +4238,7 @@ function skin0(self, s, _, _, w, h)
 				padding = 0,
 				img = false,
 			},
+			zOrder = 1,
 		},
 
 		npvisu = { hidden = 1 },
@@ -4680,6 +4725,7 @@ function skin0(self, s, _, _, w, h)
 					padding = { 0, 0, 0, 0 },
 				},
 				bgImg = npvisuBackground,
+				zOrder = 1,
 			},
 			npaudiometadata = {
 				x = 0,
@@ -4688,14 +4734,15 @@ function skin0(self, s, _, _, w, h)
 				align = "center",
 			},
 
-	        nptitle = { hidden = 1 },
-	        npartistgroup = { hidden = 1 },
-	        npalbumgroup = { hidden = 1 },
-	        npartistalbum = { hidden = 1 },
-	        npartwork = { hidden = 1 },
-	        npprogress = { hidden = 1 },
-	        npprogressNB = { hidden = 1 },
+			nptitle = { hidden = 1 },
+			npartistgroup = { hidden = 1 },
+			npalbumgroup = { hidden = 1 },
+			npartistalbum = { hidden = 1 },
+			npartwork = { hidden = 1 },
+			npprogress = { hidden = 1 },
+			npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 1 },
+			title = _only_title,
 		}
 
 		s.nowplaying_spectrum_only = _NP_uses(BASEnowplaying, _NP_def, 'nowplaying_spectrum_only')
@@ -4934,6 +4981,7 @@ function skin0(self, s, _, _, w, h)
 					padding = { 0, 0, 0, 0 },
 				},
 				bgImg = npvisuBackground,
+				zOrder = 1,
 			},
 			npaudiometadata = {
 				x = 0,
@@ -4943,13 +4991,14 @@ function skin0(self, s, _, _, w, h)
 			},
 
 			nptitle = { hidden = 1 },
-	        npartistgroup = { hidden = 1 },
-	        npalbumgroup = { hidden = 1 },
-	        npartistalbum = { hidden = 1 },
-	        npartwork = { hidden = 1 },
-	        npprogress = { hidden = 1 },
-	        npprogressNB = { hidden = 1 },
+			npartistgroup = { hidden = 1 },
+			npalbumgroup = { hidden = 1 },
+			npartistalbum = { hidden = 1 },
+			npartwork = { hidden = 1 },
+			npprogress = { hidden = 1 },
+			npprogressNB = { hidden = 1 },
 			npcontrols  = { hidden = 1 },
+			title = _only_title,
 		}
 		s.nowplaying_vumeter_only = _NP_uses(BASEnowplaying, _NP_def, "nowplaying_vumeter_only")
 		s.nowplaying_vumeter_only.pressed = s.nowplaying_vumeter_only

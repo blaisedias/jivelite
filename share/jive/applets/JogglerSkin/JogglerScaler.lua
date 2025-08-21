@@ -959,6 +959,7 @@ function getJogglerSkinParams(skinName)
 
     params.NP_PORTRAIT_GRAPHICS_SPACING = math.floor(30 * (screenHeight/1280))
     params.PROGRESS_BAR_HEIGHT = 30
+    params.npShowBackButtonAlways = false
 
     -- after scaling update params values from json - if they exist
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
