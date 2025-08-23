@@ -184,7 +184,9 @@ function _layout(self)
 --		self.cap[2][i] = 0
 --	end
 	log:info("** fg: ", self.spparms.fgImg, " bg: ", self.spparms.bgImg, " ds: ", self.spparms.dsImg)
-	log:info("** C: ", self.spparms.capColor, " B: ", self.spparms.barColor, " D: ", self.spparms.desatColor)
+	log:info("** C: ",  string.format("0x%08x", self.spparms.capColor),
+				" B: ", string.format("0x%08x", self.spparms.barColor),
+				" D: ", string.format("0x%08x", self.spparms.desatColor))
 
 	self.left = table.clone(self.spparms.barsFormat)
 	self.left.fgImg = self.spparms.fgImg
