@@ -37,6 +37,7 @@ local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
 local FRAME_RATE	= jive.ui.FRAME_RATE
 local json			= require("jive.json")
+local bit			= require("bit") 
 
 module(...)
 
@@ -626,17 +627,28 @@ local function _populateSpectrum(search_root)
 	end
 end
 
--- convert a value to an integer
-local function toInteger(v)
+-- convert a value in json file to an colour value
+local function toColourValue(v)
 	if type(v) == 'number' then
 		return math.floor(v)
 	end
 	if type(v) == 'string' then
+		local colour = 0
 		local i,j = string.find(v, "0x")
 		if i == 1 then
-			return tonumber(string.sub(v, j + 1), 16)
+			if 0xf0000000 < 0 and  #v == 10 then
+				-- workaround: 32 bit integers, tonumber(x, 16) doesn't convert correctly when MSB is set
+				for x = j+1, #v, 2 do
+					colour = bit.lshift(colour, 8)
+					colour = colour + tonumber(string.sub(v, x, x+1), 16)
+				end
+				colour = math.modf(colour, 65535)
+				return colour
+			else
+				return colour + tonumber(string.sub(v, j + 1), 16)
+			end
 		end
-		return math.floor(tonumber(v))
+		return colour + math.floor(tonumber(v))
 	end
 	return nil
 end
@@ -650,9 +662,9 @@ local function _scanSpectrum(rpath)
 				for _, v in pairs(jsData.colours) do
 					local entry = {
 						name=v.name, enabled=false, spType = jsData.sptype,
-						barColor = toInteger(v.barColor),
-						capColor = toInteger(v.capColor),
-						desatColor = toInteger(v.desatColor)
+						barColor = toColourValue(v.barColor),
+						capColor = toColourValue(v.capColor),
+						desatColor = toColourValue(v.desatColor)
 					}
 					if entry.barColor ~= nil and entry.capColor ~= nil and entry.desatColor ~= nil then
 						if spLoaded[v.name] ~= true then
