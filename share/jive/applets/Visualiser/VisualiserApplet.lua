@@ -22,7 +22,7 @@ local Framework         = require("jive.ui.Framework")
 local Checkbox          = require("jive.ui.Checkbox")
 local RadioButton       = require("jive.ui.RadioButton")
 local RadioGroup        = require("jive.ui.RadioGroup")
---local Choice            = require("jive.ui.Choice")
+local Choice            = require("jive.ui.Choice")
 local Textinput         = require("jive.ui.Textinput")
 local Keyboard          = require("jive.ui.Keyboard")
 local visImage          = require("jive.visImage")
@@ -37,6 +37,27 @@ local jiveMain      = jiveMain
 
 module(..., Framework.constants)
 oo.class(_M, Applet)
+
+-- FIXME for now duplicate a function from JogglerSkinApplet
+local function messageBox(txt, count)
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+	local text = Label("text", txt)
+
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		count = count - 1000
+		if count < 1 then
+			popup:hide(Window.transitionFadeOut)
+		end
+	end)
+	popup:show()
+end
 
 function inputVisualiserChangeOnTimer(self)
     local window = Window("text_list", self:string("CHANGE_VISUALISER_ON_TIMER"))
@@ -119,7 +140,6 @@ function init(self)
             text = txt,
             style = 'item_choice',
             weight = i,
-    --        check =  Checkbox("checkbox", function(applet, checked)
             check =  RadioButton("radio", groupS, function()
                 local cb_settings = self:getSettings()
                 cb_settings.framesVU_RTZP = v
@@ -427,18 +447,31 @@ function imagesMenu(self, _)
             settings.saveResizedImages)
     })
 
+    local save_image_formats = {"png", "bmp", "rbm"}
+    local currentIndex = 1
+    for i,v in ipairs(save_image_formats) do
+        if v == settings.saveImageFormat then
+            currentIndex = i
+            break
+        end
+    end
+
     menu:addItem({
-        id = "saveaspng",
-        text = self:string("SAVE_AS_PNG"),
+        id = "saveasformat",
+        text = self:string("SAVED_IMAGE_FORMAT"),
         style = 'item_choice',
         weight = 90,
-        check = Checkbox("checkbox", function(_, checked)
-            local cb_settings = self:getSettings()
-            cb_settings.saveAsPng = checked
-            self:storeSettings()
+        check = Choice('choice', save_image_formats,
+            function(_, indx)
+                local cb_settings = self:getSettings()
+                cb_settings.saveImageFormat = save_image_formats[indx]
+                self:storeSettings()
+                messageBox("Restart jivelite for change in saved image type to be effective", 10000)
             end,
-            settings.saveAsPng)
+        currentIndex
+    ),
     })
+
 
     window:addWidget(menu)
     window:show()
