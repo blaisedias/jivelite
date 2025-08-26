@@ -86,8 +86,8 @@ WORKSPACE_PATH
 SAVE_RESIZED
 	EN	Save resized images
 
-SAVE_AS_PNG
-	EN	Save as PNG
+SAVED_IMAGE_FORMAT
+	EN	Save Image As
 
 SPECTRUM_METER_SETTINGS
 	EN	Spectrum Meter Settings

@@ -990,10 +990,13 @@ JiveSurface *jive_surface_alt_load_image(const char *path) {
 	SDL_Surface *sdl = IMG_Load(path);
 
 	JiveSurface *srf = calloc(sizeof(JiveSurface), 1);
-	srf->refcount = 1;
-	srf->sdl = sdl;
+	if (srf) {
+		srf->refcount = 1;
+		srf->sdl = sdl;
 
-	return jive_surface_display_format(srf);
+		return jive_surface_display_format(srf);
+	}
+	return srf;
 }
 
 
@@ -1002,10 +1005,13 @@ JiveSurface *jive_surface_load_image_data(const char *data, size_t len) {
 	SDL_Surface *sdl = IMG_Load_RW(src, 1);
 
 	JiveSurface *srf = calloc(sizeof(JiveSurface), 1);
-	srf->refcount = 1;
-	srf->sdl = sdl;
+	if (srf) {
+		srf->refcount = 1;
+		srf->sdl = sdl;
 
-	return jive_surface_display_format(srf);
+		return jive_surface_display_format(srf);
+	}
+	return srf;
 }
 
 
@@ -1752,6 +1758,149 @@ int jiveL_surface_alt_load_image(lua_State *L) {
 	return 0;
 }
 
+// RAW BITMAP FORMAT
+typedef union {
+	Uint8  u8[8];
+	char   str[8];
+	Uint64 u64;
+} raw_bitmap_signature;
+
+typedef struct raw_bitmap_header {
+	raw_bitmap_signature sig;   
+	int width;
+	int height;
+	int depth;
+	int pitch;
+	Uint32  Rmask;
+	Uint32  Gmask;
+	Uint32  Bmask;
+	Uint32  Amask;
+} raw_bitmap_header;
+
+static const raw_bitmap_signature rbm_signature = {{'0' + (Uint8)sizeof(int), 'r', 'a', 'w', 's', 'd', 'l', 0}};
+static int save_raw_bitmap(SDL_Surface* sdl, const char* file) {
+//	debug_printf("save_raw_bitmap %s\n", file);
+	FILE *fp = fopen(file, "wb");
+	if (fp == NULL) {
+		logfprintf("save_raw_bitmap :-( open %s\n", file);
+		return -1;
+	}
+	raw_bitmap_header hdr;
+	hdr.sig = rbm_signature;
+	hdr.width = sdl->w;
+	hdr.height = sdl->h;
+	hdr.pitch = (int)sdl->pitch;
+	hdr.depth = (int)sdl->format->BitsPerPixel;
+	hdr.Rmask = sdl->format->Rmask;
+	hdr.Gmask = sdl->format->Gmask;
+	hdr.Bmask = sdl->format->Bmask;
+	hdr.Amask = sdl->format->Amask;
+	if (1 != fwrite(&hdr, sizeof(hdr), 1, fp)) {
+		logfprintf("save_raw_bitmap :-( write header\n");
+		fclose(fp);
+		return -2;
+	}
+	size_t pixel_bytes = sdl->h * sdl->pitch;
+	if (pixel_bytes != fwrite(sdl->pixels, sizeof(Uint8), pixel_bytes, fp)) {
+		logfprintf("save_raw_bitmap :-( write pixels\n");
+		fclose(fp);
+		return -3;
+	}
+	fclose(fp);
+//	debug_printf("save_raw_bitmap OK! :-)\n");
+	return 0;
+}
+
+static SDL_Surface* load_raw_bitmap(const char *file) {
+	FILE *fp = fopen(file, "rb");
+	raw_bitmap_header hdr;
+
+//	debug_printf("load_raw_bitmap %s\n", file);
+	if (fp == NULL) {
+		logfprintf("load_raw_bitmap :-( open %s\n", file);
+		return NULL;
+	}
+
+	if (1 != fread(&hdr, sizeof(hdr), 1, fp)) {
+		logfprintf("load_raw_bitmap :-( read header\n");
+		fclose(fp);
+		return NULL;
+	}
+	if (hdr.sig.u64 != rbm_signature.u64) {
+		logfprintf("load_raw_bitmap : signatures do not match, got %16x expected %16x\n",
+				hdr.sig.u64, rbm_signature.u64);
+		return NULL;
+	}
+	SDL_Surface* sdl = SDL_CreateRGBSurface(SDL_SWSURFACE, hdr.width, hdr.height, hdr.depth,
+			hdr.Rmask, hdr.Gmask, hdr.Bmask, hdr.Amask);
+	if (sdl != NULL) {
+		size_t pixel_bytes = hdr.height * hdr.pitch;
+//		debug_printf("load_raw_bitmap pitch %d %d\n", hdr.pitch, (int)sdl->pitch);
+		if ((hdr.pitch != (int)sdl->pitch) ||
+				pixel_bytes != fread(sdl->pixels, sizeof(Uint8), pixel_bytes, fp)) {
+			logfprintf("load_raw_bitmap :-( read pixels\n");
+			SDL_FreeSurface(sdl);
+			sdl = NULL;
+//		} else {
+//			debug_printf("load_raw_bitmap OK :-)\n");
+		}
+	}
+	fclose(fp);
+	return sdl;
+}
+
+int jive_surface_save_rawbitmap(JiveSurface *srf, const char *file) {
+	if (!srf->sdl) {
+		LOG_ERROR(log_ui, "Underlying sdl surface already freed, possibly with release()");
+		return 0;
+	}
+	return save_raw_bitmap(srf->sdl, file);
+}
+
+int jiveL_surface_save_rawbitmap(lua_State *L) {
+	/*
+	  surface
+	  filename
+	*/
+	JiveSurface *srf = *(JiveSurface **)lua_touserdata(L, 1);
+	const char *image = luaL_checklstring(L, 2, NULL);
+	if (srf && image) {
+		lua_pushinteger(L, jive_surface_save_rawbitmap(srf, image));
+		return 1;
+	}
+	return 0;
+}
+
+int jiveL_surface_load_resized_image (lua_State *L) {
+	/*
+	  class
+	  imagepath
+	*/
+	const char* imagepath = luaL_checklstring(L, 2, NULL);
+	if (imagepath) {
+		const char* suffix = imagepath + strlen(imagepath) - 4;
+		JiveSurface* srf = NULL;
+		if (strcmp(suffix, ".bmp") == 0 || strcmp(suffix, ".png") == 0) {
+			srf = jive_surface_alt_load_image(imagepath);
+		}
+		if (strcmp(suffix, ".rbm") == 0) {
+			srf = calloc(sizeof(JiveSurface), 1);
+			if (srf != NULL) {
+				srf->sdl = load_raw_bitmap(imagepath);
+				srf->refcount = 1;
+			}
+		}
+		if (srf) {
+			JiveSurface **p = (JiveSurface **)lua_newuserdata(L, sizeof(JiveSurface *));
+			*p = srf;
+			luaL_getmetatable(L, "JiveSurface");
+			lua_setmetatable(L, -2);
+			return 1;
+		}
+	}
+
+	return 0;
+}
 
 int jiveL_surface_load_image_data(lua_State *L) {
 	/*
@@ -2660,6 +2809,12 @@ static SDL_Thread* worker_threads[2] = {NULL};
 static SDL_mutex* resizer_lock = NULL;
 static SDL_sem* resizer_sem;
 
+typedef enum image_format {
+	IMG_FMT_UNKNOWN,
+	IMG_FMT_BMP,
+	IMG_FMT_PNG,
+	IMG_FMT_RAW,
+} image_format;
 
 typedef struct resize_request {
 	struct resize_request* perma_next;
@@ -2672,7 +2827,7 @@ typedef struct resize_request {
 	int   status;
 	int   seq;
 	int   op;
-	int   save_as_png;
+	image_format format;
 	SDL_Surface* src_sdl;
 	SDL_Surface* dst_sdl;
 } resize_request, *resize_request_ptr;
@@ -2800,11 +2955,20 @@ void do_resize(resize_request_ptr req) {
 //fprintf(stderr, "do_resize: +++ dst_sdl %p\n", req->dst_sdl); fflush(stderr);
 
 					if (req->dst_sdl != NULL) {
-						int saved;
-						if (req->save_as_png) {
-							saved = save_png(req->dst_sdl, req->dest_path);
-						} else {
-							saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
+						int saved = -1;
+						switch(req->format) {
+							case IMG_FMT_RAW:
+								saved = save_raw_bitmap(req->dst_sdl, req->dest_path);
+								break;
+							case IMG_FMT_BMP:
+								saved = SDL_SaveBMP(req->dst_sdl, req->dest_path);
+								break;
+							case IMG_FMT_PNG:
+								saved = save_png(req->dst_sdl, req->dest_path);
+								break;
+							case IMG_FMT_UNKNOWN:
+								logfprintf("ERROR: do_resize: unknown image format\n");
+								break;
 						}
 						if (saved == 0) {
 //fprintf(stderr, "do_resize: saved %s\n", req->dest_path); fflush(stderr);
@@ -2928,7 +3092,7 @@ void stop_concurrent_threads(void) {
 	}
 }
 
-int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, int save_as_png) {
+int submit_resize_request(const char* src_path, const char* dest_path, int width, int height, int seq, int op, image_format format) {
 	resize_request_ptr req = resize_perma;
 	size_t qmem = 0;
 	while(req != NULL) {
@@ -2955,7 +3119,7 @@ debug_printf("submit_resize_request: RESIZE: allocated %p %ld\n", req, req->size
 		req->height = height;
 		req->seq = seq;
 		req->op = op;
-		req->save_as_png = save_as_png;
+		req->format = format;
 		req->src_path = (char *)(req + 1);
 		strcpy(req->src_path, src_path);
 		req->dest_path = req->src_path + src_size;
@@ -3010,7 +3174,15 @@ int jiveL_surface_request_resize(lua_State *L) {
 	int op = luaL_checkint(L, 7);
 	const char* image_type = luaL_checklstring(L, 8, NULL);
 
-	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op, strcmp(image_type, "bmp"));
+	image_format format = IMG_FMT_UNKNOWN;
+	if (0 == strcmp(image_type, "bmp")) { format = IMG_FMT_BMP; }
+	if (0 == strcmp(image_type, "png")) { format = IMG_FMT_PNG; }
+	if (0 == strcmp(image_type, "rbm")) { format = IMG_FMT_RAW; }
+	if (format == IMG_FMT_UNKNOWN) {
+		logfprintf("unsupported image type %s\n", image_type); 
+		return 0;
+	}
+	int rsz = submit_resize_request(src_path, dest_path, width, height, seq, op, format);
 
 	lua_pushinteger(L, rsz);
 	return 1;

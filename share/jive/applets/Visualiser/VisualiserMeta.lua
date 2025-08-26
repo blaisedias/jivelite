@@ -56,6 +56,7 @@ function defaultSettings(_)
         visuChangeOnTimer=0,
         vuMeterSelection={},
         spectrumMeterSelection={},
+        saveImageFormat="png",
         spectrum={
             baselineOn=false,
             baselineAlways=true,
@@ -121,6 +122,9 @@ function registerApplet(self)
         settings.framesVU_RTZP = 1
     end
 
+    if settings.saveImageFormat == nil then
+        settings.saveImageFormat = "png"
+    end
 
     local tmp = visImage:getVuMeterList()
     for _, v in pairs(tmp) do
