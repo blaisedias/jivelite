@@ -1626,6 +1626,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "newRGBA", jiveL_surface_newRGBA },
 	{ "loadImage", jiveL_surface_load_image },
 	{ "altLoadImage", jiveL_surface_alt_load_image },
+	{ "loadResizedImage", jiveL_surface_load_resized_image },
 	{ "loadImageData", jiveL_surface_load_image_data },
 	{ "drawText", jiveL_surface_draw_text },
 	{ "free", jiveL_surface_free },
@@ -1666,6 +1667,7 @@ static const struct luaL_Reg surface_methods[] = {
 	{ "savePNG", jiveL_surface_save_png },
 	{ "requestResize", jiveL_surface_request_resize },
 	{ "clearResizeQueue", jiveL_surface_clear_resize_queue },
+	{ "saveRawbitmap", jiveL_surface_save_rawbitmap },
 	{ NULL, NULL }
 };
 

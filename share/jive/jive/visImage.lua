@@ -37,7 +37,8 @@ local log			= require("jive.utils.log").logger("jivelite.vis")
 local System		= require("jive.System")
 local FRAME_RATE	= jive.ui.FRAME_RATE
 local json			= require("jive.json")
-local bit			= require("bit") 
+local bit			= require("bit")
+local framework		= require("jive.ui.Framework")
 
 module(...)
 
@@ -87,12 +88,23 @@ local resizedCachePath = workSpace .. "/cache/resized"
 local function _parseImagePath(imgpath)
 	local parts = string.split("%.", imgpath)
 	local ix = #parts
-	if parts[ix] == 'png' or parts[ix] == 'jpg' or parts[ix] == 'bmp' then
+	if parts[ix] == 'png' or parts[ix] == 'jpg' or parts[ix] == 'bmp' or parts[ix] == 'rbm' then
 -- FIXME return array of size 2 always
 		return parts
 	end
 	return nil
 end
+
+local function _parseResizedImagePath(imgpath)
+	local parts = string.split("%.", imgpath)
+	local ix = #parts
+	if parts[ix] == saveimage_type then
+-- FIXME return array of size 2 always
+		return parts
+	end
+	return nil
+end
+
 
 local function pathsAreImageFiles(root_path, path_lst)
     local res = true
@@ -199,13 +211,12 @@ local function platformDetect()
 	end
 	PLATFORM = "desktop"
 
-	-- if setting is absent fall back to legacy behaviour
-	if visSettings.saveAsPng == nil then
-		visSettings.saveAsPng = boolOsEnv("JL_SAVE_AS_PNG", true)
+	-- if setting is absent default to png
+	if visSettings.saveImageFormat == nil then
+		visSettings.saveImageFormat = 'png'
 	end
-	if visSettings.saveAsPng == false then
-		saveimage_type = 'bmp'
-	end
+
+	saveimage_type = visSettings.saveImageFormat
 
 	-- if setting is absent fall back to legacy behaviour
 	if visSettings.saveResizedImages == nil then
@@ -299,10 +310,32 @@ end
 local function loadResizedImage(key)
 	local path = resizedImagesTable[key]
 	if path ~= nil then
-		return loadImage(path)
+		local img = imCacheGet(path)
+		if img == nil  then
+			if path == nil then
+				return nil
+			end
+			img = Surface:loadResizedImage(path)
+			imCachePut(path, img)
+		end
+		return img
 	end
 	return nil
 end
+
+-- debugging function
+--local function readResizedImageFile(key)
+--	local path = resizedImagesTable[key]
+--	if path ~= nil then
+--		local file = io.open(path, "rb")
+--		if file ~= nil then
+--			local content = file:read "*a"
+--			file:close()
+--			return #content
+--		end
+--	end
+--	return 0
+--end
 
 -- when a resized image is saved
 --  update the table so that it can be found subsequently
@@ -318,8 +351,11 @@ local function saveImage(img, key, path)
 		elseif saveimage_type == "bmp" then
 			img:saveBMP(path)
 			resizedImagesTable[key] = path
+		elseif saveimage_type == "rbm" then
+			img:saveRawbitmap(path)
+			resizedImagesTable[key] = path
 		else
-			log:error('unsupported image type: ', saveimage_type)
+			log:error('unsupported image type: ', saveimage_type, " ", path)
 		end
 	end
 end
@@ -413,7 +449,7 @@ local function _populateResizedImagesTable(search_root)
 	for entry in lfs.dir(search_root) do
 		local mode = lfs.attributes(search_root .. "/" .. entry, "mode")
 		if mode == "file" then
-			local parts = _parseImagePath(entry)
+			local parts = _parseResizedImagePath(entry)
 			if parts ~= nil then
 				resizedImagesTable[parts[1]] = search_root .. "/" .. entry
 				log:debug("_populateResizedImagesTable: ", parts[1], " ", resizedImagesTable[parts[1]])
@@ -618,7 +654,6 @@ local function _populateSpectrum(search_root)
 						if jsData.name == nil then
 							jsData.name = entry
 						end
---						__addSpectrum(path, jsData)
 						pcall(__addSpectrum, path, jsData)
 					end
 				end
@@ -911,7 +946,6 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	local barColor = spectrumList[spImageIndex].barColor and spectrumList[spImageIndex].barColor or barColorIn or 0x14bcbcff
 	local capColor = spectrumList[spImageIndex].capColor and spectrumList[spImageIndex].capColor or capColorIn or 0x7456a1ff
 	local displayResizing = makeResizingParams(fgResizeRequired or bgResizeRequired or dsResizeRequired)
---	local desatColor = spectrumList[spImageIndex].desatColor and spectrumList[spImageIndex].desatColor or 0xffffff30
 	local desatColor = 0xffffff30
 	if spectrumList[spImageIndex].desatColor ~= nil then
 		desatColor = spectrumList[spImageIndex].desatColor
@@ -927,7 +961,7 @@ function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 		capHeight = {0,0}
 		capSpace = {0,0}
 	end
---	return fg, bg, ds, barColor, capColor, desatColor, displayResizing
+
 	local spparms = {
 		fgImg=fgImg,
 		bgImg=bgImg,
@@ -969,8 +1003,6 @@ function selectSpectrum(_, name, selected)
 		end
 	end
 	log:debug("selectSpectrum", " enabled count: ", n_enabled)
---	spSeq = {}
---	__spBump()
 	return n_enabled
 end
 
@@ -1153,14 +1185,12 @@ local function _populateVuMeterList(search_root)
 						end
 						if  vuLoaded[jsData.name] == nil then
 							if jsData.vutype == VUT_frames then
---								addSingleImageFrameVUMeter(jsData, path)
 								if jsData.format == "singleimage" then
 									pcall(addSingleImageFrameVUMeter, jsData, path)
 								elseif jsData.format == "discrete" then
 									pcall(addDiscreteFrameVUMeter, jsData, path)
 								end
 							elseif jsData.vutype == VUT_compose1 then
---								addCompose1VUMeter(jsData, path)
 								pcall(addCompose1VUMeter, jsData, path)
 							else
 								log:warn("VU meter ",jsData.name," unknown type " , jsData.vutype, " at ", path)
@@ -1264,15 +1294,12 @@ local function _resizedCompose1Element(srcImg, name, element, w, h, md5sum)
 	if md5sum ~= nil then
 		dicKey = dicKey .. '-' .. md5sum
 	end
---	log:info("_resizedCompose1Element ", "name=", name, "element=", element, " dicKey=", dicKey)
 	local img = loadResizedImage(dicKey)
 	if img == nil then
 		img = srcImg:resize(w, h)
 		local dcpath = resizedImagePath(dicKey)
 		saveImage(img, dicKey, dcpath)
---		resizedImagesTable[dicKey] = dcpath
 		imCachePut(dcpath, img)
---		srcImg:altRelease()
 	end
 	return img
 end
@@ -1285,8 +1312,6 @@ local function getCompose1VUmeter(name, w, h)
 		log:info("c1vuCache -> ", key, c1vu)
 		return c1vu
 	end
-	-- FIXME: workaround. shouldn't be necessary but fixes a corner case
-	-- imCacheClear()
 
 	local cvu = compositeVuMeters[name]
 	c1vu = {}
@@ -1294,33 +1319,20 @@ local function getCompose1VUmeter(name, w, h)
 	c1vu.right={}
 	-- bar render x-offset
 	c1vu.left.on = loadImage(cvu.left_on)
---	log:info("c1vu.left.on = loadImage(cvu.left_on)", c1vu.left.on , " ", cvu.left_on)
 	c1vu.left.off = loadImage(cvu.left_off)
---	log:info("c1vu.left.off = loadImage(cvu.left_off)", c1vu.left.off , " ", cvu.left_off)
 	c1vu.left.peakon = loadImage(cvu.left_peakon)
---	log:info("c1vu.left.peakon = loadImage(cvu.left_peakon)", c1vu.left.peakon , " ", cvu.left_peakon)
 	c1vu.left.peakoff = loadImage(cvu.left_peakoff)
---	log:info("c1vu.left.peakoff = loadImage(cvu.left.peakoff)", c1vu.left.peakoff , " ", cvu.left_peakoff)
 
 	c1vu.right.on = loadImage(cvu.right_on)
---	log:info("c1vu.right.on = loadImage(cvu.right_on)", c1vu.right.on , " ", cvu.right_on)
 	c1vu.right.off = loadImage(cvu.right_off)
---	log:info("c1vu.right.off = loadImage(cvu.right_off)", c1vu.right.off , " ", cvu.right_off)
 	c1vu.right.peakon = loadImage(cvu.right_peakon)
---	log:info("c1vu.right.peakon = loadImage(cvu.right_peakon)", c1vu.right.peakon , " ", cvu.right_peakon)
 	c1vu.right.peakoff = loadImage(cvu.right_peakoff)
---	log:info("c1vu.right.peakoff = loadImage(cvu.right_peakoff)", c1vu.right.peakoff , " ", cvu.right_peakoff)
 
 	c1vu.leftlead = loadImage(cvu.left_lead)
---	log:info("c1vu.leftlead = loadImage(cvu.left_lead)", c1vu.leftlead , " ", cvu.left_lead)
 	c1vu.rightlead = loadImage(cvu.right_lead)
---	log:info("c1vu.rightlead = loadImage(cvu.right_lead)", c1vu.rightlead , " ", cvu.right_lead)
 	c1vu.lefttrail = loadImage(cvu.left_trail)
---	log:info("c1vu.lefttrail = loadImage(cvu.left_trail)", c1vu.lefttrail , " ", cvu.left_trail)
 	c1vu.righttrail = loadImage(cvu.right_trail)
---	log:info("c1vu.righttrail = loadImage(cvu.right_trail)", c1vu.righttrail , " ", cvu.right_trail)
 	c1vu.center = loadImage(cvu.centre)
---	log:info("c1vu.center = loadImage(cvu.centre)", c1vu.center , " ", cvu.centre)
 
 	local bw, bh = c1vu.left.on:getSize()
 	local lw, lh = c1vu.leftlead:getSize()
@@ -1332,7 +1344,6 @@ local function getCompose1VUmeter(name, w, h)
 	local cw, ch = c1vu.center:getSize()
 	local dw = cw
 	local dh = ch + (bh * 2)
---	local barwidth = math.floor((cw - lw)/49)
 	local barwidth = cvu.step
 	local calcbw = (cw - lw - tw)/(cvu.maxVU -1)
 	if calcbw ~= barwidth then
@@ -1341,8 +1352,6 @@ local function getCompose1VUmeter(name, w, h)
 	-- c1vu.bar_rxo= barwidth - bw
 	c1vu.left.bar_rxo= 0
 	c1vu.right.bar_rxo= 0
---	log:debug("#### dw:", dw, " dh:", dh, " w:", w, " h:", h)
---	log:debug("#### ",lw, ",", lh, "  ", bw, ",", bh, "  ", cw, "," , ch)
 	if w > dw and h >= dh then
 		c1vu.w = dw
 		c1vu.h = dh
@@ -1408,9 +1417,6 @@ end
 local prevVuImageIndex = -1
 function getVuImage(_,w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
---	if vuImages[vuImageIndex].enabled == false then
---		__vuBump()
---	end
 	local entry = vuImages[vuImageIndex]
 	log:debug("getVuImage ", entry.displayName, " ", entry.vutype)
 
@@ -1425,6 +1431,9 @@ function getVuImage(_,w,h)
 
 	local imgs = {}
 	local resizeRequired = false
+	local loadTicks
+	local startTicks
+	startTicks= framework.getTicks()
 	for i,_ in ipairs(entry.jsData.files.frames) do
 		local _name = entry.name .. ":" .. i
 		local dicKey = w .. "x" .. h .. "-" .. _name
@@ -1434,6 +1443,10 @@ function getVuImage(_,w,h)
 		local frameVU = loadResizedImage(dicKey)
 		table.insert(imgs, frameVU)
 		resizeRequired = resizeRequired or (frameVU == nil)
+	end
+	if not resizeRequired then
+		loadTicks = framework.getTicks() - startTicks
+	log:warn(saveimage_type, ':: {"', entry.displayName, '": { "load": ',  loadTicks, " } },")
 	end
 	if entry.vutype == VUT_frames and #imgs < 2 then
 		table.insert(imgs, imgs[1])
@@ -1552,7 +1565,7 @@ function concurrentResizeSpectrumMeter(_, name, w, h)
 			return resizeVisualisers(_, w, h, rszs, spectrumImagesMap[name].rszOp)
 		end
 	end
-	log:warn("concurrentResizeSpectrumMeter spectrum meter not found ", name)
+	log:warn("concurrentResizeSpectrumMeter: spectrum meter not found ", name)
 	return false
 end
 
