@@ -1128,7 +1128,7 @@ local function addSingleImageFrameVUMeter(jsData, path)
 		vuLoaded[jsData.name] = true
 		log:info("VUMeter frames: ", jsData.name, " framecount:", jsData.framecount)
 		for i,_ in ipairs(jsData.files.frames) do
-			vuImagesMap[jsData.name .. ":" .. i] = {src= path .. "/" .. jsData.files.frames[i], md5sum = readMD5sum(path .. "/" .. jsData.files.frames[i]) }
+			vuImagesMap[jsData.name .. "-" .. i] = {src= path .. "/" .. jsData.files.frames[i], md5sum = readMD5sum(path .. "/" .. jsData.files.frames[i]) }
 		end
 		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_frames, jsData=jsData})
 	else
@@ -1156,7 +1156,7 @@ local function addDiscreteFrameVUMeter(jsData, path)
 		-- prevent subsequent loading of VUMeters with the same name
 		vuLoaded[jsData.name] = true
 		for i,_ in ipairs(jsData.files.frames) do
-			local xk = jsData.name .. ":" .. i
+			local xk = jsData.name .. "-" .. i
 			vuImagesMap[xk] = {src= path .. "/" .. jsData.files.frames[i], md5sum = readMD5sum(path .. "/" .. jsData.files.frames[i]) }
 		end
 		table.insert(vuImages, {name=jsData.name, enabled=false, displayName=jsData.name, vutype=VUT_discreteframes, jsData=jsData})
@@ -1435,7 +1435,7 @@ function getVuImage(_,w,h)
 	local startTicks
 	startTicks= framework.getTicks()
 	for i,_ in ipairs(entry.jsData.files.frames) do
-		local _name = entry.name .. ":" .. i
+		local _name = entry.name .. "-" .. i
 		local dicKey = w .. "x" .. h .. "-" .. _name
 		if  vuImagesMap[_name].md5sum ~= nil then
 			dicKey = dicKey .. '-' .. vuImagesMap[_name].md5sum
@@ -1644,13 +1644,13 @@ function concurrentResizeVuMeter(_, name, w, h)
 			if v.vutype == VUT_frames then
 				local ready = true
 				for i,_ in ipairs(v.jsData.files.frames) do
-					ready = ready and requestFramesVuResize(name .. ':' .. i, w, h)
+					ready = ready and requestFramesVuResize(name .. '-' .. i, w, h)
 				end
 				return ready
 			elseif v.vutype == VUT_discreteframes then
 				local ready = true
 				for i,_ in ipairs(v.jsData.files.frames) do
-					ready = ready and requestDiscreteFrameVuResize(name .. ':' .. i, w, h)
+					ready = ready and requestDiscreteFrameVuResize(name .. '-' .. i, w, h)
 				end
 				return ready
 			end
