@@ -49,6 +49,7 @@ local debug         = require("jive.utils.debug")
 local jnt           = jnt
 local jiveMain      = jiveMain
 local appletManager = appletManager
+local os            = require("os")
 
 
 module(..., Framework.constants)
@@ -234,6 +235,12 @@ function _discover(self)
 		log:debug("sending slim discovery to ", address)
 		self.socket:send(_slimDiscoverySource, address, PORT)
 	end
+
+	 if os.getenv("JL_SERVER_ADDRESS") ~= nil then
+		local address = os.getenv("JL_SERVER_ADDRESS")
+		log:debug("sending slim discovery to ${JL_SERVER_ADDRESS} ", address)
+		self.socket:send(_slimDiscoverySource, address, PORT)
+	 end
 
 	-- Discover players via wireless scanning
 
