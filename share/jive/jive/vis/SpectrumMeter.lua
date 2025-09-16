@@ -29,6 +29,11 @@ FPS=0
 -- frames count
 FC=0
 
+local agg_draw_ticks = 0
+local max_draw_ticks = 0
+local min_draw_ticks = 1000
+local sample_count_draw_ticks = 0
+
 local TWO_SECS_FRAME_COUNT = FRAME_RATE * 2
 
 function __init(self, style, windowStyle)
@@ -62,6 +67,11 @@ end
 
 
 function _layout(self)
+	agg_draw_ticks = 0
+	max_draw_ticks = 0
+	min_draw_ticks = 1000
+	sample_count_draw_ticks = 0
+
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
@@ -578,6 +588,7 @@ function draw(self, surface)
 
 	bins[1], bins[2] = vis:spectrum()
 
+	local draw_ticks = framework:getTicks()
 	local nz1,nz2
 	if self.spparms.turbine then
 		nz1 = _drawTurbineBins( surface, bins[1], self.left)
@@ -626,6 +637,12 @@ function draw(self, surface)
 		end
 	end
 
+	local delta_draw_ticks = framework:getTicks() - draw_ticks
+	agg_draw_ticks = agg_draw_ticks + delta_draw_ticks
+	max_draw_ticks = math.max(max_draw_ticks, delta_draw_ticks)
+	min_draw_ticks = math.min(min_draw_ticks, delta_draw_ticks)
+	sample_count_draw_ticks = sample_count_draw_ticks + 1
+
 	if FC == 0 then
 		self.lastSampleTicks = ticks
 	end
@@ -635,6 +652,11 @@ function draw(self, surface)
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
 		FPS = math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000))
+		log:warn("FPS:", FPS, " max:", max_draw_ticks, " min:", min_draw_ticks, " avg:", agg_draw_ticks/sample_count_draw_ticks)
+		agg_draw_ticks = 0
+		max_draw_ticks = 0
+		min_draw_ticks = 1000
+		sample_count_draw_ticks = 0
 		self.lastSampleTicks = ticks
 	end
 end

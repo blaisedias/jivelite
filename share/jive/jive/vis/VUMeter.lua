@@ -17,7 +17,6 @@ local log           = require("jive.utils.log").logger("jivelite.vis")
 local FRAME_RATE    = jive.ui.FRAME_RATE
 
 local appletManager = appletManager
-local table         = require("jive.utils.table")
 
 module(...)
 oo.class(_M, Icon)
@@ -60,6 +59,8 @@ NF=0
 
 local agg_draw_ticks = 0
 local max_draw_ticks = 0
+local min_draw_ticks = 1000
+local sample_count_draw_ticks = 0
 
 
 local TWO_SECS_FRAME_COUNT = FRAME_RATE * 2
@@ -204,6 +205,11 @@ local function add_vol_components(params, vutbl)
 end
 
 function _layout(self)
+	agg_draw_ticks = 0
+	max_draw_ticks = 0
+	min_draw_ticks = 1000
+	sample_count_draw_ticks = 0
+
 	local x,y,w,h = self:getBounds()
 	local l,t,r,b = self:getPadding()
 
@@ -436,10 +442,6 @@ function draw(self, surface)
 		end
 	end
 
-	if self.bgParams ~= nil then
-		self.drawBackground(self.bgParams, surface)
-	end
-
 	if self.vutbl ~= nil and  self.vutbl.displayResizing ~= nil then
 		local x, y, w, h = self:getBounds()
 		local d = self.vutbl.displayResizing
@@ -458,14 +460,20 @@ function draw(self, surface)
 	local vol = {samplAcc2Vol(sampleAcc[1]), samplAcc2Vol(sampleAcc[2])}
 
 	local draw_ticks = framework:getTicks()
+	if self.bgParams ~= nil then
+		self.drawBackground(self.bgParams, surface)
+	end
+
 	-- local volume = self.player:getVolume()
 	set_vol_levels(self.left, vol[1])
 	self.drawMeter(self.left, surface, vol[1])
 	set_vol_levels(self.right, vol[2])
 	self.drawMeter(self.right, surface, vol[2])
-    local delta_draw_ticks = framework:getTicks() - draw_ticks
+	local delta_draw_ticks = framework:getTicks() - draw_ticks
 	agg_draw_ticks = agg_draw_ticks + delta_draw_ticks
-    max_draw_ticks = math.max(max_draw_ticks, delta_draw_ticks)
+	max_draw_ticks = math.max(max_draw_ticks, delta_draw_ticks)
+	min_draw_ticks = math.min(min_draw_ticks, delta_draw_ticks)
+	sample_count_draw_ticks = sample_count_draw_ticks + 1
 
 	if FC == 0 then
 		self.lastSampleTicks = ticks
@@ -473,12 +481,14 @@ function draw(self, surface)
 	FC = FC + 1
 	-- update FPS every 2 seconds
 	if FC % TWO_SECS_FRAME_COUNT == 0 then
-        log:warn(agg_draw_ticks/FC, " ", max_draw_ticks)
-        agg_draw_ticks = 0
-        max_draw_ticks = 0
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
 		FPS = (math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000)))
+		log:warn("FPS:", FPS, " max:", max_draw_ticks, " min:", min_draw_ticks, " avg:", agg_draw_ticks/sample_count_draw_ticks)
+		agg_draw_ticks = 0
+		max_draw_ticks = 0
+		min_draw_ticks = 1000
+		sample_count_draw_ticks = 0
 		if NF > 0 then
 --			if FPS > (FRAME_RATE * 1.1) then
 --				log:warn("FPS HIGH ", FPS, " step:", self.left.framecount/FPS,
