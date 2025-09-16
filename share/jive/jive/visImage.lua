@@ -919,7 +919,7 @@ local prevSpImageIndex = -1
 function getSpectrum(_, w, h, barColorIn, capColorIn, capHeightIn, capSpaceIn)
 	log:debug("getSpectrum: ", w, " ", h)
 	local spkey = spectrumList[spImageIndex].name
-	log:debug("getSpectrum: spkey: ", spkey)
+	log:warn("getSpectrum: spkey: ", spkey)
 
 	if visSettings.cacheEnabled == false and prevSpImageIndex ~= spImageIndex then
 		imCacheClear()
@@ -1418,7 +1418,7 @@ local prevVuImageIndex = -1
 function getVuImage(_,w,h)
 	log:debug("getVuImage ", vuImageIndex, ", ", vuImages[vuImageIndex])
 	local entry = vuImages[vuImageIndex]
-	log:debug("getVuImage ", entry.displayName, " ", entry.vutype)
+	log:warn("getVuImage ", entry.displayName, " ", entry.vutype)
 
 	if visSettings.cacheEnabled == false and vuImageIndex ~= prevVuImageIndex then
 		imCacheClear()
