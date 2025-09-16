@@ -17,6 +17,7 @@ local log           = require("jive.utils.log").logger("jivelite.vis")
 local FRAME_RATE    = jive.ui.FRAME_RATE
 
 local appletManager = appletManager
+local table         = require("jive.utils.table")
 
 module(...)
 oo.class(_M, Icon)
@@ -57,6 +58,10 @@ FC=0
 -- number of frames defined for VU Meter
 NF=0
 
+local agg_draw_ticks = 0
+local max_draw_ticks = 0
+
+
 local TWO_SECS_FRAME_COUNT = FRAME_RATE * 2
 
 function __init(self, style)
@@ -64,7 +69,7 @@ function __init(self, style)
 
 	obj.style = style
 
-	obj.cap = { 0, 0 }
+--	obj.cap = { 0, 0 }
 
 	obj:addAnimation(function() obj:reDraw() end, FRAME_RATE)
 
@@ -91,14 +96,16 @@ function _skin(self)
 	end
 end
 
--- FIXME dynamic based on number of bars
+-- FIXME dynamic based on number of volume levels
 local RMS_MAP = {
 	   0,    2,    5,    7,   10,   21,   33,   45,   57,   82,
 	 108,  133,  159,  200,  242,  284,  326,  387,  448,  509,
 	 570,  652,  735,  817,  900, 1005, 1111, 1217, 1323, 1454,
 	1585, 1716, 1847, 2005, 2163, 2321, 2480, 2666, 2853, 3040,
-	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536, 4755, 5000,
+	3227, 3414, 3601, 3788, 3975, 4162, 4349, 4536,
+	4755, 5000,
 }
+
 
 local function samplAcc2Vol(sampleAcc)
 	for i = #RMS_MAP, 1, -1 do
@@ -116,30 +123,16 @@ local function drawVuMeterBackground(params, surface)
 end
 
 local function drawVuMeter(params, surface, vol)
-	-- FIXME when rms map scaled
-	local val = math.min(math.floor(vol/2), 24)
-
---	val = math.floor(math.log(sampleAcc[ch]) * 1.5)
---	if val > 24 then
---		val = 24
---	end
-
-	if val >= params.cap then
-		params.cap = val
-	elseif params.cap > 0 then
-		params.cap = params.cap - 1
-	end
-
 	local y = params.y
 	local x = params.x
 	local th = params.th
 	local tw = params.tw
-	local cap = params.cap
+	local cap = params.simulated_vol
 
 	for i = 1, params.bars do
 		if i == math.floor(cap / 2) then
 			params.tickCap:blit(surface, x, y, tw, th)
-		elseif i < val then
+		elseif i < params.vol then
 			params.tickOn:blit(surface, x, y, tw, th)
 		else
 			params.tickOff:blit(surface, x, y, tw, th)
@@ -150,22 +143,10 @@ local function drawVuMeter(params, surface, vol)
 end
 
 local function drawCompose1(params, surface, volIn)
-	local vol = math.min(params.maxVU - 1, (volIn * params.maxVU)/#RMS_MAP)
-
-	-- add compose1 bar render x offset here
-	if vol >= params.cap then
-		params.cap = vol
-		params.peak_hold_counter = math.floor(FRAME_RATE/2)
-	else
-		params.peak_hold_counter = params.peak_hold_counter - 1
-		if params.peak_hold_counter < 1 then
-			params.cap = 0
-		end
-	end
-
+	local vol = params.vol
 	local x = params.x + params.compose1.bar_rxo
 	local y = params.y
-	local cap = params.cap
+	local pkh_vol = params.peak_hold_vol
 	local bw = params.compose1.bw
 	local bh = params.compose1.bh
 	local h = params.compose1.h
@@ -173,15 +154,15 @@ local function drawCompose1(params, surface, volIn)
 
 	-- 1 = 0 => no bars ON -
 	for i = 2, iDB0 do
-		if i <= vol or i == cap then
+		if i <= vol or i == pkh_vol then
 			params.compose1.on:blit(surface, x, y, bw, bh)
 		else
 			params.compose1.off:blit(surface, x, y, bw, bh)
 		end
 		x = x + params.compose1.barwidth
 	end
-	for i = iDB0+1, params.maxVU do
-		if i <= vol or i == cap then
+	for i = iDB0+1, params.volume_levels do
+		if i <= vol or i == pkh_vol then
 			params.compose1.peakon:blit(surface, x, y, bw, h)
 		else
 			params.compose1.peakoff:blit(surface, x, y, bw, h)
@@ -199,42 +180,28 @@ local function drawCompose1Static(params, surface)
 end
 
 
--- set params.cap as required for frames and discrete frames type VU meters
-local function setVUFramesCapValue(params, vol)
-	-- lua array indices start with 1 - decrement by 1 to get 0 as the minimum value.
-	-- frame offsets are 0 based
-	vol =  vol - 1
-	local val = math.min(math.floor(vol * (params.framecount/#RMS_MAP)), params.framecount - 1)
-	local v_rtzp = params.rtzp
-	if v_rtzp == 0 then
-		params.cap = val
-		return
-	end
-	if val >= params.cap then
-		params.cap = val
-	elseif params.cap > 0 then
-		if v_rtzp > 0 then
-			params.cap = math.max(0, params.cap - ((params.framecount/FPS) / v_rtzp))
-		else
-			-- negative values are number of levels to drop for each frame rendered
-			params.cap = math.max(0, params.cap + v_rtzp)
-	 end
-	end
+local function drawVUMeterFrames(params, surface, _)
+	params.img:blitClip(params.simulated_vol * params.w, params.src_y,
+								params.w, params.h, surface, params.x, params.y)
 end
 
-local function drawVUMeterFrames(params, surface, vol)
-	setVUFramesCapValue(params, vol)
-	params.img:blitClip(math.floor(params.cap + 0.5) * params.w, params.src_y, params.w, params.h, surface, params.x, params.y)
-end
-
-local function drawVUMeterDiscreteFrames(params, surface, vol)
-	setVUFramesCapValue(params, vol)
-	params.image_frames[math.floor(params.cap + 0.5) + params.firstframe_index]:blit(surface, params.x, params.y)
+local function drawVUMeterDiscreteFrames(params, surface, _)
+	params.image_frames[params.simulated_vol + params.firstframe_index]:blit(surface, params.x, params.y)
 end
 
 local function nullDraw(_, _, _)
 end
 
+
+local function add_vol_components(params, vutbl)
+	params.decay_level = 0.0
+	params.decay_step = ((vutbl.volume_levels / FPS) / vutbl.rtzp)
+	params.peak_hold_vol = 0
+	params.peak_hold_counter = 0
+	params.simulated_vol = 0
+	params.rtzp = vutbl.rtzp
+	params.volume_levels = vutbl.volume_levels
+end
 
 function _layout(self)
 	local x,y,w,h = self:getBounds()
@@ -267,7 +234,6 @@ function _layout(self)
 	end
 
 	self.bgParams = nil
-
 	if self.style == "vumeter" then
 		local vu_w = w - l - r
 		local vu_h = h - t - b
@@ -279,7 +245,8 @@ function _layout(self)
 
 		local bars = vu_h / th
 		self.y = y + t + (bars * th)
-		self.left =  { cap=0,
+		self.left = {
+			decay_level=0, peak_hold_vol=0, peak_hold_counter=0, simulated_vol=0,
 			x = x + l + ((vu_w - tw * 2) / 3),
 			y = y + t + (bars * th),
 			bars = bars,
@@ -287,9 +254,11 @@ function _layout(self)
 			th = th,
 			tickOn = self.tickOn,
 			tickOff = self.tickOff,
-			tickCap = self.tickCap
+			tickCap = self.tickCap,
+			volume_levels = 25,
 		}
-		self.right =  { cap=0,
+		self.right =  {
+			decay_level=0, peak_hold_vol=0, peak_hold_counter=0, simulated_vol=0,
 			x = x + l + ((vu_w - tw * 2) / 3) * 2 + tw,
 			y = y + t + (bars * th),
 			bars = bars,
@@ -297,18 +266,12 @@ function _layout(self)
 			th = th,
 			tickOn = self.tickOn,
 			tickOff = self.tickOff,
-			tickCap = self.tickCap
+			tickCap = self.tickCap,
+			volume_levels = 25,
 		}
 		self.drawMeter = drawVuMeter
 		self.bgParams = { bgImg = self.bgImg, bounds=self:getBounds() }
 		self.drawBackground = drawVuMeterBackground
---	elseif self.style == "vumeter_analog" then
---		local imgW, imgH = self.bgImg:getSize()
---		local frame_w = imgW/25
---		local fx = x + math.floor(w / 2) - frame_w
---		self.left =  { img=self.bgImg, x=fx ,                   y=y, src_y=0, w=frame_w, h=imgH, cap=0}
---		self.right = { img=self.bgImg, x=self.left.x + frame_w, y=y, src_y=0, w=frame_w, h=imgH, cap=0}
---		self.drawMeter = draw25FrameVuMeter
 	elseif self.style == "vumeter_v2" then
 		self.drawMeter = nullDraw
 		self.vutbl = visImage:getVuImage(w,h)
@@ -336,14 +299,16 @@ function _layout(self)
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
 				end
-				self.left  = { img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount,
-								rtzp = self.vutbl.rtzp,
-							}
-				self.right = { img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount,
-								rtzp = self.vutbl.rtzp,
-							}
+				self.left  = {
+				  img=self.vutbl.imageFrames[1], x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH,
+				  framecount = self.vutbl.jsData.framecount,
+				}
+				self.right = {
+				  img=self.vutbl.imageFrames[2], x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH,
+				  framecount = self.vutbl.jsData.framecount,
+				}
+				add_vol_components(self.left, self.vutbl)
+				add_vol_components(self.right, self.vutbl)
 				log:debug("rtzp : ", self.left.rtzp)
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
@@ -363,17 +328,19 @@ function _layout(self)
 			local y1 = y + math.floor((h - self.compose1.h)/2)
 			local y2 = y1 + self.compose1.bh + self.compose1.ch
 			self.left =  {
-				x=(compose1x + self.compose1.lw), y=y1, cap=0, peak_hold_counter=0,
+				x=(compose1x + self.compose1.lw), y=y1,
 				maxVU = self.compose1.maxVU,
 				db0 = self.compose1.db0,
-				compose1=self.compose1.left
+				compose1=self.compose1.left,
 			}
 			self.right = {
-				x=(compose1x + self.compose1.lw), y=y2, cap=0, peak_hold_counter=0,
+				x=(compose1x + self.compose1.lw), y=y2,
 				maxVU = self.compose1.maxVU,
 				db0 = self.compose1.db0,
-				compose1=self.compose1.right
+				compose1=self.compose1.right,
 			}
+			add_vol_components(self.left, self.vutbl)
+			add_vol_components(self.right, self.vutbl)
 			self.drawMeter = drawCompose1
 
 			self.bgParams = {x=compose1x, y=y1 + self.compose1.bh, compose1=self.compose1, left=self.left, right=self.right, xtrail = xtrail}
@@ -402,16 +369,18 @@ function _layout(self)
 					-- clip the image at the top and bottom
 					src_y = math.floor((imgH - h)/2)
 				end
-				self.left  = { image_frames=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount,
-								firstframe_index = ffindx_left,
-								rtzp = self.vutbl.rtzp,
-							}
-				self.right = { image_frames=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH, cap=0,
-								framecount = self.vutbl.jsData.framecount,
-								firstframe_index = ffindex_right,
-								rtzp = self.vutbl.rtzp,
-							}
+				self.left  = {
+					image_frames=self.vutbl.imageFrames, x=lx , y=fy, src_y=src_y, w=frame_w, h=imgH,
+					framecount = self.vutbl.jsData.framecount,
+					firstframe_index = ffindx_left,
+				}
+				self.right = {
+					image_frames=self.vutbl.imageFrames, x=rx , y=fy, src_y=src_y, w=frame_w, h=imgH,
+					framecount = self.vutbl.jsData.framecount,
+					firstframe_index = ffindex_right,
+				}
+				add_vol_components(self.left, self.vutbl)
+				add_vol_components(self.right, self.vutbl)
 				log:debug("rtzp : ", self.left.rtzp)
 				log:debug("frame_w : ", frame_w, " spacing: ", spacing)
 				log:debug("left : x:", self.left.x, " y:", self.left.y, " src_y:",
@@ -427,6 +396,35 @@ function _layout(self)
 	end
 end
 
+
+local function set_vol_levels(params, vol)
+	vol = math.floor(vol * (params.volume_levels/#RMS_MAP)) - 1
+
+	if vol >= params.decay_level or params.rtzp == 0 then
+		params.decay_level = vol
+		params.simulated_vol = vol
+	elseif params.decay_level > 0 then
+		if params.rtzp > 0 then
+			params.decay_level = math.max(0,
+			params.decay_level - params.decay_step)
+		else
+			params.decay_level = math.max(0, params.decay_level + params.rtzp)
+		end
+		params.simulated_vol = math.floor(0.5 + params.decay_level)
+	end
+
+	if vol >= params.peak_hold_vol then
+		params.peak_hold_counter = math.floor(FRAME_RATE/2)
+		params.peak_hold_vol = vol
+	else
+		params.peak_hold_counter = math.max(params.peak_hold_counter - 1, 0)
+		if params.peak_hold_counter == 0 then
+			params.peak_hold_vol = 0
+		end
+	end
+
+	params.vol = vol
+end
 
 function draw(self, surface)
 	local ticks = framework:getTicks()
@@ -459,10 +457,15 @@ function draw(self, surface)
 	local sampleAcc = vis:vumeter()
 	local vol = {samplAcc2Vol(sampleAcc[1]), samplAcc2Vol(sampleAcc[2])}
 
+	local draw_ticks = framework:getTicks()
 	-- local volume = self.player:getVolume()
-
+	set_vol_levels(self.left, vol[1])
 	self.drawMeter(self.left, surface, vol[1])
+	set_vol_levels(self.right, vol[2])
 	self.drawMeter(self.right, surface, vol[2])
+    local delta_draw_ticks = framework:getTicks() - draw_ticks
+	agg_draw_ticks = agg_draw_ticks + delta_draw_ticks
+    max_draw_ticks = math.max(max_draw_ticks, delta_draw_ticks)
 
 	if FC == 0 then
 		self.lastSampleTicks = ticks
@@ -470,6 +473,9 @@ function draw(self, surface)
 	FC = FC + 1
 	-- update FPS every 2 seconds
 	if FC % TWO_SECS_FRAME_COUNT == 0 then
+        log:warn(agg_draw_ticks/FC, " ", max_draw_ticks)
+        agg_draw_ticks = 0
+        max_draw_ticks = 0
 		-- minimal work: 1st time around lastSampleTicks == 0, fps calculation will be way off
 		-- self corrects next time around
 		FPS = (math.floor(TWO_SECS_FRAME_COUNT/((ticks - self.lastSampleTicks)/1000)))
@@ -500,7 +506,7 @@ Copyright 2010 Logitech. All Rights Reserved.
 
 This file is licensed under BSD. Please see the LICENSE file for details.
 
-Copyright 2023  additions: Blaise Dias
+Copyright 2025  additions: Blaise Dias
 =cut
 --]]
 

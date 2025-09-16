@@ -1426,7 +1426,13 @@ function getVuImage(_,w,h)
 	prevVuImageIndex = vuImageIndex
 
 	if entry.vutype == VUT_compose1 then
-		return  {vutype=entry.vutype, compose1=getCompose1VUmeter(entry.name, w, h)}
+		local c1 = getCompose1VUmeter(entry.name, w, h)
+		return  {
+			vutype=entry.vutype,
+			compose1=c1,
+			rtzp=visSettings.framesVU_RTZP,
+			volume_levels=c1.maxVU
+		}
 	end
 
 	local imgs = {}
@@ -1456,7 +1462,8 @@ function getVuImage(_,w,h)
 		imageFrames=imgs,
 		displayResizing=makeResizingParams(resizeRequired),
 		jsData=entry.jsData,
-		rtzp=visSettings.framesVU_RTZP
+		rtzp=visSettings.framesVU_RTZP,
+		volume_levels=entry.jsData.framecount
 	}
 end
 
