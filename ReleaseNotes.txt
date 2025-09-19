@@ -1,0 +1,41 @@
+Release 2
+- The key 'v' is now used to change visualiser (was unused previously), removed mapping of '\' for this purpose
+- NowPlaying views component alignment fixes
+- Bug fix: NowPlaying screen volume control at 800x480 screen resolution
+- portrait mode for 720x1280 screen resolution
+    - Joggler Skin: default enabled NowPlaying views: 
+        replaced - nowplaying_spectrum_text with  nowplaying_spectrum_text_art
+- VU Meter:
+    - Bug fix: compose type: render trail images
+    - artwork: fix calibration graphics
+- Added fonts (from google fonts):
+    - Antonio
+    - Oswald
+    - Roboto
+- Added support for higher resolution frames VU meters
+    - higher resolution source artwork
+    - larger number of frames - up to 50
+- Added option to switch to NowPlaying screen on startup
+- Material icons for NowPlaying controls
+- Display visualiser performance data FPS (primarily for debug purposes)
+- Added support to startup Jivelite in NowPlaying screen (transitions after 5 seconds)
+- Changes to better support portrait mode 
+- Added option to support make settings change persistent when settings are changed (piCorePlayer)
+- Logging: flush to log file immediately
+- Added scaling to Joggler Skin to support higher resolutions - removes the requirement for HD Skins
+- Added UI for basic scaling 
+- Simplify wallpaper scaling - remove broken centering code
+- Changes to support ultra-wide displays aspect ratio > 1:3
+- Scale Keyboard to suit display resolution
+- Added support to adjust layout using JSON files
+- Added support to "hide" volume controls
+- Added support for layout debugging
+- Bug fixes 
+- Added support to hide Now Playing X of Y field
+- Added support to change size of art work displayed
+- Partial fixes for Clock Screen savers
+- Added support/configuration for QVGA and WQVGA - removing the need for QVGA and WQVGA screens
+- Added back button on all Now Playing views
+- Added support for using raw SDL bitmaps for resized images
+
+
