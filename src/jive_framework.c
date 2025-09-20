@@ -318,8 +318,21 @@ static int jiveL_initSDL(lua_State *L) {
 	}
 
 	if (splash) {
+		float splash_scalef = (float)screen_w/splash_w;
+		if (splash_scalef > (float)screen_h/splash_h) {
+			splash_scalef = (float)screen_h/splash_h;
+		}
+
+		JiveSurface *resized_splash = jive_surface_resize(splash, (int)(splash_scalef * splash_w), (int)(splash_scalef * splash_h), (bool) 1);
+		if (resized_splash) {
+			jive_surface_release(splash);
+			splash = resized_splash;
+            jive_surface_get_size(splash, &splash_w, &splash_h);
+		}
+
 		jive_surface_blit(splash, srf, MAX(0, (screen_w - splash_w) / 2), MAX(0, (screen_h - splash_h) / 2));
 		jive_surface_flip(srf);
+		if (video_info->wm_available) { sleep(2); }
 	}
 
 	lua_getfield(L, 1, "screen");
