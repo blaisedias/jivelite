@@ -5039,6 +5039,40 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		-- set padding to 0 so that left edge aligns with other fields
 		local visu_text_art_wide_nptitle_padding = table.clone(BASEnowplaying.nptitle.padding)
 		visu_text_art_wide_nptitle_padding[1] = 0
+
+		s.nowplaying = _NP_uses(BASEnowplaying, {
+			nptitle = {
+				x = npX,
+				padding = visu_text_art_wide_nptitle_padding,
+				nptrack = {
+					w = screenRem - 80 - 10,
+					font = _boldfont(scaledValues.NP_TRACK_FONT_SIZE),
+					_font_size_bold = scaledValues.NP_TRACK_FONT_SIZE,
+				},
+			},
+			npcontrols = {
+				order = largeArtButtonOrder,
+				x = scaledValues.midArtworkSize + x_artwork,
+			},
+			npartwork = {
+				w = scaledValues.midArtworkSize,
+				x = x_artwork,
+				y = y_artwork,
+				align = "center",
+				h = scaledValues.midArtworkSize,
+				artwork = {
+					w = WH_FILL,
+					h = WH_FILL,
+					align = "left",
+					padding = 0,
+					img = false,
+				},
+			},
+		},
+		'nowplaying')
+		s.nowplaying.pressed = s.nowplaying
+		s.nowplaying.npartwork.pressed = s.nowplaying.npartwork
+
 		-- Visualizer: mini Spectrum Visualizer screen aspect ratio >= 3
 		local BASEnowplaying_visu_text_art_wide = _NP_uses(BASEnowplaying, {
 			nptitle = {
