@@ -1907,48 +1907,53 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		spacer_bottomRight = _uses(s.keyboard.spacer_bottomRight),
 	}
 
-	local _timeFirstColumnX12h = 218
-	local _timeFirstColumnX24h = 280
+	local _timeFirstColumnX12h = scaledValues.INPUT_TIME_FIRSTCOL_12H
+	local _timeFirstColumnX24h = scaledValues.INPUT_TIME_FIRSTCOL_24H
 
 	s.time_input_background_12h = {
-		w = WH_FILL,
+--		w = WH_FILL,
+		w = INPUT_TIME_MENUBOX_12H_W,
 		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
-		img = _loadImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_3c.png"),
-		x = 0,
+		img = _loadScaledImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_3c.png"),
+--		img = nil,
+		x = scaledValues.INPUT_TIME_MENUBOX_12H_X,
 		y = scaledValues.TITLE_HEIGHT,
 	}
 
 	s.time_input_background_24h = {
-		w = WH_FILL,
+--		w = WH_FILL,
+		w = INPUT_TIME_MENUBOX_24H_W,
 		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
-		img = _loadImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_2c.png"),
-		x = 0,
+		img = _loadScaledImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_2c.png"),
+--		img = nil,
+		x = scaledValues.INPUT_TIME_MENUBOX_24H_X,
 		y = scaledValues.TITLE_HEIGHT,
 	}
 
 	s.time_input_menu_box_12h = {
 		position = LAYOUT_NONE,
-		img = _loadImage(self, "Multi_Character_Entry/menu_box_fixed.png"),
-		w = 370,
-		h = 80,
-		x = 216,
-		y = 228,
+		img = _loadScaledImage(self, "Multi_Character_Entry/menu_box_fixed.png"),
+		w = scaledValues.INPUT_TIME_MENUBOX_12H_W,
+		h = scaledValues.INPUT_TIME_MENUBOX_12H_H,
+		x = scaledValues.INPUT_TIME_MENUBOX_12H_X,
+		y = scaledValues.INPUT_TIME_MENUBOX_12H_Y,
 	}
+
 	s.time_input_menu_box_24h = _uses(s.time_input_menu_box_12h, {
 		-- img = _loadImage(self, "UNOFFICIAL/menu_box_fixed_2c.png"),
-		w = 242,
-		x = 278,
+		w = scaledValues.INPUT_TIME_MENUBOX_24H_W,
+		x = scaledValues.INPUT_TIME_MENUBOX_24H_X,
 	})
 
 	-- time input window
 	s.input_time_12h = _uses(s.window)
 	s.input_time_12h.hour = _uses(s.menu, {
-		w = 100,
+		w = scaledValues.INPUT_TIME_WIDTH,
 		--h = screenHeight - scaledValues.TITLE_HEIGHT,
 		h = screenHeight,
-		itemHeight = 80,
+		itemHeight = scaledValues.INPUT_TIME_HEIGHT,
 		position = LAYOUT_WEST,
 		padding = 0,
 		border = { _timeFirstColumnX12h, scaledValues.TITLE_HEIGHT, 0, 0 },
@@ -1991,10 +1996,10 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		},
 	})
 	s.input_time_12h.minute = _uses(s.input_time_12h.hour, {
-		border = { _timeFirstColumnX12h + 125, scaledValues.TITLE_HEIGHT, 0, 0 },
+		border = { _timeFirstColumnX12h + scaledValues.INPUT_TIME_12H_MIN_OFFSET, scaledValues.TITLE_HEIGHT, 0, 0 },
 	})
 	s.input_time_12h.ampm = _uses(s.input_time_12h.hour, {
-		border = { _timeFirstColumnX12h + 125 + 120, scaledValues.TITLE_HEIGHT, 0, 0 },
+		border = { _timeFirstColumnX12h + scaledValues.INPUT_TIME_12H_MIN_OFFSET + scaledValues.INPUT_TIME_12H_AMPM_OFFSET, scaledValues.TITLE_HEIGHT, 0, 0 },
 		item = {
 			text = {
 				padding = { 0, 2, 8, 0 },
@@ -2027,13 +2032,13 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 			border = { _timeFirstColumnX24h, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		minute = {
-			border = { _timeFirstColumnX24h + 124, scaledValues.TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h + scaledValues.INPUT_TIME_24H_MIN_OFFSET, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		hourUnselected = {
 			border = { _timeFirstColumnX24h, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 		minuteUnselected = {
-			border = { _timeFirstColumnX24h + 124, scaledValues.TITLE_HEIGHT, 0, 0 },
+			border = { _timeFirstColumnX24h + scaledValues.INPUT_TIME_24H_MIN_OFFSET, scaledValues.TITLE_HEIGHT, 0, 0 },
 		},
 	})
 

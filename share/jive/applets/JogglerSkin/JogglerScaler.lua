@@ -367,8 +367,8 @@ end
 -- private function scales an image to match input width and height
 -- if either one but not both are nil, then the corresponding source image dimension is used.
 -- if either one but not both are 0, then the value used for the dimension retains the source aspect ratio
-local function scaleImage(imgPath, w, h)
-    log:debug("scaleImage imagePath:", imgPath, " w:", w, " h:", h)
+local function scaleImage(imgPath, w, h, scaleFactor, abs)
+    log:debug("scaleImage imagePath:", imgPath, " w:", w, " h:", h, " sf:", scaleFactor, " abs:", abs)
     local img = Surface:altLoadImage(imgPath)
     if img == nil then
         log:warn("scaleImage: failed to load ", imgPath)
@@ -376,19 +376,26 @@ local function scaleImage(imgPath, w, h)
     end
     local srcW, srcH = img:getSize()
     -- validate input parameters and bail out gracefully
-    if (w == nil or h == 0) and ( h == nil or h == 0) then
+    if (w == nil or w == 0) and ( h == nil or h == 0) and scaleFactor == nil then
         log:warn("scaleImage: invalid parameters ", imgPath)
         return nil
     end
-    if w == nil then
-        w = srcW
-    elseif w == 0 then
-        w = math.floor(srcW * h/srcH)
-    end
-    if h == nil then
-        h = srcH
-    elseif h == 0 then
-        h = math.floor(srcH * h/srcW)
+    if scaleFactor then
+        w = math.floor(srcW * scaleFactor)
+        h = math.floor(srcH * scaleFactor)
+    else
+        if abs ~= true then
+            if w == nil then
+                w = srcW
+            elseif w == 0 then
+                w = math.floor(srcW * h/srcH)
+            end
+            if h == nil then
+                h = srcH
+            elseif h == 0 then
+                h = math.floor(srcH * h/srcW)
+            end
+        end
     end
     if srcW == w and h == srcH then
         log:debug("scaleImage no scaling", img)
@@ -403,19 +410,19 @@ end
 
 -- private function scales all images found in a path, to match input width and height
 -- images discovery is not recursive.
-local function scaleImagesInPath(src_path, dest_path, w, h)
+local function scaleImagesInPath(src_path, dest_path, w, h, scaleFactor)
     for entry in lfs.dir(src_path) do
         if entry ~= "." and entry ~= ".." then
             local mode = lfs.attributes(src_path .. "/" .. entry, "mode")
             if mode == "file" then
                 mode = lfs.attributes(dest_path .. "/" .. entry, "mode")
                 if mode ~= "file"  then
-                    local img = scaleImage(src_path .. "/" .. entry, w, h)
+                    local img = scaleImage(src_path .. "/" .. entry, w, h, scaleFactor)
                     if img ~= nil then
                         img:savePNG(dest_path .. '/' .. entry)
                         img:release()
                     else
-                        log:warn("failed to scale ", src_path .. '/' .. entry)
+                        log:warn("failed to scale ", src_path .. '/' .. entry, " to ", dest_path)
                     end
                 end
             end
@@ -632,19 +639,56 @@ end
 -- global function scale images required for Joggler based skins
 function scaleUIImages(imgs_path, params)
     local resizedPath = System.getUserDir() .. '/' .. params.state.imgPath
-    local tbl_ui = {
+
+    local function _scale_tbl(tbl_ui)
+        for _, entry in pairs(tbl_ui) do
+            local src_path = findFQPath(imgs_path .. '/' .. entry.relPath)
+            local dest_path =  resizedPath .. '/' .. entry.relPath
+            os.execute("mkdir -p " .. resizedPath .. '/' .. entry.relPath)
+            if entry.w ~= nil or entry.h ~= nil then
+                scaleImagesInPath(src_path, dest_path, entry.w, entry.h, entry.scaleFactor)
+            end
+        end
+    end
+
+    _scale_tbl({
         { relPath="grid_list",     w=nil,               h=params.GRID_ITEM_HEIGHT },
         { relPath="5_line_lists",  w=nil,               h=params.FIVE_ITEM_HEIGHT },
         { relPath="IconsResized",  w=params.THUMB_SIZE, h=params.THUMB_SIZE },
         { relPath="Buttons",       w=nil,               h=params.TITLE_HEIGHT - 18 },
-    }
+    })
 
-    for _, entry in pairs(tbl_ui) do
-        local src_path = findFQPath(imgs_path .. '/' .. entry.relPath)
-        local dest_path =  resizedPath .. '/' .. entry.relPath
-        os.execute("mkdir -p " .. resizedPath .. '/' .. entry.relPath)
-        if entry.w ~= nil or entry.h ~= nil then
-            scaleImagesInPath(src_path, dest_path, entry.w, entry.h)
+    -- time input scaling is not uniform
+    if params.INPUT_TIME_HEIGHT then
+        local _, screenHeight = Framework:getScreenSize()
+        local src_path = findFQPath(imgs_path .. '/' .. "Multi_Character_Entry")
+        local dest_path =  resizedPath .. '/' .. "Multi_Character_Entry"
+        os.execute("mkdir -p " .. dest_path)
+        local mce_imgs = {
+            {filename = "menu_box_fixed.png",
+                        w=params.INPUT_TIME_MENUBOX_12H_W, h=params.INPUT_TIME_HEIGHT,
+                        abs=true},
+            {filename = "tch_multi_char_bkgrd_3c.png",
+                        w=params.INPUT_TIME_MENUBOX_12H_W,  h=screenHeight - params.TITLE_HEIGHT,
+                        abs=true},
+            {filename = "tch_multi_char_bkgrd_2c.png",
+                        w=params.INPUT_TIME_MENUBOX_24H_W,  h=screenHeight - params.TITLE_HEIGHT,
+                        abs=true},
+        }
+        for _, entry in pairs(mce_imgs) do
+            local destfilepath = dest_path .. '/' .. entry.filename
+            local mode =  lfs.attributes(destfilepath)
+            if mode ~= "file" then
+                local img = scaleImage(src_path .. "/" .. entry.filename,
+                                        entry.w, entry.h,
+                                        entry.sf, entry.abs)
+                if img ~= nil then
+                    img:savePNG(destfilepath)
+                    img:release()
+                else
+                    log:warn("failed to scale ", src_path .. '/' .. entry.filename, " to ", dest_path)
+                end
+            end
         end
     end
 end
@@ -941,6 +985,30 @@ function getJogglerSkinParams(skinName)
     params.KEYBOARD_SMALL_FONT_SIZE = scaleTextValue(36)
     params.INPUT_TIME_FONT_SIZE = scaleTextValue(45)
     params.INPUT_TIME_SMALL_FONT_SIZE = scaleTextValue(26)
+--    params.INPUT_TIME_HEIGHT = scaleTextValue(80)
+    params.INPUT_TIME_HEIGHT = math.floor((screenHeight - params.TITLE_HEIGHT)/5);
+    params.INPUT_TIME_WIDTH = scaleTextValue(100)
+
+--    params.INPUT_TIME_MENUBOX_12H_Y = scaleTextValue(228)
+    params.INPUT_TIME_MENUBOX_12H_Y = params.TITLE_HEIGHT +  (params.INPUT_TIME_HEIGHT *2 )
+    params.INPUT_TIME_MENUBOX_12H_W = scaleTextValue(370)
+--    params.INPUT_TIME_MENUBOX_12H_H = scaleTextValue(80)
+    params.INPUT_TIME_MENUBOX_12H_H = params.INPUT_TIME_HEIGHT
+--    params.INPUT_TIME_MENUBOX_12H_X = scaleTextValue(216)
+    params.INPUT_TIME_MENUBOX_12H_X = math.floor((screenWidth -  params.INPUT_TIME_MENUBOX_12H_W)/2)
+--    params.INPUT_TIME_FIRSTCOL_12H = scaleTextValue(218)
+    params.INPUT_TIME_FIRSTCOL_12H = params.INPUT_TIME_MENUBOX_12H_X
+
+    params.INPUT_TIME_MENUBOX_24H_W = scaleTextValue(242)
+--    params.INPUT_TIME_MENUBOX_24H_X = scaleTextValue(278)
+    params.INPUT_TIME_MENUBOX_24H_X = math.floor((screenWidth -  params.INPUT_TIME_MENUBOX_24H_W)/2)
+--    params.INPUT_TIME_FIRSTCOL_24H = scaleTextValue(280)
+    params.INPUT_TIME_FIRSTCOL_24H = params.INPUT_TIME_MENUBOX_24H_X
+
+    params.INPUT_TIME_12H_MIN_OFFSET = scaleTextValue(125)
+    params.INPUT_TIME_12H_AMPM_OFFSET = scaleTextValue(120)
+    params.INPUT_TIME_24H_MIN_OFFSET = scaleTextValue(124)
+
     params.ALARM_TIME_FONT_SIZE = scaleTextValue(62)
     params.SLIDER_POPUP_FONT_SIZE = scaleTextValue(32)
     params.RBUTTON_FONT_SIZE = scaleTextValue(14)
