@@ -695,6 +695,7 @@ end
 
 local function _getJogglerCoreParams(skinName, skinValues)
     local screenWidth, screenHeight = Framework:getScreenSize()
+    local resolutionString = screenWidth .. 'x' .. screenHeight
     -- TODO scaling of enclosing boix for control popup -- for now clamp at 150
     local MAX_CONTROL_POPUP_DIMENSIONS = 150
     if Framework:getGlobalSetting("jogglerScaleAndCustomise") then
@@ -757,7 +758,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenWidth / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
-                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        imgPath = jogglerImgpath .. resolutionString .. "/",
                         scalingRequired=true
                     }
                 }
@@ -773,7 +774,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
-                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        imgPath = jogglerImgpath .. resolutionString .. "/",
                         scalingRequired=true
                     }
                 }
@@ -791,7 +792,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
                     CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
                     TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
                     state = {
-                        imgPath = jogglerImgpath .. thumbSize .. "/",
+                        imgPath = jogglerImgpath .. resolutionString .. "/",
                         scalingRequired=true
                     }
                 }
@@ -805,14 +806,14 @@ local function _getJogglerCoreParams(skinName, skinValues)
 --                CONTROL_POPUP_DIMENSIONS = math.min(MAX_CONTROL_POPUP_DIMENSIONS, math.floor(screenHeight / 3)),
 --                TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
 --                state = {
---                    imgPath = jogglerImgpath .. thumbSize .. "/",
+--                    imgPath = jogglerImgpath .. resolutionString .. "/",
 --                    scalingRequired=true
 --                }
 --            }
         end
     end
 
-    return {
+    local jsp = {
             THUMB_SIZE=BASE_ICON_SIZE,
             POPUP_THUMB_SIZE=BASE_POPUP_THUMBSIZE,
             FIVE_ITEM_HEIGHT=45,
@@ -825,6 +826,12 @@ local function _getJogglerCoreParams(skinName, skinValues)
                 scalingRequired=false
             }
         }
+    if screenWidth ~= 800 then
+        jsp.state.scalingRequired = true
+        jsp.state.imgPath = jogglerImgpath .. resolutionString .. "/"
+    end
+
+    return jsp
 end
 
 function getJogglerSkinParams(skinName)
