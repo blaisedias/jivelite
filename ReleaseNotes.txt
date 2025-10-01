@@ -1,4 +1,10 @@
-Release 2
+Release 2.0.3
+- fix: time input for alarms ( scaling )
+Release 2.0.2
+- fix: ultra wide screen: nowplaying artwork and text view
+Release 2.0.1
+- scale the splash screen
+Release 2.0.0
 - The key 'v' is now used to change visualiser (was unused previously), removed mapping of '\' for this purpose
 - NowPlaying views component alignment fixes
 - Bug fix: NowPlaying screen volume control at 800x480 screen resolution
