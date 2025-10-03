@@ -22,16 +22,23 @@
     },
     "240x320": {
         "gridSkin": {
-            "GRID_ITEM_HEIGHT": 150,
+            "GRID_ITEM_HEIGHT": 145,
             "GRID_MENU_H": 288,
             "THUMB_SIZE": 75
         }
     },
     "480x272": {
         "gridSkin": {
-            "GRID_ITEM_HEIGHT": 110,
+            "GRID_ITEM_HEIGHT": 120,
             "GRID_MENU_H": 236,
             "THUMB_SIZE": 70
+        }
+    },
+    "480x320": {
+        "gridSkin": {
+            "GRID_ITEM_HEIGHT": 145,
+            "GRID_MENU_H": 288,
+            "THUMB_SIZE": 75
         }
     },
     "272x480": {
