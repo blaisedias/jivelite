@@ -327,6 +327,9 @@ function DotMatrix:__init(ampm, shortDateFormat)
 end
 
 
+function DotMatrix:DrawTick()
+end
+
 function DotMatrix:Draw()
 
     local time = os.date("*t")
@@ -473,6 +476,9 @@ function WordClock:__init(applet)
     return obj
 end
 
+function WordClock:DrawTick()
+end
+
 function WordClock:Draw()
     log:debug("WordClock:Draw")
     self.canvas:reDraw()
@@ -617,6 +623,9 @@ function Analog:__init(applet)
 end
 
 
+function Analog:DrawTick()
+end
+
 function Analog:Draw()
     self.canvas:reDraw()
 end
@@ -679,10 +688,11 @@ function Digital:__init(applet, ampm)
 
     obj.h1   = Label('h1', '1')
     obj.h2   = Label('h2', '2')
-    local dots = Group('dots', {
-        dots = Icon("icon_digitalDots")
-        }
-    )
+--    local dots = Group('dots', {
+--        dots = Icon("icon_digitalDots")
+--        }
+ --   )
+    obj.dots = Label('dots', ':')
     obj.m1   = Label('m1', '0')
     obj.m2   = Label('m2', '0')
     obj.ampm = Label('ampm', '')
@@ -733,7 +743,8 @@ function Digital:__init(applet, ampm)
     obj.window:addWidget(obj.h1Shadow)
     obj.window:addWidget(obj.h2)
     obj.window:addWidget(obj.h2Shadow)
-    obj.window:addWidget(dots)
+--    obj.window:addWidget(dots)
+    obj.window:addWidget(obj.dots)
     obj.window:addWidget(obj.m1)
     obj.window:addWidget(obj.m1Shadow)
     obj.window:addWidget(obj.m2)
@@ -762,6 +773,14 @@ function Digital:__init(applet, ampm)
     return obj
 end
 
+
+function Digital:DrawTick()
+    if self.dots:getValue() ~= ':' then
+        self.dots:setValue(":")
+    else
+        self.dots:setValue(" ")
+    end
+end
 
 function Digital:Draw()
 
@@ -868,6 +887,11 @@ function Digital:DrawTime(time)
 
     self.m1:setValue(string.sub(theMinute, 1, 1))
     self.m2:setValue(string.sub(theMinute, 2, 2))
+    if self.dots:getValue() ~= ':' then
+        self.dots:setValue(":")
+    else
+        self.dots:setValue(" ")
+    end
 
     -- Draw AM PM
     if self.useAmPm then
@@ -909,6 +933,7 @@ end
 function _tick(self)
     local theTime = os.date(self.clock.clock_format)
     if theTime == self.oldTime then
+        self.clock:DrawTick()
         -- nothing to do yet
         return
     end
@@ -2359,62 +2384,59 @@ function Digital:getDigitalClockSkin(skinName)
             m2Shadow = { hidden = 1 },
         })
     elseif _isJogglerSkin(skinName) or _isHDSkin(skinName) then
-
         local screen_width, screen_height = Framework:getScreenSize()
         local scale = screen_height / 480
         local scale_x = screen_width / 800
 
-        if screen_height > screen_width then
-            scale = screen_width/800
-        end
-        local digitWidth = 120 * scale
+--        local digitalDots = _loadImage(self, "Clocks/Digital/clock_dots_digital.png")
+--        if scale ~= 1 then
+--	        digitalDots = digitalDots:zoom(scale, scale, 1)
+--	    end
 
---        local jogglerSkinXOffset = 20
-        local jogglerSkinYOffset = math.floor(104 * screen_height/480)
+        local digitFontSize = 220
+        local digitFont = _font(digitFontSize * scale)
+        local ampmFont = _boldfont(40*scale)
+        local digitWidth = digitFont:width("0")
+        local c_w =  digitWidth * 5
+        while c_w > (screen_width - 20) do
+            digitFontSize = digitFontSize - 10
+            digitFont = _font(digitFontSize * scale)
+            digitWidth = digitFont:width("0")
+            c_w = digitWidth * 5
+        end
+
+        local jogglerSkinYOffset = math.floor(screen_height/2) - math.floor(digitFont:height("0")/2)
 
         local digitalClockBackground = _loadImage(self, "Clocks/Digital/wallpaper_clock_digital.png")
         digitalClockBackground = digitalClockBackground:zoom(screen_width/800,  screen_height/480, 1)
 
         local x = {}
-        x.dots = screen_width/2 - 20
-        x.h2   = x.dots - digitWidth - 20
-        x.h1   = x.h2 - digitWidth
-        x.m1   = x.dots + 40
-        x.m2   = x.m1 + digitWidth
-        x.ampm = x.m2 + digitWidth
         x.alarm = jogglerSkinAlarmX
 
-        local digitalDots = _loadImage(self, "Clocks/Digital/clock_dots_digital.png")
-        if scale ~= 1 then
-	        digitalDots = digitalDots:zoom(scale, scale, 1)
-	    end
+        x.h1 = math.floor((screen_width - c_w)/2)
+        x.h2 = x.h1 + digitWidth
+        x.dots = x.h2 + digitWidth
+        x.m1 = x.dots + digitWidth
+        x.m2 = x.m1 + digitWidth
 
-	    -- unfortunately I didn't find any reliable algorithm to calculate this value
---	    local ampmY = 277
---	    if screen_height == 600 then
---	    	ampmY = 310
---	    elseif screen_height > 600 and screen_height <= 800 then
---	    	ampmY = 360
---	    end
-
-        -- this works when the font is FreeSans
-        local ampmY = 40 + jogglerSkinYOffset + (220 * scale) - (40*scale) - (47 * scale)
         local _clockDigit = {
+            align = 'center',
             position = LAYOUT_NONE,
-            font = _font(220 * scale),
-            lineHeight = 220 * scale,
+            font = digitFont,
+            lineHeight = math.floor(220 * scale),
             fg = { 0xcc, 0xcc, 0xcc },
-            y = 40 + jogglerSkinYOffset,
+            y = jogglerSkinYOffset,
+            w = digitWidth,
             zOrder = 10,
         }
 
         -- hide the drop shadows, as they're really hard to scale and position right in all possible resolutions
         local _digitShadow = _uses(_clockDigit, {
- 			hidden = 1
+            hidden = 1
         })
 
         s.icon_digitalClockDropShadow = {
-        	hidden = 1
+            hidden = 1
         }
 
         s.icon_digitalClockNoShadow = _uses(s.icon_digitalClockDropShadow, {
@@ -2442,16 +2464,20 @@ function Digital:getDigitalClockSkin(skinName)
             align = 'center',
         }
 
-        s.icon_digitalDots = {
-            img = digitalDots,
-            align = 'center',
-            h = 160 * scale,
-        }
+--        s.icon_digitalDots = {
+--            img = digitalDots,
+--            align = 'center',
+----            h = 160 * scale,
+--            y = _clockDigit.y,
+--            h = digitFont:height("0") 
+--        }
 
-        s.icon_digitalClockBlank = {
-            img = false,
-            w = 40,
-        }
+--        s.icon_digitalClockBlank = {
+--            img = false,
+--            w = 40,
+--        }
+
+        s.dots = _clockDigit
 
         local scalef = 1
         if screen_width < 800 then
@@ -2486,10 +2512,14 @@ function Digital:getDigitalClockSkin(skinName)
                 y = jogglerSkinAlarmY,
             },
             ampm = {
+                -- Place AM/PM below HH:MM aligned with MM and right justified
+                -- this is more likely to work with different languages
                 position = LAYOUT_NONE,
-                x = x.ampm,
-                y = ampmY,
-                font = _boldfont(40*scale),
+                align = "right",
+                x = x.m1,
+                w = digitWidth * 2,
+                y = _clockDigit.y + digitFont:height("0"),
+                font = ampmFont,
                 fg = { 0xcc, 0xcc, 0xcc },
             },
             horizDivider2 = { hidden = 1 },
@@ -2497,7 +2527,7 @@ function Digital:getDigitalClockSkin(skinName)
             horizDivider = {
                 position = LAYOUT_NONE,
                 x = 0,
-                y = screen_height - 80,
+                y = screen_height - math.floor(scale * 80),
             },
             date = {
                 position = LAYOUT_SOUTH,
@@ -2505,7 +2535,7 @@ function Digital:getDigitalClockSkin(skinName)
                 w = math.min(screen_width, 800),
                 x = screen_width/2 - math.min(screen_width, 800)/2,
                 align = 'center',
-                h = 70,
+                h = math.floor(scale * 70),
                 padding = { 0, 0, 0, 6 },
                 dayofweek = {
                     align = 'center',
@@ -3220,18 +3250,17 @@ function Analog:getSkinParams(skin)
     elseif _isJogglerSkin(skin) or _isHDSkin(skin) then
         params.alarmX = jogglerSkinAlarmX
         params.alarmY = jogglerSkinAlarmY
-        if params.ratio == nil then
-            log:warn("ratio is nil!!!!!!!!!!!!!!")
-            params.ratio  = math.max(screen_width/800, screen_height/480)
-            if screen_height > screen_width then
-                params.ratio = screen_width/800
-            end
+        params.ratio  = math.min(screen_width/800, screen_height/480)
+
+        if screen_height > screen_width then
+            params.ratio = screen_width/800
         end
 
         if _isHDSkin(skin) then
         	params.ratio = params.ratio * 1.5
         end
     end
+
 
     return params
 end
