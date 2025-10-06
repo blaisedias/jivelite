@@ -2,7 +2,7 @@
 This document is a basic guide on customising Jivelite layout
 
 ## Terms and Conventions
-* *username* in file paths containing `/home/<username>....` : *&lt;username&gt;* is the user name under which jivelite-vis is run. Typically this is the current user name. On embedded systems where jivelite is launched without user login, it is dependent on the deployment. For example on piCorePlayer the user name is *tc*
+* *username* in file paths containing `/home/<username>....` : *&lt;username&gt;* is the user name under which jivelite-vis is run. Typically this is the current user name. On embedded systems where jivelite-vis is launched without user login, it is dependent on the deployment. For example on piCorePlayer the user name is *tc*
 * *UI* short form for User Interface
 
 ## Introduction
@@ -96,6 +96,13 @@ and then modified to suit.
 ## JogglerNowPlaying.json
 This JSON file can only be used to configure User Interface parameters for Now Playing Views.
 Contents of this configuration file override values set by the User Interface or `/home/<username>/.jivelite/userpath-vis/Joggler.json`
+
+This JSON file is created using the Jivelite-vis UI menu item  *Settings->Screen->Layout->Write Now Playing JSON*
+
+The file is generated using the current layout, this means that
+* If *Enable Scaling & Customisation* is **not** set, settings in the existing file may be lost.
+* If *Enable Scaling & Customisation* is set, settings in the existing file will be preserved.
+
 
 The fully qualified path for this file is `/home/<username>/.jivelite/userpath-vis/JogglerNowPlaying.json`.
 
