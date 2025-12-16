@@ -1362,7 +1362,7 @@ function _process_displaystatus(self, event)
 		local transitionOff = Window.transitionFadeOut
 		local duration = tonumber(display['duration'] or 3000)
 
-		local usingIR = Framework:isMostRecentInput('ir') or Framework:isMostRecentInput('key')
+		local usingIR = Framework:isMostRecentInput('ir') or Framework:isMostRecentInput('key') or Framework:isMostRecentInput('char_press')
 
 		-- this showBriefly should be displayed unless there's a good reason not to
 		local showMe = true

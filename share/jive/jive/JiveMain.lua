@@ -348,7 +348,7 @@ function JiveMain:__init()
 			elseif (bit.band(type, EVENT_MOUSE_ALL)) > 0 then
 				Framework.mostRecentInputType = "mouse"
 			elseif (bit.band(type, EVENT_CHAR_PRESS)) > 0 then
-				Framework.mostRecentInputType = "key"
+				Framework.mostRecentInputType = "char_press"
 			else
 				log:warn("... ??? ", type)
 			end
