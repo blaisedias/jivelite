@@ -16,12 +16,19 @@ end
 
 function defaultSettings(self)
 	return {
-		-- nothing to see here, move along, move along
 	}
 end
 
 function registerApplet(self)
-
+	local settings = self:getSettings()
+	if settings.blink == nil then
+		settings.blink = false
+		self:storeSettings()
+	end
+	if settings.showSecs == nil then
+		settings.showSecs = true
+		self:storeSettings()
+	end
 end
 
 function configureApplet(self)

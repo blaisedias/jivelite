@@ -49,6 +49,8 @@ oo.class(_M, Applet)
 
 local jogglerSkinAlarmX = 748
 local jogglerSkinAlarmY = 11
+local blink = false
+local showSecs = false
 
 -- Define useful variables for this skin
 
@@ -125,6 +127,12 @@ function displayName(self)
     return "Clock (NEW)"
 end
 
+function init(self)
+    local settings = self:getSettings()
+    blink = settings.blink
+    showSecs = settings.showSecs
+end
+
 Clock  = oo.class()
 
 function Clock:notify_playerAlarmState(player, alarmSet)
@@ -198,6 +206,9 @@ function Clock:_getMinute(time)
     return self:_padString(time.min)
 end
 
+function Clock:_getSeconds(time)
+    return self:_padString(time.sec)
+end
 
 function Clock:_getDate(time)
     local theDate
@@ -696,6 +707,9 @@ function Digital:__init(applet, ampm)
     obj.m1   = Label('m1', '0')
     obj.m2   = Label('m2', '0')
     obj.ampm = Label('ampm', '')
+    if showSecs then
+        obj.secs = Label('secs', '')
+    end
 
     local alarmStyle = 'icon_alarm_off'
     if obj.alarmSet then
@@ -715,6 +729,9 @@ function Digital:__init(applet, ampm)
     })
 
     obj.ampm = Label('ampm')
+    if showSecs then
+        obj.secs = Label('secs')
+    end
 
     local hdivider = Group('horizDivider', {
         horizDivider = Icon('icon_digitalClockHDivider'),
@@ -750,6 +767,9 @@ function Digital:__init(applet, ampm)
     obj.window:addWidget(obj.m2)
     obj.window:addWidget(obj.m2Shadow)
     obj.window:addWidget(obj.ampm)
+    if showSecs then
+        obj.window:addWidget(obj.secs)
+    end
 
     obj.window:addWidget(hdivider)
     obj.window:addWidget(hdivider2)
@@ -775,17 +795,23 @@ end
 
 
 function Digital:DrawTick()
-    if self.dots:getValue() ~= ':' then
-        self.dots:setValue(":")
-    else
-        self.dots:setValue(" ")
+    if blink then
+        if self.dots:getValue() ~= ':' then
+            self.dots:setValue(":")
+        else
+            self.dots:setValue(" ")
+        end
+    end
+    local tme = os.date("*t")
+    local theSecond = self:_getSeconds(tme)
+    if showSecs then
+        self.secs:setValue(theSecond)
     end
 end
 
 function Digital:Draw()
 
     local time = os.date("*t")
-
     -- string day of week
     local dayOfWeek   = tostring(time.wday - 1)
 
@@ -865,7 +891,6 @@ function Digital:DrawMaxTest()
 end
 
 function Digital:DrawTime(time)
-
     if not time then
         time = os.date("*t")
     end
@@ -873,6 +898,7 @@ function Digital:DrawTime(time)
     --local theMinute = tostring(time.min)
     local theMinute = self:_getMinute(time)
     local theHour   = self:_getHour(time)
+    local theSecond = self:_getSeconds(time)
 
     if string.sub(theHour, 1, 1) == '0' then
         self.h1:setValue('')
@@ -887,12 +913,19 @@ function Digital:DrawTime(time)
 
     self.m1:setValue(string.sub(theMinute, 1, 1))
     self.m2:setValue(string.sub(theMinute, 2, 2))
-    if self.dots:getValue() ~= ':' then
-        self.dots:setValue(":")
+    if blink then
+        if self.dots:getValue() ~= ':' then
+            self.dots:setValue(":")
+        else
+            self.dots:setValue(" ")
+        end
     else
-        self.dots:setValue(" ")
+        self.dots:setValue(":")
     end
 
+    if showSecs then
+        self.secs:setValue(theSecond)
+    end
     -- Draw AM PM
     if self.useAmPm then
         -- localized ampm rendering requires an os.date() call
@@ -2519,6 +2552,16 @@ function Digital:getDigitalClockSkin(skinName)
                 x = x.m1,
                 w = digitWidth * 2,
                 y = _clockDigit.y + digitFont:height("0"),
+                font = ampmFont,
+                fg = { 0xcc, 0xcc, 0xcc },
+            },
+            secs = {
+                -- Place secs above HH:MM aligned with MM and right justified
+                position = LAYOUT_NONE,
+                align = "right",
+                x = x.m2 + digitWidth - (ampmFont:width("0") * 3),
+                w = ampmFont:width("0") * 3,
+                y = _clockDigit.y - ampmFont:height("0"),
                 font = ampmFont,
                 fg = { 0xcc, 0xcc, 0xcc },
             },
