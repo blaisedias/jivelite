@@ -1363,6 +1363,22 @@ function skin0(self, s, _, _, w, h)
 	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_slider.png")
 
 
+	local _popupModernVolumeSliderBackground = _loadHTile(self, {
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd_r.png",
+	})
+
+
+	local _popupModernVolumeSliderBar = _loadHTile(self, {
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill_r.png",
+	})
+
+	local _popupModernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_slider.png")
+
+
 --------- DEFAULT WIDGET STYLES ---------
 	--
 	-- These are the default styles for the widgets
@@ -2865,12 +2881,12 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 	s.volume_slider = {
 		w = WH_FILL,
 		border = { 0, 0, 0, 10 },
-                bgImg = _modernVolumeSliderBackground,
-                img = _modernVolumeSliderBar,
+                bgImg = _popupModernVolumeSliderBackground,
+                img = _popupModernVolumeSliderBar,
 	}
 
         s.scanner_slider = _uses(s.volume_slider, {
-                img = _modernVolumeSliderBar,
+                img = _popupModernVolumeSliderBar,
 	})
 
 --------- BUTTONS ---------
@@ -5473,8 +5489,8 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		padding = { 6, 0, 6, 0 },
                 position = LAYOUT_SOUTH,
                 horizontal = 1,
-                bgImg = _modernVolumeSliderBackground,
-                img = _modernVolumeSliderBar,
+                bgImg = _popupModernVolumeSliderBackground,
+                img = _popupModernVolumeSliderBar,
                 pillImg = _modernVolumeSliderPill,
 	}
 
