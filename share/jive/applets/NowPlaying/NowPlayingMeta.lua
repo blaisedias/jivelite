@@ -34,6 +34,11 @@ function registerApplet(self)
 		self:storeSettings()
 	end
 
+	if settings.volumeStep == nil then
+		settings.volumeStep = 3
+		self:storeSettings()
+	end
+
 	jiveMain:addNode({
 		id = 'nowPlayingScrollSettings', iconStyle = 'hm_settings',
 		node = 'screenSettingsNowPlaying',
@@ -114,6 +119,18 @@ function registerApplet(self)
 		end,
 		settings.goNowPlayingAtStart)
 	})
+
+	jiveMain:addItem(
+		self:menuItem(
+			'volumeStep',
+			'screenSettingsNowPlaying',
+			'VOLUME_STEP',
+			function(applet, ...)
+				applet:inputVolumeStep(...)
+			end,
+			50
+		)
+	)
 
 	self:registerService('goNowPlaying')
 	self:registerService("hideNowPlaying")

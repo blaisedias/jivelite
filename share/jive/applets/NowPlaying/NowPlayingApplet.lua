@@ -2263,7 +2263,8 @@ function _createUI(self)
 							Player.volume(self.player, 99, true)
 						end
 
-						local e = Event:new(EVENT_SCROLL, -3)
+						local settings = self:getSettings()
+						local e = Event:new(EVENT_SCROLL, settings.volumeStep * -1)
 						Framework:dispatchEvent(self.volSlider, e)
 						return EVENT_CONSUME
 					end
@@ -2279,7 +2280,8 @@ function _createUI(self)
 							Player.volume(self.player, 101, true);
 						end
 
-						local e = Event:new(EVENT_SCROLL, 3)
+						local settings = self:getSettings()
+						local e = Event:new(EVENT_SCROLL, settings.volumeStep)
 						Framework:dispatchEvent(self.volSlider, e)
 						return EVENT_CONSUME
 					end
@@ -2683,3 +2685,39 @@ function inputFontScrollFactor(self)
 	self:tieAndShowWindow(window)
 	return window
 end
+
+function inputVolumeStep(self)
+	local window = Window("text_list", self:string("VOLUME_STEP"))
+	local settings = self:getSettings()
+
+	local currentValue = settings.volumeStep
+	if currentValue == nil then
+		currentValue = ''
+	else
+		currentValue = ''.. currentValue
+	end
+
+	local v = Textinput.integerValue(currentValue)
+	local input = Textinput("textinput", v,
+			function(_, value)
+				local val = tonumber(value.s)
+				if (val ~= nil and tonumber(val) ~= 0) then
+					settings.volumeStep = tonumber(val)
+					self:storeSettings()
+				end
+				window:hide()
+			end
+	)
+
+	local keyboard = Keyboard("keyboard", "integer", input)
+	local backspace = Keyboard.backspace()
+		local group = Group('keyboard_textinput', { textinput = input, backspace = backspace } )
+
+	window:addWidget(group)
+	window:addWidget(keyboard)
+	window:focusWidget(group)
+	self:tieAndShowWindow(window)
+	return window
+end
+
+
