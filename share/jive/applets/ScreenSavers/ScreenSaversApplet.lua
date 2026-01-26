@@ -38,6 +38,7 @@ local string           = require("string")
 local table            = require("jive.utils.table")
 local debug            = require("jive.utils.debug")
 local Player           = require("jive.slim.Player")
+local Checkbox          = require("jive.ui.Checkbox")
 
 local appletManager    = appletManager
 
@@ -793,6 +794,37 @@ function timeoutSetting(self, menuItem)
 	return window
 end
 
+function digitalClockSettings(self, menuItem)
+	local window = Window("text_list", menuItem.text, 'settingstitle')
+	window:addWidget(SimpleMenu("menu",
+		{
+			{
+				text = self:string('DIGITAL_CLOCK_SECONDS_BLINK'),
+				style = 'item_choice',
+				check = Checkbox("checkbox", function(_, checked)
+					Framework:setGlobalSetting("digitalClockSecondsBlink", checked)
+					end,
+					Framework:getGlobalSetting("digitalClockSecondsBlink")
+				),
+			},
+			{
+				text = self:string('DIGITAL_CLOCK_SECONDS_SHOW'),
+				style = 'item_choice',
+				check = Checkbox("checkbox", function(_, checked)
+					Framework:setGlobalSetting("digitalClockSecondsShow", checked)
+					end,
+					Framework:getGlobalSetting("digitalClockSecondsShow")
+				),
+			},
+		}))
+
+	window:addListener(EVENT_WINDOW_POP, function() self:storeSettings() end)
+
+	self:tieAndShowWindow(window)
+	return window
+end
+
+
 
 function openSettings(self, menuItem)
 
@@ -822,6 +854,14 @@ function openSettings(self, menuItem)
 						   self:timeoutSetting(menu_item)
 					   end
 			},
+			{
+				text = self:string("DIGITAL_CLOCK"),
+				weight = 5,
+				sound = "WINDOWSHOW",
+				callback = function(event, menu_item)
+						   self:digitalClockSettings(menu_item)
+					   end
+			},
 		})
 
 	-- only present a WHEN OFF option when there is a local player present
@@ -837,7 +877,7 @@ function openSettings(self, menuItem)
 			}
 		)
 	end
-	
+
 	menu:setComparator(menu.itemComparatorWeightAlpha)
 	for setting_name, screensaver in pairs(self.screensaverSettings) do
 		menu:addItem({

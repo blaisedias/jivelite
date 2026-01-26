@@ -49,7 +49,6 @@ oo.class(_M, Applet)
 
 local jogglerSkinAlarmX = 748
 local jogglerSkinAlarmY = 11
-local blink = false
 local showSecs = false
 
 -- Define useful variables for this skin
@@ -129,8 +128,6 @@ end
 
 function init(self)
     local settings = self:getSettings()
-    blink = settings.blink
-    showSecs = settings.showSecs
 end
 
 Clock  = oo.class()
@@ -707,6 +704,7 @@ function Digital:__init(applet, ampm)
     obj.m1   = Label('m1', '0')
     obj.m2   = Label('m2', '0')
     obj.ampm = Label('ampm', '')
+    showSecs = Framework:getGlobalSetting("digitalClockSecondsShow")
     if showSecs then
         obj.secs = Label('secs', '')
     end
@@ -795,7 +793,7 @@ end
 
 
 function Digital:DrawTick()
-    if blink then
+    if Framework:getGlobalSetting("digitalClockSecondsBlink") then
         if self.dots:getValue() ~= ':' then
             self.dots:setValue(":")
         else
@@ -913,7 +911,7 @@ function Digital:DrawTime(time)
 
     self.m1:setValue(string.sub(theMinute, 1, 1))
     self.m2:setValue(string.sub(theMinute, 2, 2))
-    if blink then
+    if Framework:getGlobalSetting("digitalClockSecondsBlink") then
         if self.dots:getValue() ~= ':' then
             self.dots:setValue(":")
         else

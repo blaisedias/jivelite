@@ -317,3 +317,12 @@ SCREENSAVER_NONE
 	RU	Нет
 	SV	Ingen
 
+DIGITAL_CLOCK_SECONDS_BLINK
+	EN	Blink : on seconds
+
+DIGITAL_CLOCK_SECONDS_SHOW
+	EN	Display seconds
+
+DIGITAL_CLOCK
+	EN	Digital Clock
+
