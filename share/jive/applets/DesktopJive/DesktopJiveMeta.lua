@@ -107,7 +107,7 @@ function registerApplet(meta)
 	appletManager:addDefaultSetting("ScreenSavers", "whenStopped", "false:false")
 
 	-- this is the startup skin - expect user to select an alternative
-	jiveMain:setDefaultSkin("HDSkin-VGA")
+	jiveMain:setDefaultSkin("JogglerSkin")
 
 	Framework:addActionListener("soft_reset", self, _softResetAction, true)
 
