@@ -153,6 +153,13 @@ function __tostring(self)
 	return "LocalPlayer {" .. self:getName() .. "}"
 end
 
+-- https://github.com/blaisedias : this function is invoked, but not declared 
+-- declare it but make it a nop. That prevents unwarranted failures to call
+-- this function.
+function volumeLocal(self, vol, p1, p2)
+    log:debug("volumeLocal is a NOP, formal params:", vol, ",", p1, ",", p2)
+end
+
 --[[
 
 =head1 LICENSE
