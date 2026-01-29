@@ -39,6 +39,7 @@ local FRAME_RATE	= jive.ui.FRAME_RATE
 local json			= require("jive.json")
 local bit			= require("bit")
 local framework		= require("jive.ui.Framework")
+local platform		= require("jive.utils.platform")
 
 module(...)
 
@@ -75,10 +76,6 @@ local saveimage_type = "png"
 -- In that sense it is a bit like a cache.
 local resizedImagesTable = {}
 local displayResizingParameters = {}
-
-local PLATFORM = ""
--- PCP only
-local persistent_storage_root = nil
 
 -- on desktop OSes userPath is persistent
 local defaultWorkspace = System.getUserDir()
@@ -202,15 +199,9 @@ local function ShuffleInPlace(t)
 end
 
 --------------------------------------------------------
---- platform
 --------------------------------------------------------
 -- at the moment the only distinction is pcp or desktop
-local function platformDetect()
-	if PLATFORM ~= "" then
-		return PLATFORM
-	end
-	PLATFORM = "desktop"
-
+local function visImageSetup()
 	-- if setting is absent default to png
 	if visSettings.saveImageFormat == nil then
 		visSettings.saveImageFormat = 'png'
@@ -238,14 +229,8 @@ local function platformDetect()
 
 	-- workspace on PCP has additional requirements,
 	-- must be under persistent storage root
-	local pcp_version_file = "/usr/local/etc/pcp/pcpversion.cfg"
-	local mode = lfs.attributes(pcp_version_file, "mode")
-	if mode == "file" then
-		PLATFORM = "piCorePlayer"
-		persistent_storage_root = io.popen('readlink /etc/sysconfig/tcedir'):read()
-	end
 
-	visSettings.persisentStorageRoot =  persistent_storage_root
+	visSettings.persisentStorageRoot =  platform:getPersisentStorageRoot()
 
 	if wkSpace ~= nil and string.len(wkSpace) ~= 0 then
 		workSpace = wkSpace
@@ -257,9 +242,8 @@ local function platformDetect()
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
 	os.execute("mkdir -p " .. workSpace .. "/assets/visualisers/vumeters")
 
-	log:info("PLATFORM:", PLATFORM, " workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
+	log:info(" workSpace:" , workSpace, " resizedCachePath:", resizedCachePath)
 	log:info("saveResizedImages:", saveResizedImages, " save image type:" , saveimage_type)
-	return PLATFORM
 end
 
 --------------------------------------------------------
@@ -1689,7 +1673,7 @@ end
 function setVisSettings(_, settings)
 	visSettings = settings
 
-	platformDetect()
+	visImageSetup()
 	initialiseCache()
 
 	-- try persistent load of resizing image

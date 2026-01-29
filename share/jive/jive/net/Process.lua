@@ -10,10 +10,11 @@ local Task            = require("jive.ui.Task")
 
 local debug           = require("jive.utils.debug")
 local log             = require("jive.utils.log").logger("net.socket")
+local platform        = require("jive.utils.platform")
 
 -- use ffi as luajit does not appear to support fileno as a method for io objects
-local ffi             = require("ffi")
-ffi.cdef[[int fileno(void *)]]
+--local ffi             = require("ffi")
+--ffi.cdef[[int fileno(void *)]]
 
 module(..., oo.class)
 
@@ -79,7 +80,8 @@ end
 
 function getfd(self)
 	--return self.fh:fileno()
-	return ffi.C.fileno(self.fh)
+	-- return ffi.C.fileno(self.fh)
+	return platform:getfd(self.fh)
 end
 
 

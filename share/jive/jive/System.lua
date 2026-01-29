@@ -38,6 +38,7 @@ local tonumber, tostring, type, pairs = tonumber, tostring, type, pairs
 
 local oo           = require("loop.simple")
 local log           = require("jive.utils.log").logger("jivelite")
+local platform      = require("jive.utils.platform")
 
 
 -- our class
@@ -97,7 +98,7 @@ function hasDigitalOut(self)
 end
 
 function hasTouch(self)
-	return _capabilities["touch"] ~= nil
+	return platform:hasTouch(_capabilities["touch"])
 end
 
 function hasIr(self)
