@@ -309,8 +309,10 @@ local function getAudioStreamMetadata(self)
 						end
 					end
 					self.audiometadatatxt = amd_txt
-					self.audiometadata:setValue(amd_txt .. " ")
-					log:info("audio stream metadata " .. amd_txt)
+					if self.audiometadata then
+						self.audiometadata:setValue(amd_txt .. " ")
+						log:info("audio stream metadata " .. amd_txt)
+					end
 					if self:getSettings().annotateTrack or self:getSettings().annotateAlbum then
 						local playerStatus = self.player:getPlayerStatus()
 						if playerStatus.item_loop then
