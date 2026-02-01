@@ -18,6 +18,7 @@ int (*jive_sdlfilter_pump)(const SDL_Event *event);
 
 LOG_CATEGORY *log_ui_draw;
 LOG_CATEGORY *log_ui;
+LOG_CATEGORY *log_keymap;
 
 SDL_Rect jive_dirty_region, last_dirty_region;
 
@@ -53,6 +54,8 @@ struct jive_keymap {
 	SDLKey keysym;
 	SDLMod mod;      // 0 for don't care, otherwise expected SDLmod value
 	JiveKey keycode;
+	const char* keysym_str;
+	const char* keycode_str;
 };
 
 struct jive_keyir {
@@ -86,65 +89,65 @@ static bool pointer_enable = true;
 static Uint16 mouse_origin_x, mouse_origin_y;
 
 static struct jive_keymap keymap[] = {
-	{ SDLK_LEFT,		0, JIVE_KEY_LEFT },
-	{ SDLK_RIGHT,		0, JIVE_KEY_RIGHT },
-	{ SDLK_UP,		0, JIVE_KEY_UP },
-	{ SDLK_DOWN,		0, JIVE_KEY_DOWN },
-	{ SDLK_END,		0, JIVE_KEY_BACK },
-	{ SDLK_HOME,		0, JIVE_KEY_HOME },
+	{ SDLK_LEFT,		0, JIVE_KEY_LEFT, "SDLK_LEFT", "JIVE_KEY_LEFT" },
+	{ SDLK_RIGHT,		0, JIVE_KEY_RIGHT, "SDLK_RIGHT", "JIVE_KEY_RIGHT" },
+	{ SDLK_UP,		0, JIVE_KEY_UP, "SDLK_UP", "JIVE_KEY_UP" },
+	{ SDLK_DOWN,		0, JIVE_KEY_DOWN, "SDLK_DOWN", "JIVE_KEY_DOWN" },
+	{ SDLK_END,		0, JIVE_KEY_BACK, "SDLK_END", "JIVE_KEY_BACK" },
+	{ SDLK_HOME,		0, JIVE_KEY_HOME, "SDLK_HOME", "JIVE_KEY_HOME" },
 	//{ SDLK_RIGHT,		0, JIVE_KEY_GO },
 	//{ SDLK_LEFT,		0, JIVE_KEY_BACK },
-	{ SDLK_KP_PLUS,		0, JIVE_KEY_ADD },
-	{ SDLK_MENU,		0, JIVE_KEY_ADD },
-	{ SDLK_PAGEUP,		0, JIVE_KEY_PAGE_UP },
-	{ SDLK_PAGEDOWN,	0, JIVE_KEY_PAGE_DOWN },
-	{ SDLK_PRINT,		0, JIVE_KEY_PRINT },
-	{ SDLK_SYSREQ,		0, JIVE_KEY_PRINT },
-	{ SDLK_F10,		0, JIVE_KEY_PRESET_0 },
-	{ SDLK_F1,		0, JIVE_KEY_PRESET_1 },
-	{ SDLK_F2,		0, JIVE_KEY_PRESET_2 },
-	{ SDLK_F3,		0, JIVE_KEY_PRESET_3 },
-	{ SDLK_F4,		0, JIVE_KEY_PRESET_4 },
-	{ SDLK_F5,		0, JIVE_KEY_PRESET_5 },
-	{ SDLK_F6,		0, JIVE_KEY_PRESET_6 },
-	{ SDLK_F7,		0, JIVE_KEY_PRESET_7 },
-	{ SDLK_F8,		0, JIVE_KEY_PRESET_8 },
-	{ SDLK_F9,		0, JIVE_KEY_PRESET_9 },
-	{ SDLK_POWER,		0, JIVE_KEY_POWER },
+	{ SDLK_KP_PLUS,		0, JIVE_KEY_ADD, "SDLK_KP_PLUS", "JIVE_KEY_ADD" },
+	{ SDLK_MENU,		0, JIVE_KEY_ADD, "SDLK_MENU", "JIVE_KEY_ADD" },
+	{ SDLK_PAGEUP,		0, JIVE_KEY_PAGE_UP, "SDLK_PAGEUP", "JIVE_KEY_PAGE_UP" },
+	{ SDLK_PAGEDOWN,	0, JIVE_KEY_PAGE_DOWN, "SDLK_PAGEDOWN", "JIVE_KEY_PAGE_DOWN" },
+	{ SDLK_PRINT,		0, JIVE_KEY_PRINT, "SDLK_PRINT", "JIVE_KEY_PRINT" },
+	{ SDLK_SYSREQ,		0, JIVE_KEY_PRINT, "SDLK_SYSREQ", "JIVE_KEY_PRINT" },
+	{ SDLK_F10,		0, JIVE_KEY_PRESET_0, "SDLK_F10", "JIVE_KEY_PRESET_0" },
+	{ SDLK_F1,		0, JIVE_KEY_PRESET_1, "SDLK_F1", "JIVE_KEY_PRESET_1" },
+	{ SDLK_F2,		0, JIVE_KEY_PRESET_2, "SDLK_F2", "JIVE_KEY_PRESET_2" },
+	{ SDLK_F3,		0, JIVE_KEY_PRESET_3, "SDLK_F3", "JIVE_KEY_PRESET_3" },
+	{ SDLK_F4,		0, JIVE_KEY_PRESET_4, "SDLK_F4", "JIVE_KEY_PRESET_4" },
+	{ SDLK_F5,		0, JIVE_KEY_PRESET_5, "SDLK_F5", "JIVE_KEY_PRESET_5" },
+	{ SDLK_F6,		0, JIVE_KEY_PRESET_6, "SDLK_F6", "JIVE_KEY_PRESET_6" },
+	{ SDLK_F7,		0, JIVE_KEY_PRESET_7, "SDLK_F7", "JIVE_KEY_PRESET_7" },
+	{ SDLK_F8,		0, JIVE_KEY_PRESET_8, "SDLK_F8", "JIVE_KEY_PRESET_8" },
+	{ SDLK_F9,		0, JIVE_KEY_PRESET_9, "SDLK_F9", "JIVE_KEY_PRESET_9" },
+	{ SDLK_POWER,		0, JIVE_KEY_POWER, "SDLK_POWER", "JIVE_KEY_POWER" },
 
 #ifdef SDL_MEDIAKEYS_DEFINED
 	// include with patched SDL - optimised for windows MCE remotes
-	{ SDLK_AudioPlay,   0, JIVE_KEY_PLAY },
-	{ SDLK_AudioPause,  0, JIVE_KEY_PAUSE },
-	{ SDLK_AudioPrev,   0, JIVE_KEY_REW },
-	{ SDLK_AudioNext,   0, JIVE_KEY_FWD },
-	{ SDLK_AudioStop,   0, JIVE_KEY_STOP },
-	{ SDLK_AudioRaiseVolume, 0, JIVE_KEY_VOLUME_UP },
-	{ SDLK_AudioLowerVolume, 0, JIVE_KEY_VOLUME_DOWN },
-	{ SDLK_AudioMute,   0, JIVE_KEY_MUTE },
-	{ SDLK_LeftMouse,   0, JIVE_KEY_BACK },
-	{ SDLK_RightMouse,  0, JIVE_KEY_GO },
-	{ SDLK_WWW,         0, JIVE_KEY_HOME },
+	{ SDLK_AudioPlay,   0, JIVE_KEY_PLAY, "SDLK_AudioPlay", "JIVE_KEY_PLAY" },
+	{ SDLK_AudioPause,  0, JIVE_KEY_PAUSE, "SDLK_AudioPause", "JIVE_KEY_PAUSE" },
+	{ SDLK_AudioPrev,   0, JIVE_KEY_REW, "SDLK_AudioPrev", "JIVE_KEY_REW" },
+	{ SDLK_AudioNext,   0, JIVE_KEY_FWD, "SDLK_AudioNext", "JIVE_KEY_FWD" },
+	{ SDLK_AudioStop,   0, JIVE_KEY_STOP, "SDLK_AudioStop", "JIVE_KEY_STOP" },
+	{ SDLK_AudioRaiseVolume, 0, JIVE_KEY_VOLUME_UP, "SDLK_AudioRaiseVolume", "JIVE_KEY_VOLUME_UP" },
+	{ SDLK_AudioLowerVolume, 0, JIVE_KEY_VOLUME_DOWN, "SDLK_AudioLowerVolume", "JIVE_KEY_VOLUME_DOWN" },
+	{ SDLK_AudioMute,   0, JIVE_KEY_MUTE, "SDLK_AudioMute", "JIVE_KEY_MUTE" },
+	{ SDLK_LeftMouse,   0, JIVE_KEY_BACK, "SDLK_LeftMouse", "JIVE_KEY_BACK" },
+	{ SDLK_RightMouse,  0, JIVE_KEY_GO, "SDLK_RightMouse", "JIVE_KEY_GO" },
+	{ SDLK_WWW,         0, JIVE_KEY_HOME, "SDLK_WWW", "JIVE_KEY_HOME" },
 #endif
 
 	// control modified keypresses from windows MCE remote
-	{ SDLK_RETURN, KMOD_LALT,                JIVE_KEY_HOME },     // "Start button"
-	{ SDLK_F4,     KMOD_LALT,                JIVE_KEY_HOME },     // "Close button"
-	{ SDLK_b,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_REW_SCAN }, // "Scan back"
-	{ SDLK_f,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_FWD_SCAN }, // "Scan forward"
-	{ SDLK_r,      KMOD_LCTRL,               JIVE_KEY_ADD },      // "Rec"
-	{ SDLK_t,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_PRESET_1 }, // "Yello"
-	{ SDLK_m,      KMOD_LCTRL,               JIVE_KEY_PRESET_2 }, // "Blue"
-	{ SDLK_i,      KMOD_LCTRL,               JIVE_KEY_PRESET_3 }, // "Green"
-	{ SDLK_e,      KMOD_LCTRL,               JIVE_KEY_PRESET_4 }, // "Red"
-	{ SDLK_o,      KMOD_LCTRL,               JIVE_KEY_PRESET_5 }, // "Preset"
-	{ SDLK_g,      KMOD_LCTRL,               JIVE_KEY_PRESET_6 }, // "Preset"
+	{ SDLK_RETURN, KMOD_LALT,                JIVE_KEY_HOME , "SDLK_RETURN", "JIVE_KEY_HOME" },     // "Start button"
+	{ SDLK_F4,     KMOD_LALT,                JIVE_KEY_HOME , "SDLK_F4", "JIVE_KEY_HOME" },     // "Close button"
+	{ SDLK_b,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_REW_SCAN , "SDLK_b", "JIVE_KEY_REW_SCAN" }, // "Scan back"
+	{ SDLK_f,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_FWD_SCAN , "SDLK_f", "JIVE_KEY_FWD_SCAN" }, // "Scan forward"
+	{ SDLK_r,      KMOD_LCTRL,               JIVE_KEY_ADD , "SDLK_r", "JIVE_KEY_ADD" },      // "Rec"
+	{ SDLK_t,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_PRESET_1 , "SDLK_t", "JIVE_KEY_PRESET_1" }, // "Yello"
+	{ SDLK_m,      KMOD_LCTRL,               JIVE_KEY_PRESET_2 , "SDLK_m", "JIVE_KEY_PRESET_2" }, // "Blue"
+	{ SDLK_i,      KMOD_LCTRL,               JIVE_KEY_PRESET_3 , "SDLK_i", "JIVE_KEY_PRESET_3" }, // "Green"
+	{ SDLK_e,      KMOD_LCTRL,               JIVE_KEY_PRESET_4 , "SDLK_e", "JIVE_KEY_PRESET_4" }, // "Red"
+	{ SDLK_o,      KMOD_LCTRL,               JIVE_KEY_PRESET_5 , "SDLK_o", "JIVE_KEY_PRESET_5" }, // "Preset"
+	{ SDLK_g,      KMOD_LCTRL,               JIVE_KEY_PRESET_6 , "SDLK_g", "JIVE_KEY_PRESET_6" }, // "Preset"
 	//{ SDLK_t,      KMOD_LCTRL, JIVE_KEY_PRESET_6 }, // "Preset"
 	//{ SDLK_m,      KMOD_LCTRL | KMOD_LSHIFT, JIVE_KEY_PRESET_6 }, // "Preset"
 
-	{ SDLK_RETURN,		0, JIVE_KEY_GO },
+	{ SDLK_RETURN,		0, JIVE_KEY_GO , "SDLK_RETURN", "JIVE_KEY_GO" },
 
-	{ SDLK_UNKNOWN,     0, JIVE_KEY_NONE },
+	{ SDLK_UNKNOWN,     0, JIVE_KEY_NONE , "SDLK_UNKNOWN", "JIVE_KEY_NONE" },
 };
 
 #ifdef EMULATE_IR
@@ -173,6 +176,34 @@ static int process_event(lua_State *L, SDL_Event *event);
 static void process_timers(lua_State *L);
 static int filter_events(const SDL_Event *event);
 int jiveL_update_screen(lua_State *L);
+
+const char* kmod_string(SDLMod mod) {
+	switch ((unsigned)mod) {
+		case KMOD_CTRL:   return "CTRL"; break;
+		case KMOD_SHIFT:  return "SHIFT"; break;
+		case KMOD_ALT:	return "ALT"; break;
+		case KMOD_META:   return "META"; break;
+		case KMOD_LCTRL|KMOD_LSHIFT:   return "CTRL+SHIFT"; break;
+	}
+
+	switch (mod) {
+		case KMOD_NONE:   return ""; break;
+		case KMOD_LSHIFT: return "LSHIFT"; break;
+		case KMOD_RSHIFT: return "RSHIFT"; break;
+		case KMOD_LCTRL:  return "LCTRL"; break;
+		case KMOD_RCTRL:  return "RCTRL"; break;
+		case KMOD_LALT:   return "LALT"; break;
+		case KMOD_RALT:   return "RALT"; break;
+		case KMOD_LMETA:  return "LMETA"; break;
+		case KMOD_RMETA:  return "RMETA"; break;
+		case KMOD_NUM:	return "NUM"; break;
+		case KMOD_CAPS:   return "CAPS"; break;
+		case KMOD_MODE:   return "MODE"; break;
+		case KMOD_RESERVED:  return "RESERVED"; break;
+	}
+
+	return "??";
+}
 
 int jive_frame_rate(void) {
 	int	fr;
@@ -227,6 +258,7 @@ static int jiveL_initSDL(lua_State *L) {
 	/* logging */
 	log_ui_draw = LOG_CATEGORY_GET("jivelite.ui.draw");
 	log_ui = LOG_CATEGORY_GET("jivelite.ui");
+	log_keymap = LOG_CATEGORY_GET("keymap");
 
 	/* linux fbcon does not need a mouse */
 	SDL_putenv("SDL_NOMOUSE=1");
@@ -373,6 +405,18 @@ static int jiveL_initSDL(lua_State *L) {
 	lua_pop(L, 2);
 
 	start_concurrent_threads();
+	struct jive_keymap *entry = keymap;
+	LOG_DEBUG(log_keymap, "Keymap table:");
+	LOG_DEBUG(log_keymap, "%11s %25s %8s -> %-8s %s",
+			"key mod", "key sym", "hex", "hex", "keycode");
+	while (entry->keysym != SDLK_UNKNOWN) {
+		LOG_DEBUG(log_keymap, "%11s %25s (0x%04x) -> (0x%04x) %s",
+				kmod_string(entry->mod),
+				entry->keysym_str, entry->keysym,
+				entry->keycode, entry->keycode_str
+				);
+		entry++;
+	}
 
 	return 0;
 }
@@ -1221,6 +1265,9 @@ static int process_event(lua_State *L, SDL_Event *event) {
 		// Fall through
 
 	case SDL_KEYUP: {
+		LOG_DEBUG(log_keymap, "%s sym=0x%x unicode=0x%x scancode=0x%x",
+			   event->type == SDL_KEYUP? "SDL_KEYUP" : "SDL_KEYDOWN",
+			   event->key.keysym.sym, event->key.keysym.unicode);
 		struct jive_keymap *entry = keymap;
 		
 #ifdef EMULATE_IR
@@ -1282,6 +1329,7 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				} else {
 					jevent.u.text.unicode = event->key.keysym.unicode;
 				}
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_CHAR_PRESS %x (unmapped)", jevent.u.text.unicode);
 			}
 		}
 
@@ -1292,6 +1340,11 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jevent.type = JIVE_EVENT_KEY_PRESS;
 				jevent.ticks = jive_jiffies();
 				jevent.u.key.code = entry->keycode;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_PRESS %x (%s %s (0x%x) -> %s)",
+					jevent.u.key.code,
+					kmod_string(entry->mod),
+					entry->keysym_str, entry->keysym,
+					entry->keycode_str);
 			}
 		}
 		
@@ -1316,6 +1369,11 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jevent.u.key.code = entry->keycode;
 
 				key_timeout = now + HOLD_TIMEOUT;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_DOWN %x  (%s %s (0x%x) -> %s)\n",
+					jevent.u.key.code,
+					kmod_string(entry->mod),
+					entry->keysym_str, entry->keysym,
+					entry->keycode_str);
 				break;
 			 }
 
@@ -1349,6 +1407,12 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jive_queue_event(&keyup);
 
 				key_state = KEY_STATE_SENT;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_DOWN (%s %s (0x%x) -> %s)",
+					jevent.u.key.code,
+					kmod_string(entry->mod),
+					entry->keysym_str, entry->keysym,
+					entry->mod,
+					entry->keycode_str);
 				break;
 			}
 
@@ -1358,6 +1422,12 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				 */
 				jevent.type = JIVE_EVENT_KEY_UP;
 				jevent.u.key.code = entry->keycode;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_SENT (%s %s (0x%x) -> %s)",
+					jevent.u.key.code,
+					kmod_string(entry->mod),
+					entry->keysym_str, entry->keysym,
+					entry->mod,
+					entry->keycode_str);
 				break;
 			}
 			}
