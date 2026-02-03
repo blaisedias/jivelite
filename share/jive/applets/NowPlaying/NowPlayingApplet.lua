@@ -2703,7 +2703,7 @@ function inputVolumeStep(self)
 	local input = Textinput("textinput", v,
 			function(_, value)
 				local val = tonumber(value.s)
-				if (val ~= nil and tonumber(val) ~= 0) then
+				if (val ~= nil and tonumber(val) ~= 0 and tonumber(val) <= 50) then
 					settings.volumeStep = tonumber(val)
 					self:storeSettings()
 				end
