@@ -131,6 +131,27 @@ local defaultEnabledStyles = {
 --        return style
 --end
 
+-- FIXME for now duplicate a function from JogglerSkinApplet
+local function messageBox(txt, count)
+	local popup = Popup("toast_popup_mixed")
+
+	popup:ignoreAllInputExcept()
+	popup:setAllowScreensaver(false)
+	popup:setAlwaysOnTop(true)
+	popup:setAutoHide(false)
+
+	local text = Label("text", txt)
+
+	popup:addWidget(text)
+	popup:addTimer(1000, function()
+		count = count - 1000
+		if count < 1 then
+			popup:hide(Window.transitionFadeOut)
+		end
+	end)
+	popup:show()
+end
+
 local function _secondsToString(seconds)
 	local hrs = math.floor(seconds / 3600)
 	local min = math.floor((seconds / 60) - (hrs*60))
@@ -2706,6 +2727,12 @@ function inputVolumeStep(self)
 				if (val ~= nil and tonumber(val) ~= 0 and tonumber(val) <= 50) then
 					settings.volumeStep = tonumber(val)
 					self:storeSettings()
+				else
+					if value.s == "" then
+						messageBox("volume step setting is unchanged", 2000)
+					else
+						messageBox("ignoring invalid volume step value ".. value.s..".\nValid values range from 1 to 50.", 3000)
+					end
 				end
 				window:hide()
 			end
