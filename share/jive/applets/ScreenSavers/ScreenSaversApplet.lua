@@ -38,7 +38,8 @@ local string           = require("string")
 local table            = require("jive.utils.table")
 local debug            = require("jive.utils.debug")
 local Player           = require("jive.slim.Player")
-local Checkbox          = require("jive.ui.Checkbox")
+local Checkbox         = require("jive.ui.Checkbox")
+local platform         = require("jive.utils.platform")
 
 local appletManager    = appletManager
 
@@ -238,10 +239,10 @@ function _activate(self, the_screensaver, force, isServerRequest)
 	local screensaver = self.screensavers[self.currentSS]
 
 	-- In some situations the timer restart below tries to activate a SS when one is already running.
-	-- We don't want to do this for BlankScreen when BlankScreen is already active
+	-- We don't want to do this for BlankScreen when BlankScreen/DisplayOff is already active
 	-- This causes the backlight to turn on again after 10 seconds. #14986
-	if self:isScreensaverActive() and self.current == 'BlankScreen' then
-		log:warn("BlankScreen SS is currently active and we're trying to reactivate it. Nothing to activate then, so return")
+	if self:isScreensaverActive() and (self.current == 'BlankScreen' or self.current == 'DisplayOff') then
+		log:warn("BlankScreen/DisplayOff SS is currently active and we're trying to reactivate it. Nothing to activate then, so return")
 		return
 	else
 		log:debug('DEBUG: self:isScreensaverActive()', self:isScreensaverActive(), ' self.current: ', self.current)
@@ -563,27 +564,30 @@ function screensaverWindow(self, window, scrollAllowed, ssAllowedActions, mouseA
 
 	if not self:isSoftPowerOn() then
 		--allow input to pass through, so that the following listeners will be honored
-	        self:_setSSAllowedActions(true, {}, true)
+		if platform:screenSaverAllowAllActions(appletManager) then
+			self:_setSSAllowedActions(true, {}, true)
 
-		window:ignoreAllInputExcept(    { "power", "power_on", "power_off" },
-		                                function(actionEvent)
-		                                        self:_powerActionHandler(actionEvent)
-		                                end)
-		window:addListener(bit.bor(EVENT_MOUSE_PRESS, EVENT_MOUSE_HOLD, EVENT_MOUSE_DRAG),
-		                        function (event)
-			                        self:_showPowerOnWindow()
-			                        return EVENT_CONSUME
-		                        end)
-		window:addListener(     EVENT_SCROLL,
-					function ()
-						self:_showPowerOnWindow()
-					end)
-
+			window:ignoreAllInputExcept(    { "power", "power_on", "power_off" },
+			                                function(actionEvent)
+			                                        self:_powerActionHandler(actionEvent)
+			                                end)
+			window:addListener(bit.bor(EVENT_MOUSE_PRESS, EVENT_MOUSE_HOLD, EVENT_MOUSE_DRAG),
+			                        function (event)
+				                        self:_showPowerOnWindow()
+				                        return EVENT_CONSUME
+			                        end)
+			window:addListener(     EVENT_SCROLL,
+						function ()
+							self:_showPowerOnWindow()
+						end)
+		else
+			self:_setSSAllowedActions(nil, nil, nil)
+		end
 	end
 
 	log:debug("Overriding the default window action 'bump' handling to allow action to fall through to framework listeners")
 	window:removeDefaultActionListeners()
-	
+
 end
 
 
@@ -865,7 +869,7 @@ function openSettings(self, menuItem)
 		})
 
 	-- only present a WHEN OFF option when there is a local player present
-	if Player:getLocalPlayer() then
+	if Player:getLocalPlayer() or platform:forceLocalPlayer() then
 		menu:addItem(
 			{
 				text = self:string("SCREENSAVER_WHEN_OFF"),

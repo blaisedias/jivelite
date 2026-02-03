@@ -47,6 +47,7 @@ local _inputToActionMap = require("jive.InputToActionMap")
 local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite")
 local logheap       = require("jive.utils.log").logger("jivelite.heap")
+local platform      = require("jive.utils.platform")
 
 
 --require("profiler")
@@ -197,6 +198,7 @@ function JiveMain:setSoftPowerState(softPowerState, isServerRequest)
 		 return
 	end
 
+	platform:setDefaultBrightnessValues(appletManager)
 	_softPowerState = softPowerState
 	local currentPlayer = appletManager:callService("getCurrentPlayer")
 	if _softPowerState == "off" then
@@ -204,6 +206,7 @@ function JiveMain:setSoftPowerState(softPowerState, isServerRequest)
 		if currentPlayer and (currentPlayer:isConnected() or currentPlayer:isLocal()) then
 			currentPlayer:setPower(false, nil, isServerRequest)
 		end
+		platform:setReducedBrightness()
 		--todo: also pause/power off local player since local player might be playing and not be the current player
 		appletManager:callService("activateScreensaver", isServerRequest)
 	elseif _softPowerState == "on" then
@@ -217,6 +220,7 @@ function JiveMain:setSoftPowerState(softPowerState, isServerRequest)
 			currentPlayer:setPower(true, nil, isServerRequest)
 		end
 
+		platform:setReducedBrightness()
 		appletManager:callService("deactivateScreensaver")
 		appletManager:callService("restartScreenSaverTimer")
 
@@ -279,7 +283,7 @@ function JiveMain:__init()
 
 	appletManager = AppletManager(jnt)
 	iconbar = Iconbar(jnt)
-	
+
 	-- Singleton instances (locals)
 	_globalStrings = locale:readGlobalStringsFile()
 

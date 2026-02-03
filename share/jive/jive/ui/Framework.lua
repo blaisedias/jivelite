@@ -35,6 +35,8 @@ local oo            = require("loop.simple")
 local table         = require("jive.utils.table")
 
 local debug         = require("jive.utils.debug")
+-- create log category for C code
+local keymap_log          = require("jive.utils.log").logger("keymap")
 
 local EVENT_SHOW    = jive.ui.EVENT_SHOW
 local EVENT_HIDE    = jive.ui.EVENT_HIDE

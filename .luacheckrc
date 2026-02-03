@@ -144,3 +144,19 @@ files["share/jive/applets/JogglerSkin/JogglerScaler.lua"] = {
    }
 }
 
+files["share/jive/jive/utils/platform.lua"] = {
+   globals = {
+       "getVersion",
+       "getPlatformString",
+       "getPersisentStorageRoot",
+       "getfd",
+       "hasTouch",
+       "setDefaultBrightnessValues",
+       "setBrightness",
+       "setReducedBrightness",
+       "forceLocalPlayer",
+       "screenSaverAllowAllActions",
+   },
+   read_globals = {
+   }
+}

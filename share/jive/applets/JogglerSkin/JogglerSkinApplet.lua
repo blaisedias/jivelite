@@ -1328,25 +1328,25 @@ function skin0(self, s, _, _, w, h)
 --	})
 --	local _vizProgressBarPill = _loadImageTile(self, imgpath .. "UNOFFICIAL/viz_progress_slider.png")
 
-	local _volumeSliderBackground = _loadHTile(self, {
-		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd_l.png",
-		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd.png",
-		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd_r.png",
-	})
+--	local _volumeSliderBackground = _loadHTile(self, {
+--		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd_l.png",
+--		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd.png",
+--		imgpath .. "Touch_Toolbar/tch_volumebar_bkgrd_r.png",
+--	})
 
-	local _volumeSliderBar = _loadHTile(self, {
-			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_l.png",
-			   imgpath .. "UNOFFICIAL/tch_volumebar_fill.png",
-			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_r.png",
-	})
+--	local _volumeSliderBar = _loadHTile(self, {
+--			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_l.png",
+--			   imgpath .. "UNOFFICIAL/tch_volumebar_fill.png",
+--			   imgpath .. "UNOFFICIAL/tch_volumebar_fill_r.png",
+--	})
 
-	local _volumeSliderPill = _loadImageTile(self, imgpath .. "Touch_Toolbar/tch_volume_slider.png")
+--	local _volumeSliderPill = _loadImageTile(self, imgpath .. "Touch_Toolbar/tch_volume_slider.png")
 
-	local _popupSliderBar = _loadHTile(self, {
-		imgpath .. "Touch_Toolbar/tch_volumebar_fill_l.png",
-		imgpath .. "Touch_Toolbar/tch_volumebar_fill.png",
-		imgpath .. "Touch_Toolbar/tch_volumebar_fill_r.png",
-		})
+--	local _popupSliderBar = _loadHTile(self, {
+--		imgpath .. "Touch_Toolbar/tch_volumebar_fill_l.png",
+--		imgpath .. "Touch_Toolbar/tch_volumebar_fill.png",
+--		imgpath .. "Touch_Toolbar/tch_volumebar_fill_r.png",
+--		})
 
 	local _modernVolumeSliderBackground = _loadHTile(self, {
 		nil,
@@ -1361,6 +1361,22 @@ function skin0(self, s, _, _, w, h)
 	})
 
 	local _modernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_volumebar_slider.png")
+
+
+	local _popupModernVolumeSliderBackground = _loadHTile(self, {
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_bkgrd_r.png",
+	})
+
+
+	local _popupModernVolumeSliderBar = _loadHTile(self, {
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill_l.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill.png",
+		imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_fill_r.png",
+	})
+
+	local _popupModernVolumeSliderPill = _loadImageTile(self, imgpath .. CONTROLS_THEME_PATH .. "/VolumeBar/" .. scaledValues.CONTROLS_DIMENSIONS .. "/tch_popup_volumebar_slider.png")
 
 
 --------- DEFAULT WIDGET STYLES ---------
@@ -2809,17 +2825,21 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		},
 	}
 	-- slider popup (volume)
+	local slider_popup_h = 200
+	if screenHeight > 480 then
+		slider_popup_h = 240
+	end
 	s.slider_popup = {
 		x = 50,
-		y = screenHeight/2 - 100,
+		y = screenHeight/2 - slider_popup_h/2,
 		w = screenWidth - 100,
-		h = 200,
+		h = slider_popup_h,
 		bgImg = popupBox,
 		heading = {
 			w = WH_FILL,
 		      border = 10,
-		      fg = scaledValues.TEXT_COLOR,
-		      font = _boldfont(scaledValues.SLIDER_POPUP_FONT_SIZE),
+		      fg = TEXT_COLOR,
+		      font = _boldfont(32),
 			padding = { 4, 16, 4, 0 },
 		      align = "center",
 		      bgImg = false,
@@ -2827,17 +2847,22 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		slider_group = {
 			w = WH_FILL,
 			align = 'center',
-			padding = { 10, 0, 10, 0 },
+			padding = { 20, 0, 20, 0 },
 			order = { 'slider' },
 		},
 	}
 
 
        -- scanner popup
+	local scanner_popup_h = 110
+	if screenHeight > 480 then
+		scanner_popup_h = 120
+	end
 	s.scanner_popup = _uses(s.slider_popup, {
-		h = 110,
-		y = screenHeight/2 - 55,
+		h = scanner_popup_h,
+		y = screenHeight/2 - scanner_popup_h/2,
 	})
+
 
 	s.image_popup = _uses(s.popup, {
 		image = {
@@ -2856,12 +2881,12 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 	s.volume_slider = {
 		w = WH_FILL,
 		border = { 0, 0, 0, 10 },
-                bgImg = _volumeSliderBackground,
-                img = _popupSliderBar,
+                bgImg = _popupModernVolumeSliderBackground,
+                img = _popupModernVolumeSliderBar,
 	}
 
         s.scanner_slider = _uses(s.volume_slider, {
-                img = _volumeSliderBar,
+                img = _popupModernVolumeSliderBar,
 	})
 
 --------- BUTTONS ---------
@@ -5464,9 +5489,9 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		padding = { 6, 0, 6, 0 },
                 position = LAYOUT_SOUTH,
                 horizontal = 1,
-                bgImg = _volumeSliderBackground,
-                img = _volumeSliderBar,
-                pillImg = _volumeSliderPill,
+                bgImg = _popupModernVolumeSliderBackground,
+                img = _popupModernVolumeSliderBar,
+                pillImg = _modernVolumeSliderPill,
 	}
 
 	s.settings_slider_group = _uses(s.brightness_group, {

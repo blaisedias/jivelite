@@ -628,6 +628,13 @@ function scaleControlsImages(params)
         { relPath='tch_volumebar_fill_r.png', w=0,         h=vol_dim },
         { relPath='tch_volumebar_fill.png',   w=vol_dim*9, h=vol_dim },
         { relPath='tch_volumebar_slider.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_fill_l.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_fill_r.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_fill.png',   w=vol_dim*9, h=vol_dim },
+        { relPath='tch_popup_volumebar_slider.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_bkgrd_l.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_bkgrd_r.png', w=0,         h=vol_dim },
+        { relPath='tch_popup_volumebar_bkgrd.png',   w=vol_dim*9, h=vol_dim },
     }
 
     for _, entry in pairs(tbl_vol) do
@@ -823,7 +830,7 @@ local function _getJogglerCoreParams(skinName, skinValues)
             TITLEBUTTONS_DIMENSIONS = scaleTitleButtonsImageValue(22),
             state = {
                 imgPath = jogglerImgpath,
-                scalingRequired=false
+                scalingRequired=true
             }
         }
     if screenWidth ~= 800 then
@@ -1148,7 +1155,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
             GRID_MENU_H = gridMenuHeight,
             state = {
                 imgPath = grid_imgpath,
-                scalingRequired=false
+                scalingRequired=true
             }
         }
 end
