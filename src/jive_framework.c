@@ -1340,7 +1340,7 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jevent.type = JIVE_EVENT_KEY_PRESS;
 				jevent.ticks = jive_jiffies();
 				jevent.u.key.code = entry->keycode;
-				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_PRESS %x (%s %s (0x%x) -> %s)",
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_PRESS %x (%s %s (0x%x) -> %s) (navigation)",
 					jevent.u.key.code,
 					kmod_string(entry->mod),
 					entry->keysym_str, entry->keysym,
@@ -1369,10 +1369,11 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jevent.u.key.code = entry->keycode;
 
 				key_timeout = now + HOLD_TIMEOUT;
-				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_DOWN %x  (%s %s (0x%x) -> %s)\n",
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_DOWN %x  (%s %s (0x%x) -> %s)",
 					jevent.u.key.code,
 					kmod_string(entry->mod),
-					entry->keysym_str, entry->keysym,
+					entry->keysym_str,
+					entry->keysym,
 					entry->keycode_str);
 				break;
 			 }
@@ -1407,11 +1408,11 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				jive_queue_event(&keyup);
 
 				key_state = KEY_STATE_SENT;
-				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_DOWN (%s %s (0x%x) -> %s)",
+
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_DOWN (%s (0x%x) -> %s) %d",
 					jevent.u.key.code,
-					kmod_string(entry->mod),
-					entry->keysym_str, entry->keysym,
-					entry->mod,
+					entry->keysym_str,
+					entry->keysym,
 					entry->keycode_str);
 				break;
 			}
@@ -1422,11 +1423,10 @@ static int process_event(lua_State *L, SDL_Event *event) {
 				 */
 				jevent.type = JIVE_EVENT_KEY_UP;
 				jevent.u.key.code = entry->keycode;
-				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_SENT (%s %s (0x%x) -> %s)",
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_KEY_UP %x KEY_STATE_SENT (%s (0x%x) -> %s)",
 					jevent.u.key.code,
-					kmod_string(entry->mod),
-					entry->keysym_str, entry->keysym,
-					entry->mod,
+					entry->keysym_str,
+					entry->keysym,
 					entry->keycode_str);
 				break;
 			}
