@@ -220,7 +220,7 @@ function JiveMain:setSoftPowerState(softPowerState, isServerRequest)
 			currentPlayer:setPower(true, nil, isServerRequest)
 		end
 
-		platform:setReducedBrightness()
+		platform:setBrightness()
 		appletManager:callService("deactivateScreensaver")
 		appletManager:callService("restartScreenSaverTimer")
 
