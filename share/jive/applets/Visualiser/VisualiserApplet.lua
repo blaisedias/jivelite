@@ -321,10 +321,10 @@ local function inputWorkSpace(self)
         currentValue = ''.. currentValue
     end
 
-    if string.len(currentValue) == 0 and settings.persisentStorageRoot ~= nil then
+    if string.len(currentValue) == 0 and settings.persistentStorageRoot ~= nil then
         -- unset - pre-fill with recommended value if a persistent storage path
         -- is defined
-        currentValue = settings.persisentStorageRoot .. '/jivelite-workspace'
+        currentValue = settings.persistentStorageRoot .. '/jivelite-workspace'
     end
 
     local v = Textinput.textValue(currentValue)
@@ -332,7 +332,7 @@ local function inputWorkSpace(self)
             function(_, value)
                 -- reject the path if it is identical to settings.persistenStorageRoot
                 -- as this might be an indication that the user has not set it.
-                if value.s == settings.persisentStorageRoot ~= nil then
+                if value.s == settings.persistentStorageRoot ~= nil then
                     settings.workSpace = value.s
                     self:storeSettings()
                 end
@@ -495,8 +495,8 @@ function workspaceMenu(self, _)
             weight=110
     })
     -- if persistent storage path is defined then offer recommended values
-    if settings.persisentStorageRoot ~= nil then
-        menu:addItem({ text = 'Recommended workspace path: ' .. settings.persisentStorageRoot .. '/jivelite-workspace',
+    if settings.persistentStorageRoot ~= nil then
+        menu:addItem({ text = 'Recommended workspace path: ' .. settings.persistentStorageRoot .. '/jivelite-workspace',
             style = 'item_no_arrow',
             weight=120
         })

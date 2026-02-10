@@ -37,7 +37,7 @@ local version = 1.0
 -- ========================
 --  { visImage interface
 -- ======================
-function getPersisentStorageRoot(_)
+function getPersistentStorageRoot(_)
     return nil
 end
 --  } visImage interface

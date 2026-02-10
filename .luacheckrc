@@ -148,7 +148,7 @@ files["share/jive/jive/utils/platform.lua"] = {
    globals = {
        "getVersion",
        "getPlatformString",
-       "getPersisentStorageRoot",
+       "getPersistentStorageRoot",
        "getfd",
        "hasTouch",
        "setDefaultBrightnessValues",

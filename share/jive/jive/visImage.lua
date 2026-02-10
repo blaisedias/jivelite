@@ -230,7 +230,7 @@ local function visImageSetup()
 	-- workspace on PCP has additional requirements,
 	-- must be under persistent storage root
 
-	visSettings.persisentStorageRoot =  platform:getPersisentStorageRoot()
+	visSettings.persistentStorageRoot =  platform:getPersistentStorageRoot()
 
 	if wkSpace ~= nil and string.len(wkSpace) ~= 0 then
 		workSpace = wkSpace
