@@ -35,8 +35,6 @@ local oo            = require("loop.simple")
 local table         = require("jive.utils.table")
 
 local debug         = require("jive.utils.debug")
--- create log category for C code
-local keymap_log          = require("jive.utils.log").logger("keymap")
 
 local EVENT_SHOW    = jive.ui.EVENT_SHOW
 local EVENT_HIDE    = jive.ui.EVENT_HIDE
@@ -82,6 +80,7 @@ local Window        = require("jive.ui.Window")
 
 local log           = require("jive.utils.log").logger("jivelite.ui")
 local logTask       = require("jive.utils.log").logger("jivelite.task")
+local logKeymap     = require("jive.utils.log").logger("keymap")
 
 local dumper        = require("jive.utils.dumper")
 local io            = require("io")
@@ -795,16 +794,21 @@ function getAction(self, event)
 
 	if eventType == jive.ui.EVENT_KEY_PRESS then
 		action = self.inputToActionMap.keyActionMappings.press[event:getKeycode()]
+		logKeymap:debug("EVENT_KEY_PRESS keycode:", event:getKeycode(), " -> action:", action)
 	elseif eventType == jive.ui.EVENT_GESTURE then
 		action = self.inputToActionMap.gestureActionMappings[event:getGesture()]
 	elseif eventType == jive.ui.EVENT_KEY_HOLD then
 		action = self.inputToActionMap.keyActionMappings.hold[event:getKeycode()]
+		logKeymap:debug("EVENT_KEY_HOLD keycode:", event:getKeycode(), " -> action:", action)
 	elseif eventType == jive.ui.EVENT_CHAR_PRESS then
 		action = self.inputToActionMap.charActionMappings.press[string.char(event:getUnicode())]
+		logKeymap:debug("EVENT_CHAR_PRESS unicode:", event:getUnicode(), " -> action:", action)
 	elseif eventType == jive.ui.EVENT_IR_PRESS then
 		action = inputToActionMap.irActionMappings.press[self:getIRButtonName(event:getIRCode())]
+		logKeymap:debug("EVENT_IR_PRESS unicode:", event:getIRCode(), " -> action:", action)
 	elseif eventType == jive.ui.EVENT_IR_HOLD then
 		action = inputToActionMap.irActionMappings.hold[self:getIRButtonName(event:getIRCode())]
+		logKeymap:debug("EVENT_IR_HOLD unicode:", event:getIRCode(), " -> action:", action)
 	end
 
 	return action

@@ -61,6 +61,7 @@ struct jive_keymap {
 struct jive_keyir {
 	SDLKey keysym;
 	Uint32 code;
+	const char* keysym_str;
 };
 
 static enum jive_key_state {
@@ -152,23 +153,23 @@ static struct jive_keymap keymap[] = {
 
 #ifdef EMULATE_IR
 static struct jive_keyir irmap[] = {
-	{ SDLK_UP,       0x7689e01f }, /* arrow_up */
-	{ SDLK_DOWN,     0x7689b04f }, /* arrow_down */
-	{ SDLK_LEFT,     0x7689906f }, /* arrow_left */
-	{ SDLK_RIGHT,    0x7689d02f }, /* arrow_right */
-	{ SDLK_0,        0x76899867 },
-	{ SDLK_1,        0x7689f00f },
-	{ SDLK_2,        0x768908f7 },
-	{ SDLK_3,        0x76898877 },
-	{ SDLK_4,        0x768948b7 },
-	{ SDLK_5,        0x7689c837 },
-	{ SDLK_6,        0x768928d7 },
-	{ SDLK_7,        0x7689a857 },
-	{ SDLK_8,        0x76896897 },
-	{ SDLK_9,        0x7689e817 },
-	{ SDLK_x,        0x768910ef }, /* play */
-	{ SDLK_a,        0x7689609f }, /* add */
-	{ SDLK_UNKNOWN,	 0x0        },
+	{ SDLK_UP,       0x7689e01f, "SDLK_UP"    }, /* arrow_up */
+	{ SDLK_DOWN,     0x7689b04f, "SDLK_DOWN"  }, /* arrow_down */
+	{ SDLK_LEFT,     0x7689906f, "SDLK_LEFT"  }, /* arrow_left */
+	{ SDLK_RIGHT,    0x7689d02f, "SDLK_RIGHT" }, /* arrow_right */
+	{ SDLK_0,        0x76899867, "SDLK_0" },
+	{ SDLK_1,        0x7689f00f, "SDLK_1" },
+	{ SDLK_2,        0x768908f7, "SDLK_2" },
+	{ SDLK_3,        0x76898877, "SDLK_3" },
+	{ SDLK_4,        0x768948b7, "SDLK_4" },
+	{ SDLK_5,        0x7689c837, "SDLK_5" },
+	{ SDLK_6,        0x768928d7, "SDLK_6" },
+	{ SDLK_7,        0x7689a857, "SDLK_7" },
+	{ SDLK_8,        0x76896897, "SDLK_8" },
+	{ SDLK_9,        0x7689e817, "SDLK_9" },
+	{ SDLK_x,        0x768910ef, "SDLK_x" }, /* play */
+	{ SDLK_a,        0x7689609f, "SDLK_a" }, /* add */
+	{ SDLK_UNKNOWN,	 0x0, "SDLK_UNKNOWN"  },
 };
 #endif
 
@@ -1287,12 +1288,18 @@ static int process_event(lua_State *L, SDL_Event *event) {
 			if (event->type == SDL_KEYDOWN) {
 				jevent.type = JIVE_EVENT_IR_DOWN;
 				jevent.u.ir.code = ir->code;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_IR_DOWN %x %s)",
+					jevent.u.ir.code,
+					entry->keysym_str);
 			}
 			else {
 				JiveEvent irup;
 
 				jevent.type = JIVE_EVENT_IR_PRESS;
 				jevent.u.ir.code = ir->code;
+				LOG_DEBUG(log_keymap, "JIVE_EVENT_IR_PRESS %x %s)",
+					jevent.u.ir.code,
+					entry->keysym_str);
 
 				memset(&irup, 0, sizeof(JiveEvent));
 				irup.type = JIVE_EVENT_IR_UP;
