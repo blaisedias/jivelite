@@ -1,3 +1,23 @@
+Release 2.1.0
+- add debug for key mapping
+- platform independence layer
+- improve popup volume bar rendering
+- remove unused images
+- configurable volume step
+- fix: invalid setting of audio metadata field
+- locale: improve granularity of debug categories
+- fix: add stub function volumeLocal (is invoked by was undefined)
+- digital clock
+  - configurable seconds display (on/off)
+  - configurable seconds : blink (on/off)
+- show build version, platform & display information in advanced settings menu
+Release 2.0.6
+- fix: ip address input
+Release 2.0.5
+- ClockApplet scaling changes
+- 480x320 display: add scaling corrections
+Release 2.0.4
+- fix: time input : WQVGA portrait mode
 Release 2.0.3
 - fix: time input for alarms ( scaling )
 Release 2.0.2
