@@ -163,7 +163,7 @@ files["share/jive/jive/utils/platform.lua"] = {
 
 files["share/jive/jive/utils/version.lua"] = {
    globals = {
-       "getVersion",
+       "getBuildVersion",
    },
    read_globals = {
    }
