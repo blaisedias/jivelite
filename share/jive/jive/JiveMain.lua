@@ -484,10 +484,10 @@ function JiveMain:jiveMainNodes(globalStrings)
 
     jiveMain:addItem(
         {
-            id = 'version',
+            id = 'build_version',
             node = 'advancedSettings',
             style = 'item_no_arrow',
-            text = "Version: " .. version:getVersion(),
+            text = "Build Version: " .. version:getBuildVersion(),
             weight = 1000,
         }
     )
