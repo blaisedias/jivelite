@@ -48,6 +48,7 @@ local debug         = require("jive.utils.debug")
 local log           = require("jive.utils.log").logger("jivelite")
 local logheap       = require("jive.utils.log").logger("jivelite.heap")
 local platform      = require("jive.utils.platform")
+local version      = require("jive.utils.version")
 
 
 --require("profiler")
@@ -481,7 +482,24 @@ function JiveMain:jiveMainNodes(globalStrings)
 	jiveMain:addNode( { id = 'settingsAudio', iconStyle = "hm_settingsAudio", node = 'settings', noCustom = 1, text = _globalStrings:str("AUDIO_SETTINGS"), weight = 40, windowStyle = 'text_only' })
 	jiveMain:addNode( { id = 'settingsBrightness', iconStyle = "hm_settingsBrightness", node = 'settings', noCustom = 1, text = _globalStrings:str("BRIGHTNESS_SETTINGS"), weight = 45, windowStyle = 'text_only' })
 
-
+    jiveMain:addItem(
+        {
+            id = 'version',
+            node = 'advancedSettings',
+            style = 'item_no_arrow',
+            text = "Version: " .. version:getVersion(),
+            weight = 1000,
+        }
+    )
+    jiveMain:addItem(
+        {
+            id = 'platform',
+            node = 'advancedSettings',
+            style = 'item_no_arrow',
+            text = "Platform: " .. platform:getPlatformName() .. ' v' .. platform:getVersion(),
+            weight = 2000,
+        }
+    )
 end
 
 --[[
@@ -680,7 +698,7 @@ function JiveMain:getDefaultSkin()
 	        end
         end
     end
-	return "QVGAportraitSkin"
+	return "JogglerSkin"
 end
 
 

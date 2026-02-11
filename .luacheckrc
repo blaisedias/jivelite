@@ -160,3 +160,11 @@ files["share/jive/jive/utils/platform.lua"] = {
    read_globals = {
    }
 }
+
+files["share/jive/jive/utils/version.lua"] = {
+   globals = {
+       "getVersion",
+   },
+   read_globals = {
+   }
+}
