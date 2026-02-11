@@ -99,6 +99,10 @@ function screenSaverAllowAllActions(_, appletManager)
 end
 -- } ScreenSavers interface
 
+function getPlatformName()
+    return "generic-desktop"
+end
+
 -- platform check
 function getVersion(_)
     log:debug("platform implementation version ", version)
