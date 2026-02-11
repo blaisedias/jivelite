@@ -500,6 +500,23 @@ function JiveMain:jiveMainNodes(globalStrings)
             weight = 2000,
         }
     )
+
+    local wmAvail = Framework:getWmAvailable()
+    local strWMA = "no"
+    if wmAvail then
+        strWMA = "yes"
+    end
+    local disp_w, disp_h = Framework:getDisplaySize()
+
+    jiveMain:addItem(
+        {
+            id = 'screen_resolution',
+            node = 'advancedSettings',
+            style = 'item_no_arrow',
+            text = "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
+            weight = 3000,
+        }
+    )
 end
 
 --[[
