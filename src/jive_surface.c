@@ -987,7 +987,20 @@ JiveSurface *jive_surface_load_image(const char *path) {
 }
 
 JiveSurface *jive_surface_alt_load_image(const char *path) {
-	SDL_Surface *sdl = IMG_Load(path);
+	if (!path) {
+		return NULL;
+	}
+	char *fullpath;
+	fullpath = malloc(PATH_MAX);
+
+	if (!jive_find_file(path, fullpath)) {
+		LOG_ERROR(log_ui_draw, "Can't find image %s\n", path);
+		free(fullpath);
+		return NULL;
+	}
+
+	SDL_Surface *sdl = IMG_Load(fullpath);
+	free(fullpath);
 
 	JiveSurface *srf = calloc(sizeof(JiveSurface), 1);
 	if (srf) {
