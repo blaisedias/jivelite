@@ -39,6 +39,7 @@ local table            = require("jive.utils.table")
 local debug            = require("jive.utils.debug")
 local Player           = require("jive.slim.Player")
 local Checkbox         = require("jive.ui.Checkbox")
+local Choice           = require("jive.ui.Choice")
 local platform         = require("jive.utils.platform")
 
 local appletManager    = appletManager
@@ -829,6 +830,39 @@ function digitalClockSettings(self, menuItem)
 end
 
 
+function wordClockSettings(self, menuItem)
+	local window = Window("text_list", menuItem.text, 'settingstitle')
+	local wc_colour_settings = {"White", "Coloured", "MultiColoured"}
+	local current_idx = 1
+
+	for i , _ in ipairs(wc_colour_settings) do
+		if Framework:getGlobalSetting("wordclockColour") == wc_colour_settings[i] then
+			current_idx = i
+		end
+	end
+
+	window:addWidget(SimpleMenu("menu",
+		{
+			{
+				text = self:string('WORD_CLOCK_COLOUR'),
+				style = 'item_choice',
+				check = Choice(
+					"choice",
+					wc_colour_settings ,
+					function(_, selectedIndex)
+						Framework:setGlobalSetting("wordclockColour", wc_colour_settings[selectedIndex])
+					end,
+					current_idx
+				),
+			},
+		}))
+
+	window:addListener(EVENT_WINDOW_POP, function() self:storeSettings() end)
+
+	self:tieAndShowWindow(window)
+	return window
+end
+
 
 function openSettings(self, menuItem)
 
@@ -859,11 +893,19 @@ function openSettings(self, menuItem)
 					   end
 			},
 			{
-				text = self:string("DIGITAL_CLOCK"),
+				text = self:string("DIGITAL_CLOCK_SETTINGS"),
 				weight = 5,
 				sound = "WINDOWSHOW",
 				callback = function(event, menu_item)
 						   self:digitalClockSettings(menu_item)
+					   end
+			},
+			{
+				text = self:string("WORD_CLOCK_SETTINGS"),
+				weight = 5,
+				sound = "WINDOWSHOW",
+				callback = function(event, menu_item)
+						   self:wordClockSettings(menu_item)
 					   end
 			},
 		})

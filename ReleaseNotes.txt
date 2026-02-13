@@ -11,6 +11,8 @@ Release 2.1.0
   - configurable seconds display (on/off)
   - configurable seconds : blink (on/off)
 - show build version, platform & display information in advanced settings menu
+- word clock
+  - add support to colourise, and UI support to select colour mode
 Release 2.0.6
 - fix: ip address input
 Release 2.0.5
