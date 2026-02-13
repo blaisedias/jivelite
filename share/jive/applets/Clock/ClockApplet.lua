@@ -690,6 +690,9 @@ function WordClock:_reDraw(screen)
         if all or flags.pm         then wordclock_blit(obj.skinParams.textPM, x + 716*r, y + 338*r) end
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
+        if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
+            self.textdate:setFg(word_clock_colours[ix_colour])
+        end
 
     elseif self.skinName == "QVGAlandscapeSkin" or self.skinName == "QVGAportraitSkin" or self.skinName == "QVGA240squareSkin" then
         local x, y

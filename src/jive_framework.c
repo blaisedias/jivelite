@@ -1600,6 +1600,7 @@ static const struct luaL_Reg label_methods[] = {
 	{ "animate", jiveL_label_animate },
 	{ "draw", jiveL_label_draw },
 	{ "setScrollParameters", jiveL_label_set_scroll_parameters },
+	{ "setFg", jiveL_label_set_fg },
 	{ NULL, NULL }
 };
 

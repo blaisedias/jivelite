@@ -588,3 +588,25 @@ int jiveL_label_set_scroll_parameters(lua_State *L) {
 	font_scroll_factor = fsf;
 	return 0;
 }
+
+/*
+ * function to facilitate changing the foreground colour.
+ */
+int jiveL_label_set_fg(lua_State *L) {
+	/* stack is:
+	 * 1: widget
+	 * 2: colour
+	 */
+
+	LabelWidget *peer = jive_getpeer(L, 1, &labelPeerMeta);
+	int colour = luaL_checkint(L, 2);
+	if (peer->base.fg != colour) {
+		peer->base.fg = colour;
+
+		if (jive_getmethod(L, 1, "reLayout")) {
+			lua_pushvalue(L, 1);
+			lua_call(L, 1, 0);
+		}
+	}
+	return 0;
+}
