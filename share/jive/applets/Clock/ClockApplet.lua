@@ -591,103 +591,72 @@ function WordClock:_reDraw(screen)
 
         local ix_colour = ixmod(self.colour_ix, #word_clock_colours)
 
-        local function wordclock_blit(img_path, blitx, blity)
+        local function wordclock_blit(img_path, blitx, blity, on)
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then
-                if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
+                if on then
+                    if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
+                        local _w, _h = img_fg:getSize()
+                        local img_colour = Surface:newRGBA(_w, _h)
+                        img_colour:filledRectangle(0,0, _w, _h, word_clock_colours[ix_colour]);
+                        img_colour:blit(img_fg, 0, 0)
+                        img_colour:release()
+                        if self.config_value == "MultiColoured" then
+                            ix_colour = ixmod(ix_colour + 1, #word_clock_colours)
+                        end
+                    end
+                else
                     local _w, _h = img_fg:getSize()
                     local img_colour = Surface:newRGBA(_w, _h)
-                    img_colour:filledRectangle(0,0, _w, _h, word_clock_colours[ix_colour]);
+                    img_colour:filledRectangle(0,0, _w, _h, 0x303030ff)
                     img_colour:blit(img_fg, 0, 0)
                     img_colour:release()
-                    if self.config_value == "MultiColoured" then
-                        ix_colour = ixmod(ix_colour + 1, #word_clock_colours)
-                    end
                 end
                 img_fg:zoom(z, z, 1):blit(screen, blitx, blity)
                 img_fg:altRelease()
             end
         end
 
-        if obj.skinParams.textIt == nil then log:warn("obj.skinParams.textIt == nil") end
-        if obj.skinParams.textIs == nil then log:warn("obj.skinParams.textIs == nil") end
-        if obj.skinParams.textHas == nil then log:warn("obj.skinParams.textHas == nil") end
-        if obj.skinParams.textNearly == nil then log:warn("obj.skinParams.textNearly == nil") end
-        if obj.skinParams.textJustgone == nil then log:warn("obj.skinParams.textJustgone == nil") end
-
-    -- Row 2
-        if obj.skinParams.textHalf == nil then log:warn("obj.skinParams.textHalf == nil") end
-        if obj.skinParams.textTen == nil then log:warn("obj.skinParams.textTen == nil") end
-        if obj.skinParams.textAQuarter == nil then log:warn("obj.skinParams.textAQuarter == nil") end
-        if obj.skinParams.textTwenty == nil then log:warn("obj.skinParams.textTwenty == nil") end
-
-    -- Row 3
-        if obj.skinParams.textFive == nil then log:warn("obj.skinParams.textFive == nil") end
-        if obj.skinParams.textMinutes == nil then log:warn("obj.skinParams.textMinutes == nil") end
-        if obj.skinParams.textTo == nil then log:warn("obj.skinParams.textTo == nil") end
-        if obj.skinParams.textPast == nil then log:warn("obj.skinParams.textPast == nil") end
-        if obj.skinParams.textHourSix == nil then log:warn("obj.skinParams.textHourSix == nil") end
-
-    -- Row 4
-        if obj.skinParams.textHourSeven == nil then log:warn("obj.skinParams.textHourSeven == nil") end
-        if obj.skinParams.textHourOne == nil then log:warn("obj.skinParams.textHourOne == nil") end
-        if obj.skinParams.textHourTwo == nil then log:warn("obj.skinParams.textHourTwo == nil") end
-        if obj.skinParams.textHourTen == nil then log:warn("obj.skinParams.textHourTen == nil") end
-        if obj.skinParams.textHourFour == nil then log:warn("obj.skinParams.textHourFour == nil") end
-
-    -- Row 5
-        if obj.skinParams.textHourFive == nil then log:warn("obj.skinParams.textHourFive == nil") end
-        if obj.skinParams.textHourNine == nil then log:warn("obj.skinParams.textHourNine == nil") end
-        if obj.skinParams.textHourTwelve == nil then log:warn("obj.skinParams.textHourTwelve == nil") end
-        if obj.skinParams.textHourEight == nil then log:warn("obj.skinParams.textHourEight == nil") end
-
-    -- Row 6
-        if obj.skinParams.textHourEleven == nil then log:warn("obj.skinParams.textHourEleven == nil") end
-        if obj.skinParams.textHourThree == nil then log:warn("obj.skinParams.textHourThree == nil") end
-        if obj.skinParams.textOClock == nil then log:warn("obj.skinParams.textOClock == nil") end
-        if obj.skinParams.textAM == nil then log:warn("obj.skinParams.textAM == nil") end
-        if obj.skinParams.textPM == nil then log:warn("obj.skinParams.textPM == nil") end
-
     -- Row 1
 --        self.pointer_textIt:zoom(z, z, 1):blit(screen, x + 20*r, y + 50*r)
-        wordclock_blit(obj.skinParams.textIt, x + 20*r, y + 50*r)
-        if all or flags.is         then wordclock_blit(obj.skinParams.textIs, x + 86*r, y + 50*r) end
-        if all or flags.has        then wordclock_blit(obj.skinParams.textHas, x + 156*r, y + 50*r) end
-        if all or flags.nearly     then wordclock_blit(obj.skinParams.textNearly, x + 280*r, y + 50*r) end
-        if all or flags.justgone   then wordclock_blit(obj.skinParams.textJustgone, x + 496*r, y + 50*r) end
+        wordclock_blit(obj.skinParams.textIt, x + 20*r, y + 50*r, true)
+        wordclock_blit(obj.skinParams.textIs, x + 86*r, y + 50*r, flags.is)
+        wordclock_blit(obj.skinParams.textHas, x + 156*r, y + 50*r, flags.has)
+        wordclock_blit(obj.skinParams.textNearly, x + 280*r, y + 50*r, flags.nearly)
+        wordclock_blit(obj.skinParams.textJustgone, x + 496*r, y + 50*r, flags.justgone)
 
     -- Row 2
-        if all or flags.half       then wordclock_blit(obj.skinParams.textHalf, x + 20*r, y + 108*r) end
-        if all or flags.ten        then wordclock_blit(obj.skinParams.textTen, x + 163*r, y + 108*r) end
-        if all or flags.aquarter   then wordclock_blit(obj.skinParams.textAQuarter, x + 274*r, y + 108*r) end
-        if all or flags.twenty     then wordclock_blit(obj.skinParams.textTwenty, x + 579*r, y + 108*r) end
+        wordclock_blit(obj.skinParams.textHalf, x + 20*r, y + 108*r, flags.half)
+        wordclock_blit(obj.skinParams.textTen, x + 163*r, y + 108*r, flags.ten)
+        wordclock_blit(obj.skinParams.textAQuarter, x + 274*r, y + 108*r, flags.aquarter)
+        wordclock_blit(obj.skinParams.textTwenty, x + 579*r, y + 108*r, flags.twenty)
 
     -- Row 3
-        if all or flags.five       then wordclock_blit(obj.skinParams.textFive, x + 20*r, y + 165*r) end
-        if all or flags.minutes    then wordclock_blit(obj.skinParams.textMinutes, x + 169*r, y + 165*r) end
-        if all or flags.to         then wordclock_blit(obj.skinParams.textTo, x + 425*r, y + 165*r) end
-        if all or flags.past       then wordclock_blit(obj.skinParams.textPast, x + 537*r, y + 165*r) end
-        if all or flags.hsix       then wordclock_blit(obj.skinParams.textHourSix, x + 707*r, y + 165*r) end
+        wordclock_blit(obj.skinParams.textFive, x + 20*r, y + 165*r, flags.five)
+        wordclock_blit(obj.skinParams.textMinutes, x + 169*r, y + 165*r, flags.minutes)
+        wordclock_blit(obj.skinParams.textTo, x + 425*r, y + 165*r, flags.to)
+        wordclock_blit(obj.skinParams.textPast, x + 537*r, y + 165*r, flags.past)
+        wordclock_blit(obj.skinParams.textHourSix, x + 707*r, y + 165*r, flags.hsix)
 
     -- Row 4
-        if all or flags.hseven     then wordclock_blit(obj.skinParams.textHourSeven, x + 20*r, y + 222*r) end
-        if all or flags.hone       then wordclock_blit(obj.skinParams.textHourOne, x + 222*r, y + 222*r) end
-        if all or flags.htwo       then wordclock_blit(obj.skinParams.textHourTwo, x + 363*r, y + 222*r) end
-        if all or flags.hten       then wordclock_blit(obj.skinParams.textHourTen, x + 513*r, y + 222*r) end
-        if all or flags.hfour      then wordclock_blit(obj.skinParams.textHourFour, x + 650*r, y + 222*r) end
+        wordclock_blit(obj.skinParams.textHourSeven, x + 20*r, y + 222*r, flags.hseven)
+        wordclock_blit(obj.skinParams.textHourOne, x + 222*r, y + 222*r, flags.hone)
+        wordclock_blit(obj.skinParams.textHourTwo, x + 363*r, y + 222*r, flags.htwo)
+        wordclock_blit(obj.skinParams.textHourTen, x + 513*r, y + 222*r, flags.hten)
+        wordclock_blit(obj.skinParams.textHourFour, x + 650*r, y + 222*r, flags.hfour)
 
     -- Row 5
-        if all or flags.hfive      then wordclock_blit(obj.skinParams.textHourFive, x + 20*r, y + 280*r) end
-        if all or flags.hnine      then wordclock_blit(obj.skinParams.textHourNine, x + 193*r, y + 280*r) end
-        if all or flags.htwelve    then wordclock_blit(obj.skinParams.textHourTwelve, x + 371*r, y + 280*r) end
-        if all or flags.height     then wordclock_blit(obj.skinParams.textHourEight, x + 639*r, y + 280*r) end
+        wordclock_blit(obj.skinParams.textHourFive, x + 20*r, y + 280*r, flags.hfive)
+        wordclock_blit(obj.skinParams.textHourNine, x + 193*r, y + 280*r, flags.hnine)
+        wordclock_blit(obj.skinParams.textHourTwelve, x + 371*r, y + 280*r, flags.htwelve)
+        wordclock_blit(obj.skinParams.textHourEight, x + 639*r, y + 280*r, flags.height)
 
     -- Row 6
-        if all or flags.heleven    then wordclock_blit(obj.skinParams.textHourEleven, x + 20*r, y + 338*r) end
-        if all or flags.hthree     then wordclock_blit(obj.skinParams.textHourThree, x + 222*r, y + 338*r) end
-        if all or flags.oclock     then wordclock_blit(obj.skinParams.textOClock, x + 398*r, y + 338*r) end
-        if all or flags.am         then wordclock_blit(obj.skinParams.textAM, x + 627*r, y + 338*r) end
-        if all or flags.pm         then wordclock_blit(obj.skinParams.textPM, x + 716*r, y + 338*r) end
+        wordclock_blit(obj.skinParams.textHourEleven, x + 20*r, y + 338*r, flags.heleven)
+        wordclock_blit(obj.skinParams.textHourThree, x + 222*r, y + 338*r, flags.hthree)
+        wordclock_blit(obj.skinParams.textOClock, x + 398*r, y + 338*r, flags.oclock)
+        wordclock_blit(obj.skinParams.textAM, x + 627*r, y + 338*r, flags.am)
+        wordclock_blit(obj.skinParams.textPM, x + 716*r, y + 338*r, flags.pm)
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
         if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
