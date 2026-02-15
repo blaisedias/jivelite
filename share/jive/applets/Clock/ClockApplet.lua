@@ -1843,13 +1843,15 @@ function WordClock:getWordClockSkin(skinName)
     -- HDSkin is using the Joggler's artwork. Quite a mess...
     local imgpath = string.gsub(self.imgpath, 'HDSkin', 'JogglerSkin')
 
-    local wordClockBackground = Tile:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
+--    local wordClockBackground = Tile:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
+    local wordClockBackground = Surface:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
 
     if _isJogglerSkin(skinName) or _isHDSkin(skinName) then
         local screen_width, screen_height = Framework:getScreenSize()
         local ratio = math.min(screen_width/800, screen_height/480)
-        local xratio = screen_width/800
-        local yratio = screen_height/480
+        local bg_w, bg_h =  wordClockBackground:getSize()
+        local xratio = screen_width/bg_w
+        local yratio = screen_height/bg_h
         local td_font_size = 26 * screen_height/480
         -- portrait mode for WordClock this is deemed good enough for now
         if screen_height > screen_width then
@@ -1885,7 +1887,7 @@ function WordClock:getWordClockSkin(skinName)
             end
         end
 
-        wordClockBackground = Surface:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
+
         wordClockBackground = wordClockBackground:zoom(xratio, yratio, 1)
         s.Clock.bgImg = wordClockBackground
 
