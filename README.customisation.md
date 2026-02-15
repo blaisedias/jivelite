@@ -1,3 +1,21 @@
+- [Overview](#overview)
+  - [Terms and Conventions](#terms-and-conventions)
+  - [Introduction](#introduction)
+- [Workflow](#workflow)
+  - [Order of precedence](#order-of-precedence)
+  - [Generated JSON files](#generated-json-files)
+  - [Using the UI](#using-the-ui)
+  - [Joggler.json](#jogglerjson)
+  - [JogglerNowPlaying.json](#jogglernowplayingjson)
+    - [allstyles](#allstyles)
+    - [values of keys named **order**](#values-of-keys-named-order)
+      - [controls order](#controls-order)
+    - [Semantics and values of primitive keys](#semantics-and-values-of-primitive-keys)
+      - [The description of the following keys are approximations. In general changing these values is not recommended.](#the-description-of-the-following-keys-are-approximations-in-general-changing-these-values-is-not-recommended)
+- [Debugging Layout issues](#debugging-layout-issues)
+- [FAQ](#faq)
+- [Word Clock ScreenSaver](#word-clock-screensaver)
+
 # Overview
 This document is a basic guide on customising Jivelite layout
 
@@ -280,3 +298,16 @@ Answer:
 
 Answer:
   * No, the section has been provided as an aid for the user. Including the section does no harm, as the section is ignored.
+
+# Word Clock ScreenSaver
+Colour parameters are defined and documented in `share/jive/applets/Clock/ClockParameters.lua`.
+Change or override this file.
+
+The rendering of the Word Clock Screensaver has been modified such that rendering of text is not dependent on the background image.
+
+This means that it is possible to change/override the background image used.
+The file is `share/jive/applets/JogglerSkin/images/Clock/WordClock/wallpaper_clock_word.png`
+
+Other parameters can be changed in the ScreenSaver menu.
+
+
