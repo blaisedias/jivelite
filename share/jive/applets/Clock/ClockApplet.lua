@@ -27,6 +27,7 @@ local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 local Player           = require("jive.slim.Player")
 
 local datetime         = require("jive.utils.datetime")
+local params           = require("applets.Clock.ClockParams")
 
 local appletManager = appletManager
 local jiveMain          = jiveMain
@@ -50,60 +51,6 @@ oo.class(_M, Applet)
 local jogglerSkinAlarmX = 748
 local jogglerSkinAlarmY = 11
 local showSecs = false
-
-local word_clock_colours = {
-    0xff6666ff,
-    0xff8c66ff,
-    0xffb366ff,
-    0xffd966ff,
-    0xffff66ff,
-    0xd9ff66ff,
-    0xb3ff66ff,
-    0x8cff66ff,
-    0x66ff66ff,
-    0x66ff8cff,
-    0x66ffb3ff,
-    0x66ffd9ff,
-    0x66ffffff,
-    0x66d9ffff,
-    0x66b3ffff,
-    0x668cffff,
-    0x6666ffff,
-    0x8c66ffff,
-    0xb366ffff,
-    0xd966ffff,
-    0xff66ffff,
-    0xff66d9ff,
-    0xff66b3ff,
-    0xff668cff,
-}
-
---local word_clock_colours = {
---    0xff0000ff,
---    0xff4000ff,
---    0xff8000ff,
---    0xffc000ff,
---    0xffff00ff,
---    0xc0ff00ff,
---    0x80ff00ff,
---    0x40ff00ff,
---    0x00ff00ff,
---    0x00ff40ff,
---    0x00ff80ff,
---    0x00ffc0ff,
---    0x00ffffff,
---    0x00c0ffff,
---    0x0080ffff,
---    0x0040ffff,
---    0x0000ffff,
---    0x4000ffff,
---    0x8000ffff,
---    0xc000ffff,
---    0xff00ffff,
---    0xff00c0ff,
---    0xff0080ff,
---    0xff0040ff,
---}
 
 -- Define useful variables for this skin
 
@@ -557,10 +504,10 @@ end
 
 function WordClock:NextColour()
     if self.config_value == "MultiColoured" then
-        self.colour_ix = ixmod(self.colour_ix + (#word_clock_colours/4) + 1,  #word_clock_colours)
+        self.colour_ix = ixmod(self.colour_ix + (#params.word_clock_colours/4) + 1,  #params.word_clock_colours)
     end
     if self.config_value == "Coloured" then
-        self.colour_ix = ixmod(self.colour_ix + 1,  #word_clock_colours)
+        self.colour_ix = ixmod(self.colour_ix + 1,  #params.word_clock_colours)
     end
 end
 
@@ -586,81 +533,83 @@ function WordClock:_reDraw(screen)
         	z = 1
         end
 
-        local x = self.skin.Clock.offsetX
-        local y = self.skin.Clock.offsetY
+        local ix_colour = ixmod(self.colour_ix, #params.word_clock_colours)
 
-        local ix_colour = ixmod(self.colour_ix, #word_clock_colours)
-
-        local function wordclock_blit(img_path, blitx, blity, on)
+        local function wordclock_blit(img_name, blitx, blity, on)
+            img_path = obj.skinParams[img_name]
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then
                 if on then
                     if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
                         local _w, _h = img_fg:getSize()
                         local img_colour = Surface:newRGBA(_w, _h)
-                        img_colour:filledRectangle(0,0, _w, _h, word_clock_colours[ix_colour]);
+                        img_colour:filledRectangle(0,0, _w, _h, params.word_clock_colours[ix_colour]);
                         img_colour:blit(img_fg, 0, 0)
                         img_colour:release()
                         if self.config_value == "MultiColoured" then
-                            ix_colour = ixmod(ix_colour + 1, #word_clock_colours)
+                            ix_colour = ixmod(ix_colour + 1, #params.word_clock_colours)
                         end
                     end
                 else
                     local _w, _h = img_fg:getSize()
                     local img_colour = Surface:newRGBA(_w, _h)
-                    img_colour:filledRectangle(0,0, _w, _h, 0x303030ff)
+                    img_colour:filledRectangle(0,0, _w, _h, params.word_clock_off_colour)
                     img_colour:blit(img_fg, 0, 0)
                     img_colour:release()
                 end
-                img_fg:zoom(z, z, 1):blit(screen, blitx, blity)
+                img_fg:zoom(z, z, 1):blit(
+                    screen,
+                    self.skin.Clock.offsetX + blitx*self.skin.Clock.ratio,
+                    self.skin.Clock.offsetY + blity*self.skin.Clock.ratio
+                )
                 img_fg:altRelease()
             end
         end
 
     -- Row 1
---        self.pointer_textIt:zoom(z, z, 1):blit(screen, x + 20*r, y + 50*r)
-        wordclock_blit(obj.skinParams.textIt, x + 20*r, y + 50*r, true)
-        wordclock_blit(obj.skinParams.textIs, x + 86*r, y + 50*r, flags.is)
-        wordclock_blit(obj.skinParams.textHas, x + 156*r, y + 50*r, flags.has)
-        wordclock_blit(obj.skinParams.textNearly, x + 280*r, y + 50*r, flags.nearly)
-        wordclock_blit(obj.skinParams.textJustgone, x + 496*r, y + 50*r, flags.justgone)
+--        self.pointer_textIt:zoom(z, z, 1):blit(screen, 20, 50)
+        wordclock_blit("textIt", 20, 50, true)
+        wordclock_blit("textIs", 86, 50, flags.is)
+        wordclock_blit("textHas", 156, 50, flags.has)
+        wordclock_blit("textNearly", 280, 50, flags.nearly)
+        wordclock_blit("textJustgone", 496, 50, flags.justgone)
 
     -- Row 2
-        wordclock_blit(obj.skinParams.textHalf, x + 20*r, y + 108*r, flags.half)
-        wordclock_blit(obj.skinParams.textTen, x + 163*r, y + 108*r, flags.ten)
-        wordclock_blit(obj.skinParams.textAQuarter, x + 274*r, y + 108*r, flags.aquarter)
-        wordclock_blit(obj.skinParams.textTwenty, x + 579*r, y + 108*r, flags.twenty)
+        wordclock_blit("textHalf", 20, 108, flags.half)
+        wordclock_blit("textTen", 163, 108, flags.ten)
+        wordclock_blit("textAQuarter", 274, 108, flags.aquarter)
+        wordclock_blit("textTwenty", 579, 108, flags.twenty)
 
     -- Row 3
-        wordclock_blit(obj.skinParams.textFive, x + 20*r, y + 165*r, flags.five)
-        wordclock_blit(obj.skinParams.textMinutes, x + 169*r, y + 165*r, flags.minutes)
-        wordclock_blit(obj.skinParams.textTo, x + 425*r, y + 165*r, flags.to)
-        wordclock_blit(obj.skinParams.textPast, x + 537*r, y + 165*r, flags.past)
-        wordclock_blit(obj.skinParams.textHourSix, x + 707*r, y + 165*r, flags.hsix)
+        wordclock_blit("textFive", 20, 165, flags.five)
+        wordclock_blit("textMinutes", 169, 165, flags.minutes)
+        wordclock_blit("textTo", 425, 165, flags.to)
+        wordclock_blit("textPast", 537, 165, flags.past)
+        wordclock_blit("textHourSix", 707, 165, flags.hsix)
 
     -- Row 4
-        wordclock_blit(obj.skinParams.textHourSeven, x + 20*r, y + 222*r, flags.hseven)
-        wordclock_blit(obj.skinParams.textHourOne, x + 222*r, y + 222*r, flags.hone)
-        wordclock_blit(obj.skinParams.textHourTwo, x + 363*r, y + 222*r, flags.htwo)
-        wordclock_blit(obj.skinParams.textHourTen, x + 513*r, y + 222*r, flags.hten)
-        wordclock_blit(obj.skinParams.textHourFour, x + 650*r, y + 222*r, flags.hfour)
+        wordclock_blit("textHourSeven", 20, 222, flags.hseven)
+        wordclock_blit("textHourOne", 222, 222, flags.hone)
+        wordclock_blit("textHourTwo", 363, 222, flags.htwo)
+        wordclock_blit("textHourTen", 513, 222, flags.hten)
+        wordclock_blit("textHourFour", 650, 222, flags.hfour)
 
     -- Row 5
-        wordclock_blit(obj.skinParams.textHourFive, x + 20*r, y + 280*r, flags.hfive)
-        wordclock_blit(obj.skinParams.textHourNine, x + 193*r, y + 280*r, flags.hnine)
-        wordclock_blit(obj.skinParams.textHourTwelve, x + 371*r, y + 280*r, flags.htwelve)
-        wordclock_blit(obj.skinParams.textHourEight, x + 639*r, y + 280*r, flags.height)
+        wordclock_blit("textHourFive", 20, 280, flags.hfive)
+        wordclock_blit("textHourNine", 193, 280, flags.hnine)
+        wordclock_blit("textHourTwelve", 371, 280, flags.htwelve)
+        wordclock_blit("textHourEight", 639, 280, flags.height)
 
     -- Row 6
-        wordclock_blit(obj.skinParams.textHourEleven, x + 20*r, y + 338*r, flags.heleven)
-        wordclock_blit(obj.skinParams.textHourThree, x + 222*r, y + 338*r, flags.hthree)
-        wordclock_blit(obj.skinParams.textOClock, x + 398*r, y + 338*r, flags.oclock)
-        wordclock_blit(obj.skinParams.textAM, x + 627*r, y + 338*r, flags.am)
-        wordclock_blit(obj.skinParams.textPM, x + 716*r, y + 338*r, flags.pm)
+        wordclock_blit("textHourEleven", 20, 338, flags.heleven)
+        wordclock_blit("textHourThree", 222, 338, flags.hthree)
+        wordclock_blit("textOClock", 398, 338, flags.oclock)
+        wordclock_blit("textAM", 627, 338, flags.am)
+        wordclock_blit("textPM", 716, 338, flags.pm)
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
         if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
-            self.textdate:setFg(word_clock_colours[ix_colour])
+            self.textdate:setFg(params.word_clock_colours[ix_colour])
         end
 
     elseif self.skinName == "QVGAlandscapeSkin" or self.skinName == "QVGAportraitSkin" or self.skinName == "QVGA240squareSkin" then

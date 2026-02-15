@@ -168,3 +168,12 @@ files["share/jive/jive/utils/version.lua"] = {
    read_globals = {
    }
 }
+
+files["share/jive/applets/Clock/ClockParams.lua"] = {
+   globals = {
+       "word_clock_colours",
+       "word_clock_off_colour",
+   },
+   read_globals = {
+   }
+}
