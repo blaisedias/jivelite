@@ -536,6 +536,10 @@ function WordClock:_reDraw(screen)
         local ix_colour = ixmod(self.colour_ix, #params.word_clock_colours)
 
         local function wordclock_blit(img_name, blitx, blity, on)
+            if not on and not params.work_clock_display_off_elements then
+                -- nothing to do, elements that are off are not to be rendered
+                return
+            end
             img_path = obj.skinParams[img_name]
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then

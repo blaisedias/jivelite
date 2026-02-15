@@ -173,6 +173,7 @@ files["share/jive/applets/Clock/ClockParams.lua"] = {
    globals = {
        "word_clock_colours",
        "word_clock_off_colour",
+       "work_clock_display_off_elements"
    },
    read_globals = {
    }

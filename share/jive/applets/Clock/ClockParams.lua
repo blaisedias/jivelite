@@ -55,5 +55,9 @@ local bright_word_clock_colours = {
     0xff0040ff,
 }
 
+-- colour palette for word clock
 word_clock_colours = default_word_clock_colours
+-- colour to use for word clock elements that are off
 word_clock_off_colour = 0x303030ff
+-- display elements that are off
+work_clock_display_off_elements = true
