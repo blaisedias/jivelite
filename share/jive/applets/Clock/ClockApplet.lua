@@ -1895,6 +1895,8 @@ function WordClock:getWordClockSkin(skinName)
     if _isJogglerSkin(skinName) or _isHDSkin(skinName) then
         local screen_width, screen_height = Framework:getScreenSize()
         local ratio = math.min(screen_width/800, screen_height/480)
+        local xratio = screen_width/800
+        local yratio = screen_height/480
         local td_font_size = 26 * screen_height/480
         -- portrait mode for WordClock this is deemed good enough for now
         if screen_height > screen_width then
@@ -1916,34 +1918,22 @@ function WordClock:getWordClockSkin(skinName)
             offsetY = 0
         }
 
-        wordClockBackground = Surface:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
-        wordClockBackground = wordClockBackground:zoom(ratio, ratio, 1)
-
         -- if the ratio of the resized background is different, we need to shift it accordingly
-        if ratio ~= (800/480) then
-	        local w, h = wordClockBackground:getSize()
+        if true then
+            local w = 800 * ratio
+            local h = 480 * ratio
 
-	        if w < screen_width then
-	        	s.Clock.offsetX = (screen_width - w)/2
-		        local tmp = Surface:newRGB(screen_width, screen_height)
-		        wordClockBackground:blit(tmp, s.Clock.offsetX, 0)
-		        wordClockBackground:release()
-		        wordClockBackground = tmp
-		    elseif h > screen_height then
-		        local tmp = Surface:newRGB(screen_width, screen_height)
-		        wordClockBackground:blit(tmp, 0, (screen_height - h)/2)
-		        wordClockBackground:release()
-		        wordClockBackground = tmp
-		    elseif h < screen_height then
-	        	s.Clock.offsetY = (screen_height - h)/2
-		        s.Clock.textdate.y = s.Clock.textdate.y + s.Clock.offsetY
-		        local tmp = Surface:newRGB(screen_width, screen_height)
-		        wordClockBackground:blit(tmp, 0, s.Clock.offsetY)
-		        wordClockBackground:release()
-		        wordClockBackground = tmp
-		    end
+            if w < screen_width then
+                s.Clock.offsetX = (screen_width - w)/2
+            end
+            if h < screen_height then
+                s.Clock.offsetY = (screen_height - h)/2
+                s.Clock.textdate.y = s.Clock.textdate.y + s.Clock.offsetY
+            end
         end
 
+        wordClockBackground = Surface:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
+        wordClockBackground = wordClockBackground:zoom(xratio, yratio, 1)
         s.Clock.bgImg = wordClockBackground
 
     elseif _isWQVGASkin(skinName) then
