@@ -495,19 +495,22 @@ function WordClock:Draw()
     self.canvas:reDraw()
 end
 
-local function ixmod(v, div)
-    if v%div == 0 then
-        return div
+local function circular_array_index_increment(index, increment, array_len)
+    local v = index + increment
+    if v % array_len == 0 then
+        return array_len
     end
-    return v%div
+    return v % array_len
 end
 
-function WordClock:NextColour()
-    if self.config_value == "MultiColoured" then
-        self.colour_ix = ixmod(self.colour_ix + (#params.word_clock_colours/4) + 1,  #params.word_clock_colours)
-    end
-    if self.config_value == "Coloured" then
-        self.colour_ix = ixmod(self.colour_ix + 1,  #params.word_clock_colours)
+local function inc_color_index(index, increment)
+    return circular_array_index_increment(index, increment, #params.word_clock_colours)
+end
+
+function WordClock:BumpColour()
+    -- first setting is monochrome do not increment the colour index
+    if self.config_value ~= params.word_clock_colour_settings[1] then
+        self.colour_ix = inc_color_index(self.colour_ix, params.word_clock_colour_inc)
     end
 end
 
@@ -533,10 +536,10 @@ function WordClock:_reDraw(screen)
         	z = 1
         end
 
-        local ix_colour = ixmod(self.colour_ix, #params.word_clock_colours)
+        local ix_colour = self.colour_ix
 
         local function wordclock_blit(img_name, blitx, blity, on)
-            if not on and not params.work_clock_display_off_elements then
+            if not on and Framework:getGlobalSetting("wordclockOnlyShowOnText") then
                 -- nothing to do, elements that are off are not to be rendered
                 return
             end
@@ -544,14 +547,14 @@ function WordClock:_reDraw(screen)
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then
                 if on then
-                    if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
+                    if self.config_value ~= params.word_clock_colour_settings[1] then
                         local _w, _h = img_fg:getSize()
                         local img_colour = Surface:newRGBA(_w, _h)
                         img_colour:filledRectangle(0,0, _w, _h, params.word_clock_colours[ix_colour]);
                         img_colour:blit(img_fg, 0, 0)
                         img_colour:release()
-                        if self.config_value == "MultiColoured" then
-                            ix_colour = ixmod(ix_colour + 1, #params.word_clock_colours)
+                        if self.config_value == params.word_clock_colour_settings[3] then
+                            ix_colour = inc_color_index(ix_colour, 1)
                         end
                     end
                 else
@@ -612,7 +615,7 @@ function WordClock:_reDraw(screen)
         wordclock_blit("textPM", 716, 338, flags.pm)
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
-        if self.config_value == "Coloured" or self.config_value == "MultiColoured" then
+        if self.config_value ~= params.word_clock_colour_settings[1] then
             self.textdate:setFg(params.word_clock_colours[ix_colour])
         end
 
@@ -1037,7 +1040,7 @@ function _tick(self)
     end
     self.snapshot:replace(self.clock.window)
     if self.clock.colour_ix ~= nil then
-        self.clock:NextColour()
+        self.clock:BumpColour()
     end
     self.clock:Draw()
     self.clock.window:replace(self.snapshot, Window.transitionFadeIn)

@@ -41,6 +41,7 @@ local Player           = require("jive.slim.Player")
 local Checkbox         = require("jive.ui.Checkbox")
 local Choice           = require("jive.ui.Choice")
 local platform         = require("jive.utils.platform")
+local ClockParams      = require("applets.Clock.ClockParams")
 
 local appletManager    = appletManager
 
@@ -832,11 +833,10 @@ end
 
 function wordClockSettings(self, menuItem)
 	local window = Window("text_list", menuItem.text, 'settingstitle')
-	local wc_colour_settings = {"White", "Coloured", "MultiColoured"}
 	local current_idx = 1
 
-	for i , _ in ipairs(wc_colour_settings) do
-		if Framework:getGlobalSetting("wordclockColour") == wc_colour_settings[i] then
+	for i , _ in ipairs(ClockParams.word_clock_colour_settings) do
+		if Framework:getGlobalSetting("wordclockColour") == ClockParams.word_clock_colour_settings[i] then
 			current_idx = i
 		end
 	end
@@ -848,11 +848,20 @@ function wordClockSettings(self, menuItem)
 				style = 'item_choice',
 				check = Choice(
 					"choice",
-					wc_colour_settings ,
+					ClockParams.word_clock_colour_settings,
 					function(_, selectedIndex)
-						Framework:setGlobalSetting("wordclockColour", wc_colour_settings[selectedIndex])
+						Framework:setGlobalSetting("wordclockColour", ClockParams.word_clock_colour_settings[selectedIndex])
 					end,
 					current_idx
+				),
+			},
+			{
+				text = self:string('WORD_CLOCK_SHOW_ON_TEXT_ONLY'),
+				style = 'item_choice',
+				check = Checkbox("checkbox", function(_, checked)
+					Framework:setGlobalSetting("wordclockOnlyShowOnText", checked)
+					end,
+					Framework:getGlobalSetting("wordclockOnlyShowOnText")
 				),
 			},
 		}))
