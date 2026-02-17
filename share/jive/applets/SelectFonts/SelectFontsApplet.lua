@@ -45,6 +45,8 @@ oo.class(_M, Applet)
 
 
 local fontsdb = {
+	Cooper={regular="Cooper/ttf/Cooper-Regular", bold="Cooper/ttf/Cooper-SemiBold"},
+	CooperBold={regular="Cooper/ttf/Cooper-Bold", bold="Cooper/ttf/Cooper-ExtraBold"},
 	FreeSans={regular="FreeSans",bold="FreeSansBold"},
 	Laila={ regular="Laila/Laila-Regular", bold="Laila/Laila-SemiBold", },
 	Mina={ regular="Mina/Mina-Regular", bold="Mina/Mina-Bold", },
