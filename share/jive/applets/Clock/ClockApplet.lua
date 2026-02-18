@@ -432,7 +432,8 @@ function WordClock:__init(applet)
     obj.textdate = Label('textdate')
     obj.skinParams = WordClock:getSkinParams(skinName)
     obj.colour_ix = 1
-    obj.colour_setting = Framework:getGlobalSetting("wordclockColour") or ClockParams.word_clock.colour_modes[1]
+    obj.colourMode = Framework:getGlobalSetting("wordclockColour") or ClockParams.word_clock.colour_modes[1]
+    obj.palette = ClockParams.word_clock.colour_mode_attributes[obj.colourMode].palette
 
     obj.alarmIcon = Surface:loadImage(obj.skinParams.alarmIcon)
 
@@ -465,13 +466,13 @@ local function circular_array_index_increment(index, increment, array_len)
     return v % array_len
 end
 
-local function inc_color_index(index, increment)
-    return circular_array_index_increment(index, increment, #ClockParams.word_clock.colours)
+local function inc_color_index(index, increment, palette)
+    return circular_array_index_increment(index, increment, #palette)
 end
 
 function WordClock:BumpColour()
-    if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette then
-        self.colour_ix = inc_color_index(self.colour_ix, ClockParams.word_clock.colour_inc)
+    if ClockParams.word_clock.colour_mode_attributes[self.colourMode].palette then
+        self.colour_ix = inc_color_index(self.colour_ix, ClockParams.word_clock.colour_inc, self.palette)
     end
 end
 
@@ -508,14 +509,14 @@ function WordClock:_reDraw(screen)
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then
                 if on then
-                    if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette then
+                    if ClockParams.word_clock.colour_mode_attributes[self.colourMode].palette then
                         local _w, _h = img_fg:getSize()
                         local img_colour = Surface:newRGBA(_w, _h)
-                        img_colour:filledRectangle(0,0, _w, _h, ClockParams.word_clock.colours[ix_colour]);
+                        img_colour:filledRectangle(0,0, _w, _h, self.palette[ix_colour]);
                         img_colour:blit(img_fg, 0, 0)
                         img_colour:release()
-                        if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].change_colour_on_word then
-                            ix_colour = inc_color_index(ix_colour, 1)
+                        if ClockParams.word_clock.colour_mode_attributes[self.colourMode].change_colour_on_word then
+                            ix_colour = inc_color_index(ix_colour, 1, self.palette)
                         end
                     end
                 else
@@ -576,8 +577,8 @@ function WordClock:_reDraw(screen)
         wordclock_blit("textPM", flags.pm)
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
-        if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette  then
-            self.textdate:setFg(ClockParams.word_clock.colours[ix_colour])
+        if ClockParams.word_clock.colour_mode_attributes[self.colourMode].palette  then
+            self.textdate:setFg(self.palette[ix_colour])
         end
 
     elseif self.skinName == "QVGAlandscapeSkin" or self.skinName == "QVGAportraitSkin" or self.skinName == "QVGA240squareSkin" then

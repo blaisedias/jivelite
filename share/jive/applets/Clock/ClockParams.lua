@@ -3,36 +3,36 @@ module(...)
 
 -- colour palette in hex 0xrrggbbaa
 -- rr -> red, gg -> green, bb -> blue, aa -> alpha
-local default_word_clock_colours = {
-    0xff6666ff,
+local default_word_clock_palette = {
+    0xff6666ff, -- red
     0xff8c66ff,
     0xffb366ff,
     0xffd966ff,
-    0xffff66ff,
+    0xffff66ff, -- yellow
     0xd9ff66ff,
     0xb3ff66ff,
     0x8cff66ff,
-    0x66ff66ff,
+    0x66ff66ff, -- green
     0x66ff8cff,
     0x66ffb3ff,
     0x66ffd9ff,
-    0x66ffffff,
+    0x66ffffff, -- cyan
     0x66d9ffff,
     0x66b3ffff,
     0x668cffff,
-    0x6666ffff,
+    0x6666ffff, -- blue
     0x8c66ffff,
     0xb366ffff,
     0xd966ffff,
-    0xff66ffff,
+    0xff66ffff, -- purple
     0xff66d9ff,
     0xff66b3ff,
     0xff668cff,
 }
 
--- colour palette in hex 0xrrggbbaa
+-- colour palette in hex 0xrrggbbaa, primary colours
 -- rr -> red, gg -> green, bb -> blue, aa -> alpha
-local bright_word_clock_colours = {
+local bright_word_clock_palette = {
     0xff0000ff,
     0xff4000ff,
     0xff8000ff,
@@ -61,8 +61,6 @@ local bright_word_clock_colours = {
 
 -- word clock parameters
 word_clock = {
-    -- colour palette for word clock
-    colours = default_word_clock_colours,
     -- colour to use for word clock elements that are off
     -- rr -> red, gg -> green, bb -> blue, aa -> alpha
     -- note colours are applied as overlays, so alpha should almost always be ff
@@ -75,12 +73,47 @@ word_clock = {
     colour_inc = 7,
     -- foreground colour mode strings
     -- This array is also used by the UI for user selection
-    colour_modes = {"Multiple", "Single", "White"},
+    colour_modes = {
+        "Multiple Rotating", "Single Rotating", "White",
+        "Red", "Yellow", "Green", "Cyan", "Blue", "Purple"
+        },
     -- foreground colour mode attributes
     colour_mode_attributes = {
-        ["Multiple"] = { uses_palette = true, change_colour_on_word = true},
-        ["Single"] = { uses_palette = true, change_colour_on_word = false},
-        ["White"] = { uses_palette = false, change_colour_on_word = false},
+        ["Multiple Rotating"] = {
+            change_colour_on_word = true,
+            palette=default_word_clock_palette
+        },
+        ["Single Rotating"] = {
+            change_colour_on_word = false,
+            palette=default_word_clock_palette
+        },
+        ["White"] = {
+            change_colour_on_word = false
+        },
+        ["Red"] = {
+            change_colour_on_word = false,
+            palette={0xff6666ff}
+        },
+        ["Yellow"] = {
+            change_colour_on_word = false,
+            palette={0xffff66ff}
+        },
+        ["Green"] = {
+            change_colour_on_word = false,
+            palette={0x66ff66ff}
+        },
+        ["Cyan"] = {
+            change_colour_on_word = false,
+            palette={0x66ffffff}
+        },
+        ["Blue"] = {
+            change_colour_on_word = false,
+            palette={0x6666ffff}
+        },
+        ["Purple"] = {
+            change_colour_on_word = false,
+            palette={0x6666ffff}
+        },
     },
     -- font selections
     font_list = {"CooperBlack", "FreeSans"},
