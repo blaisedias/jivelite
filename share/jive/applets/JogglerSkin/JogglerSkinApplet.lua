@@ -485,6 +485,7 @@ function param(self)
 		FIVE_ITEM_HEIGHT = scaledValues.FIVE_ITEM_HEIGHT,
 
 		piCorePlayerStyle = 'hm_settings_pcp',
+		piCorePlayerSaveStyle = 'hm_settings_save_pcp',
 		nowPlayingScreenStyles = npSS,
 		portraitMode = portraitMode,
 	}
@@ -3251,6 +3252,9 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 	})
 	s.hm_settings_pcp = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
+	})
+	s.hm_settings_save_pcp = _uses(_buttonicon, {
+		img = _loadScaledImage(self, "IconsResized/icon_settings_save_pcp" .. skinSuffix),
 	})
 	s.hm_radio = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),

@@ -509,6 +509,9 @@ function skin(self, s, reload, useDefaultSize, w, h)
 	s.hm_settings_pcp = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_settings_pcp" .. skinSuffix),
 	})
+	s.hm_settings_save_pcp = _uses(_buttonicon, {
+		img = _loadScaledImage(self, "IconsResized/icon_settings_save_pcp" .. skinSuffix),
+	})
 	s.hm_radio = _uses(_buttonicon, {
 		img = _loadScaledImage(self, "IconsResized/icon_tunein" .. skinSuffix),
 	})

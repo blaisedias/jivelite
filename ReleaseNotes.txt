@@ -11,8 +11,12 @@ Release 2.1.0
   - configurable seconds display (on/off)
   - configurable seconds : blink (on/off)
 - show build version, platform & display information in advanced settings menu
-- word clock
-  - add support to colourise, and UI support to select colour mode
+- word clock refactor
+  - add colourisation
+  - add limited font selection: Free Sans or Cooper Black
+  - update background wallpaper
+- add pcp save settings icon for pcp to add as a menu item in settings
+- add Cooper fonts from indestructibletype
 Release 2.0.6
 - fix: ip address input
 Release 2.0.5
