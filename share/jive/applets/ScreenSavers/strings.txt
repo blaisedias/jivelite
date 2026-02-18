@@ -330,8 +330,11 @@ WORD_CLOCK_SETTINGS
 	EN	Word Clock Settings
 
 WORD_CLOCK_COLOUR
-	EN	Word Clock Colour
+	EN	Colour Mode
 
 WORD_CLOCK_SHOW_ON_TEXT_ONLY
 	EN	Only Show ON Text	
+
+WORD_CLOCK_FONT
+	EN	Font	
 

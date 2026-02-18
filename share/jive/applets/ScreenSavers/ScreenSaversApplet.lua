@@ -833,13 +833,21 @@ end
 
 function wordClockSettings(self, menuItem)
 	local window = Window("text_list", menuItem.text, 'settingstitle')
-	local current_idx = 1
+	local current_colour_idx = 1
 
-	for i , _ in ipairs(ClockParams.word_clock_colour_settings) do
-		if Framework:getGlobalSetting("wordclockColour") == ClockParams.word_clock_colour_settings[i] then
-			current_idx = i
+	for i , _ in ipairs(ClockParams.word_clock.colour_modes) do
+		if Framework:getGlobalSetting("wordclockColour") == ClockParams.word_clock.colour_modes[i] then
+			current_colour_idx = i
 		end
 	end
+
+	local current_font_idx = 1
+	for i , _ in ipairs(ClockParams.word_clock.font_list) do
+		if Framework:getGlobalSetting("wordclockFont") == ClockParams.word_clock.font_list[i] then
+			current_font_idx = i
+		end
+	end
+
 
 	window:addWidget(SimpleMenu("menu",
 		{
@@ -848,11 +856,11 @@ function wordClockSettings(self, menuItem)
 				style = 'item_choice',
 				check = Choice(
 					"choice",
-					ClockParams.word_clock_colour_settings,
+					ClockParams.word_clock.colour_modes,
 					function(_, selectedIndex)
-						Framework:setGlobalSetting("wordclockColour", ClockParams.word_clock_colour_settings[selectedIndex])
+						Framework:setGlobalSetting("wordclockColour", ClockParams.word_clock.colour_modes[selectedIndex])
 					end,
-					current_idx
+					current_colour_idx
 				),
 			},
 			{
@@ -862,6 +870,18 @@ function wordClockSettings(self, menuItem)
 					Framework:setGlobalSetting("wordclockOnlyShowOnText", checked)
 					end,
 					Framework:getGlobalSetting("wordclockOnlyShowOnText")
+				),
+			},
+			{
+				text = self:string('WORD_CLOCK_FONT'),
+				style = 'item_choice',
+				check = Choice(
+					"choice",
+					ClockParams.word_clock.font_list,
+					function(_, selectedIndex)
+						Framework:setGlobalSetting("wordclockFont", ClockParams.word_clock.font_list[selectedIndex])
+					end,
+					current_font_idx
 				),
 			},
 		}))

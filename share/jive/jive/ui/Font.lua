@@ -78,6 +78,10 @@ end
 function boldFont(self, fontSize)
 	return self:load(fontpath .. BOLD_FONT_NAME .. ".ttf", fontSize)
 end
+
+function fontByName(self, fontname, fontSize)
+	return self:load(fontpath .. fontname .. ".ttf", fontSize)
+end
 --[[
 
 =head1 LICENSE

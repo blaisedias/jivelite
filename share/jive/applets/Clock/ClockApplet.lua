@@ -27,7 +27,7 @@ local SnapshotWindow   = require("jive.ui.SnapshotWindow")
 local Player           = require("jive.slim.Player")
 
 local datetime         = require("jive.utils.datetime")
-local params           = require("applets.Clock.ClockParams")
+local ClockParams      = require("applets.Clock.ClockParams")
 
 local appletManager = appletManager
 local jiveMain          = jiveMain
@@ -420,57 +420,19 @@ function WordClock:__init(applet)
     log:debug("self.skin: ", self.skin)
     log:debug("self.skinName: ", self.skinName)
     log:debug("skinName: ", skinName)
-    log:debug("self.oldSkinName: ", self.oldSkinName)
+--    log:debug("self.oldSkinName: ", self.oldSkinName)
 
-    if not self.skin or skinName ~= self.oldSkinName then
+--    if not self.skin or skinName ~= self.oldSkinName then
         log:debug("Fetching WordClock clock skin")
-        self.oldSkinName = skinName
+--        self.oldSkinName = skinName
         self.skin = WordClock:getWordClockSkin(skinName)
-    end
+--    end
     obj = oo.rawnew(self, Clock(self.skin))
 
     obj.textdate = Label('textdate')
     obj.skinParams = WordClock:getSkinParams(skinName)
     obj.colour_ix = 1
-    obj.config_value = Framework:getGlobalSetting("wordclockColour")
-
-    if _isJogglerSkin(skinName) or _isWQVGASkin(skinName) or _isHDSkin(skinName) then
-        obj.pointer_textIt         = Surface:loadImage(obj.skinParams.textIt)
-        obj.pointer_textIs         = Surface:loadImage(obj.skinParams.textIs)
-        obj.pointer_textHas        = Surface:loadImage(obj.skinParams.textHas)
-        obj.pointer_textNearly     = Surface:loadImage(obj.skinParams.textNearly)
-        obj.pointer_textJustgone   = Surface:loadImage(obj.skinParams.textJustgone)
-
-        obj.pointer_textHalf       = Surface:loadImage(obj.skinParams.textHalf)
-        obj.pointer_textTen        = Surface:loadImage(obj.skinParams.textTen)
-        obj.pointer_textAquarter   = Surface:loadImage(obj.skinParams.textAQuarter)
-        obj.pointer_textTwenty     = Surface:loadImage(obj.skinParams.textTwenty)
-
-        obj.pointer_textFive       = Surface:loadImage(obj.skinParams.textFive)
-        obj.pointer_textMinutes    = Surface:loadImage(obj.skinParams.textMinutes)
-        obj.pointer_textTo         = Surface:loadImage(obj.skinParams.textTo)
-        obj.pointer_textPast       = Surface:loadImage(obj.skinParams.textPast)
-
-        obj.pointer_textHourOne    = Surface:loadImage(obj.skinParams.textHourOne)
-        obj.pointer_textHourTwo    = Surface:loadImage(obj.skinParams.textHourTwo)
-        obj.pointer_textHourThree  = Surface:loadImage(obj.skinParams.textHourThree)
-        obj.pointer_textHourFour   = Surface:loadImage(obj.skinParams.textHourFour)
-        obj.pointer_textHourFive   = Surface:loadImage(obj.skinParams.textHourFive)
-        obj.pointer_textHourSix    = Surface:loadImage(obj.skinParams.textHourSix)
-        obj.pointer_textHourSeven  = Surface:loadImage(obj.skinParams.textHourSeven)
-        obj.pointer_textHourEight  = Surface:loadImage(obj.skinParams.textHourEight)
-        obj.pointer_textHourNine   = Surface:loadImage(obj.skinParams.textHourNine)
-        obj.pointer_textHourTen    = Surface:loadImage(obj.skinParams.textHourTen)
-        obj.pointer_textHourEleven = Surface:loadImage(obj.skinParams.textHourEleven)
-        obj.pointer_textHourTwelve = Surface:loadImage(obj.skinParams.textHourTwelve)
-
-        obj.pointer_textOClock     = Surface:loadImage(obj.skinParams.textOClock)
-        obj.pointer_textAM         = Surface:loadImage(obj.skinParams.textAM)
-        obj.pointer_textPM         = Surface:loadImage(obj.skinParams.textPM)
-    elseif skinName == "QVGAlandscapeSkin" or skinName == "QVGAportraitSkin" or skinName == "QVGA240squareSkin" then
-        obj.pointer_hour           = Surface:loadImage(obj.skinParams.hourHand)
-        obj.pointer_minute         = Surface:loadImage(obj.skinParams.minuteHand)
-    end
+    obj.colour_setting = Framework:getGlobalSetting("wordclockColour") or ClockParams.word_clock.colour_modes[1]
 
     obj.alarmIcon = Surface:loadImage(obj.skinParams.alarmIcon)
 
@@ -504,13 +466,12 @@ local function circular_array_index_increment(index, increment, array_len)
 end
 
 local function inc_color_index(index, increment)
-    return circular_array_index_increment(index, increment, #params.word_clock_colours)
+    return circular_array_index_increment(index, increment, #ClockParams.word_clock.colours)
 end
 
 function WordClock:BumpColour()
-    -- first setting is monochrome do not increment the colour index
-    if self.config_value ~= params.word_clock_colour_settings[1] then
-        self.colour_ix = inc_color_index(self.colour_ix, params.word_clock_colour_inc)
+    if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette then
+        self.colour_ix = inc_color_index(self.colour_ix, ClockParams.word_clock.colour_inc)
     end
 end
 
@@ -538,36 +499,36 @@ function WordClock:_reDraw(screen)
 
         local ix_colour = self.colour_ix
 
-        local function wordclock_blit(img_name, blitx, blity, on)
+        local function wordclock_blit(field_name, on)
             if not on and Framework:getGlobalSetting("wordclockOnlyShowOnText") then
                 -- nothing to do, elements that are off are not to be rendered
                 return
             end
-            img_path = obj.skinParams[img_name]
+            img_path = obj.skinParams[field_name]
             local img_fg = Surface:altLoadImage(img_path)
             if img_fg then
                 if on then
-                    if self.config_value ~= params.word_clock_colour_settings[1] then
+                    if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette then
                         local _w, _h = img_fg:getSize()
                         local img_colour = Surface:newRGBA(_w, _h)
-                        img_colour:filledRectangle(0,0, _w, _h, params.word_clock_colours[ix_colour]);
+                        img_colour:filledRectangle(0,0, _w, _h, ClockParams.word_clock.colours[ix_colour]);
                         img_colour:blit(img_fg, 0, 0)
                         img_colour:release()
-                        if self.config_value == params.word_clock_colour_settings[3] then
+                        if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].change_colour_on_word then
                             ix_colour = inc_color_index(ix_colour, 1)
                         end
                     end
                 else
                     local _w, _h = img_fg:getSize()
                     local img_colour = Surface:newRGBA(_w, _h)
-                    img_colour:filledRectangle(0,0, _w, _h, params.word_clock_off_colour)
+                    img_colour:filledRectangle(0,0, _w, _h, ClockParams.word_clock.off_colour)
                     img_colour:blit(img_fg, 0, 0)
                     img_colour:release()
                 end
                 img_fg:zoom(z, z, 1):blit(
                     screen,
-                    self.skin.Clock.offsetX + blitx*self.skin.Clock.ratio,
-                    self.skin.Clock.offsetY + blity*self.skin.Clock.ratio
+                    self.skin.Clock.offsetX + ClockParams.word_clock[self.typeface].layout[field_name].x*self.skin.Clock.ratio,
+                    self.skin.Clock.offsetY + ClockParams.word_clock[self.typeface].layout[field_name].y*self.skin.Clock.ratio
                 )
                 img_fg:altRelease()
             end
@@ -575,48 +536,48 @@ function WordClock:_reDraw(screen)
 
     -- Row 1
 --        self.pointer_textIt:zoom(z, z, 1):blit(screen, 20, 50)
-        wordclock_blit("textIt", 20, 50, true)
-        wordclock_blit("textIs", 86, 50, flags.is)
-        wordclock_blit("textHas", 156, 50, flags.has)
-        wordclock_blit("textNearly", 280, 50, flags.nearly)
-        wordclock_blit("textJustgone", 496, 50, flags.justgone)
+        wordclock_blit("textIt", true)
+        wordclock_blit("textIs", flags.is)
+        wordclock_blit("textHas", flags.has)
+        wordclock_blit("textNearly", flags.nearly)
+        wordclock_blit("textJustgone", flags.justgone)
 
     -- Row 2
-        wordclock_blit("textHalf", 20, 108, flags.half)
-        wordclock_blit("textTen", 163, 108, flags.ten)
-        wordclock_blit("textAQuarter", 274, 108, flags.aquarter)
-        wordclock_blit("textTwenty", 579, 108, flags.twenty)
+        wordclock_blit("textHalf", flags.half)
+        wordclock_blit("textTen", flags.ten)
+        wordclock_blit("textAQuarter", flags.aquarter)
+        wordclock_blit("textTwenty", flags.twenty)
 
     -- Row 3
-        wordclock_blit("textFive", 20, 165, flags.five)
-        wordclock_blit("textMinutes", 169, 165, flags.minutes)
-        wordclock_blit("textTo", 425, 165, flags.to)
-        wordclock_blit("textPast", 537, 165, flags.past)
-        wordclock_blit("textHourSix", 707, 165, flags.hsix)
+        wordclock_blit("textFive", flags.five)
+        wordclock_blit("textMinutes", flags.minutes)
+        wordclock_blit("textTo", flags.to)
+        wordclock_blit("textPast", flags.past)
+        wordclock_blit("textHourSix", flags.hsix)
 
     -- Row 4
-        wordclock_blit("textHourSeven", 20, 222, flags.hseven)
-        wordclock_blit("textHourOne", 222, 222, flags.hone)
-        wordclock_blit("textHourTwo", 363, 222, flags.htwo)
-        wordclock_blit("textHourTen", 513, 222, flags.hten)
-        wordclock_blit("textHourFour", 650, 222, flags.hfour)
+        wordclock_blit("textHourSeven", flags.hseven)
+        wordclock_blit("textHourOne", flags.hone)
+        wordclock_blit("textHourTwo", flags.htwo)
+        wordclock_blit("textHourTen", flags.hten)
+        wordclock_blit("textHourFour", flags.hfour)
 
     -- Row 5
-        wordclock_blit("textHourFive", 20, 280, flags.hfive)
-        wordclock_blit("textHourNine", 193, 280, flags.hnine)
-        wordclock_blit("textHourTwelve", 371, 280, flags.htwelve)
-        wordclock_blit("textHourEight", 639, 280, flags.height)
+        wordclock_blit("textHourFive", flags.hfive)
+        wordclock_blit("textHourNine", flags.hnine)
+        wordclock_blit("textHourTwelve", flags.htwelve)
+        wordclock_blit("textHourEight", flags.height)
 
     -- Row 6
-        wordclock_blit("textHourEleven", 20, 338, flags.heleven)
-        wordclock_blit("textHourThree", 222, 338, flags.hthree)
-        wordclock_blit("textOClock", 398, 338, flags.oclock)
-        wordclock_blit("textAM", 627, 338, flags.am)
-        wordclock_blit("textPM", 716, 338, flags.pm)
+        wordclock_blit("textHourEleven", flags.heleven)
+        wordclock_blit("textHourThree", flags.hthree)
+        wordclock_blit("textOClock", flags.oclock)
+        wordclock_blit("textAM", flags.am)
+        wordclock_blit("textPM", flags.pm)
 
         self.textdate:setValue("ON " .. string.upper(WordClock:getDateAsWords(tonumber(os.date("%d")))))
-        if self.config_value ~= params.word_clock_colour_settings[1] then
-            self.textdate:setFg(params.word_clock_colours[ix_colour])
+        if ClockParams.word_clock.colour_mode_attributes[self.colour_setting].uses_palette  then
+            self.textdate:setFg(ClockParams.word_clock.colours[ix_colour])
         end
 
     elseif self.skinName == "QVGAlandscapeSkin" or self.skinName == "QVGAportraitSkin" or self.skinName == "QVGA240squareSkin" then
@@ -764,7 +725,7 @@ function Digital:__init(applet, ampm)
     obj.m1   = Label('m1', '0')
     obj.m2   = Label('m2', '0')
     obj.ampm = Label('ampm', '')
-    showSecs = Framework:getGlobalSetting("digitalClockSecondsShow")
+    showSecs = Framework:getGlobalSetting("digitalClockSecondsShow") or false
     if showSecs then
         obj.secs = Label('secs', '')
     end
@@ -1839,17 +1800,13 @@ function WordClock:getWordClockSkin(skinName)
 
     self.skinName = skinName
     self.imgpath = _imgpath(self)
+    self.typeface = Framework:getGlobalSetting("wordclockFont") or ClockParams.word_clock.font_list[1]
 
     log:debug("Image path - " .. self.imgpath)
     local s = {}
 
-    -- HDSkin is using the Joggler's artwork. Quite a mess...
-    local imgpath = string.gsub(self.imgpath, 'HDSkin', 'JogglerSkin')
+    local wordClockBackground = Surface:loadImage("applets/Clock/images/WordClock/wallpaper_clock_word.png")
 
---    local wordClockBackground = Tile:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
-    local wordClockBackground = Surface:loadImage(imgpath .. "Clocks/WordClock/wallpaper_clock_word.png")
-
-    if _isJogglerSkin(skinName) or _isHDSkin(skinName) then
         local screen_width, screen_height = Framework:getScreenSize()
         local ratio = math.min(screen_width/800, screen_height/480)
         local bg_w, bg_h =  wordClockBackground:getSize()
@@ -1867,7 +1824,7 @@ function WordClock:getWordClockSkin(skinName)
                 x = 0,
                 y = 420 * ratio,
                 w = screen_width,
-                font = _font(td_font_size),
+                font = Font:fontByName(ClockParams.word_clock[self.typeface].font, td_font_size),
                 align = 'bottom',
                 fg = { 0xff, 0xff, 0xff },
             },
@@ -1894,62 +1851,6 @@ function WordClock:getWordClockSkin(skinName)
         wordClockBackground = wordClockBackground:zoom(xratio, yratio, 1)
         s.Clock.bgImg = wordClockBackground
 
-    elseif _isWQVGASkin(skinName) then
-        s.Clock = {
-            bgImg = wordClockBackground,
-            textdate = {
-                position = LAYOUT_NONE,
-                x = 0,
-                y = 244, --(420 * (480/800)) - (((480 * (480/800)) - 272) / 2)
-                w = 480,
-                font = _font(15), --26 * (480/800)
-                align = 'bottom',
-                fg = { 0xff, 0xff, 0xff },
-            },
-            offsetX = 0,
-            ratio = 480/800
-        }
-    elseif skinName == "QVGAlandscapeSkin" then
-        s.Clock = {
-            bgImg = wordClockBackground,
-            textdate = {
-                position = LAYOUT_NONE,
-                x = 0,
-                y = 222,
-                w = 320,
-                font = _font(10), --26 * (320/800)
-                align = 'bottom',
-                fg = { 0xff, 0xff, 0xff },
-            },
-        }
-    elseif skinName == "QVGAportraitSkin" then
-        s.Clock = {
-            bgImg = wordClockBackground,
-            textdate = {
-                position = LAYOUT_NONE,
-                x = 0,
-                y = 300,
-                w = 240,
-                font = _font(8), --26 * (240/800)
-                align = 'bottom',
-                fg = { 0xff, 0xff, 0xff },
-            },
-        }
-    elseif skinName == "QVGA240squareSkin" then
-        s.Clock = {
-            bgImg = wordClockBackground,
-            textdate = {
-                position = LAYOUT_NONE,
-                x = 0,
-                y = 220,
-                w = 240,
-                font = _font(18),
-                align = 'bottom',
-                fg = { 0xff, 0xff, 0xff },
-            },
-        }
-    end
-
     return s
 end
 
@@ -1961,11 +1862,9 @@ function WordClock:getSkinParams(skinName)
 
     log:debug("Image path - " .. self.imgpath)
 
-    if _isJogglerSkin(skinName) or _isWQVGASkin(skinName) or _isHDSkin(skinName) then
-        -- HDSkin is using the Joggler's artwork. Quite a mess...
-        local imgpath = string.gsub(self.imgpath, 'HDSkin', 'JogglerSkin') .. "Clocks/WordClock/"
+        local imgpath = "applets/Clock/images/WordClock/" .. self.typeface .. "/"
 
-        local params = {
+        local skin_params = {
             textIt        = imgpath .. 'text-it.png',
             textIs        = imgpath .. 'text-is.png',
             textHas       = imgpath .. 'text-has.png',
@@ -1999,42 +1898,12 @@ function WordClock:getSkinParams(skinName)
             textAM         = imgpath .. 'text-am.png',
             textPM         = imgpath .. 'text-pm.png',
 
-            alarmIcon  = imgpath .. 'icon_alarm_word.png',
+            alarmIcon  = "applets/Clock/images/WordClock/icon_alarm_word.png",
             alarmX     = jogglerSkinAlarmX,
             alarmY     = jogglerSkinAlarmY,
         }
 
-        if _isWQVGASkin(skinname) then
-            params.alarmX = 445
-            params.alarmY = 2
-        end
-
-        return params
-    elseif skinName == "QVGAlandscapeSkin" then
-        return {
-            minuteHand = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_min_hand.png',
-            hourHand   = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_hr_hand.png',
-            alarmIcon  = self.imgpath .. "Clocks/WordClock/" .. 'icon_alarm_word.png',
-            alarmX     = 280,
-            alarmY     = 15,
-        }
-    elseif skinName == "QVGAportraitSkin" then
-        return {
-            minuteHand = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_min_hand.png',
-            hourHand   = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_hr_hand.png',
-            alarmIcon  = self.imgpath .. "Clocks/WordClock/" .. 'icon_alarm_word.png',
-            alarmX     = 200,
-            alarmY     = 15,
-        }
-    elseif skinName == "QVGA240squareSkin" then
-        return {
-            minuteHand = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_min_hand.png',
-            hourHand   = self.imgpath .. "Clocks/WordClock/" .. 'clock_word_hr_hand.png',
-            alarmIcon  = self.imgpath .. "Clocks/WordClock/" .. 'icon_alarm_word.png',
-            alarmX     = 200,
-            alarmY     = 15,
-        }
-    end
+        return skin_params
 end
 
 function WordClock:getwordflags(timenow)
