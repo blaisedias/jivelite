@@ -482,41 +482,60 @@ function JiveMain:jiveMainNodes(globalStrings)
 	jiveMain:addNode( { id = 'settingsAudio', iconStyle = "hm_settingsAudio", node = 'settings', noCustom = 1, text = _globalStrings:str("AUDIO_SETTINGS"), weight = 40, windowStyle = 'text_only' })
 	jiveMain:addNode( { id = 'settingsBrightness', iconStyle = "hm_settingsBrightness", node = 'settings', noCustom = 1, text = _globalStrings:str("BRIGHTNESS_SETTINGS"), weight = 45, windowStyle = 'text_only' })
 
-    jiveMain:addItem(
-        {
-            id = 'build_version',
-            node = 'advancedSettings',
-            style = 'item_no_arrow',
-            text = "Build Version: " .. version:getBuildVersion(),
-            weight = 1000,
-        }
-    )
-    jiveMain:addItem(
-        {
-            id = 'platform',
-            node = 'advancedSettings',
-            style = 'item_no_arrow',
-            text = "Platform: " .. platform:getPlatformName() .. ' v' .. platform:getVersion(),
-            weight = 2000,
-        }
-    )
+	if version.BuildInfo then
+			jiveMain:addNode({
+		id = 'build_info',
+		node = 'advancedSettings',
+		text = "Build: " .. version:getBuildVersion(),
+		windowStyle = 'text_only',
+		weight=3000,
+		})
+		for lno, bi_text in ipairs(version.BuildInfo) do
+			jiveMain:addItem({
+				id = 'buildinfo' .. lno,
+				node = 'build_info',
+				style = 'item_no_arrow',
+				text = bi_text,
+				weight = lno,
+			})
+		end
+	else
+	jiveMain:addItem(
+		{
+			id = 'build_version',
+			node = 'advancedSettings',
+			style = 'item_no_arrow',
+			text = "Build: " .. version:getBuildVersion(),
+			weight = 3000,
+		}
+	)
+	end
+	jiveMain:addItem(
+		{
+			id = 'platform',
+			node = 'advancedSettings',
+			style = 'item_no_arrow',
+			text = "Platform: " .. platform:getPlatformName() .. ' v' .. platform:getVersion(),
+			weight = 2000,
+		}
+	)
 
-    local wmAvail = Framework:getWmAvailable()
-    local strWMA = "no"
-    if wmAvail then
-        strWMA = "yes"
-    end
-    local disp_w, disp_h = Framework:getDisplaySize()
+	local wmAvail = Framework:getWmAvailable()
+	local strWMA = "no"
+	if wmAvail then
+		strWMA = "yes"
+	end
+	local disp_w, disp_h = Framework:getDisplaySize()
 
-    jiveMain:addItem(
-        {
-            id = 'screen_resolution',
-            node = 'advancedSettings',
-            style = 'item_no_arrow',
-            text = "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
-            weight = 3000,
-        }
-    )
+	jiveMain:addItem(
+		{
+			id = 'screen_resolution',
+			node = 'advancedSettings',
+			style = 'item_no_arrow',
+			text = "WindowManager: " .. strWMA .. " Display: width: " .. disp_w .. ' height: ' .. disp_h,
+			weight = 1000,
+		}
+	)
 end
 
 --[[
