@@ -1823,10 +1823,11 @@ function WordClock:getWordClockSkin(skinName)
             textdate = {
                 position = LAYOUT_NONE,
                 x = 0,
-                y = 420 * ratio,
+                y = 404 * ratio,
                 w = screen_width,
+                h = 50 * ratio,
                 font = Font:fontByName(ClockParams.word_clock[self.typeface].font, td_font_size),
-                align = 'bottom',
+                align = 'center',
                 fg = { 0xff, 0xff, 0xff },
             },
             ratio = ratio,
