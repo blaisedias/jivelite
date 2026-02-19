@@ -112,7 +112,7 @@ word_clock = {
         },
         ["Purple"] = {
             change_colour_on_word = false,
-            palette={0x6666ffff}
+            palette={0xff66ffff}
         },
     },
     -- font selections
