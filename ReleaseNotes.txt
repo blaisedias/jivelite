@@ -1,3 +1,5 @@
+Release 2.1.1
+- add UI for build information
 Release 2.1.0
 - add debug for key mapping
 - platform independence layer
