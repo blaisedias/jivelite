@@ -606,7 +606,7 @@ function scaleControlsImages(params)
     end
     for _, imgnames in pairs(tbl_titlebutton_pressed.imgs) do
         -- always regenerate this because TITLE_HEIGHT may change
-        os.execute("rm  " .. dest_root .. "/" .. imgnames.dest)
+        os.execute("rm -f " .. dest_root .. "/" .. imgnames.dest)
         scaleImageFile(src_root .. "/" .. imgnames.src, dest_root .. "/" .. imgnames.dest,
                         tbl_titlebutton_pressed.dim.w, tbl_titlebutton_pressed.dim.h)
     end
