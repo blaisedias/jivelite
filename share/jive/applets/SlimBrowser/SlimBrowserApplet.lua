@@ -538,6 +538,12 @@ local function _checkboxItem(item, db)
 					log:info("OFF: ", checkboxFlag)
 					_actionHandler(nil, nil, db, nil, nil, 'off', item) 
 				end
+				local np = appletManager:getAppletInstance("NowPlaying")
+				if np ~= nil and item['text'] == 'Fixed Volume 100%' then
+					-- NP view: invalidate the window so that layout is performed again
+					-- so that volume controls may be rendered or not to match Fixed Volume setting
+					np:invalidateWindow(nil)
+				end
 			end,
 			checkboxFlag == 1
 		)
