@@ -1,3 +1,6 @@
+Release 2.1.2
+- fix: update layout if fixed volume setting is changed in the UI.
+- fix: do not generate error message when deleting non-existent file
 Release 2.1.1
 - add UI for build information
 Release 2.1.0
