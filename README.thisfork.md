@@ -15,7 +15,7 @@ Features:
   * controls
     * the complete set of controls displayed is now selectable - Joggler based skins only
     * a new control to cycle visualiser graphics has been added - Joggler based skins only
-    * the `\` key cycles the visualiser graphics
+    * the `v` key cycles the visualiser graphics
   * audio metadata on screen display - screen bottom right corner or top right corner
 
 The set of available Now Playing Views with visualisers are dependent on the selected skin.
@@ -30,12 +30,6 @@ Joggler, PiGrid and Touch skins:
   * `VU Meter, Artwork and Text` - smaller vu meters
   * `VU Meter, Large Artwork and Text` - even smaller vu meters
   * `VU Meter Only` full screen - no controls
-
-HD and HDGrid skins:
-  * `Spectrum Analyzer and Text`
-  * `Spectrum Analyzer, Artwork and Text` - smaller spectrum meter
-  * `VU Meter and Text` 
-  * `VU Meter, Artwork and Text` - smaller vu meters
 
 The layout of `Artwork and Text` now playing views has been altered for consistency.
 
@@ -300,7 +294,7 @@ For all positive values, the measured the frame rate and the frame count of the 
 
 All negative values other then -1 are invalid.
 
-For convenience of discussion the preceding description used VU meters depiting needles.
+For convenience of discussion the preceding description used VU meters depicting needles.
 
 However this parameter applies to all frames VU Meters.
 
@@ -442,7 +436,7 @@ An image consisting of a single vertical line with different colours would suffi
 
 # User defined visualisers
 User defined visualisers can be added at 
-* `/home/<username>/.jivelite/userpath-visu5/assets/visualisers`
+* `/home/<username>/.jivelite/userpath-vis/assets/visualisers`
   * `spectrum`
   * `vumeters`
 * `<workspace>/assets`
@@ -475,11 +469,53 @@ To a large extent this has been addressed by caching the output of resize operat
 
 Occassionally transitioning to a now playing screen, results in sluggish rendering. Cycling through now playing views fixes the rendering.
  
+# Building
+## Debian 
+In the instructions below replace *<path_to_build_location>* with a suitable path.
+```
+sudo apt update && sudo apt full-upgrade -y && sudo apt autoremove -y && sudo reboot
+
+sudo apt install -y build-essential git libluajit-5.1-dev libsdl1.2-dev libsdl-ttf2.0-dev libsdl-gfx1.2-dev libsdl-image1.2-dev libexpat1-dev
+
+cd <path_to_build_location>
+git clone http://luajit.org/git/luajit.git
+cd luajit
+make
+sudo make install
+sudo ldconfig
+
+cd <path_to_build_location>
+
+git clone https://github.com/blaisedias/jivelite.git
+cd jivelite
+git checkout vis
+git submodule update --init --recursive
+
+cd jivelite
+make PREFIX=/usr/local
+```
+Then to run
+```
+<path_to_build_location>/jivelite/bin/jivelite
+```
+
+Example desktop file
+```
+[Desktop Entry]
+Name=Jivelite
+GenericName=Music Player
+Comment=Squeezebox Music Player
+Exec=JIVE_FRAMERATE=50 path_to_build_location/jivelite/bin/jivelite
+Icon=qjackctl
+Categories=Audio;AudioVideo;
+Terminal=false
+Type=Application
+```
+
 # Thanks
 Thanks to those involved in creating and maintaining Jivelite,
  * the Logitech team
  * Adrian Smith,  triode1@btinternet.
- * GWENWDESIGN / Felix Mueller
- * presslabs-us
  * Ralph Irving (https://github.com/ralph-irving)
- * Michael Herger (https://github.com/mherger)
+ * Michael Herger (https://github.com/mherger) * GWENWDESIGN / Felix Mueller
+ * presslabs-us

@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Jivelite
+GenericName=Squeezelite Music Player Controller
+Comment=Graphical user interface for Lyrion Squeezelite music mlayer
+Exec=JIVE_FRAMERATE=50 /home/blaise/projects/jivelite/vis/jivelite/bin/jivelite
+Categories=Audio;AudioVideo;
+Terminal=false
+Type=Application
