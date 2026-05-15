@@ -273,7 +273,7 @@ struct jive_gesture_event {
 
 struct jive_event {
 	JiveEventType type;
-	Uint32 ticks;
+	jiffies_t ticks;
 
 	union {
 		struct jive_scroll_event scroll;

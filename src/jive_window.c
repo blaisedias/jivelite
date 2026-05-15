@@ -169,7 +169,7 @@ int jiveL_window_iterate(lua_State *L) {
 
 
 static int draw_closure(lua_State *L) {
-	Uint32 t0 = 0, t1 = 0;
+	jiffies_t t0 = 0, t1 = 0;
 
 	if (perfwarn.draw) t0 = jive_jiffies();
 
@@ -186,7 +186,7 @@ static int draw_closure(lua_State *L) {
 			lua_getglobal(L, "tostring");
 			lua_pushvalue(L, 1);
 			lua_call(L, 1, 1);
-			printf("widget_draw   > %dms: %4dms [%s]\n", perfwarn.draw, t1-t0, lua_tostring(L, -1));
+			printf("widget_draw   > %dms: %4dms [%s]\n", perfwarn.draw, (int)(t1-t0), lua_tostring(L, -1));
 			lua_pop(L, 1);
 		}
 	}

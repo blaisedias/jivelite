@@ -560,7 +560,7 @@ int jiveL_set_update_screen(lua_State *L) {
 
 static int _draw_screen(lua_State *L) {
 	JiveSurface *srf;
-	Uint32 t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0;
+	jiffies_t t0 = 0, t1 = 0, t2 = 0, t3 = 0, t4 = 0;
 	clock_t c0 = 0, c1 = 0;
 	bool_t standalone_draw, drawn = false;
 
@@ -714,7 +714,7 @@ static int _draw_screen(lua_State *L) {
 				t3 = t2;
 			}
 			printf("update_screen > %dms: %4dms (%dms) [layout:%dms animate:%dms background:%dms draw:%dms]\n",
-				   perfwarn.screen, t4-t0, (int)((c1-c0) * 1000 / CLOCKS_PER_SEC), t1-t0, t2-t1, t3-t2, t4-t3);
+				   perfwarn.screen, (int)(t4-t0), (int)((c1-c0) * 1000 / CLOCKS_PER_SEC), (int)(t1-t0), (int)(t2-t1), (int)(t3-t2), (int)(t4-t3));
 		}
 	}
 	
@@ -864,7 +864,7 @@ void jive_queue_event(JiveEvent *evt) {
 
 int jiveL_dispatch_event(lua_State *L) {
 	Uint32 r = 0;
-	Uint32 t0 = 0, t1 = 0;
+	jiffies_t t0 = 0, t1 = 0;
 	clock_t c0 = 0, c1 = 0;
 
 	/* stack is:
@@ -942,7 +942,7 @@ int jiveL_dispatch_event(lua_State *L) {
 		t1 = jive_jiffies();
 		c1 = clock();
 		if (t1-t0 > perfwarn.event) {
-			printf("process_event > %dms: %4dms (%dms) ", perfwarn.event, t1-t0, (int)((c1-c0) * 1000 / CLOCKS_PER_SEC));
+			printf("process_event > %dms: %4dms (%dms) ", perfwarn.event, (int)(t1-t0), (int)((c1-c0) * 1000 / CLOCKS_PER_SEC));
 			lua_getglobal(L, "tostring");
 			lua_pushvalue(L, 2);
 			lua_call(L, 1, 1);
@@ -1121,7 +1121,8 @@ int jiveL_event(lua_State *L) {
 
 
 int jiveL_get_ticks(lua_State *L) {
-	lua_pushinteger(L, jive_jiffies());
+//	lua_pushinteger(L, jive_jiffies());
+	lua_pushnumber(L, jive_jiffies());
 	return 1;
 }
 
