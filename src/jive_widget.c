@@ -424,7 +424,7 @@ int jiveL_widget_check_skin(lua_State *L) {
 int jiveL_widget_check_layout(lua_State *L) {
 	JiveWidget *peer;
 
-	Uint32 t0 = 0, t1 = 0, t2 = 0;
+	jiffies_t t0 = 0, t1 = 0, t2 = 0;
 	clock_t c0 = 0, c1 = 0;
 
 	/* stack is:
@@ -477,7 +477,7 @@ int jiveL_widget_check_layout(lua_State *L) {
 				lua_pushvalue(L, 1);
 				lua_call(L, 1, 1);
 				printf("widget_layout > %dms: %3dms (%dms) [%s skin:%dms layout:%dms]\n",
-					   perfwarn.layout, t2-t0, (int)((c1-c0) * 1000 / CLOCKS_PER_SEC), lua_tostring(L, -1), t1-t0, t2-t1);
+					   perfwarn.layout, (int)(t2-t0), (int)((c1-c0) * 1000 / CLOCKS_PER_SEC), lua_tostring(L, -1), (int)(t1-t0), (int)(t2-t1));
 				lua_pop(L, 1);
 			}
 		}

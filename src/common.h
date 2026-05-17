@@ -84,7 +84,8 @@ const char * system_get_uuid_char(void);
 
 /* time */
 #if HAVE_CLOCK_GETTIME
-static inline u32_t jive_jiffies(void)
+typedef uint64_t jiffies_t;
+static inline jiffies_t jive_jiffies(void)
 {
 	struct timespec now;
 
@@ -92,6 +93,7 @@ static inline u32_t jive_jiffies(void)
 	return (now.tv_sec*1000)+(now.tv_nsec/1000000);
 }
 #else
+typedef u32_t jiffies_t;
 #define jive_jiffies() SDL_GetTicks()
 #endif
 

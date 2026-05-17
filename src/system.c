@@ -103,7 +103,7 @@ static int system_lua_get_machine(lua_State *L) {
 
 
 static int system_get_uptime(lua_State *L) {
-	Uint32 uptime;
+	jiffies_t uptime;
 	int updays, upminutes, uphours;
 
 	// FIXME wraps around after 49.7 days
