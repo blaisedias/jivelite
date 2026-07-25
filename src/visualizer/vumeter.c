@@ -10,6 +10,9 @@
 #include "visualizer.h"
 
 #define VUMETER_DEFAULT_SAMPLE_WINDOW 1024 * 2
+static double old_val_0 = 0.0;
+static double old_val_1 = 0.0;
+const double damping = 0.15; // Adjustable damping factor
 
 int visualizer_vumeter(lua_State *L) {
 	long long sample_accumulator[2];
@@ -58,6 +61,15 @@ int visualizer_vumeter(lua_State *L) {
 
 	sample_accumulator[0] /= num_samples;
 	sample_accumulator[1] /= num_samples;
+
+    double current_val_0 = old_val_0 + ((double)sample_accumulator[0] - old_val_0) * damping;
+    double current_val_1 = old_val_1 + ((double)sample_accumulator[1] - old_val_1) * damping;
+
+    old_val_0 = current_val_0;
+    old_val_1 = current_val_1;
+
+    sample_accumulator[0] = (long long)current_val_0;
+    sample_accumulator[1] = (long long)current_val_1;
 
 	lua_newtable(L);
 	lua_pushinteger(L, sample_accumulator[0]);
