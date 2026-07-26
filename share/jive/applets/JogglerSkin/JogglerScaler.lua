@@ -753,8 +753,9 @@ local function _getJogglerCoreParams(skinName, skinValues)
             end
         end
         local popupThumbSize = scaleThumbsizeValue(BASE_POPUP_THUMBSIZE)
-        if screenWidth == 720 and screenHeight == 1280 then
-            local thumbSize = 72
+        if screenWidth < screenHeight then
+--            local thumbSize = math.ceil(scaleThumbsizeValue(BASE_ICON_SIZE) * 1.2)
+            local thumbSize = math.floor(TEXTMENU_FONT_SIZE * 1.72)
             skinValues.TEXTMENU_FONT_SIZE = TEXTMENU_FONT_SIZE
             return {
                     THUMB_SIZE=thumbSize,
@@ -1109,9 +1110,9 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
         if gridItemHeight < thumbSize + gridTxtHeight then
             thumbSize = math.floor(gridItemHeight - gridTxtHeight)
         end
-        if screenWidth == 720 and screenHeight == 1280 then
+        if screenWidth < screenHeight then
             return {
-                    THUMB_SIZE=thumbSize,
+                    THUMB_SIZE = thumbSize,
                     GRID_ITEM_HEIGHT = gridItemHeight,
                     ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
@@ -1124,7 +1125,7 @@ local function _getGridSkinCoreParams(fiveItemHeight, skinValues)
         elseif screenWidth > screenHeight and screenHeight >480 then
             return {
                     THUMB_SIZE = thumbSize,
-                    GRID_ITEM_HEIGHT =  gridItemHeight,
+                    GRID_ITEM_HEIGHT = gridItemHeight,
                     ITEMS_PER_LINE = math.floor(screenWidth/scaleThumbsizeValue(160)),
                     ITEM_G_YPAD = math.floor(4 * thumbSize/BASE_GRID_ICON_SIZE),
                     GRID_MENU_H = gridMenuHeight,
