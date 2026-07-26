@@ -1,3 +1,10 @@
+Release 2.1.3
+- fix: portrait mode & resolution capping
+  - cap resolution to 1920x1200 or 1200x1920
+  - generalise portrait mode so that it works for
+    - 720x1280
+    - 1200x1920
+- fix: use 64 bits for jiffies
 Release 2.1.2
 - fix: update layout if fixed volume setting is changed in the UI.
 - fix: do not generate error message when deleting non-existent file

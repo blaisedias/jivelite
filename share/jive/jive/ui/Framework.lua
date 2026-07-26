@@ -441,9 +441,13 @@ Returns I<w, h, wm> the current DisplaySize size.
 --]]
 function getDisplaySize(self)
 	local bounds = screen.bounds
-	if bounds[5] > 1920 and bounds[6] > 1080 and bounds[7] ~= 0 then
-		log:info("Window manager available: capping display resolution to 1920x1080 from ", bounds[5],'x',bounds[6])
-		return 1920, 1080
+	if bounds[5] > 1920 and bounds[6] > 1200 and bounds[7] ~= 0 then
+		log:info("Window manager available: capping display resolution to 1920x1200 from ", bounds[5],'x',bounds[6])
+		return 1920, 1200
+	end
+	if bounds[5] > 1200 and bounds[6] > 1920 and bounds[7] ~= 0 then
+		log:info("Window manager available: capping display resolution to 1200x1920 from ", bounds[5],'x',bounds[6])
+		return 1200, 1920
 	end
 	return bounds[5], bounds[6]
 end

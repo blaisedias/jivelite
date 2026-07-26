@@ -5691,8 +5691,16 @@ function skin1920x1080(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 1920, 1080)
 end
 
+function skin1920x1200(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1920, 1200)
+end
+
 function skin720x1280(self, s, reload, useDefaultSize)
 	return self:skin(s, reload, useDefaultSize, 720, 1280)
+end
+
+function skin1200x1920(self, s, reload, useDefaultSize)
+	return self:skin(s, reload, useDefaultSize, 1200, 1920)
 end
 
 function skin1920x480(self, s, reload, useDefaultSize)
