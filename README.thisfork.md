@@ -1,6 +1,7 @@
 # General
 Features:
 * Fonts see [README.fonts](README.fonts.md)
+* Customisation see [README.customisation](README.customisation.md)
 * VU Meters
   * Are now rendered by resizing and centering in the available space.
   * VU Meters are now selectable see *Selection* and *Location* below

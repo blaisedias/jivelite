@@ -44,7 +44,7 @@ Be prepared for significant delays when selecting any of the resize actions belo
   * **Save Resized Images:** Save resized images to disk (default ON)
   * **Save as PNG:** Save resized images as PNGs (default ON)
 * **Workspace:** Customise the location where resized images are stored and custom artwork can be added.
-See https://github.com/blaisedias/tcz-jivelite/blob/vis/README.vis.md#persistent-resized-image-cache-on-a-partition
+See [Persistent resized image cache on a partition](https://github.com/blaisedias/tcz-jivelite/blob/vis/README.vis.md#persistent-resized-image-cache-on-a-partition)
 ## Bar formats
 The bars rendered in the spectrum meter now have limited configurability -
 i.e select one from 18 presets.
