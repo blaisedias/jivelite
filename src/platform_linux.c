@@ -23,6 +23,8 @@
 #include <netinet/in.h>
 #include <linux/if.h>
 #include <execinfo.h>
+#include <dirent.h>
+
 
 
 char *platform_get_home_dir() {
@@ -86,6 +88,23 @@ char *platform_get_mac_address() {
 
 	return macaddr;
 }
+
+int platform_is_mac_address_squeezelite(const char* mac) {
+    DIR* od = opendir("/dev/shm");
+    if (od) {
+        struct dirent* de;
+        while(NULL != (de = readdir(od))) {
+            if (0 == strncmp("squeezelite-", de->d_name, 12)) {
+                const char* macstr = de->d_name+12;
+                if ( 0 == strcmp(macstr, mac)) {
+                    return 1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 
 // find non loopback ip address to allow check for active network
 char *platform_get_ip_address(void) {

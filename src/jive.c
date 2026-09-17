@@ -597,6 +597,7 @@ int main (int argc, char **argv) {
 	// close state
 	lua_close(L);
 
+	logfprintf("Bye. status=%d s.status=%d\n\n", status, s.status);
 //	stop_concurrent_resizer();
 	// report status to caller
 	return (status || s.status) ? EXIT_FAILURE : EXIT_SUCCESS;
