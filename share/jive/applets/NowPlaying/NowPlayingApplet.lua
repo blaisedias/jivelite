@@ -142,7 +142,7 @@ local function messageBox(txt, count)
 	local text = Label("text", txt)
 
 	popup:addWidget(text)
-	if count and count ~= 0 then
+	if count and count > 0 then
 		popup:ignoreAllInputExcept()
 		popup:addTimer(1000, function()
 			count = count - 1000
