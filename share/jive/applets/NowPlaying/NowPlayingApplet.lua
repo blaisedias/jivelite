@@ -135,7 +135,6 @@ local defaultEnabledStyles = {
 local function messageBox(txt, count)
 	local popup = Popup("toast_popup_mixed")
 
-	popup:ignoreAllInputExcept()
 	popup:setAllowScreensaver(false)
 	popup:setAlwaysOnTop(true)
 	popup:setAutoHide(false)
@@ -143,12 +142,15 @@ local function messageBox(txt, count)
 	local text = Label("text", txt)
 
 	popup:addWidget(text)
-	popup:addTimer(1000, function()
-		count = count - 1000
-		if count < 1 then
-			popup:hide(Window.transitionFadeOut)
-		end
-	end)
+	if count and count ~= 0 then
+		popup:ignoreAllInputExcept()
+		popup:addTimer(1000, function()
+			count = count - 1000
+			if count < 1 then
+				popup:hide(Window.transitionFadeOut)
+			end
+		end)
+	end
 	popup:show()
 end
 
@@ -670,6 +672,12 @@ function npviewsSettingsShow(self)
 
 	local menu = SimpleMenu("menu")
 
+	if not self.player:isConnected() then
+		messageBox("The selected player is not available", 5000)
+	elseif not self.player:isLocal() then
+		messageBox("Available views are limited.\nThe selected player is not local\nor\nis not exporting audio data", 5000)
+	end
+
 	-- go through each NP screen view and add an item for each
 	local npscreenViews = self:getNPStyles()
 
@@ -1085,6 +1093,10 @@ function notify_playerCurrent(self, player)
 
 	if not self.player then
 		return
+	end
+
+	if self.player:isAvailable() == true and not self.player:isLocal() then
+		messageBox("The selected player does not support visualisers")
 	end
 
 	if jiveMain:getSkinParam("NOWPLAYING_MENU") then

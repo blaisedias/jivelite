@@ -104,6 +104,11 @@ char *platform_get_mac_address() {
     return macaddr;
 }
 
+int platform_is_mac_address_squeezelite(const char* mac) {
+	//unsupported
+	return -1;
+}
+
 static int windows_filter_pump(const SDL_Event *event) {
 	//handle multimedia button events
 	if (event->type == SDL_SYSWMEVENT)

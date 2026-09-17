@@ -55,6 +55,31 @@ static int system_get_mac_address(lua_State *L) {
 	return 1;
 }
 
+static int system_is_mac_address_squeezelite(lua_State *L) {
+	int yn = -1;
+	const char *input_player_mac_address;
+	char *player_mac_address;
+	char *ptr;
+
+	/* stack is:
+	 * 1: framework
+	 * 2: player mac address
+	 */
+	input_player_mac_address= luaL_checkstring(L, 2);
+	if (input_player_mac_address) {
+		player_mac_address = strdup(input_player_mac_address);
+		ptr = player_mac_address;
+		while (*ptr) {
+			*ptr = tolower(*ptr);
+			ptr++;
+		}
+		yn = platform_is_mac_address_squeezelite(player_mac_address);
+		free(player_mac_address);
+	}
+	lua_pushinteger(L, yn);
+	return 1;
+}
+
 
 static int system_get_ip_address(lua_State *L) {
 	char *addr = platform_get_ip_address();
@@ -503,6 +528,7 @@ static const struct luaL_Reg jive_system_methods[] = {
 	{ "atomicWrite", system_atomic_write },
 	{ "init", system_init },
 	{ "backgroundExec", system_background_exec },
+	{ "isPlayerAddressLocalSqueezelite", system_is_mac_address_squeezelite },
 	{ NULL, NULL }
 };
 
