@@ -1080,6 +1080,9 @@ function notify_playerDelete(self, player)
 	self:freeAndClear()
 end
 
+-- table to track which players the user has been notified that visualiser support is absent
+-- and avoid repeatedly nitifying the user.
+local playerUserNotifiedVis = {}
 -- players changed, add playing menu
 function notify_playerCurrent(self, player)
 
@@ -1095,14 +1098,18 @@ function notify_playerCurrent(self, player)
 		return
 	end
 
-	if self.player:isAvailable() == true and not self.player:isLocal() then
+	if self.player:isAvailable() == true and not self.player:isLocal() and not playerUserNotifiedVis[self.player:getId()] then
 		messageBox("The selected player does not support visualisers", 5000)
+		playerUserNotifiedVis[self.player:getId()] = true
 	end
 
 	if jiveMain:getSkinParam("NOWPLAYING_MENU") then
 		self:addNowPlayingItem()
 	else
 		self:removeNowPlayingItem()
+	end
+	if self.player then
+		System:setCurrentPlayerMacAddress(self.player:getId())
 	end
 end
 
@@ -1915,6 +1922,7 @@ function replaceNPWindow(self,noTrans)
 		self:_updateRepeat(self.player:getPlayerStatus()['playlist repeat'])
 		self:_updateShuffle(self.player:getPlayerStatus()['playlist shuffle'])
 	end
+
 	self:_refreshRightButton()
 	self.window:replace(oldWindow, noTrans and Window.transitionNone or Window.transitionFadeIn)
 end
@@ -1924,6 +1932,9 @@ end
 --
 
 function _createUI(self)
+	if self.player then
+		System:setCurrentPlayerMacAddress(self.player:getId())
+	end
 	self.audiometadatatxt = "-"
 	--local window = Window("text_list")
 	self.windowStyle = self.selectedStyle
