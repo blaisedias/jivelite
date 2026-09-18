@@ -1096,7 +1096,7 @@ function notify_playerCurrent(self, player)
 	end
 
 	if self.player:isAvailable() == true and not self.player:isLocal() then
-		messageBox("The selected player does not support visualisers")
+		messageBox("The selected player does not support visualisers", 5000)
 	end
 
 	if jiveMain:getSkinParam("NOWPLAYING_MENU") then
