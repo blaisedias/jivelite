@@ -1,3 +1,4 @@
+extern void vis_set_mac(const char* mac);
 extern void vis_check(void);
 extern void vis_lock(void);
 extern void vis_unlock(void);
