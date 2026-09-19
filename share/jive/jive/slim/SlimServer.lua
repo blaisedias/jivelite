@@ -263,8 +263,8 @@ function _serverstatusSink(self, event, err)
 				--      is a local squeezelite MAC address
 				--  1 playerId is a local squeezelite MAC address
 				--  0 playerId is NOT a local squeezelite MAC address
-				local playerIdIsLocalSqueezeliteMac = System:isPlayerAddressLocalSqueezelite(playerId)
-				if playerIdIsLocalSqueezeliteMac < 0 then
+				local playerIdIsLocalMac = System:isPlayerAddressLocal(playerId)
+				if playerIdIsLocalMac < 0 then
 					-- The platform does not support checking for local squeezelite MAC address,
 					-- fall back to legacy behaviour
 					if playerId == System:getMacAddress() then
@@ -272,13 +272,13 @@ function _serverstatusSink(self, event, err)
 					else
 						self.players[playerId] = Player(self.jnt, playerId)
 					end
-				elseif playerIdIsLocalSqueezeliteMac == 1 then
+				elseif playerIdIsLocalMac == 1 then
 					self.players[playerId] = LocalPlayer(self.jnt, playerId)
 					log:info("matched player to local instance of squeezelite ", playerId)
-				elseif playerIdIsLocalSqueezeliteMac == 0 then
+				elseif playerIdIsLocalMac == 0 then
 					self.players[playerId] = Player(self.jnt, playerId)
 				else
-					log:warn("unexpected value returned by System:isPlayerAddressLocalSqueezelite")
+					log:warn("unexpected value returned by System:isPlayerAddressLocal")
 					self.players[playerId] = Player(self.jnt, playerId)
 				end
 			end
