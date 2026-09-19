@@ -182,7 +182,7 @@ function _addPlayerItem(self, player)
 	local playerWeight = PLAYER_WEIGHT
 	local prefix = ''
 
-	if player:isLocal() then
+	if player:hasVisualisationSupport() then
 		prefix = '* '
 	end
 

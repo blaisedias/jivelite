@@ -61,6 +61,8 @@ local string         = require("jive.utils.string")
 local log            = require("jive.utils.log").logger("jivelite.player")
 local socket         = require("socket")
 
+local System           = require("jive.System")
+
 local EVENT_KEY_ALL    = jive.ui.EVENT_KEY_ALL
 local EVENT_CHAR_PRESS = jive.ui.EVENT_CHAR_PRESS
 local EVENT_MOUSE_HOLD        = jive.ui.EVENT_MOUSE_HOLD
@@ -147,6 +149,19 @@ end
 function isLocal(self)
 	return false
 end
+
+-- class method, returns whether the player supports visualisation
+function hasVisualisationSupport(self)
+	if self.has_vis == 0 then
+		return false
+	elseif self.has_vis == 1 then
+		return true
+	end
+	-- self.has_vis is indeterminate fallback to legacy behaviour
+	-- namely visualiser support is only available on local players
+	return self:isLocal()
+end
+
 
 --class method, returns the delay used before which consecutive commands like volume will be suppressed 
 function getRateLimitTime(self)
@@ -330,7 +345,9 @@ function __init(self, jnt, playerId)
 		popupIcon = {},
 
 		-- browse history
-		browseHistory = {}
+		browseHistory = {},
+
+		has_vis = System:isPlayerAddressSqueezeliteShared(playerId)
 	})
 
 	playerIds[obj.id] = obj

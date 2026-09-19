@@ -561,8 +561,8 @@ function getNPStyles(self)
 				--  setting for style/view is undefined, only enable it if is defined as enabled by default
 				v.enabled = table.contains(defaultEnabledStyles, v.style)
 			end
-			if not self.player:isLocal() and v.localPlayerOnly then
-				log:debug('the style ', v.style , ' is not for non-local players. Removing...')
+			if not self.player:hasVisualisationSupport() and v.localPlayerOnly then
+				log:debug('the style ', v.style , ' is not for players without visualisation support. Removing...')
 				-- if we purge this style, by definition it cannot be selected
 				if v.style == self.selectedStyle then
 					self.selectedStyle = nil
@@ -611,9 +611,9 @@ function getNPStyles(self)
 			auditedNPStyles = {}
 			for _, v in pairs(npSkinStyles) do
 				v.enabled = true
-				if not self.player:isLocal() and v.localPlayerOnly then
+				if not self.player:hasVisualisationSupport() and v.localPlayerOnly then
 					-- never enable localPlayerOnly styles for non local players (e.g., visualizers)
-					log:debug('np view ', v.style, ' left out of available views because this player is not local')
+					log:debug('np view ', v.style, ' left out of available views because this player does not support visualisation')
 				else
 					table.insert(auditedNPStyles, v)
 				end
@@ -674,8 +674,8 @@ function npviewsSettingsShow(self)
 
 	if not self.player:isConnected() then
 		messageBox("The selected player is not available", 5000)
-	elseif not self.player:isLocal() then
-		messageBox("Available views are limited.\nThe selected player is not local\nor\nis not exporting audio data", 5000)
+	elseif not self.player:hasVisualisationSupport() then
+		messageBox("Available views are limited.\nThe selected player does not support visualisation", 5000)
 	end
 
 	-- go through each NP screen view and add an item for each
@@ -1082,7 +1082,7 @@ end
 
 -- table to track which players the user has been notified that visualiser support is absent
 -- and avoid repeatedly notifying the user.
-local playerUserNotifiedVis = {}
+local userNotifiedPlayerHasNoVis = {}
 -- players changed, add playing menu
 function notify_playerCurrent(self, player)
 
@@ -1098,9 +1098,9 @@ function notify_playerCurrent(self, player)
 		return
 	end
 
-	if self.player:isAvailable() == true and not self.player:isLocal() and not playerUserNotifiedVis[self.player:getId()] then
+	if self.player:isAvailable() == true and not self.player:hasVisualisationSupport() and not userNotifiedPlayerHasNoVis[self.player:getId()] then
 		messageBox("The selected player does not support visualisers", 5000)
-		playerUserNotifiedVis[self.player:getId()] = true
+		userNotifiedPlayerHasNoVis[self.player:getId()] = true
 	end
 
 	if jiveMain:getSkinParam("NOWPLAYING_MENU") then
