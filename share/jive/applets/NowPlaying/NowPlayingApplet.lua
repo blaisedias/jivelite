@@ -1081,7 +1081,7 @@ function notify_playerDelete(self, player)
 end
 
 -- table to track which players the user has been notified that visualiser support is absent
--- and avoid repeatedly nitifying the user.
+-- and avoid repeatedly notifying the user.
 local playerUserNotifiedVis = {}
 -- players changed, add playing menu
 function notify_playerCurrent(self, player)

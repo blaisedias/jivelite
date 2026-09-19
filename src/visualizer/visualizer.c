@@ -60,15 +60,20 @@ void vis_set_mac(const char* player_mac_address) {
 		// ideally use LOG_DEBUG here, but that requires a largish change.
 		fprintf(stderr, "visualizer:vis_set_mac: %s\n", player_mac_address); fflush(stderr);
 		if (mac_address && strcmp(player_mac_address, mac_address)) {
+			// mac_address was set and it does not match the input MAC address
+			// free the MAC address and set it to NULL
 			free(mac_address);
 			mac_address = NULL;
 		}
+		// @here if mac_address is NULL 
+		// either it has not be set previously or it was set but has just been freed because its value
+		// does not match the input MAC address
 		if (mac_address == NULL)  {
 			mac_address = strdup(player_mac_address);
 			_reopen();
 		}
 	} else {
-		// for now if input mac address is NULL - do nothing
+		// for now if input MAC address is NULL - do nothing
 	}
 }
 
