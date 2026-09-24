@@ -1932,9 +1932,9 @@ end
 --
 
 function _createUI(self)
-	if self.player then
-		System:setCurrentPlayerMacAddress(self.player:getId())
-	end
+--	if self.player then
+--		System:setCurrentPlayerMacAddress(self.player:getId())
+--	end
 	self.audiometadatatxt = "-"
 	--local window = Window("text_list")
 	self.windowStyle = self.selectedStyle
