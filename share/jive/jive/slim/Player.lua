@@ -152,11 +152,9 @@ end
 
 -- class method, returns whether the player supports visualisation
 function hasVisualisationSupport(self)
-	local has_vis = System:isPlayerAddressSqueezeliteShared(self.id)
-
-	if has_vis == 0 then
+	if self.has_vis == 0 then
 		return false
-	elseif has_vis == 1 then
+	elseif self.has_vis == 1 then
 		return true
 	end
 	-- has_vis is indeterminate fallback to legacy behaviour
@@ -164,6 +162,11 @@ function hasVisualisationSupport(self)
 	return self:isLocal()
 end
 
+-- class method, checks whether the player supports visualisation and sets state
+function checkVisualisationSupport(self)
+	self.has_vis = System:isPlayerAddressSqueezeliteShared(self.id)
+	return self:hasVisualisationSupport()
+end
 
 --class method, returns the delay used before which consecutive commands like volume will be suppressed 
 function getRateLimitTime(self)
@@ -349,6 +352,7 @@ function __init(self, jnt, playerId)
 		-- browse history
 		browseHistory = {},
 
+        has_vis = System:isPlayerAddressSqueezeliteShared(playerId)
 	})
 
 	playerIds[obj.id] = obj
