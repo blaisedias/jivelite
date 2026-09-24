@@ -152,12 +152,14 @@ end
 
 -- class method, returns whether the player supports visualisation
 function hasVisualisationSupport(self)
-	if self.has_vis == 0 then
+	local has_vis = System:isPlayerAddressSqueezeliteShared(self.id)
+
+	if has_vis == 0 then
 		return false
-	elseif self.has_vis == 1 then
+	elseif has_vis == 1 then
 		return true
 	end
-	-- self.has_vis is indeterminate fallback to legacy behaviour
+	-- has_vis is indeterminate fallback to legacy behaviour
 	-- namely visualiser support is only available on local players
 	return self:isLocal()
 end
@@ -347,7 +349,6 @@ function __init(self, jnt, playerId)
 		-- browse history
 		browseHistory = {},
 
-		has_vis = System:isPlayerAddressSqueezeliteShared(playerId)
 	})
 
 	playerIds[obj.id] = obj
