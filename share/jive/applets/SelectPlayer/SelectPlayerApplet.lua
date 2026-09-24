@@ -180,7 +180,7 @@ function _addPlayerItem(self, player)
 	local mac = player:getId()
 	local playerName = player:getName()
 	local playerWeight = PLAYER_WEIGHT
-	local prefix = ''
+	local prefix = '_ '
 
 	if player:hasVisualisationSupport() then
 		prefix = '* '
