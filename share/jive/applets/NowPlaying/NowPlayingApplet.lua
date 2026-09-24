@@ -135,7 +135,6 @@ local defaultEnabledStyles = {
 local function messageBox(txt, count)
 	local popup = Popup("toast_popup_mixed")
 
-	popup:ignoreAllInputExcept()
 	popup:setAllowScreensaver(false)
 	popup:setAlwaysOnTop(true)
 	popup:setAutoHide(false)
@@ -143,12 +142,15 @@ local function messageBox(txt, count)
 	local text = Label("text", txt)
 
 	popup:addWidget(text)
-	popup:addTimer(1000, function()
-		count = count - 1000
-		if count < 1 then
-			popup:hide(Window.transitionFadeOut)
-		end
-	end)
+	if count and count > 0 then
+		popup:ignoreAllInputExcept()
+		popup:addTimer(1000, function()
+			count = count - 1000
+			if count < 1 then
+				popup:hide(Window.transitionFadeOut)
+			end
+		end)
+	end
 	popup:show()
 end
 
@@ -559,8 +561,8 @@ function getNPStyles(self)
 				--  setting for style/view is undefined, only enable it if is defined as enabled by default
 				v.enabled = table.contains(defaultEnabledStyles, v.style)
 			end
-			if not self.player:isLocal() and v.localPlayerOnly then
-				log:debug('the style ', v.style , ' is not for non-local players. Removing...')
+			if not self.player:hasVisualisationSupport() and v.localPlayerOnly then
+				log:debug('the style ', v.style , ' is not for players without visualisation support. Removing...')
 				-- if we purge this style, by definition it cannot be selected
 				if v.style == self.selectedStyle then
 					self.selectedStyle = nil
@@ -609,9 +611,9 @@ function getNPStyles(self)
 			auditedNPStyles = {}
 			for _, v in pairs(npSkinStyles) do
 				v.enabled = true
-				if not self.player:isLocal() and v.localPlayerOnly then
+				if not self.player:hasVisualisationSupport() and v.localPlayerOnly then
 					-- never enable localPlayerOnly styles for non local players (e.g., visualizers)
-					log:debug('np view ', v.style, ' left out of available views because this player is not local')
+					log:debug('np view ', v.style, ' left out of available views because this player does not support visualisation')
 				else
 					table.insert(auditedNPStyles, v)
 				end
@@ -669,6 +671,12 @@ function npviewsSettingsShow(self)
 --	local group = RadioGroup()
 
 	local menu = SimpleMenu("menu")
+
+	if not self.player:isConnected() then
+		messageBox("The selected player is not available", 5000)
+	elseif not self.player:hasVisualisationSupport() then
+		messageBox("Available views are limited.\nThe selected player does not support visualisation", 5000)
+	end
 
 	-- go through each NP screen view and add an item for each
 	local npscreenViews = self:getNPStyles()
@@ -1072,6 +1080,9 @@ function notify_playerDelete(self, player)
 	self:freeAndClear()
 end
 
+-- table to track which players the user has been notified that visualiser support is absent
+-- and avoid repeatedly notifying the user.
+local userNotifiedPlayerHasNoVis = {}
 -- players changed, add playing menu
 function notify_playerCurrent(self, player)
 
@@ -1087,10 +1098,18 @@ function notify_playerCurrent(self, player)
 		return
 	end
 
+	if self.player:isAvailable() == true and not self.player:hasVisualisationSupport() and not userNotifiedPlayerHasNoVis[self.player:getId()] then
+		messageBox("The selected player does not support visualisers", 5000)
+		userNotifiedPlayerHasNoVis[self.player:getId()] = true
+	end
+
 	if jiveMain:getSkinParam("NOWPLAYING_MENU") then
 		self:addNowPlayingItem()
 	else
 		self:removeNowPlayingItem()
+	end
+	if self.player then
+		System:setCurrentPlayerMacAddress(self.player:getId())
 	end
 end
 
@@ -1903,6 +1922,7 @@ function replaceNPWindow(self,noTrans)
 		self:_updateRepeat(self.player:getPlayerStatus()['playlist repeat'])
 		self:_updateShuffle(self.player:getPlayerStatus()['playlist shuffle'])
 	end
+
 	self:_refreshRightButton()
 	self.window:replace(oldWindow, noTrans and Window.transitionNone or Window.transitionFadeIn)
 end
@@ -1912,6 +1932,9 @@ end
 --
 
 function _createUI(self)
+	if self.player then
+		System:setCurrentPlayerMacAddress(self.player:getId())
+	end
 	self.audiometadatatxt = "-"
 	--local window = Window("text_list")
 	self.windowStyle = self.selectedStyle

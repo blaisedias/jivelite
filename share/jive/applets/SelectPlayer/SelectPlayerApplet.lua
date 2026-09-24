@@ -180,6 +180,11 @@ function _addPlayerItem(self, player)
 	local mac = player:getId()
 	local playerName = player:getName()
 	local playerWeight = PLAYER_WEIGHT
+	local prefix = '_ '
+
+	if player:hasVisualisationSupport() then
+		prefix = '* '
+	end
 
 	-- 08/29/09 - fm
 	-- Only allow Controller to setup not yet setup players (i.e. Receiver)
@@ -232,7 +237,7 @@ function _addPlayerItem(self, player)
 		id = mac,
 		style = 'item',
 		iconStyle = "player_" .. playerModel,
-		text = playerName,
+		text = prefix .. playerName,
 		sound = "WINDOWSHOW",
 		callback = function()
 			log:info("select player item: ", player)
