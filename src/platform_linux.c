@@ -23,6 +23,8 @@
 #include <netinet/in.h>
 #include <linux/if.h>
 #include <execinfo.h>
+#include <dirent.h>
+
 
 
 char *platform_get_home_dir() {
@@ -85,6 +87,66 @@ char *platform_get_mac_address() {
     sprintf(macaddr, "%02x:%02x:%02x:%02x:%02x:%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
 
 	return macaddr;
+}
+
+int platform_is_mac_address_squeezelite_shm(const char* mac) {
+	DIR* od = opendir("/dev/shm");
+	if (od) {
+		struct dirent* de;
+		while(NULL != (de = readdir(od))) {
+			if (0 == strncmp("squeezelite-", de->d_name, 12)) {
+				const char* macstr = de->d_name+12;
+				if ( 0 == strcmp(macstr, mac)) {
+					return 1;
+				}
+			}
+		}
+	}
+	return 0;
+}
+
+int platform_is_mac_address_local(const char* mac_address_in) {
+	// -1 => unable to check
+	int rv = -1;
+	struct ifconf ifc;
+	struct ifreq *ifr, *ifend;
+	struct ifreq ifreq;
+	struct ifreq ifs[10];
+
+	uint8_t mac[6];
+
+	int s = socket(AF_INET, SOCK_DGRAM, 0);
+ 
+	ifc.ifc_len = sizeof(ifs);
+	ifc.ifc_req = ifs;
+
+	if (ioctl(s, SIOCGIFCONF, &ifc) == 0) {
+		// 0 => default to not local 
+		rv = 0;
+		ifend = ifs + (ifc.ifc_len / sizeof(struct ifreq));
+
+		for (ifr = ifc.ifc_req; ifr < ifend; ifr++) {
+			if (ifr->ifr_addr.sa_family == AF_INET) {
+
+				strncpy(ifreq.ifr_name, ifr->ifr_name, sizeof(ifreq.ifr_name));
+				if (ioctl (s, SIOCGIFHWADDR, &ifreq) == 0) {
+					memcpy(mac, ifreq.ifr_hwaddr.sa_data, 6);
+					if (mac[0]+mac[1]+mac[2] != 0) {
+						char buff[20];
+						sprintf(buff, "%02x:%02x:%02x:%02x:%02x:%02x",
+								(unsigned)mac[0], (unsigned)mac[1], (unsigned)mac[2], (unsigned)mac[3], (unsigned)mac[4], (unsigned)mac[5]);
+						if (0 == strcmp(buff, mac_address_in)) {
+							// 1 => mac address is local
+							rv = 1;
+							break;
+						} 
+					}
+				}
+			}
+		}
+	}
+	close(s);
+	return rv;
 }
 
 // find non loopback ip address to allow check for active network

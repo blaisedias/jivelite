@@ -69,6 +69,16 @@ char *platform_get_mac_address() {
     return macaddr;
 }
 
+int platform_is_mac_address_squeezelite_shm(const char* mac) {
+	//unsupported
+	return -1;
+}
+
+int platform_is_mac_address_local(const char* mac_address_in) {
+	//unsupported
+	return -1;
+}
+
 // find non loopback ip address to allow check for active network
 char *platform_get_ip_address(void) {
 	struct ifaddrs* ifaphead;

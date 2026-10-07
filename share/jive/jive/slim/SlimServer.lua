@@ -255,16 +255,34 @@ function _serverstatusSink(self, event, err)
 
 			-- remove the player from our list since it is reported by the server
 			selfPlayers[playerId] = nil
-	
+
 			-- create new players
 			if not self.players[playerId] then
-				if playerId == System:getMacAddress() then
+				-- return value of this function is
+				--  -1 the platform does not support checking whether a MAC address
+				--      is a local squeezelite MAC address
+				--  1 playerId is a local squeezelite MAC address
+				--  0 playerId is NOT a local squeezelite MAC address
+				local playerIdIsLocalMac = System:isPlayerAddressLocal(playerId)
+				if playerIdIsLocalMac < 0 then
+					-- The platform does not support checking for local squeezelite MAC address,
+					-- fall back to legacy behaviour
+					if playerId == System:getMacAddress() then
+						self.players[playerId] = LocalPlayer(self.jnt, playerId)
+					else
+						self.players[playerId] = Player(self.jnt, playerId)
+					end
+				elseif playerIdIsLocalMac == 1 then
 					self.players[playerId] = LocalPlayer(self.jnt, playerId)
+					log:info("matched player to local instance of squeezelite ", playerId)
+				elseif playerIdIsLocalMac == 0 then
+					self.players[playerId] = Player(self.jnt, playerId)
 				else
+					log:warn("unexpected value returned by System:isPlayerAddressLocal")
 					self.players[playerId] = Player(self.jnt, playerId)
 				end
 			end
-			
+
 			local player = self.players[playerId]
 
 			-- update player state
