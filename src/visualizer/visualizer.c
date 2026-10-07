@@ -41,8 +41,6 @@ static void _reopen(void) {
 	}
 
 	sprintf(shm_path, "/squeezelite-%s", mac_address ? mac_address : "");
-	// ideally use LOG_DEBUG here, but that requires a largish change.
-	fprintf(stderr, "visualizer:shm: _reopen %s\n", shm_path); fflush(stderr);
 
 	vis_fd = shm_open(shm_path, O_RDWR, 0666);
 	if (vis_fd > 0) {
