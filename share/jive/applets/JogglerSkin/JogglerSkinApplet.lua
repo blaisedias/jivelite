@@ -1929,7 +1929,7 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 
 	s.time_input_background_12h = {
 --		w = WH_FILL,
-		w = INPUT_TIME_MENUBOX_12H_W,
+		w = scaledValues.INPUT_TIME_MENUBOX_12H_W,
 		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
 		img = _loadScaledImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_3c.png"),
@@ -1940,7 +1940,7 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 
 	s.time_input_background_24h = {
 --		w = WH_FILL,
-		w = INPUT_TIME_MENUBOX_24H_W,
+		w = scaledValues.INPUT_TIME_MENUBOX_24H_W,
 		h = screenHeight - scaledValues.TITLE_HEIGHT,
 		position = LAYOUT_NONE,
 		img = _loadScaledImage(self, "Multi_Character_Entry/tch_multi_char_bkgrd_2c.png"),
@@ -2839,7 +2839,7 @@ s.title.pressed.textButton = _uses(s.title.textButton, {
 		heading = {
 			w = WH_FILL,
 		      border = 10,
-		      fg = TEXT_COLOR,
+		      fg = scaledValues.TEXT_COLOR,
 		      font = _boldfont(32),
 			padding = { 4, 16, 4, 0 },
 		      align = "center",

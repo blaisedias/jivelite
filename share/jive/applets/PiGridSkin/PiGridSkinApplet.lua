@@ -46,7 +46,6 @@ local WH_FILL                = jive.ui.WH_FILL
 local jiveMain               = jiveMain
 local appletManager          = appletManager
 local math                   = math
-local math                   = math
 
 
 module(..., Framework.constants)
@@ -305,7 +304,7 @@ function skin(self, s, reload, useDefaultSize, w, h)
 
 	s.home_menu.menu.item.icon_no_artwork = {
 		img = _loadScaledImage(self, "IconsResized/icon_loading" .. skinSuffix ),
-		h   = THUMB_SIZE,
+		h   = scaledValues.THUMB_SIZE,
 		padding = c.MENU_ITEM_ICON_PADDING,
 		align = 'center',
 	}
