@@ -27,6 +27,13 @@ static SDL_sem* background_exec_sem;
 int fn_thread_background_exec(void *ptr);
 static volatile unsigned background_exec_run = 1;
 
+static void dummy_printf(char *format, ...) {
+		va_list args;
+		va_start(args, format);
+		va_end(args);
+}
+static void (*debug_printf)(char *format, ...) = &dummy_printf;
+
 // public API
 const char * system_get_machine(void) {
 	return machine;
@@ -55,6 +62,83 @@ static int system_get_mac_address(lua_State *L) {
 	return 1;
 }
 
+static int system_is_mac_address_squeezelite_shm(lua_State *L) {
+	int yn = -1;
+	const char *input_player_mac_address;
+	char *player_mac_address;
+	char *ptr;
+
+	/* stack is:
+	 * 1: framework
+	 * 2: player mac address
+	 */
+	input_player_mac_address= luaL_checkstring(L, 2);
+	if (input_player_mac_address) {
+		player_mac_address = strdup(input_player_mac_address);
+		ptr = player_mac_address;
+		while (*ptr) {
+			*ptr = tolower(*ptr);
+			ptr++;
+		}
+		yn = platform_is_mac_address_squeezelite_shm(player_mac_address);
+		free(player_mac_address);
+	}
+	lua_pushinteger(L, yn);
+	return 1;
+}
+
+static int system_is_mac_address_local(lua_State *L) {
+	int yn = -1;
+	const char *input_player_mac_address;
+	char *player_mac_address;
+	char *ptr;
+
+	/* stack is:
+	 * 1: framework
+	 * 2: player mac address
+	 */
+	input_player_mac_address= luaL_checkstring(L, 2);
+	if (input_player_mac_address) {
+		player_mac_address = strdup(input_player_mac_address);
+		ptr = player_mac_address;
+		while (*ptr) {
+			*ptr = tolower(*ptr);
+			ptr++;
+		}
+		yn = platform_is_mac_address_local(player_mac_address);
+		free(player_mac_address);
+	}
+	lua_pushinteger(L, yn);
+	return 1;
+}
+
+
+extern void vis_set_mac(const char* mac);
+static int system_set_player_mac_address(lua_State *L) {
+	int yn = -1;
+	const char *input_player_mac_address;
+	char *player_mac_address;
+	char *ptr;
+
+	/* stack is:
+	 * 1: framework
+	 * 2: player mac address
+	 */
+	input_player_mac_address= luaL_checkstring(L, 2);
+	if (input_player_mac_address) {
+		player_mac_address = strdup(input_player_mac_address);
+		ptr = player_mac_address;
+		while (*ptr) {
+			*ptr = tolower(*ptr);
+			ptr++;
+		}
+		debug_printf("system_set_player_mac_address : %s\n", player_mac_address);
+		vis_set_mac(player_mac_address);
+		free(player_mac_address);
+	}
+	lua_pushinteger(L, yn);
+	return 1;
+}
 
 static int system_get_ip_address(lua_State *L) {
 	char *addr = platform_get_ip_address();
@@ -305,13 +389,6 @@ int jive_find_file(const char *path, char *fullpath) {
 	return 0;
 }
 
-static void dummy_printf(char *format, ...) {
-		va_list args;
-		va_start(args, format);
-		va_end(args);
-}
-static void (*debug_printf)(char *format, ...) = &dummy_printf;
-
 /*
  * 
  */
@@ -503,6 +580,9 @@ static const struct luaL_Reg jive_system_methods[] = {
 	{ "atomicWrite", system_atomic_write },
 	{ "init", system_init },
 	{ "backgroundExec", system_background_exec },
+	{ "isPlayerAddressSqueezeliteShared", system_is_mac_address_squeezelite_shm },
+	{ "isPlayerAddressLocal", system_is_mac_address_local },
+	{ "setCurrentPlayerMacAddress", system_set_player_mac_address },
 	{ NULL, NULL }
 };
 
