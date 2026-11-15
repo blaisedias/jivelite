@@ -78,13 +78,13 @@ static enum jive_mouse_state {
 
 static JiveKey key_mask = 0;
 
-static Uint32 key_timeout = 0;
+static jiffies_t key_timeout = 0;
 
-static Uint32 mouse_timeout = 0;
-static Uint32 mouse_long_timeout = 0;
-static Uint32 mouse_timeout_arg;
+static jiffies_t mouse_timeout = 0;
+static jiffies_t mouse_long_timeout = 0;
+static jiffies_t mouse_timeout_arg;
 
-static Uint32 pointer_timeout = 0;
+static jiffies_t pointer_timeout = 0;
 static bool pointer_enable = true;
 
 static Uint16 mouse_origin_x, mouse_origin_y;
@@ -1152,7 +1152,7 @@ static int do_dispatch_event(lua_State *L, JiveEvent *jevent) {
 
 static int process_event(lua_State *L, SDL_Event *event) {
 	JiveEvent jevent;
-	Uint32 now;
+	jiffies_t now;
 
 	memset(&jevent, 0, sizeof(JiveEvent));
 	jevent.ticks = now = jive_jiffies();
@@ -1506,7 +1506,7 @@ static int process_event(lua_State *L, SDL_Event *event) {
 
 static void process_timers(lua_State *L) {
 	JiveEvent jevent;
-	Uint32 now;
+	jiffies_t now;
 
 	memset(&jevent, 0, sizeof(JiveEvent));
 	jevent.ticks = now = jive_jiffies();
